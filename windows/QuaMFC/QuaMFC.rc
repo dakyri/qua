@@ -1,0 +1,1071 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\QuaMFC.ico"
+IDR_QUAMFCTYPE          ICON                    "res\\QuaMFCDoc.ico"
+IDR_QUACONTEXTTYPE      ICON                    "res\\idr_quam.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_QUAMFCTYPE          BITMAP                  "res\\toolbar1.bmp"
+IDR_QUACONTEXTTYPE      BITMAP                  "res\\quamfcty.bmp"
+IDB_BUT_LG_U            BITMAP                  "res\\but_lg_u.bmp"
+IDB_BUT_LG_O            BITMAP                  "res\\but_lg_o.bmp"
+IDB_BUT_LG_D            BITMAP                  "res\\but_lg_d.bmp"
+IDB_BUT_SM_D            BITMAP                  "res\\but_sm_d.bmp"
+IDB_BUT_SM_O            BITMAP                  "res\\but_sm_o.bmp"
+IDB_BUT_SM_U            BITMAP                  "res\\but_sm_u.bmp"
+IDB_BUT_SM_UE           BITMAP                  "res\\but_sm_ue.bmp"
+IDB_BUT_LG_E            BITMAP                  "res\\but_lg_e.bmp"
+IDB_BUT_SM_OE           BITMAP                  "res\\but_sm_oe.bmp"
+IDB_BUT_SM_DE           BITMAP                  "res\\but_sm_de.bmp"
+IDB_ROT_SM_K            BITMAP                  "res\\rot_sm_k.bmp"
+IDR_ARRANGER_TOOL       BITMAP                  "res\\arranger_tool.bmp"
+IDB_CLIP_LIST_IDX_IMG   BITMAP                  "res\\sym_idx_img.bmp"
+IDB_SYM_IDX_IMG         BITMAP                  "res\\sym_idx_.bmp"
+IDB_TAKE_IDX_IMG        BITMAP                  "res\\take_idx.bmp"
+IDB_QP_STATE_OK         BITMAP                  "res\\q_parse_state_ok.bmp"
+IDB_QP_STATE_ERR        BITMAP                  "res\\q_parse_state_err.bmp"
+IDB_QP_STATE_DEFER      BITMAP                  "res\\q_parse_state_defer.bmp"
+IDB_CTXT_IDX_IMG        BITMAP                  "res\\ctxt_idx.bmp"
+IDB_ICO_SM_MDI          BITMAP                  "res\\ico_sm_mdi.bmp"
+IDB_ICO_SM_AUD          BITMAP                  "res\\ico_sm_aud.bmp"
+IDB_ICO_SM_JOY          BITMAP                  "res\\ico_sm_joy.bmp"
+IDB_ICO_SM_CHAN         BITMAP                  "res\\ico_sm_chan.bmp"
+IDB_ICO_SM_NON          BITMAP                  "res\\ico_sm_non.bmp"
+IDB_ARROW_R_SM          BITMAP                  "res\\arrow_r_sm.bmp"
+IDB_ARROW_L_SM          BITMAP                  "res\\arrow_l_.bmp"
+IDB_CLIP_IDX_IMG        BITMAP                  "res\\clip_idx_img.bmp"
+IDB_SIMPLEVAR_IDX_IMG   BITMAP                  "res\\var_idx.bmp"
+IDB_CLSBUT_SM_D         BITMAP                  "res\\clsbut_sm.bmp"
+IDB_CLSBUT_SM_O         BITMAP                  "res\\clsbut_sm_o.bmp"
+IDB_CLSBUT_SM_U         BITMAP                  "res\\clsbut_sm_u.bmp"
+IDB_BUT_MIN_SM_DE       BITMAP                  "res\\but_min_sm_de.bmp"
+IDB_BUT_MIN_SM_D        BITMAP                  "res\\bmp_min_sm_d.bmp"
+IDB_BUT_MIN_SM_OE       BITMAP                  "res\\bmp_min_sm_oe.bmp"
+IDB_BUT_MIN_SM_O        BITMAP                  "res\\but_min_sm_o.bmp"
+IDB_BUT_MIN_SM_UE       BITMAP                  "res\\but_min_sm_ue.bmp"
+IDB_BUT_MIN_SM_U        BITMAP                  "res\\but_min_sm_u.bmp"
+IDB_BUT_BLANK_SM_DE     BITMAP                  "res\\but_sm_blank_de.bmp"
+IDB_BUT_BLANK_SM_D      BITMAP                  "res\\but_blank_sm_d.bmp"
+IDB_BUT_BLANK_SM_OE     BITMAP                  "res\\but_blank_sm_oe.bmp"
+IDB_BUT_BLANK_SM_O      BITMAP                  "res\\but_blank_sm_o.bmp"
+IDB_BUT_BLANK_SM_UE     BITMAP                  "res\\but_blank_sm_ue.bmp"
+IDB_BUT_BLANK_SM_U      BITMAP                  "res\\but_blank_sm_u.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+END
+
+IDR_QUAMFCTYPE TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_FULL_REWIND_BUTTON
+    BUTTON      ID_REWIND_BUTTON
+    BUTTON      ID_FF_BUTTON
+    BUTTON      ID_FULL_FORWARD_BUTTON
+    BUTTON      ID_PLAY_BUTTON
+    BUTTON      ID_PAUSE_BUTTON
+    BUTTON      ID_STOP_BUTTON
+    BUTTON      ID_RECORD_BUTTON
+    BUTTON      ID_TRANSPORT_PLAYTIME
+    BUTTON      ID_TRANSPORT_TEMPO
+END
+
+IDR_QUACONTEXTTYPE TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_CONNECT_BUTTON
+END
+
+IDR_ARRANGER_TOOL TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_ARTOOL_RGSELECT
+    BUTTON      ID_ARTOOL_POINT
+    BUTTON      ID_ARTOOL_SLICE
+    BUTTON      ID_ARTOOL_DRAW
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               57643
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                57635
+        MENUITEM "&Copy\tCtrl+C",               57634
+        MENUITEM "&Paste\tCtrl+V",              57637
+        MENUITEM SEPARATOR
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "Qua Context",                 150
+        MENUITEM SEPARATOR
+        MENUITEM "Preferences",                 ID_FILE_PREFERENCES
+    END
+    POPUP "Window"
+    BEGIN
+        MENUITEM "&New Window",                 57648
+        MENUITEM "&Cascade",                    57650
+        MENUITEM "&Tile",                       57651
+        MENUITEM "&Arrange Icons",              57649
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Qua...",               ID_APP_ABOUT
+        MENUITEM "Don't Panic",                 ID_HELP_DONTPANIC
+    END
+END
+
+IDR_QUAMFCTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Add Sample",                  ID_EDIT_ADD_SAMPLE
+        MENUITEM "Add Voice",                   ID_EDIT_ADD_VOICE
+        MENUITEM "Add Channel",                 4152
+        MENUITEM "Add Method",                  4161
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Transport Bar",              ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "&Arranger Tool Bar",          ID_VIEW_ARRANGERTOOLS
+    END
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "Qua Context",                 150
+        MENUITEM SEPARATOR
+        MENUITEM "Preferences",                 ID_FILE_PREFERENCES
+    END
+    POPUP "Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Qua...",               ID_APP_ABOUT
+        MENUITEM "Don't Panic",                 ID_HELP_DONTPANIC
+    END
+END
+
+IDR_QUACONTEXTTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN, INACTIVE
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS, INACTIVE
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "Qua Context",                 150
+        MENUITEM SEPARATOR
+        MENUITEM "Preferences",                 ID_FILE_PREFERENCES
+    END
+    POPUP "Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Qua...",               ID_APP_ABOUT
+        MENUITEM "Don't Panic",                 ID_HELP_DONTPANIC
+    END
+END
+
+IDR_CHANNEL_RCLICK MENU 
+BEGIN
+    POPUP "Channel"
+    BEGIN
+        MENUITEM "Editor",                      ID_CHANNEL_EDITOR
+        MENUITEM "Controller",                  ID_CHANNEL_CONTROLLER
+        MENUITEM "Delete",                      ID_CHANNEL_DELETE
+        MENUITEM "Add Method",                  4162
+    END
+END
+
+IDR_INSTANCE_RCLICK MENU 
+BEGIN
+    POPUP "Instance"
+    BEGIN
+        MENUITEM "Controller",                  ID_INSTANCE_CONTROLLER
+        MENUITEM "Delete",                      ID_INSTANCE_DELETE
+    END
+END
+
+IDR_SCHEDULABLE_RCLICK MENU 
+BEGIN
+    POPUP "Schedulable"
+    BEGIN
+        MENUITEM "Editor",                      195
+        MENUITEM "Delete",                      196
+        MENUITEM "Add Method",                  4162
+    END
+END
+
+IDR_QUA_RCLICK MENU 
+BEGIN
+    POPUP "Qua"
+    BEGIN
+        MENUITEM "Editor",                      201
+        MENUITEM "Close",                       ID_VSTPLUGIN_DISABLE
+    END
+END
+
+IDR_PORT_RCLICK MENU 
+BEGIN
+    POPUP "Port"
+    BEGIN
+        MENUITEM "Editor",                      ID_VSTPLUGIN_VIEW
+        MENUITEM "Copy",                        57634
+    END
+END
+
+IDR_VSTPLUGIN_RCLICK MENU 
+BEGIN
+    POPUP "Vstplugin"
+    BEGIN
+        MENUITEM "View Details",                ID_VSTPLUGIN_VIEW
+        MENUITEM "Disable",                     ID_VSTPLUGIN_DISABLE
+    END
+END
+
+IDR_TEMPLATE_RCLICK MENU 
+BEGIN
+    POPUP "Template"
+    BEGIN
+        MENUITEM "Editor",                      ID_VSTPLUGIN_VIEW
+        MENUITEM "Delete",                      ID_VSTPLUGIN_DISABLE
+    END
+END
+
+IDR_METHOD_RCLICK MENU 
+BEGIN
+    POPUP "Method"
+    BEGIN
+        MENUITEM "Editor",                      206
+        MENUITEM "Delete",                      207
+        MENUITEM "Add Method",                  4162
+    END
+END
+
+IDR_BUILTIN_RCLICK MENU 
+BEGIN
+    POPUP "Builtin"
+    BEGIN
+        MENUITEM "Copy",                        57634
+    END
+END
+
+IDR_VSTPLUGIN_GLOBAL_RCLICK MENU 
+BEGIN
+    POPUP "Vst plugin global"
+    BEGIN
+        MENUITEM "Save",                        ID_VSTPLUGIN_GLOBAL_SAVE
+        MENUITEM "Reload",                      ID_VSTPLUGIN_GLOBAL_RELOAD
+        MENUITEM "Set Plugin Directory",        ID_VSTPLUGIN_GLOBAL_SET_DIRECTORY
+
+        MENUITEM "Add Plugin Directory",        ID_VSTPLUGIN_GLOBAL_ADD_DIRECTORY
+
+    END
+END
+
+IDR_CLIP_RCLICK MENU 
+BEGIN
+    POPUP "Clip"
+    BEGIN
+        MENUITEM "Delete Clip",                 401
+    END
+END
+
+IDR_SAMPLETAKE_RCLICK MENU 
+BEGIN
+    POPUP "SampleTake"
+    BEGIN
+        MENUITEM "Load Sample",                 421
+        MENUITEM "Delete Sample",               422
+        MENUITEM "Edit Sample",                 423
+        MENUITEM "Add Clip",                    402
+    END
+END
+
+IDR_STREAMTAKE_RCLICK MENU 
+BEGIN
+    POPUP "StreamTake"
+    BEGIN
+        MENUITEM "Create stream",               418
+        MENUITEM "Delete stream",               422
+        MENUITEM "Edit stream",                 419
+        MENUITEM "Add Clip",                    402
+    END
+END
+
+IDR_STREAMTAKENULL_RCLICK MENU 
+BEGIN
+    POPUP "Stream Take Null"
+    BEGIN
+        MENUITEM "Create Stream",               418
+    END
+END
+
+IDR_SAMPLETAKENULL_RCLICK MENU 
+BEGIN
+    POPUP "Sample Take Null"
+    BEGIN
+        MENUITEM "Load Sample",                 421
+    END
+END
+
+IDR_STREAM_EDITOR_CONTEXT MENU 
+BEGIN
+    POPUP "Stream Editor Context"
+    BEGIN
+        MENUITEM "Add Controller",              ID_STREAMEDITORCONTEXT_ADD_CONTROLLER
+
+        MENUITEM "Add SysX",                    454
+        MENUITEM "Add System Common",           ID_STREAMEDITORCONTEXT_ADD_SYSC
+
+        MENUITEM "Add Value Item",              ID_STREAMEDITORCONTEXT_ADD_VALUE
+
+    END
+END
+
+IDR_METHOD_TOP_RCLICK MENU 
+BEGIN
+    POPUP "Method Top"
+    BEGIN
+        MENUITEM "Add Method",                  4161
+    END
+END
+
+IDR_SAMPLE_TOP_RCLICK MENU 
+BEGIN
+    POPUP "Sample Top"
+    BEGIN
+        MENUITEM "Add Sample",                  4150
+    END
+END
+
+IDR_CHANNEL_TOP_RCLICK MENU 
+BEGIN
+    POPUP "Channel Top"
+    BEGIN
+        POPUP "Add Channel"
+        BEGIN
+            MENUITEM "Stereo In, Stereo Out",       4155
+            MENUITEM "Mono In, Mono Out",           4152
+            MENUITEM "Mono In, Stereo Out",         4153
+            MENUITEM "Stereo In, Mono Out",         4154
+        END
+    END
+END
+
+IDR_VOICE_TOP_RCLICK MENU 
+BEGIN
+    POPUP "Voice Top"
+    BEGIN
+        MENUITEM "Add Voice",                   4151
+    END
+END
+
+ID_EDITORCONTEXT_ADD_MARKER MENU 
+BEGIN
+    POPUP "Top Level Region"
+    BEGIN
+        MENUITEM "Select Region",               ID_TOPLEVELREGION_SELECTREGION
+
+        MENUITEM "Go to Start of Region",       ID_TOPLEVELREGION_GOTOSTARTOFREGION
+
+        MENUITEM "Delete Region",               743
+        MENUITEM "Add Region",                  742
+        MENUITEM "Add Marker",                  ID_TOPLEVELREGION_ADDMARKER
+    END
+END
+
+IDR_MAINCLIP_TOP_RCLICK MENU 
+BEGIN
+    POPUP "Top Region Top"
+    BEGIN
+        MENUITEM "Add Region",                  4163
+        MENUITEM "Add Marker",                  4164
+    END
+END
+
+IDR_MAINCLIP_RCLICK MENU 
+BEGIN
+    POPUP "Top Level Region"
+    BEGIN
+        MENUITEM "Select Region",               746
+        MENUITEM "Go to Start of Region",       747
+        MENUITEM "Go To End of Region",         748
+        MENUITEM "Delete Region",               743
+        MENUITEM SEPARATOR
+        MENUITEM "Add Region",                  742
+        MENUITEM "Add Marker",                  744
+    END
+END
+
+IDR_MAINMARK_RCLICK MENU 
+BEGIN
+    POPUP "Top Level Marker"
+    BEGIN
+        MENUITEM "Go To Marker",                747
+        MENUITEM "Delete Marker",               743
+        MENUITEM SEPARATOR
+        MENUITEM "Add Region",                  4163
+        MENUITEM "Add Marker",                  4164
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+IDR_QUAMFCTYPE ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+IDR_QUACONTEXTTYPE ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG  0, 0, 152, 92
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Qua"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "Qua Version 1.0 (MFC)",IDC_STATIC,27,6,93,12,
+                    SS_NOPREFIX | SS_SUNKEN
+    CTEXT           "Copyright (C) 2005",IDC_STATIC,26,25,94,13,
+                    SS_CENTERIMAGE | SS_SUNKEN
+    DEFPUSHBUTTON   "OK",IDOK,48,45,50,14,WS_GROUP
+    CTEXT           "Another fine Maya Swell Product",IDC_STATIC,2,68,143,12,
+                    SS_SUNKEN
+END
+
+IDD_PARSE_ERROR DIALOGEX 0, 0, 223, 114
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Parse Errors"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Yeah, Right",IDOK,81,93,50,14
+    EDITTEXT        IDC_PARSE_ERR_TXT,7,7,209,85,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_VSCROLL | WS_HSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "Qua MFC Application"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "Qua"
+            VALUE "LegalCopyright", "Copyright (C) 2005"
+            VALUE "OriginalFilename", "QuaMFC.EXE"
+            VALUE "ProductName", "Qua Application"
+            VALUE "ProductVersion", "1, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_ARTOOL_REGION       CURSOR                  "res\\ar_region.cur"
+IDC_ARTOOL_SLICE        CURSOR                  "res\\ar_slice.cur"
+IDC_ARTOOL_POINT        CURSOR                  "res\\ar_point.cur"
+IDC_ARTOOL_DRAW         CURSOR                  "res\\ar_draw.cur"
+IDC_ARTOOL_DRAW_CTL     CURSOR                  "res\\a_draw_ctl.cur"
+IDC_ARTOOL_POINT_CTL    CURSOR                  "res\\ar_point_ctl.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PARSE_ERROR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 107
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Qua"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the Main Toolbar\nToggle Main Toolbar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_PLAY_BUTTON          "Play"
+    ID_STOP_BUTTON          "Stop"
+    ID_PAUSE_BUTTON         "Pause"
+    ID_RECORD_BUTTON        "Record"
+    ID_FF_BUTTON            "Fast Forward"
+    ID_REWIND_BUTTON        "Rewind"
+END
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "Qua"
+    IDR_QUAMFCTYPE          "\nArrangement\nArrangement\nQua (*.qua)\n.qua\nQua.Arrangement\nQua Arrangement"
+    IDR_QUACONTEXTTYPE      "\n\n\n\n\nQua.Context\nQua Context"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SHOW_CONTEXT_WINDOW  "Show Context Window"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BAKGND1_FULL        BITMAP                  "background.BMP"
+IDB_BAKGND1_256         BITMAP                  "background256.bmp"
+IDB_SPLASH              BITMAP                  "Splsh16.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROP_CONFIG DIALOG  0, 0, 183, 94
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Configuration",IDC_STATIC,31,34,128,13
+END
+
+IDD_PROP_VST DIALOG  0, 0, 230, 207
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "VST"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CTEXT           "VST preferences",IDC_STATIC,15,15,128,13
+    LISTBOX         IDC_LIST1,15,46,193,36,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST2,15,111,193,78,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Plugin Folder",IDC_STATIC,16,30,128,13
+    LTEXT           "Plugins Loaded",IDC_STATIC,17,92,128,13
+END
+
+IDD_PROP_MIDI DIALOG  0, 0, 183, 94
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "MIDI"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "MIDI preferences",IDC_STATIC,31,34,128,13
+END
+
+IDD_PROP_AUDIO DIALOGEX 0, 0, 183, 94
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Audio"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "ASIO Control Panel",IDC_BUTTON_ASIO_CTL,7,15,89,14
+    COMBOBOX        IDC_ASIO_DRIVER_SELECT,49,32,117,41,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "ASIO Driver",IDC_STATIC,7,34,39,8
+END
+
+IDD_CC_DIALOG DIALOGEX 0, 0, 210, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Create Channel"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,30,61,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,107,61,50,14
+    CONTROL         "Add Stream Input",IDC_CC_ADDSTREAMIN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,16,47,73,10
+    CONTROL         "Add Stream Output",IDC_CC_ADDSTREAMOUT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,118,47,78,10
+    CONTROL         "Add Audio Input",IDC_CC_ADDAUDIN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,29,68,10
+    CONTROL         "Add Audio Output",IDC_CC_ADDAUDOUT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,118,28,73,10
+    COMBOBOX        IDC_CC_INMODE,49,6,48,48,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Output Mode",IDC_STATIC,111,6,43,8
+    LTEXT           "Input Mode",IDC_STATIC,7,6,38,8
+    COMBOBOX        IDC_CC_OUTMODE,154,6,48,41,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PROP_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 86
+    END
+
+    IDD_PROP_VST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 199
+    END
+
+    IDD_PROP_MIDI, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 86
+    END
+
+    IDD_PROP_AUDIO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 86
+    END
+
+    IDD_CC_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 202
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 75
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\QuaMFC.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// HTML
+//
+
+IDR_HTML_TEST           HTML                    "test.htm"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_PROPSHT_CAPTION     "Property Sheet"
+END
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\QuaMFC.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

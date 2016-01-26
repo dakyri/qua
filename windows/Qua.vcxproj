@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{30973EF6-EDBE-445F-BC78-3244D0C9ABAE}</ProjectGuid>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>Qua</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua2\windows;D:\src\cpp\Qua2\include\devices;D:\src\cpp\Qua2\include\base;D:\src\cpp\Qua2\include\block;D:\src\cpp\Qua2\include\audio;D:\src\cpp\Qua2\util;D:\src\cpp\Qua2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\audio\Oscilator.h" />
+    <ClInclude Include="..\include\audio\QuaAsio.h" />
+    <ClInclude Include="..\include\audio\SampleFile.h" />
+    <ClInclude Include="..\include\audio\Sampler.h" />
+    <ClInclude Include="..\include\audio\VstPlugin.h" />
+    <ClInclude Include="..\include\base\BaseVal.h" />
+    <ClInclude Include="..\include\base\Channel.h" />
+    <ClInclude Include="..\include\base\Clip.h" />
+    <ClInclude Include="..\include\base\Clock.h" />
+    <ClInclude Include="..\include\base\ControllerBridge.h" />
+    <ClInclude Include="..\include\base\Destination.h" />
+    <ClInclude Include="..\include\base\Edittable.h" />
+    <ClInclude Include="..\include\base\Envelope.h" />
+    <ClInclude Include="..\include\base\FloatQueue.h" />
+    <ClInclude Include="..\include\base\Log.h" />
+    <ClInclude Include="..\include\base\Metric.h" />
+    <ClInclude Include="..\include\base\MidiDefs.h" />
+    <ClInclude Include="..\include\base\Note.h" />
+    <ClInclude Include="..\include\base\Pool.h" />
+    <ClInclude Include="..\include\base\PoolPlayer.h" />
+    <ClInclude Include="..\include\base\Properties.h" />
+    <ClInclude Include="..\include\base\Qua.h" />
+    <ClInclude Include="..\include\base\QuaDisplay.h" />
+    <ClInclude Include="..\include\base\QuaInsert.h" />
+    <ClInclude Include="..\include\base\QuasiStack.h" />
+    <ClInclude Include="..\include\base\QuaTypes.h" />
+    <ClInclude Include="..\include\base\SampleSplice.h" />
+    <ClInclude Include="..\include\base\Stackable.h" />
+    <ClInclude Include="..\include\base\Stacker.h" />
+    <ClInclude Include="..\include\base\State.h" />
+    <ClInclude Include="..\include\base\Stream.h" />
+    <ClInclude Include="..\include\base\Sym.h" />
+    <ClInclude Include="..\include\base\Time.h" />
+    <ClInclude Include="..\include\base\TimeKeeper.h" />
+    <ClInclude Include="..\include\block\Block.h" />
+    <ClInclude Include="..\include\block\Buflist.h" />
+    <ClInclude Include="..\include\block\Controllable.h" />
+    <ClInclude Include="..\include\block\Executable.h" />
+    <ClInclude Include="..\include\block\Expression.h" />
+    <ClInclude Include="..\include\block\Insertable.h" />
+    <ClInclude Include="..\include\block\Instance.h" />
+    <ClInclude Include="..\include\block\Markov.h" />
+    <ClInclude Include="..\include\block\Method.h" />
+    <ClInclude Include="..\include\block\Notifiable.h" />
+    <ClInclude Include="..\include\block\Parse.h" />
+    <ClInclude Include="..\include\block\Sample.h" />
+    <ClInclude Include="..\include\block\Schedulable.h" />
+    <ClInclude Include="..\include\block\Template.h" />
+    <ClInclude Include="..\include\block\Voice.h" />
+    <ClInclude Include="..\include\devices\QuaAudio.h" />
+    <ClInclude Include="..\include\devices\QuaDirect.h" />
+    <ClInclude Include="..\include\devices\QuaFX.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaJoystick.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaMidi.h" />
+    <ClInclude Include="..\include\devices\QuaParallel.h" />
+    <ClInclude Include="..\include\devices\QuaPort.h" />
+    <ClInclude Include="..\include\qua_version.h" />
+    <ClInclude Include="..\include\StdDefs.h" />
+    <ClInclude Include="..\util\Base64.h" />
+    <ClInclude Include="..\util\tinyxml2.h" />
+    <ClInclude Include="..\util\Url.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\base\BaseVal.cpp" />
+    <ClCompile Include="..\base\Clip.cpp" />
+    <ClCompile Include="..\base\Clock.cpp" />
+    <ClCompile Include="..\base\Envelope.cpp" />
+    <ClCompile Include="..\base\Log.cpp" />
+    <ClCompile Include="..\base\LValue.cpp" />
+    <ClCompile Include="..\base\Metric.cpp" />
+    <ClCompile Include="..\base\Note.cpp" />
+    <ClCompile Include="..\base\Properties.cpp" />
+    <ClCompile Include="..\base\QuaInsert.cpp" />
+    <ClCompile Include="..\base\QuasiStack.cpp" />
+    <ClCompile Include="..\base\Stacker.cpp" />
+    <ClCompile Include="..\base\State.cpp" />
+    <ClCompile Include="..\base\Stream.cpp" />
+    <ClCompile Include="..\base\StreamItem.cpp" />
+    <ClCompile Include="..\base\Sym.cpp" />
+    <ClCompile Include="..\base\Time.cpp" />
+    <ClCompile Include="..\base\ValList.cpp" />
+    <ClCompile Include="..\block\Block.cpp" />
+    <ClCompile Include="..\block\Channel.cpp" />
+    <ClCompile Include="..\block\Destination.cpp" />
+    <ClCompile Include="..\block\Esrap.cpp" />
+    <ClCompile Include="..\block\Executable.cpp" />
+    <ClCompile Include="..\block\Expression.cpp" />
+    <ClCompile Include="..\block\Instance.cpp" />
+    <ClCompile Include="..\block\Markov.cpp" />
+    <ClCompile Include="..\block\Method.cpp" />
+    <ClCompile Include="..\block\Nofifiable.cpp" />
+    <ClCompile Include="..\block\Parse.cpp" />
+    <ClCompile Include="..\block\Pool.cpp" />
+    <ClCompile Include="..\block\QuaFX.cpp" />
+    <ClCompile Include="..\block\QuaPort.cpp" />
+    <ClCompile Include="..\block\Roll.cpp" />
+    <ClCompile Include="..\block\Sample.cpp" />
+    <ClCompile Include="..\block\SampleSplice.cpp" />
+    <ClCompile Include="..\block\Schedulable.cpp" />
+    <ClCompile Include="..\block\Template.cpp" />
+    <ClCompile Include="..\block\UpdateActive.cpp" />
+    <ClCompile Include="..\block\Voice.cpp" />
+    <ClCompile Include="..\block\VstPlugin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\core\ControllerBridge.cpp" />
+    <ClCompile Include="..\core\Qua.cpp" />
+    <ClCompile Include="..\core\QuaBridge.cpp" />
+    <ClCompile Include="..\core\QuaDisplay.cpp" />
+    <ClCompile Include="..\core\QuaQuaQua.cpp" />
+    <ClCompile Include="..\devices\Midi.cpp" />
+    <ClCompile Include="..\devices\PoolPlayer.cpp" />
+    <ClCompile Include="..\devices\QuaAsio.cpp" />
+    <ClCompile Include="..\devices\QuaAudio.cpp" />
+    <ClCompile Include="..\devices\QuaDirect.cpp" />
+    <ClCompile Include="..\devices\QuaJoystick.cpp" />
+    <ClCompile Include="..\devices\QuaParallel.cpp" />
+    <ClCompile Include="..\globals\Buflist.cpp" />
+    <ClCompile Include="..\globals\SampleFile.cpp" />
+    <ClCompile Include="..\globals\SamplePlayer.cpp" />
+    <ClCompile Include="..\util\Base64.cpp" />
+    <ClCompile Include="..\util\tinyxml2.cpp" />
+    <ClCompile Include="..\util\Url.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

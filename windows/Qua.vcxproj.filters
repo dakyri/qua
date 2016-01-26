@@ -1,0 +1,436 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\block">
+      <UniqueIdentifier>{a593fc95-cad1-455f-8c2d-84823aaba7df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\base">
+      <UniqueIdentifier>{6d3f0c6a-ab2a-4935-b888-f407a6a6548e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio">
+      <UniqueIdentifier>{45ccc8e3-543f-448b-83bb-5a9a773e2155}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{3fec687d-b4ff-4975-b337-96cbc60486b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\devices">
+      <UniqueIdentifier>{c7d04f7c-a1b0-4f8d-a76c-379f30d81ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{d03864f8-dc47-4298-956e-10a7ae59008e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base">
+      <UniqueIdentifier>{7a531289-f267-4e33-a5ad-1d4129838d2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\block">
+      <UniqueIdentifier>{04c973f9-72ef-4ca4-a56a-ea04e279559d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\devices">
+      <UniqueIdentifier>{5c7b891f-1127-4c68-8a15-6528f8206924}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{eb8b9625-a19f-460c-a483-7620622f5ef0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\global">
+      <UniqueIdentifier>{f7e08da3-56ea-462f-93a8-21970fa349dd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\State.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\TimeKeeper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\qua_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\StdDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Block.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Buflist.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Controllable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Executable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Expression.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Insertable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Instance.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Markov.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Method.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Notifiable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Parse.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Sample.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Schedulable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Template.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Voice.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Channel.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Qua.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\BaseVal.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Clip.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Clock.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Destination.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Edittable.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Envelope.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\FloatQueue.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Log.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Metric.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\MidiDefs.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Note.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Pool.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\PoolPlayer.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Properties.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\QuaInsert.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\QuasiStack.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\QuaTypes.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\audio\Oscilator.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\audio\QuaAsio.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\audio\SampleFile.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\audio\Sampler.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\audio\VstPlugin.h">
+      <Filter>Header Files\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaPort.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\tinyxml2.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\QuaDisplay.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\ControllerBridge.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Stream.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Stackable.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Stacker.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Sym.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\SampleSplice.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Time.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaParallel.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaMidi.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaJoystick.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaDirect.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaAudio.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaFX.h">
+      <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\Url.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util\Base64.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\Qua.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\QuaQuaQua.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\QuaBridge.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\QuaDisplay.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\ControllerBridge.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\BaseVal.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Clip.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Clock.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Envelope.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Log.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\LValue.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Metric.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Note.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Properties.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\QuaInsert.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\QuasiStack.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Stacker.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\State.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Stream.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\StreamItem.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Sym.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Time.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\ValList.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Block.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Channel.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Destination.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Esrap.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Executable.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Expression.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Instance.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Markov.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Method.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Nofifiable.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Parse.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Pool.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\QuaFX.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\QuaPort.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Roll.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Sample.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\SampleSplice.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Schedulable.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Template.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\UpdateActive.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Voice.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\VstPlugin.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\Midi.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\PoolPlayer.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaAsio.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaAudio.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaDirect.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaJoystick.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaParallel.cpp">
+      <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\tinyxml2.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\globals\Buflist.cpp">
+      <Filter>Source Files\global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\globals\SampleFile.cpp">
+      <Filter>Source Files\global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\globals\SamplePlayer.cpp">
+      <Filter>Source Files\global</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\Base64.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\util\Url.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
