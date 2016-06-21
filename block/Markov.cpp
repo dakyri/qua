@@ -1,10 +1,5 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 #include "StdDefs.h"
 
 #include "Markov.h"
@@ -39,7 +34,7 @@ GenNextNote(struct MarkovInfo *minf)
 			last_interv;    
     Note	noteTo;
     float	dur;
-    bool	silent=FALSE;
+    bool	silent=false;
 
     noteTo.dynamic = (vel_t)minf->baseNoteVelocity;
 	noteTo.properties = nullptr;

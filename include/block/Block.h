@@ -515,4 +515,10 @@ flag			UpdateActiveBlock(
 						short r,
 						bool generate_on_the_fly);
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
 #endif

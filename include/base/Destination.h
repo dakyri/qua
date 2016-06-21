@@ -126,10 +126,8 @@ public:
 	union destination_info_t
 	{
 		struct audio_destination_info_t {
-#if defined(WIN32) || defined(NEW_MEDIA)
 			QuaAudioOut		*port;
 			QuaAudioOut		*xport;
-#endif
 		}					audio;
 		QuaMidiOut			*midi;
 		QuaJoystickPort		*joy;

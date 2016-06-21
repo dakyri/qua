@@ -3,14 +3,6 @@
 #include "StdDefs.h"
 
 
-#if defined(WIN32)
-
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-
-#endif
 
 #include "Sym.h"
 #include "Executable.h"
@@ -101,7 +93,7 @@ Schedulable::Init()
 	}
 
 	if (mainBlock && !mainBlock->Init(this)) {
-			return FALSE;
+			return false;
 	}
 
 	for (auto ci: instances) {
@@ -142,7 +134,7 @@ otherwise once for each created instance ... ????????!!!!!!!!!!
 		mainStream.ClearStream();
 	}
 */
-	return TRUE;
+	return true;
 }
 
 Instance *
@@ -219,7 +211,7 @@ Schedulable::Trigger()
 	AddInstance(nullptr, uberQua->theTime, Time::infinity, uberQua->channel[0]);
 #endif
 
-	return TRUE;
+	return true;
 }
 
 bool
@@ -244,7 +236,7 @@ Schedulable::UnTrigger()
 		}
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 status_t

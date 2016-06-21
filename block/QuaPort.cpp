@@ -1,10 +1,5 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-
 #include "QuaPort.h"
 #include "Sym.h"
 #include "QuaAudio.h"
@@ -12,9 +7,7 @@
 #include "Qua.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
 #include "QuaDisplay.h"
-#endif
 #endif
 
 QuaPort::QuaPort(

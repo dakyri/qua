@@ -1,11 +1,5 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-
 #include "StdDefs.h"
 
 #include "Block.h"
@@ -197,7 +191,7 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
 			ret_val = Find(P->mainStream, Q);
 		} else {
 			; // TypedValue::S_UNKNOWN
-			ret_val = ResultValue((int32)0,TRUE); //  blocked
+			ret_val = ResultValue((int32)0,true); //  blocked
 		}
 		break;
     }

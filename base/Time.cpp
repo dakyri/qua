@@ -1,13 +1,5 @@
 #include "qua_version.h"
 
-///////////////// System headers and underlying types
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-
-#include <windows.h>
-#endif
-
 #include "StdDefs.h"
 
 ///////////////// Application headers
@@ -138,9 +130,9 @@ bool
 Time::operator >= (Time t2)
 {
 	if (ticks == INFINITE_TICKS) {
-		return TRUE;
+		return true;
 	} else if (t2.ticks == INFINITE_TICKS) {
-		return FALSE;
+		return false;
 	} else if(*metric == *t2.metric) {
 		return ticks >= t2.ticks;
 	} else {
@@ -152,9 +144,9 @@ bool
 Time::operator <= (Time t2)
 {
 	if (t2.ticks == INFINITE_TICKS) {
-		return TRUE;
+		return true;
 	} else if (ticks == INFINITE_TICKS) {
-		return FALSE;
+		return false;
 	} else if (*metric == *t2.metric) {
 		return ticks <= t2.ticks;
 	} else {
@@ -166,9 +158,9 @@ bool
 Time::operator < (Time t2)
 {
 	if (t2.ticks == INFINITE_TICKS) {
-		return TRUE;
+		return true;
 	} else if (ticks == INFINITE_TICKS) {
-		return FALSE;
+		return false;
 	} else if (*metric == *t2.metric) {
 		return ticks < t2.ticks;
 	} else {
@@ -180,9 +172,9 @@ bool
 Time::operator > (Time t2)
 {
 	if (ticks == INFINITE_TICKS) {
-		return TRUE;
+		return true;
 	} else if (t2.ticks == INFINITE_TICKS) {
-		return FALSE;
+		return false;
 	} else if (*metric == *t2.metric) {
 		return ticks > t2.ticks;
 	} else {

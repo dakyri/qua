@@ -16,16 +16,9 @@
 // known bit of a known stack with very few checks.
 // mainly for values, and hardwired pieces of known stack
 /////////////////////////////////////////////////////////////////////
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 #include <time.h>
 #include <ctype.h>
-
-#endif
-
 ///////////////// Application headers
 
 #include "StdDefs.h"
@@ -833,7 +826,7 @@ LValue::StoreValue(TypedValue *valp)
 bool
 LValue::StoreData(char *data, int length)
 {
-	return FALSE;
+	return false;
 }
 
 void

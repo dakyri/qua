@@ -3,12 +3,6 @@
 #include "StdDefs.h"
 
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-
 #include "Envelope.h"
 #include "Sym.h"
 #include "ControllerBridge.h"
@@ -239,7 +233,7 @@ bool
 Envelope::DelSegment(int s, bool draw)
 {
 	if (nSeg == 1)		// or maybe s == nSeg-1
-		return FALSE;
+		return false;
 	segLock.lock();
 	for (short i=s; i<nSeg; i++) {
 		segment[i] = segment[i+1];
@@ -252,7 +246,7 @@ Envelope::DelSegment(int s, bool draw)
 		CueAndSet(cueTime);
 	}
 
-	return FALSE;
+	return false;
 }
 
 
@@ -260,7 +254,7 @@ bool
 Envelope::MoveSegment(int i, Time &t, float v, bool draw)
 {
 	if (!MoveableSegment(i,t,v))
-		return FALSE;
+		return false;
 	if (segment[i].time != t || segment[i].val != v) {	
 #if defined(QUA_V_ARRANGER_INTERFACE)
 		/*
@@ -284,7 +278,7 @@ Envelope::MoveSegment(int i, Time &t, float v, bool draw)
 		}*/
 #endif
 	}
-	return TRUE;
+	return true;
 }
 
 void

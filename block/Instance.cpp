@@ -1,12 +1,5 @@
 #include "qua_version.h"
 
-
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <stdafx.h>
-
-#endif
 #include "tinyxml2.h"
 #include "Instance.h"
 #include "Qua.h"
@@ -24,8 +17,6 @@
 #ifdef QUA_V_APP_HANDLER
 #include "Application.h"
 #endif
-
-
 
 status_t
 Loggable::SaveLogInfo(FILE *fp, short indent)

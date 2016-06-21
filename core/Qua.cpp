@@ -22,12 +22,6 @@
 
 #include "StdDefs.h"
 
-#ifdef WIN32
-#ifdef QUA_V_WINAPP
-#include "QuaMFC.h"
-#endif
-#endif
-
 #include "Qua.h"
 #include "Executable.h"
 #include "Schedulable.h"
@@ -61,12 +55,7 @@
 #if defined(QUA_V_APP_HANDLER)
 #include "Application.h"
 #endif
-#if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
-#include "include/QuaDisplay.h"
-#include "MFCErrorViewer.h"
-#endif
-#endif
+
 
 QuaGlobalContext	context;
 

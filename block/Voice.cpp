@@ -8,11 +8,7 @@
  * stream/midi player is needed.
  */
 
-#if defined(WIN32)
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 #include <tinyxml2.h>
 #include "StdDefs.h"
 
@@ -213,14 +209,14 @@ Voice::Init()
 #endif
 	glob.PopContext(sym);
  	
-	return TRUE;
+	return true;
 err_ex:
 #ifdef VOICE_MAINSTREAM
 	glob.PopContext(stream);
 #endif
 	glob.PopContext(sym);
   	
-	return FALSE;
+	return false;
 	
 }
 

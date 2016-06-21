@@ -1,18 +1,11 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
 
 #include "StdDefs.h"
-
 
 #include "Qua.h"
 #include "Voice.h"
@@ -691,6 +684,7 @@ QSParser::ClearComment()
 	comment = nullptr;
 }
 
+#include <stdarg.h>
 void
 QSParser::ParseError(char *msg, ...)
 {
@@ -970,11 +964,11 @@ check_token:
 				bool isa_float;
 			    p = currentToken+1;
 	    read_constant:	// ha fucking ha
-				isa_float = FALSE;
+				isa_float = false;
 			    c = getChar();
 			    if (c == 'x') {
 					*p++ = c;
-					bool	at_eof=FALSE;
+					bool	at_eof=false;
 			    	ulong val = 0;
 			    	while (isdigit(c=getChar()) ||
 			    			(c >= 'a' && c<='f')) {
@@ -988,9 +982,9 @@ check_token:
 			    	currentTokenVal.SetValue((int32)val, nullptr);
 				    currentTokenType = TOK_VAL;
 			    } else {
-					bool	at_eof=FALSE;
+					bool	at_eof=false;
 				    while (isdigit(c) || c == '.') {
-				    	if (c == '.') isa_float = TRUE;
+				    	if (c == '.') isa_float = true;
 						*p++ = c;
 			    		if (at_eof) break;
 						c = getChar();
@@ -1056,7 +1050,7 @@ check_token:
 					}
 				}
 			} else if (isalpha(c) || c == '_') {
-				bool	at_eof=FALSE;
+				bool	at_eof=false;
 			    p = currentToken+1;
 			    c = getChar();
 			    while (isalnum(c) || c == '#' || c == '_' || c=='\\'){
@@ -1244,7 +1238,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 	    while (strcmp(currentToken, ")") != 0) {
 	    
 			TypedValue		v1, v2;
-			bool			hasRange = FALSE, hasInit = FALSE;
+			bool			hasRange = false, hasInit = false;
 			
     		int32	type;
     		short	dispMode=StabEnt::DISPLAY_NOT;
@@ -1314,7 +1308,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 					}
 					v2 = currentTokenVal;
 					if (neg) v2 = - v2;
-					hasRange = TRUE;
+					hasRange = true;
 					break;
 				}
 		    	default:
@@ -2481,15 +2475,15 @@ Block *
 QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 {
     Stream		y;
-    bool		isLocus = FALSE,
-    			isModal = FALSE,
-    			isOncer = FALSE,
-    			isPool = FALSE,
-    			isFixed = FALSE,
-    			isToggled = FALSE,
-    			isException= FALSE,
-    			isInit = FALSE,
-    			isHeld = FALSE;
+    bool		isLocus = false,
+    			isModal = false,
+    			isOncer = false,
+    			isPool = false,
+    			isFixed = false,
+    			isToggled = false,
+    			isException= false,
+    			isInit = false,
+    			isHeld = false;
     long		type = TypedValue::S_UNKNOWN;
     long		templateType = TypedValue::S_UNKNOWN;
     long		subType = 0;
@@ -2906,11 +2900,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		
 		case Qualifier::TOGGLE:
 		   	GetToken();
-			isToggled = TRUE;
+			isToggled = true;
 			break;
 		case Qualifier::HELD:
 		   	GetToken();
-			isHeld = TRUE;
+			isHeld = true;
 			break;
 		case Qualifier::RESETTO:
 		   	GetToken();

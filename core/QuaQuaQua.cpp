@@ -1,12 +1,6 @@
 #include "qua_version.h"
 
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <stdafx.h>
-//#include <afxwin.h>
-#endif
 /*
  * Qua:
  * the hacked Be version

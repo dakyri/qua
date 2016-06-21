@@ -2,13 +2,6 @@
 
 #include "StdDefs.h"
 
-#if defined(WIN32)
-#include <io.h>
-
-#define WIN32_LEAN_AND_MEAN
-#include <stdafx.h>
-#endif
-
 #include "tinyxml2.h"
 #include <math.h>
 
@@ -29,9 +22,7 @@
 #include "State.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
 #include "QuaDisplay.h"
-#endif
 #endif
 
 

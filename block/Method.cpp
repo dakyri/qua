@@ -2,14 +2,6 @@
 
 #include "StdDefs.h"
 
-#if defined(WIN32)
-
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#endif
-
 #include "StdDefs.h"
 #include "Qua.h"
 #include "Method.h"
@@ -93,7 +85,7 @@ Method::Method(Method *S, StabEnt *contxt):
 	isHeld = S->isHeld;
 	isInit = S->isInit;
 	if (S->mainBlock) {
-		mainBlock = new Block(S->mainBlock, sym, TRUE);
+		mainBlock = new Block(S->mainBlock, sym, true);
 	} else {
 		mainBlock = nullptr;
 	}

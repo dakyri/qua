@@ -73,10 +73,6 @@ class SampleTake;
 class StreamTake;
 class Clip;
 
-#if defined(WIN32)
-class BMessage;
-#endif
-
 class TypedValueList
 {
 public:
@@ -93,8 +89,6 @@ public:
 
 	void				AddItem(void *I, short t);
 	void				AddItem(class TypedValue *v);
-
-	bool				AddToMessage(BMessage *m);
 
 	void				Clear();
 };

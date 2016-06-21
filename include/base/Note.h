@@ -1,18 +1,7 @@
 #ifndef _NOTE
 #define _NOTE
 
-#if defined(WIN32)
-
 #include "StdDefs.h"
-
-#else
-
-#ifdef __INTEL__
-#include <SupportDefs.h>
-#endif
-
-#endif
-
 #include "Properties.h"
 
 

@@ -2,9 +2,6 @@
 #define _QUAQUA
 
 #if defined(WIN32)
-
-class BPath;
-class BMimeType;
 #ifdef QUA_V_MULTIMEDIA_TIMER
 #include <Mmsystem.h>
 #endif

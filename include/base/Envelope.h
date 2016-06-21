@@ -1,8 +1,6 @@
 #ifndef _ENVELOPE
 #define _ENVELOPE
 
-#if defined(WIN32)
-#endif
 
 #include <stdio.h>
 

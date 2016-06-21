@@ -7,15 +7,6 @@
  */
 
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <stdafx.h>
-
-#include <time.h>
-#include <ctype.h>
-
-#endif
 #include "tinyxml2.h"
 #include "StdDefs.h"
 

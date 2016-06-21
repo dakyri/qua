@@ -12,16 +12,7 @@
  *	 - display changes that running qua schedulable instances make to their variables
  */
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include <stdio.h>
-
-
-#endif
-
 
 #include "Sym.h"
 #include "Block.h"
