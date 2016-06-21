@@ -1,6 +1,8 @@
 #ifndef _QUASISTACK_H
 #define _QUASISTACK_H
 
+#include "StdDefs.h"
+
 typedef	uint16	stack_size_t;
 
 class StabEnt;
@@ -92,8 +94,12 @@ public:
 		struct AEffect		*afx;
 	}					stk;
 
-	inline QuasiStack * frameAt(int i) { return i >= 0 && i < higherFrame.size()? higherFrame[i]:nullptr; }
-	inline void addFrame(QuasiStack * i) { higherFrame.push_back(i); }
+	inline QuasiStack * frameAt(int i) {
+		return i >= 0 && ((size_t)i) < higherFrame.size()? higherFrame[i]:nullptr; 
+	}
+	inline void addFrame(QuasiStack * i) {
+		higherFrame.push_back(i);
+	}
 	inline bool removeFrame(QuasiStack * i) {
 		for (auto ci = higherFrame.begin(); ci != higherFrame.end(); ++ci) {
 			if (*ci == i) {

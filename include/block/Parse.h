@@ -1,18 +1,6 @@
 #ifndef _PARSE
 #define _PARSE
 
-#if defined(WIN32)
-
-class BTextView;
-
-#elif defined(_BEOS)
-
-#ifdef __INTEL__ 
-#include <SupportDefs.h>
-#endif
-
-#endif
-
 class Voice;
 class Note;
 class Pool;
@@ -208,25 +196,6 @@ public:
 	char			*text_buf;
 	int				text_buf_ind;
 	off_t			size;
-};
-
-class TvParser: public QSParser
-{
-public:
-					TvParser(BTextView *, const char *, Qua *q);
-					~TvParser();
-					
-	virtual void	unGetChar();
-	virtual char	getChar();
-	virtual bool	atEof();
-	virtual void	seek(off_t ind);
-	virtual void	rewind();
-	virtual	off_t	position();
-#if defined(WIN32)
-#elif defined(_BEOS)
-	BTextView		*tv;
-#endif
-	int				text_buf_ind;
 };
 
 

@@ -2,8 +2,9 @@
 #define _QUASTREAMIO
 
 class Qua;
+class QuaPort;
 
-#define QUA_INSERT_NAME_LENGTH	256
+#include "StdDefs.h"
 
 class QuaStreamIO
 {

@@ -8,7 +8,7 @@ class Qua;
 #include <mutex>
 #include <vector>
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "QuaTypes.h"
 
 #include "QuaDisplay.h"

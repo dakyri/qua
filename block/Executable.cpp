@@ -45,7 +45,7 @@ Event::operator=(Event&s)
 	if (s.block) {
 		block = new Block(s.block, sym, true);
 		if (!block->Init(nullptr)) {
-			reportError("Can't initialise %s block", sym->name);
+			internalError("Can't initialise %s block", sym->name);
 		}
 	}
 }

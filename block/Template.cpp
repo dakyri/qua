@@ -24,13 +24,13 @@
 #include "QuaDisplay.h"
 
 status_t
-Template::Save(FILE *fp, short indent)
+Template::save(FILE *fp, short indent)
 {
-	status_t	err=B_NO_ERROR;
-	char		*typenm = typeIndex.KeyOf(type);
+	status_t err=B_NO_ERROR;
+	const char *typenm = qut::unfind(typeIndex, (int)type).c_str();
 	
 	if (typenm == nullptr) {
-		reportError("Invalid type for template %s: not saved");
+		internalError("Invalid type for template %s: not saved");
 	}
 	
 	tab(fp, indent);
@@ -38,8 +38,8 @@ Template::Save(FILE *fp, short indent)
 
 	fprintf(fp, " %s", typenm);
 	
-	if (mimeType && *mimeType)
-		fprintf(fp, " \"%s\"");
+	if (mimeType.size())
+		fprintf(fp, " \"%s\"", mimeType.c_str());
 
 	fprintf(fp,	" %s", sym->PrintableName());
 
@@ -57,8 +57,8 @@ Template::Save(FILE *fp, short indent)
 }
 
 
-Template::Template(char *nm, StabEnt *context,
-			long typ, char *mim, char *pth):
+Template::Template(string nm, StabEnt *context,
+			long typ, string mim, string pth):
 	Executable(DefineSymbol(nm, TypedValue::S_TEMPLATE, 0,
 						this, context,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT)),
@@ -79,14 +79,8 @@ Template::Template(char *nm, StabEnt *context,
 	mimeType = nullptr;
 	path = nullptr;
 	
-	if (mim) {
-		mimeType = new char[strlen(mim)+1];
-		strcpy(mimeType, mim);
-	}
-	if (pth) {
-		path = new char[strlen(pth)+1];
-		strcpy(path, pth);
-	}
+	mimeType = mim;
+	path = pth;
 	
 #ifdef QUA_V_ARRANGER_INTERFACE
 	/*
@@ -126,8 +120,7 @@ Template::Template(char *nm, StabEnt *context,
 
 Template::~Template()
 {
-	if (mimeType)
-		delete mimeType;
+
 #ifdef QUA_V_ARRANGER_INTERFACE
 	/*
 	if (sicon)
@@ -138,7 +131,7 @@ Template::~Template()
 }
 
 bool
-Template::Init()
+Template::initialize()
 {
 	Block		*B = mainBlock;
 	StabEnt		*C = sym->context;
@@ -175,7 +168,7 @@ err_ex:
 }
 
 status_t
-Template::Instantiate(StabEnt *newContxt)
+Template::instantiate(StabEnt *newContxt)
 {
 	status_t	err = B_NO_ERROR;
 
@@ -197,7 +190,7 @@ Template::Instantiate(StabEnt *newContxt)
 	for (p=newContxt->children; p!=nullptr; p=p->sibling) {
 		if (p->type == TypedValue::S_METHOD) {
 			if (!p->MethodValue()->Init())
-				reportError("%s not instantiated", p->name);
+				internalError("%s not instantiated", p->name);
 		}
 	}
 
@@ -207,7 +200,7 @@ Template::Instantiate(StabEnt *newContxt)
 		if (mainBlock) {
 			E->mainBlock = new Block(mainBlock, newContxt, true);
 			if (!E->mainBlock->Init(E)) {
-				reportError("Can't initialise main block");
+				internalError("Can't initialise main block");
 			}
 		}
 	}

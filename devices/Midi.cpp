@@ -132,6 +132,7 @@ std::unordered_map<std::string, int> midiTechNameIndex = {
 #endif
 
 
+
 QuaMidiPort::QuaMidiPort(std::string portnm, std::string nm, QuaMidiManager *qp, short md, int32 p):
 	QuaPort(nm, QUA_DEV_MIDI, QUA_DEV_GENERIC, md)
 {
@@ -147,7 +148,7 @@ QuaMidiPort::QuaMidiPort(std::string portnm, std::string nm, QuaMidiManager *qp,
 	
 
 #endif
-	fprintf(stderr, "QuaMidiPort: created midi port \"%s\"\n", portnm);
+	fprintf(stderr, "QuaMidiPort: created midi port \"%s\"\n", portnm.c_str());
 }
 
 
@@ -200,7 +201,7 @@ QuaMidiIn::QuaMidiIn(Qua *q, QuaMidiPort *p):
 
 QuaMidiIn::~QuaMidiIn()
 {
-	for (short i=0; i<sysxBuf.size(); i++) {
+	for (short i=0; ((size_t)i) < sysxBuf.size(); i++) {
 		delete (char *)sysxBuf[i];
 	}
 }
@@ -318,9 +319,9 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 						fprintf(stderr, "Midi in: note %d cmd %x chan %d vel %d\n",
 								t.pitch, cmd, MMMSG_CHANNEL(dwParam1), t.dynamic);
 					}
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 					break;
 				}
 
@@ -334,9 +335,9 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 						fprintf(stderr, "Midi in: note %d chan %d %x %d\n",
 								t.pitch, MMMSG_CHANNEL(dwParam1), MMMSG_CMD(dwParam1), t.dynamic);
 					}
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 					break;
 				}
 
@@ -349,9 +350,9 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 						fprintf(stderr, "Midi in: %x ctrl %d chan %d val %d\n", cmd,
 								t.controller, MMMSG_CHANNEL(dwParam1), t.amount);
 					}
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 					break;
 				}
 
@@ -366,9 +367,9 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 								t.program, t.bank, t.subbank,
 								MMMSG_CHANNEL(dwParam1), t.program);
 					}
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 					break;
 				}
 
@@ -377,12 +378,11 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 					t.bend = (MMMSG_PARAM2(dwParam1)<<8)|MMMSG_PARAM1(dwParam1);
 					t.cmd = MMMSG_STATUS(dwParam1);
 					if (debug_midi) {
-						fprintf(stderr, "Midi in: bend %d chan %d %x %d\n",
-								t.bend,  MMMSG_CHANNEL(dwParam1));
+						fprintf(stderr, "Midi in: bend %d chan %d\n", t.bend,  MMMSG_CHANNEL(dwParam1));
 					}
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 					break;
 				}
 
@@ -441,9 +441,9 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 						if (debug_midi) {
 							fprintf(stderr, "Midi in: sys common %x %x %x\n", (uchar)t.cmd, (uchar)t.data1, (uchar)t.data2);
 						}
-						rexMutex.Lock();
+						rexMutex.lock();
 						received.AddToStream(&t, &uberQua->theTime);
-						rexMutex.Unlock();
+						rexMutex.unlock();
 						break;
 					}
 				 }
@@ -466,38 +466,38 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 				if (!sysxFlag) {					/* first chunk of sysx */
 					sysxFlag |= 0x01;
 					ptr++; len--;
-					for (short i=0; i<sysxBuf.CountItems(); i++) {
+					for (short i=0; ((unsigned)i)<sysxBuf.size(); i++) {
 						delete (char *)sysxBuf[i];
 					}
-					sysxBuf.MakeEmpty();
-					sysxBufLen.MakeEmpty();
+					sysxBuf.clear();
+					sysxBufLen.clear();
 				}
 
 				if (ptr[len - 1] == MIDI_SYSX_END)	{ // last sysx block?
 					sysxFlag &= (~0x01);
 					len--;
 				}
-				char	**buf = new char *[len];
+				uchar	*buf = new uchar [len];
 				memcpy(buf, ptr, len);
-				sysxBuf.AddItem(buf);
-				sysxBufLen.AddItem((void *)len);
+				sysxBuf.push_back(buf);
+				sysxBufLen.push_back(len);
 				if (!sysxFlag) {	// send it
 					static	SysX	t;
 					int		sysxLen = 0;
 					short	i;
-					for (i=0; i<sysxBufLen.CountItems(); i++) {
+					for (i=0; ((unsigned)i)<sysxBufLen.size(); i++) {
 						sysxLen += (int)sysxBufLen[i];
 					}
 					t.data = new char[sysxLen];
 					char	*p = t.data;
-					for (i=0; i<sysxBufLen.CountItems(); i++) {
+					for (i=0; ((unsigned)i)<sysxBufLen.size(); i++) {
 						memcpy(p, (char *)sysxBuf[i], (int)sysxBufLen[i]);
 						p += (int)sysxBufLen[i];
 					}
 					t.length = sysxLen;
-					rexMutex.Lock();
+					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
-					rexMutex.Unlock();
+					rexMutex.unlock();
 				}
 
 				midiInAddBuffer(handle, lpMIDIHeader, sizeof(MIDIHDR));/* Queue the MIDIHDR for more input */
@@ -678,7 +678,7 @@ QuaMidiOut::MidiCmd(uchar channel, Note *tp)
 	case MIDI_STOP:		SendStop();		break;
 	case MIDI_CONT:		SendCont();		break;
 	default:
-		reportError("unexpected midi cmd %x\n", cmd);
+		internalError("unexpected midi cmd %x\n", cmd);
 	}
 }
 
@@ -804,7 +804,7 @@ bool
 QuaMidiOut::OutputStream(Time theTime, Stream *A, uchar chan)
 {
     if (debug_midi && A->nItems) {
-		fprintf(stderr, "out stream %d %x chan %d\n", A->nItems, A->head, chan);
+		fprintf(stderr, "out stream %d %x chan %d\n", A->nItems, (unsigned) A->head, chan);
 	}
 	
 	StreamItem	*p, *prev;
@@ -910,7 +910,7 @@ QuaMidiOut::OutputStream(Time theTime, Stream *A, uchar chan)
 			p=p->next;
 			delete q;
 			if (debug_midi)
-				fprintf(stderr, "deleted %x\n", q);
+				fprintf(stderr, "deleted %x\n", (unsigned) q);
 		} else {
 			prev = p;
 			p = p->next;
@@ -1026,7 +1026,8 @@ QuaMidiIn::Close()
 
 #endif
 
-QuaMidiManager::QuaMidiManager()
+QuaMidiManager::QuaMidiManager(Qua &q)
+	: QuaPortManager(q)
 {
 	dfltInput = nullptr;
 	dfltOutput = nullptr;
@@ -1060,7 +1061,6 @@ QuaMidiManager::~QuaMidiManager()
 	fprintf(stderr, "QuaMidiManager::~QuaMidiManager()\n");
 
 #if defined(WIN32)
-	short i;
 	for (QuaMidiIn *pi: inputs) {
 		pi->Close();
 	}
@@ -1292,10 +1292,11 @@ QuaMidiManager::midiOutDevices(int32 *nDevicesp)
 	return moc;
 }
 
-char *
+const char *
 QuaMidiManager::mmTechName(int techno)
 {
-	return qut::unfind(midiTechNameIndex, techno).c_str;
+	string s = qut::unfind(midiTechNameIndex, techno);
+	return s.c_str();
 }
 
 #endif

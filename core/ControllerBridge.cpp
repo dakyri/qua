@@ -22,7 +22,7 @@
 
 #endif
 
-#include "ControllerBridge.h"
+
 #include "Sym.h"
 #include "Block.h"
 #include "Pool.h"
@@ -31,122 +31,24 @@
 #include "Sample.h"
 #include "Envelope.h"
 #include "Qua.h"
+#include "ControllerBridge.h"
 
 
 #ifdef QUA_V_APP_HANDLER
-#include "include/Application.h"
+#include "Application.h"
 #endif
 
 #ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
-#elif defined(_BEOS)
-#include "MyCheckBox.h"
-#include "EnvelopePanel.h"
-#include "include/ArrangerObject.h"
-#include "include/SequencerWindow.h"
-#include "NumCtrl.h"
-#include "NameCtrl.h"
-#include "TimeCtrl.h"
-#include "PoolSelect.h"
-#include "BlockCtrl.h"
-#endif
+#include "QuaDisplay.h"
 #endif
 
-		
-// set the diplay value on the mixer panel
-// forward an update message to the arranger object
+
 void
 QuaControllerBridge::SetDisplayValue()
 {
 	fprintf(stderr, "Set display\n");
-#if defined(WIN32)
-#elif defined(_BEOS)
-	if (envelope) {
-		if (msg && msg->HasInt32("segment")) {
-			int		seg = msg->FindInt32("segment");
-			if (  stacker &&
-				  stacker->arrangerObject &&
-				  stacker->arrangerObject->displayedControlVariable == this) {
-				ArrangerObject	*ao = stacker->arrangerObject;
-				fprintf(stderr, "ao %x\n");
-				BRect	r(	seg <= 0?0:ao->TimeToPixel(envelope->segment[seg-1].time.ticks),
-							0,
-							seg < envelope->nSeg-1?ao->TimeToPixel(envelope->segment[seg+1].time.ticks):ao->TimeToPixel(INFINITE_TICKS),
-							stacker->arrangerObject->ObjectHeight()+1);
-				BMessage	m(REDISPLAY_OBJECT);
-				m.AddRect("rect", r);
-				m.AddPointer("object", ((ObjectView*)ao));
-				if (ao->Window())
-					ao->Window()->PostMessage(&m, ao);			
-//				a->Draw(r);
-			}
-			if (envelopePanel && envelopePanel->displayMode == DISPLAY_ENV) {
-				EnvelopePanel	*ep = envelopePanel;
-				if (ep->Window())
-					ep->Window()->Lock();
-				BRect		bnd = ep->editRegion;
-				BRect	r(	seg <= 0?bnd.left:
-								ep->TimeToPixel(envelope->segment[seg-1].time.ticks),
-							bnd.top,
-							seg < envelope->nSeg-1?ep->TimeToPixel(envelope->segment[seg+1].time.ticks):bnd.right,
-							bnd.bottom);
-				ep->SetLowColor(ep->bgColor);
-				ep->FillRect(r, B_SOLID_LOW);
-				ep->DrawNewEnvSegment(envelope, seg);
-				if (ep->Window())
-					ep->Window()->Unlock();
-			}
-		}
-	} else {
-		if (screenControl) {
-			LValue	l = stabEnt->SetLValue(NULL, stacker, stackFrame);
-			ResultValue	v	= l.CurrentValue();
-
-			switch (stabEnt->type) {
-			case S_POOL:
-				break;
-			
-			case S_BOOL: {
-				((MyCheckBox *)screenControl)->SetValue(v.BoolValue(NULL));
-				break;
-			}
-			
-			case S_TIME: {
-				((TimeCtrl *)screenControl)->SetValue(v.TimeValue()->ticks);
-				break;
-			}
-			
-			case S_INT: {
-				((NumCtrl *)screenControl)->SetValue(v.IntValue(NULL));
-				break;
-			}
-			
-			case S_BYTE: {
-				((NumCtrl *)screenControl)->SetValue(v.FloatValue(NULL));
-				break;
-			}
-			
-			case S_FLOAT: {
-				((NumCtrl *)screenControl)->SetValue(v.FloatValue(NULL));
-				break;
-			}
-			
-			case S_SHORT: {
-				((NumCtrl *)screenControl)->SetValue(v.ShortValue(NULL));
-				break;
-			}
-				
-			case S_LONG: {
-				((NumCtrl *)screenControl)->SetValue(v.LongValue(NULL));
-				break;
-			}
-			
-			default:
-				break;
-			}
-		}
-	}
-#endif
+	// deleted stuff from the original that set the display value of the screenControl display thingy according to current value
+	// also did stuff with onscreen envelopes
 }
 
 
@@ -155,61 +57,7 @@ QuaControllerBridge::SetSymbolValue()
 {
 	LValue	lval;
 	sym->SetLValue(lval, 0, stacker, stackCtxt, stackFrame);
-#if defined(WIN32)
-#elif defined(_BEOS)
-	switch (stabEnt->type) {
-	case S_POOL: {
-		PoolSelect	*PS = (PoolSelect *)screenControl;
-		Pool	*P = PS->selected;
-		stabEnt->SetValue(P);
-		break;
-	}
-
-	case S_TIME:
-		lval.StoreInt(((TimeCtrl *)screenControl)->TickValue());
-		break;
-		
-	case S_BOOL:
-		lval.StoreInt(((BCheckBox *)screenControl)->Value());
-		break;
-		
-	case S_BYTE:
-	case S_SHORT:
-	case S_INT:
-		lval.StoreInt(((NumCtrl *)screenControl)->Value());
-		break;
-		
-	case S_LONG:
-		lval.StoreLong(((NumCtrl *)screenControl)->Value());
-		break;
-		
-	case S_FLOAT:
-		lval.StoreFloat(((NumCtrl *)screenControl)->Value());
-		break;
-		
-	case S_EXPRESSION: {
-		BlockCtrl	*PS = (BlockCtrl *)screenControl;
-		RWLock		*l = (RWLock *)(((int32)stabEnt->maxVal.PointerValue())
-								+ ((int32)stacker));
-		StabEnt		*s = (StabEnt *)stabEnt->iniVal.PointerValue();
-		
-		if (s == NULL) {
-			reportError("Can't find all the right bits to compile this");
-		} else {
-			Block *b = PS->ExpressionValue(s);
-			
-			if (l) l->Lock();
-			lval.StoreBlock(b);
-			if (l) l->Unlock();
-		}
-		break;
-	}
-
-	default:
-		reportError("Unlikely combination for control var");
-		lval.StoreInt(((NumCtrl *)screenControl)->Value());
-	}
-#endif
+	// deleted stuff from the original that set the value according to the screenControl var
 }
 
 QuaControllerBridge::QuaControllerBridge(TimeKeeper *timeKeeper,
@@ -343,8 +191,6 @@ StabEnt::UpdateControllerBridge(Time *timep, TypedValue *v, QuasiStack *stack)
 			stack != NULL &&
 			(p=stack->ControllerBridgeFor(this))) {
 
-#if defined(WIN32)
-#elif defined(_BEOS)
 
 		BMessage	*msg = new BMessage(UPDATE_CONTROL_VAR);
 		msg->AddPointer("control var", p);
@@ -370,7 +216,7 @@ StabEnt::UpdateControllerBridge(Time *timep, TypedValue *v, QuasiStack *stack)
 			w->PostMessage(msg, stack->controlPanel);
 		}
 		delete msg;
-#endif		
+	
 		return true;
 	}
 	return false;

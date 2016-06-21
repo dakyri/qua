@@ -72,7 +72,7 @@ StabEnt::SetLValue(LValue &lval, StreamItem *items, Stacker *stacker, StabEnt *s
 	BaseAddress(lval, items, stacker, stack);
 	if (debug_lval >= 2) {
 		fprintf(stderr, "SetLValue: %s addr %x indirection %d stacker %x\n",
-			name, lval.addr, lval.indirection, lval.stacker);
+			name, (unsigned) lval.addr, lval.indirection, (unsigned)lval.stacker);
 	}
 }
 
@@ -155,7 +155,7 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 			addr = (char *)val.stackAddress.offset;
 		}
 		if (addr == 0) {
-			reportError("Unusual null data reference");
+			internalError("Unusual null data reference");
 		}
 		lval.addr = stacker? ((uint32)stacker) + addr: nullptr;
 		lval.indirection = 1;
@@ -255,9 +255,7 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 						return;
 						
 					default:
-						reportError("BaseAddress: surprising context %d for %s\n",
-									ctxt->type,
-									name);
+						internalError("BaseAddress: surprising context %d for %s\n", ctxt->type, name);
 						return;//addr;
 				}
 			}
@@ -269,8 +267,7 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 	}
 	}
 	
-	reportError("Qua::BaseAddress(): severe misunderstanding in context for %s\n",
-					name);
+	internalError("Qua::BaseAddress(): severe misunderstanding in context for %s\n", name);
 		
 	return;
 }
@@ -652,7 +649,7 @@ LValue::StoreBlock(Block *v)
 {
 	if (addr != nullptr && sym != nullptr) {
 		if (debug_lval)
-			fprintf(stderr, "StoreBlock(): addr %s %x\n", sym->name, addr);
+			fprintf(stderr, "StoreBlock(): addr %s %x\n", sym->name, (unsigned) addr);
 		switch(sym->type) {
 		case TypedValue::S_BLOCK:
 		case TypedValue::S_EXPRESSION:
@@ -694,8 +691,8 @@ LValue::StoreInt(int32 v)
 			fprintf(stderr, "store_int %s.%s (%d): addr %x = %d. %x %x\n",
 				sym->context?sym->context->name:"<glbl>",
 				sym->name, sym->context?sym->context->type:-1,
-				addr, v,
-				sym->context, sym->val.stackAddress.context);
+				(unsigned) addr, v,
+				(unsigned) sym->context, (unsigned) sym->val.stackAddress.context);
 		switch(sym->type) {
 			case TypedValue::S_BOOL:	*(bool*)addr = (v!=0); break;
 			case TypedValue::S_BYTE:	*(int8*)addr = (int8)v; break;
@@ -720,17 +717,14 @@ LValue::StoreFloat(float v)
 #if defined(QUA_V_VST_HOST)
 	  !VstParamCheck(v) &&
 #endif
-#if defined(_BEOS)
-	  !PortParamCheck(v) &&
-#endif
 	  !SpecialAssignment(v) &&
 	  addr != nullptr) {
 		if (debug_lval)
 			fprintf(stderr, "store_float %s.%s (%d): addr %x = %g. %x %x\n",
 				sym->context?sym->context->name:"<glbl>",
 				sym->name, sym->context?sym->context->type:-1,
-				addr, v,
-				sym->context, sym->val.stackAddress.context);
+				(unsigned) addr, v,
+				(unsigned)sym->context, (unsigned)sym->val.stackAddress.context);
 		switch(sym->type) {
 			case TypedValue::S_BOOL:	*(bool*)addr = (v!=0); break;
 			case TypedValue::S_BYTE:	*(int8*)addr = (int8)v; break;
@@ -741,7 +735,7 @@ LValue::StoreFloat(float v)
 			case TypedValue::S_LONG:	*(int64*)addr = (int64)v; break;
 			case TypedValue::S_TIME:	((Time*)addr)->ticks = (int32)v; break;
 			case TypedValue::S_STRANGE_POINTER:
-				reportError("StoreFloat: strange pointer not expected");
+				internalError("StoreFloat: strange pointer not expected");
 				*(void**)addr = nullptr; break;
 		}
 		AssignmentExtras();
@@ -760,17 +754,12 @@ LValue::StoreLong(int64 v)
 #if defined(QUA_V_VST_HOST)
 	  !VstParamCheck(v) &&
 #endif
-#if defined(_BEOS)
-	  !PortParamCheck(v) &&
-#endif
 	  !SpecialAssignment(v) &&
 	  addr != nullptr) {
 		if (debug_lval)
-			fprintf(stderr, "store_long %s.%s (%d): addr %x = %Ld. %x %x\n",
-				sym->context?sym->context->name:"<glbl>",
-				sym->name, sym->context?sym->context->type:-1,
-				addr, v,
-				sym->context, sym->val.stackAddress.context);
+			fprintf(stderr, "store_long %s.%s (%d): addr %x = %lld. %x %x\n",
+				sym->context?sym->context->name:"<glbl>", sym->name, sym->context?sym->context->type:-1,
+				(unsigned)addr, v, (unsigned)sym->context, (unsigned) sym->val.stackAddress.context);
 		switch(sym->type) {
 			case TypedValue::S_BOOL:	*(bool*)addr = (v!=0); break;
 			case TypedValue::S_BYTE:	*(int8*)addr = (int8)v; break;
@@ -969,20 +958,22 @@ LValue::SetToString(const char *strval)
 		case TypedValue::S_TIME:	((Time*)addr)->Set(strval); break;
 		case TypedValue::S_BOOL: {
 			if (strcmp(strval,"true")==0) {
-				*((int8*)addr) == 1;
+				*((int8*)addr) = 1;
 			} else if (strcmp(strval,"false")==0) {
-				*((int8*)addr) == 0;
+				*((int8*)addr) = 0;
 			} else {
 				*((int8*)addr) = ((atoi(strval)!=0));
 			}
 			break;
 					 }
 		case TypedValue::S_VST_PROGRAM: {
+#ifdef QUA_V_VST_HOST
 			VstPlugin *vst = nullptr;
 			if (stack && stack->context && (vst=stack->context->VstValue())) {
 				int		prog = atoi(strval);
 				vst->SetProgram(stack->stk.afx, prog);
 			}
+#endif
 			break;
 		}
 #ifdef QUA_V_VST_HOST
@@ -997,8 +988,12 @@ LValue::SetToString(const char *strval)
 		case TypedValue::S_CHANNEL: {
 //			reportError("channel set to string '%s'", strval);
 			if (indirection > 0) {
-				Channel	*c = FindChannel(strval, -1, false);
-				*((Channel**)addr) = c;
+				Channel	*c = findChannel(strval, -1);
+				if (c == nullptr) {
+					;
+				} else {
+					*((Channel**)addr) = c;
+				}
 			}
 			break;
 		}

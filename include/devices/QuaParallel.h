@@ -1,11 +1,6 @@
 #ifndef _QUA_PARALLEL
 #define _QUA_PARALLEL
 
-#ifdef __INTEL__ 
-#include <DeviceKit.h>
-#include <InterfaceKit.h>
-#endif
-
 #include <mutex>
 
 #include "Stream.h"
@@ -18,39 +13,39 @@ class QuaParallelManager;
 class QuaParallelPort: public QuaPort
 {
 public:
-						QuaParallelPort(char *nm, QuaParallelManager *);
+	QuaParallelPort(char *nm, QuaParallelManager *);
 
-	status_t			Open();
-	status_t			Close();
+	status_t Open();
+	status_t Close();
 	
-	bool				CheckPortOpen();
-	bool				CheckPortClose();
+	bool CheckPortOpen();
+	bool CheckPortClose();
 //	ControlPanel		*PortControlPanel(BRect, float);
 	
-	bool				GetStreamItems(Stream *S);
-	bool				HasStreamItems();
-	bool				Update();
+	bool GetStreamItems(Stream *S);
+	bool HasStreamItems();
+	bool Update();
 	
 	QuaParallelManager	*quaParallel;
 	
-	Stream				recv;
-	std::mutex			schlock;
+	Stream recv;
+	std::mutex schlock;
 };
 
 
-class QuaParallelManager: public QuaPortManager
+class QuaParallelManager: public QuaPortManager<QuaParallelPort>
 {
 public:
-						QuaParallelManager();
-						~QuaParallelManager();
+	 QuaParallelManager(Qua &q);
+	 ~QuaParallelManager();
 					
-	virtual status_t	connect(Input *);
-	virtual status_t	connect(Output *);
-	virtual status_t	disconnect(Input *);
-	virtual status_t	disconnect(Output *);
+	virtual status_t connect(Input *);
+	virtual status_t connect(Output *);
+	virtual status_t disconnect(Input *);
+	virtual status_t disconnect(Output *);
 
-	static long			updateWrapper(void *userData);
-	virtual long		update();
+	static long updateWrapper(void *userData);
+	virtual long update();
 };
 
 #endif

@@ -8,7 +8,7 @@
 
 #include "tinyxml2.h"
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "Sample.h"
 #include "Clip.h"
 
@@ -156,8 +156,7 @@ SampleTake::SetSampleFile(const std::string pathnm, SampleFile *newFile)
 	} else {
 		file = new SampleFile();
 		if ((err=file->SetTo(pathnm.c_str())) != B_OK) {
-			reportError("AddSampleTake::can't open %s: %s", pathnm,
-				err == B_ERROR? "format error":errorStr(err));
+			internalError("AddSampleTake::can't open %s: %s", pathnm, err == B_ERROR? "format error":errorStr(err));
 			status = STATUS_UNLOADED;
 		}
 	}
@@ -323,7 +322,10 @@ SampleTake::Peakerator()
 			break;
 		}
 		nf = nb / (file->nChannels*file->sampleSize);
-		file->NormalizeInputCpy(sambuf, rawbuf, nf);
+		long nr = file->NormalizeInputCpy(sambuf, rawbuf, nf);
+		if (nr < 0) {
+
+		}
 		long	i=0;
 		long	nsamp = hdr.nChannels*PEAK_FILE_DFLT_CHUNK_LENGTH;
 		for (i=0; i<nsamp; i+=hdr.nChannels) {
@@ -519,7 +521,10 @@ SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float 
 			}
 			peakBufferNFrames = nr/(file->nChannels*file->sampleSize);
 			fprintf(stderr, "nread %d nframes %d at frame %d\n", nr, peakBufferNFrames, frame);
-			file->NormalizeInputCpy(peakBuffer, rawBuffer, nr);
+			long nr = file->NormalizeInputCpy(peakBuffer, rawBuffer, nr);
+			if (nr < 0) {
+				// todo xxxx an error
+			}
 			peakBufferStartFrame = chunk_start_frame;
 		}
 		long cgo = (frame%N_PEAK_BUFFER_FRAMES)*file->nChannels + channel;

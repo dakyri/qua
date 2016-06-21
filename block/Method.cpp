@@ -8,11 +8,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#elif defined(_BEOS)
-
-#ifdef __INTEL__ 
-#endif
-
 #endif
 
 #include "StdDefs.h"
@@ -22,11 +17,9 @@
 #include "Block.h"
 #include "StdDefs.h"
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
+
 #include "QuaDisplay.h"
-#elif defined(_BEOS)
-#include "QuaObject.h"
-#endif
+
 #endif
 
 flag debug_method=0;
@@ -73,7 +66,7 @@ Method::Method(std::string nm, StabEnt *context, Qua *q, bool f1,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
 	if (debug_method)
-		fprintf(stderr, "Method(%s, %d%d%d%d%d%d)\n", nm, f1, f2, f3, f4, f6, f7);
+		fprintf(stderr, "Method(%s, %d%d%d%d%d%d)\n", nm.c_str(), f1, f2, f3, f4, f6, f7);
 
 	isLocus = f1;
 	isModal = f2;
@@ -128,8 +121,7 @@ Method::Init()
 	StabEnt		*C = sym->context;
 	StabEnt		*OriginalState = glob.TopContext();
 	StabEnt		*p = nullptr;
-	fprintf(stderr, "Init() of method %s in ctxt %s block %x\n", sym->name,
-				C?C->name:"<glbl>, block ", B);
+	fprintf(stderr, "Init() of method %s in ctxt %s block %x\n", sym->name, C?C->name:"<glbl>, block ", (unsigned)B);
 
 //	shit(sym, uberQua->sym);
 	glob.PushContext(sym);
@@ -143,8 +135,7 @@ Method::Init()
 				goto err_ex;
 		}
 	}
-	fprintf(stderr, "exit Init() of method %s in ctxt %s block %x\n", sym->name,
-				C?C->name:"<glbl>, block ", B);
+	fprintf(stderr, "exit Init() of method %s in ctxt %s block %x\n", sym->name, C?C->name:"<glbl>, block ", (unsigned)B);
 	glob.PopContext(sym);
 	return true;
 

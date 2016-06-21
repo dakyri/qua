@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "Time.h"
+#include "QuaTime.h"
 
 class StabEnt;
 class RosterView;
@@ -53,21 +53,51 @@ class QuaPortBridge;
 #include "QuasiStack.h"
 #include "Insertable.h"
 
-class QuaPortManager
+template <class P> class QuaPortManager
 {
 public:
-	qua_status			status;
+	QuaPortManager(Qua &q) : uberQua(q) {
 
-	std::vector<QuaPort*> ports;
+	}
+	Qua &uberQua;
+
+	qua_status status;
+
+	std::vector<P*> ports;
 	
-	virtual status_t	connect(Input *)=0;
-	virtual status_t	connect(Output *)=0;
-	virtual status_t	disconnect(Input *)=0;
-	virtual status_t	disconnect(Output *)=0;
+	virtual status_t connect(Input *)=0;
+	virtual status_t connect(Output *)=0;
+	virtual status_t disconnect(Input *)=0;
+	virtual status_t disconnect(Output *)=0;
 
-	inline int countPorts() { return ports.size(); }
-	inline QuaPort *port(int i) { return i >= 0 && i < ports.size() ? ports[i]: nullptr; }
-	inline void removePort(int i) { ports.erase(ports.begin() + i); }
+	bool destinationIndex(std::unordered_map<std::string, P *> &index) {
+		for (short i = 0; i < countPorts(); i++) {
+			if (Port(i)->mode & QUA_PORT_OUT) {
+				index[Port(i)->sym->name] = Port(i);
+			}
+		}
+		return true;
+	}
+
+	bool sourceIndex(std::unordered_map<std::string, P *> &index) {
+		index.clear();
+		for (short i = 0; i < countPorts(); i++) {
+			if (Port(i)->mode & QUA_PORT_IN) {
+				index[Port(i)->sym->name] = Port(i);
+			}
+		}
+		return true;
+	}
+
+	inline int countPorts() {
+		return ports.size();
+	}
+	inline P *port(int i) { 
+		return i >= 0 && ((size_t)i) < ports.size() ? ports[i]: nullptr; 
+	}
+	inline void removePort(int i) { 
+		ports.erase(ports.begin() + i);
+	}
 };
 
 class QuaPort

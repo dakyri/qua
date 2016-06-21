@@ -33,15 +33,9 @@
 #endif
 
 #ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
+
 #include "QuaDisplay.h"
-#elif defined(_BEOS)
-#include "Editor.h"
-#include "QuaObject.h"
-#include "ArrangerObject.h"
-#include "Application.h"
-#include "SequencerWindow.h"
-#endif
+
 #endif
 
 flag	debug_chan = 0;
@@ -116,12 +110,6 @@ Channel::Channel(std::string nm, short ch_id,
 	instSig = sample_buf_alloc(nAudioOuts, QUA_MAX_AUDIO_BUFSIZE);
 	outSig = sample_buf_alloc(nAudioOuts, QUA_MAX_AUDIO_BUFSIZE);
 	
-
-#ifdef QUA_V_ARRANGER_INTERFACE
-#ifdef _BEOS
-	channelView = Q->sequencerWindow->channelView;
-#endif
-#endif
 //	RxSym = DefineSymbol("rx", TypedValue::S_DESTINATION, &Receive, sym, 0,
 //					false, false, false, true, StabEnt::DISPLAY_CTL);
 //	TxSym = DefineSymbol("tx", TypedValue::S_DESTINATION, &Transmit, sym, 0,
@@ -159,7 +147,7 @@ Channel::Init()
 	if (hasAudio&AUDIO_HAS_PLAYER) {
 		fprintf(stderr, "Channel::initialise starting audio for player channel\n");
 
-		context.quaAudio->StartChannel(this);
+		context.quaAudio->startChannel(this);
 	}
 #endif
 	if (initBlock) {
@@ -177,10 +165,10 @@ Channel::Init()
 		;
 	}
 	if (tx.block && !tx.block->StackOMatic(txStack, 3)) {
-		reportError("can't build stack for channel");
+		uberQua->bridge.reportError("can't build stack for channel");
 	}
 	if (rx.block && !rx.block->StackOMatic(rxStack, 3)) {
-		reportError("can't build stack for channel");
+		uberQua->bridge.reportError("can't build stack for channel");
 	}
 	status = STATUS_RUNNING;
 	return true;
@@ -287,19 +275,6 @@ Channel::Start()
 	status = STATUS_RUNNING;
 }
 
-#ifdef QUA_V_ARRANGER_INTERFACE
-#ifdef _BEOS
-void
-Channel::Edit()
-{
-	if (editor) {
-		editor->Activate();
-	} else {
-		editor = new Editor(BRect(200,200,500,500), uberQua, sym);
-	}
-}
-#endif
-#endif
 
 void
 Channel::OutputStream(Stream *S)
@@ -527,7 +502,7 @@ Channel::StopRecording()
 	if (audioRecordInstance) {
 		audioRecordInstance->StopRecording();
 #ifdef QUA_V_AUDIO
-		context.quaAudio->StopRecording(audioRecordInstance);
+		context.quaAudio->stopRecording(audioRecordInstance);
 #endif
 		audioRecordInstance = nullptr;
 	}
@@ -839,23 +814,12 @@ LoadChannel(FILE *fp, Qua *u)
 // Called
 //  * through the audio input infrastructure
 size_t
-Channel::Receive(
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-	size_t nFrames
-#else 
-	float *inBuf, long nFrames, short nChannel
-#endif
-#elif defined(WIN32)
-	size_t nFrames
-#else
-	size_t nFrames
-#endif
-	)
+Channel::Receive(size_t nFrames)
 {
 	long	nsamp = nAudioIns * nFrames;
 	sample_buf_zero(inSig, nAudioIns, nFrames);
 
+#ifdef QUA_V_AUDIO
 	for (Input *inp: activeAudioInputs) {
 		QuaAudioIn	*ip = inp->src.audio.port;
 		QuaAudioIn	*xp=nullptr;
@@ -897,6 +861,7 @@ Channel::Receive(
 	if (recordState == RECORD_ING && audioRecordInstance) {
 		audioRecordInstance->QSample()->Stash(inSig, nAudioIns, nFrames);
 	}
+#endif
 	return nFrames;
 }
 
@@ -905,17 +870,7 @@ Channel::Receive(
 //
 //  read lock activeAudioOutputs, activeAudioInputs, activeAudioInstances
 size_t
-Channel::Generate(
-#if defined(_BEOS)
-#ifdef NEW_MEDIA
-							bigtime_t event_time, size_t nFrames
-#else
-							float *outBuf, size_t nFrames
-#endif
-#elif defined(WIN32)
-							size_t nFrames
-#endif
-	)
+Channel::Generate(size_t nFrames)
 {
 	if (debug_chan >= 2) {
 		fprintf(stderr, "Channel %d: generate(%d)\n", chanId, nFrames);
@@ -956,37 +911,7 @@ Channel::Generate(
 #endif
 
 	activePortsLock.lock();
-#if defined(_BEOS)
-#ifdef NEW_MEDIA
-	for (short i=0; i<activeAudioOutputs.CountItems(); i++) {
-		Output 	*dp = activeAudioOutputs.Item(i);
-		QuaAudioOut	*op = dp->dst.audio.outport;
-		float	*sp = op->quap_buf+op->offset;
-		if (nAudioChannel == op->nChannel) {
-			for (short i=0; i<nFrames*nAudioOuts; i++) {
-				*sp++ = *tp++;
-			}
-		} else if (nAudioChannel == 2) {
-			QuaAudioOut	*xp = dp->dst.audio.xport;
-			float	*olp = outSig[0];
-			float	*orp = outSig[1];
-			if (op->nChannel == 1 && xp && xp->nChannel == 1) {
-				float	*xsp = xp->quap_buf+xp->offset;
-				for (short i=0; i<nFrames; i++) {
-					*sp++ = *olp++;
-					*xsp++ = *orp++;
-				}
-			}
-		} else if (nAudioOuts == 1) {
-		} else {	// what a wonderful wierd world this might be!
-		}
-	}
-#else	// old media, copy straight to buf...
-	for (i=0; i<nsample; i++) {
-		*outBuf++ = *bufp++;
-	}
-#endif
-#elif defined(WIN32)
+#ifdef QUA_V_AUDIO
 	for (Output *dp: activeAudioOutputs) {
 		QuaAudioOut	*op = dp->dst.audio.port;
 		float	*sp = op->outbuf+op->offset;
@@ -996,7 +921,7 @@ Channel::Generate(
 			float	*orp = outSig[1];
 			if (op->nChannel == 1 && xp && xp->nChannel == 1) {
 				float	*xsp = xp->outbuf+xp->offset;
-				for (short i=0; i<nFrames; i++) {
+				for (short i=0; ((unsigned)i)<nFrames; i++) {
 					*sp++ = *olp++;
 					*xsp++ = *orp++;
 				}
@@ -1011,7 +936,7 @@ Channel::Generate(
 		} else if (nAudioOuts == 1) {
 			if (op->nChannel == 1) {
 				float	*tp = outSig[0];
-				for (short i=0; i<nFrames; i++) {
+				for (short i=0; ((unsigned)i)<nFrames; i++) {
 					*sp++ = *tp++;
 				}
 			}
@@ -1135,7 +1060,7 @@ Channel::Enable(Input *s, bool en)
 				if ((err=context.quaMidi->connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
 				} else {
-					reportError("failed to open midi input %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
+					uberQua->bridge.reportError("failed to open midi input %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
 					return false;
 				}
 			} else {
@@ -1165,15 +1090,15 @@ Channel::Enable(Input *s, bool en)
 		case QUA_DEV_AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NUM));
-				if ((err=context.quaAudio->Connect(s)) == B_OK) {
+				if ((err=context.quaAudio->connect(s)) == B_OK) {
 					activeAudioInputs.Add(s);
 				} else {
-					reportError("failed to open audio input %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), context.quaAudio->ErrorString(err));
+					uberQua->bridge.reportError("failed to open audio input %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), context.quaAudio->ErrorString(err));
 					return false;
 				}
 			} else {
 				activeAudioInputs.Del(s);
-				context.quaAudio->Disconnect(s);
+				context.quaAudio->disconnect(s);
 			}
 			break;
 		}
@@ -1199,7 +1124,7 @@ Channel::Enable(Output *s, bool en)
 				if ((err=context.quaMidi->connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
 				} else {
-					reportError("failed to open midi output %s\n", s->Name(NMFMT_NAME,NMFMT_NAME));
+					uberQua->bridge.reportError("failed to open midi output %s\n", s->Name(NMFMT_NAME,NMFMT_NAME));
 					return false;
 				}
 			} else {
@@ -1229,15 +1154,15 @@ Channel::Enable(Output *s, bool en)
 		case QUA_DEV_AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NUM));
-				if ((err=context.quaAudio->Connect(s)) == B_OK) {
+				if ((err=context.quaAudio->connect(s)) == B_OK) {
 					activeAudioOutputs.Add(s);
 				} else {
-					reportError("failed to open audio output %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), context.quaAudio->ErrorString(err));
+					uberQua->bridge.reportError("failed to open audio output %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), context.quaAudio->ErrorString(err));
 					return false;
 				}
 			} else {
 				activeAudioOutputs.Del(s);
-				context.quaAudio->Disconnect(s);
+				context.quaAudio->disconnect(s);
 			}
 			break;
 		}
@@ -1251,13 +1176,13 @@ Channel::Enable(Output *s, bool en)
 void
 Channel::SetInput(Input *d, QuaPort *p, short c)
 {
-	reportError("unimp");
+	uberQua->bridge.reportError("unimp");
 }
 
 void
 Channel::SetOutput(Output *d, QuaPort *p, short c)
 {
-	reportError("unimp");
+	uberQua->bridge.reportError("unimp");
 }
 
 #ifdef XXX
@@ -1295,11 +1220,7 @@ Input::NoodleEnable(bool en)
 							break;
 					}
 				}
-				if (!anyEnabled && !channel->uberQua->quaMidi->CloseInput(src.midi
-#ifdef _BEOS
-							, (QuaMidiPort *)device
-#endif
-						)) {
+				if (!anyEnabled && !channel->uberQua->quaMidi->CloseInput(src.midi)) {
 					reportError("Can't close input midi port %s", device->sym->name);
 					err = B_ERROR;
 				}
@@ -1352,65 +1273,9 @@ Input::NoodleEnable(bool en)
 				anyEnabled = true;
 			}
 			if (anyEnabled) {
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-				src.audio.inport = src.audio.xport = nullptr;
-				fprintf(stderr, "inp nc %d %d\n", needed_channels, format.u.raw_audio.channel_count);
-				if (needed_channels == 2 && format.u.raw_audio.channel_count < 2) {
-					media_format	sf = format;
-					sf.u.raw_audio.channel_count = 2;
-					sf.u.raw_audio.buffer_size *= 2;
-					src.audio.inport = 
-						channel->uberQua->sampler->OpenInput(
-									(QuaAudioPort *)device,
-									source, sf);
-					if (src.audio.inport) {
-						format = sf;
-					}
-				}
-				
-				if (src.audio.inport == nullptr) { // paired mono as stereo
-					src.audio.inport = 
-						channel->uberQua->sampler->OpenInput(
-									(QuaAudioPort *)device,
-									source, format);
-					if (src.audio.inport) {
-						if (  needed_channels == 2 &&
-							  format.u.raw_audio.channel_count == 1 &&
-							  xsource != media_source::null) {
-							src.audio.xport = 
-								channel->uberQua->sampler->OpenInput(
-										(QuaAudioPort *)device,
-										xsource, format);
-							if (src.audio.xport == nullptr) {
-								err = B_ERROR;
-							}
-						}
-					} else {
-						err = B_ERROR;
-					}
-				}
-#else
 				err=channel->uberQua->sampler->OpenInput((QuaAudioPort *)device, deviceChannel);
-#endif
-#endif
 			} else {
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-					if (src.audio.inport) {
-						channel->uberQua->sampler->CloseInput(
-										src.audio.inport);
-					}
-					if (src.audio.xport) {
-						channel->uberQua->sampler->CloseInput(
-									src.audio.xport);
-					}
-					src.audio.inport = src.audio.xport = nullptr;
-#else
-					channel->uberQua->sampler->CloseInput(
-							(QuaAudioPort *)device, deviceChannel);
-#endif
-#endif
+				channel->uberQua->sampler->CloseInput((QuaAudioPort *)device, deviceChannel);
 			}
 		}
 		
@@ -1461,11 +1326,7 @@ Output::NoodleEnable(bool en)
 							break;
 					}
 				}
-				if (!anyEnabled && !channel->uberQua->quaMidi->CloseOutput(dst.midi
-#ifdef _BEOS
-							, (QuaMidiPort *)device
-#endif
-								)) {
+				if (!anyEnabled && !channel->uberQua->quaMidi->CloseOutput(dst.midi)) {
 					reportError("Can't close output midi port %s", device->sym->name);
 					err = B_ERROR;
 				}
@@ -1480,47 +1341,7 @@ Output::NoodleEnable(bool en)
 		
 		case QUA_DEV_AUDIO: {
 			if (en) {
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-				dst.audio.outport = dst.audio.xport = nullptr;
-				if (needed_channels == 2 && format.u.raw_audio.channel_count == 1) {
-					media_format	sf = format;
-					sf.u.raw_audio.channel_count = 2;
-					sf.u.raw_audio.buffer_size *= 2;
-					dst.audio.outport = 
-						channel->uberQua->sampler->OpenOutput(
-									(QuaAudioPort *)device,
-									destination, sf);
-					if (dst.audio.outport) {
-						fprintf(stderr, "successfully opened mono line as stereo");
-						format = sf;
-					}
-				}
-				if (dst.audio.outport == nullptr) { // paired mono as stereo
-					dst.audio.outport = 
-						channel->uberQua->sampler->OpenOutput(
-									(QuaAudioPort *)device,
-									destination, format);
-					if (dst.audio.outport) {
-						if (  needed_channels == 2 &&
-							  format.u.raw_audio.channel_count == 1 &&
-							  xdestination != media_destination::null) {
-							dst.audio.xport = 
-								channel->uberQua->sampler->OpenOutput(
-									(QuaAudioPort *)device,
-									xdestination, format);
-							if (dst.audio.xport == nullptr) {
-								err = B_ERROR;
-							}
-						}
-					} else {
-						err = B_ERROR;
-					}
-				}
-#else
 				channel->uberQua->sampler->OpenOutput((QuaAudioPort *)device, deviceChannel);
-#endif
-#endif
 				channel->activeAudioOutputs.Add(this);
 			} else {
 				bool	anyEnabled=false;
@@ -1543,22 +1364,8 @@ Output::NoodleEnable(bool en)
 					}
 				}
 				if (!anyEnabled) {
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-					if (dst.audio.outport) {
-						channel->uberQua->sampler->CloseOutput(
-									dst.audio.outport);
-					}
-					if (dst.audio.xport) {
-						channel->uberQua->sampler->CloseOutput(
-									dst.audio.xport);
-					}
-					dst.audio.outport = dst.audio.xport = nullptr;
-#else
-					channel->uberQua->sampler->CloseOutput(
-							(QuaAudioPort *)device, deviceChannel);
-#endif
-#endif
+					channel->uberQua->sampler->CloseOutput((QuaAudioPort *)device, deviceChannel);
+
 				}
 			}
 		}

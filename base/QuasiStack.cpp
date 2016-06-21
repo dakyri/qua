@@ -341,8 +341,9 @@ QuasiStack::Delete()
 bool
 QuasiStack::Thunk()
 {
-	QDBMSG_STK("Thunk(%s%x, ", isLeaf?"leaf ":"",this,)
+	QDBMSG_STK("Thunk(%s%x, ", isLeaf?"leaf ":"",this)
 	QDBMSG_STK("%d higher frames, exec %x)\n", higherFrame.CountItems(),stackable);
+
 	if (countFrames() == 0 && !isLeaf && context->type == TypedValue::S_METHOD) {
 		Method	*executable = (Method *)stackable;
 		if (executable && executable->mainBlock) {
@@ -460,6 +461,7 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 		if (callingBlock && callingBlock->type == Block::C_VST) {
 			VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
 			if (vst->programChunks) {
+#ifdef QUA_V_VST_HOST
 				void		*chunkPtr;
 				long		chunkLen;
 				chunkLen = vst->GetChunk(stk.afx, &chunkPtr);
@@ -474,11 +476,13 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 						"<stack name=\"%s\" type=\"vst\" length=\"0\" encoding=\"base64\">\n",
 						label);
 				}
+#endif
 			} else { // programs are not chunks!
 				fprintf(fp,
 					"<stack name=\"%s\" type=\"vst\" length=\"0\" encoding=\"base64\">\n",
 					label);
 			}
+
 		} else {
 			if (stackable->stackSize > 0 && saveBinaryValues) {
 				fprintf(fp, "<stack name=\"%s\" length=\"%d\" encoding=\"base64\">\n", label, stackable->stackSize);

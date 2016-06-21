@@ -30,13 +30,7 @@
 #include "SampleBuffer.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
 #include "QuaDisplay.h"
-#elif defined(_BEOS)
-#include "QuaObject.h"
-#include "SequencerWindow.h"
-#include "ArrangerObject.h"
-#endif
 #endif
 
 
@@ -198,13 +192,13 @@ Voice::Init()
 	mainStream.ClearStream();
 #endif		
 	if (sym == nullptr) {
-		reportError("Initialization: voice symbol '%s' not found\n" , sym->name);
+		uberQua->bridge.reportError("Initialization: voice symbol '%s' not found\n" , sym->name);
 	    return false;
 	}
 #ifdef VOICE_MAINSTREAM
 	stream = glob.FindSymbol("stream", -1);
 	if (stream == nullptr) {
-		reportError("Initializing voice %s: stream symbol not found\n", sym->name);
+		uberQua->bridge.reportError("Initializing voice %s: stream symbol not found\n", sym->name);
 	    return false;
 	}
 #endif
@@ -262,7 +256,7 @@ Voice::Wake(Instance *i)
 #endif
 #ifdef QUA_V_AUDIO
 		if (i->mainStack->hasAudio != AUDIO_NONE) {
-			context.quaAudio->StartInstance(i);
+			context.quaAudio->startInstance(i);
 		}
 #endif
 		return Schedulable::Wake(i);
@@ -464,7 +458,6 @@ Voice::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		takeAttr = takeVal;
 	}
 	if (startVal != nullptr) {
-
 		startt.Set(startVal);
 	}
 	if (durVal != nullptr) {
@@ -473,7 +466,7 @@ Voice::LoadSnapshotElement(tinyxml2::XMLElement *element)
 
 
 	const char *namep = element->Value();
-	std::string namestr = namep;
+	namestr = namep;
 
 	if (namestr == "snapshot") {
 		LoadSnapshotChildren(element);
@@ -547,7 +540,7 @@ Voice::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 
 
 Instance *
-Voice::AddInstance(std::string nm, Time t, Time d, Channel * chan)
+Voice::addInstance(std::string nm, Time t, Time d, Channel * chan)
 {
 	VoiceInstance *i = new VoiceInstance(this, nm, t, d, chan);
 	instanceLock.lock();
@@ -570,7 +563,7 @@ Voice::AddInstance(std::string nm, Time t, Time d, Channel * chan)
 
 
 Instance *
-Voice::AddInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
+Voice::addInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
 {
 	Time	at_t;
 	Time	dur_t;
@@ -592,7 +585,7 @@ Voice::AddInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return AddInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, at_t, dur_t, c);
 }
 
 

@@ -10,7 +10,7 @@
 #include <mutex>
 
 #include "Note.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Sym.h"
 #include "QuaJoy.h"
 #include "Log.h"
@@ -22,7 +22,7 @@ class RWLock;
 class StreamItem
 {
 public:
-	virtual ~StreamItem();
+	virtual ~StreamItem() {}
 
 	short				type;
     Time				time;
@@ -30,22 +30,22 @@ public:
     					*prev;
 
     StreamItem			*Subsequent(short typ, short cmd, short data);
-    StreamItem			*Previous(short typ, short cmd, short data); // currently next is ignored?
+//    StreamItem			*Previous(short typ, short cmd, short data); // currently next is ignored?
     dur_t				Duration();
 	bool				SetMidiParams(int8, int8, int8, bool);
 	
 	virtual StreamItem	*Clone();
 	virtual status_t	SaveSnapshot(FILE *fp)=0;
 
-	void				*operator new(size_t);
-	void				operator delete(void *);
+//	void *operator new(size_t);
+	void operator delete(void *);
 };
 
 class StreamItemCache
 {
 public:
-						StreamItemCache(size_t sz);
-						~StreamItemCache();
+	StreamItemCache(size_t sz);
+	~StreamItemCache();
 	void				*Alloc();
 	void				Dealloc(void *q);
 	std::mutex			mutex;
@@ -56,66 +56,66 @@ public:
 class StreamNote: public StreamItem
 {
 public:
-						StreamNote(class Time *tag, Note *tp);
-						StreamNote(class Time *tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamNote(class Time *tag, Note *tp);
+	StreamNote(class Time *tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
     
-    Note				note;
+    Note note;
 };
 
 class StreamCtrl: public StreamItem
 {
 public:
-						StreamCtrl(class Time *tag, Ctrl *cp);
-						StreamCtrl(class Time *tag, cmd_t cmd, ctrl_t ct, amt_t amt);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamCtrl(class Time *tag, Ctrl *cp);
+	StreamCtrl(class Time *tag, cmd_t cmd, ctrl_t ct, amt_t amt);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	Ctrl				ctrl;
+ 	Ctrl ctrl;
 };
 
 class StreamBend: public StreamItem
 {
 public:
-						StreamBend(class Time *tag, class Bend *cp);
-						StreamBend(class Time *tag, cmd_t, bend_t);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamBend(class Time *tag, class Bend *cp);
+	StreamBend(class Time *tag, cmd_t, bend_t);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	Bend				bend;
+ 	Bend bend;
 };
 
 class StreamProg: public StreamItem
 {
 public:
-						StreamProg(class Time *tag, class Prog *cp);
-						StreamProg(class Time *tag, cmd_t, prg_t, prg_t, prg_t);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamProg(class Time *tag, class Prog *cp);
+	StreamProg(class Time *tag, cmd_t, prg_t, prg_t, prg_t);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	Prog				prog;
+ 	Prog prog;
 };
 
 class StreamSysC: public StreamItem
 {
 public:
-						StreamSysC(class Time *tag, class SysC *cp);
-						StreamSysC(class Time *tag, int8, int8, int8);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamSysC(class Time *tag, class SysC *cp);
+	StreamSysC(class Time *tag, int8, int8, int8);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	SysC				sysC;
+ 	SysC sysC;
 };
 
 
@@ -124,14 +124,14 @@ public:
 class StreamMesg: public StreamItem
 {
 public:
-						StreamMesg(BMessage *mp, class Time *tag);
-						~StreamMesg();
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamMesg(BMessage *mp, class Time *tag);
+	~StreamMesg();
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	BMessage			*mesg;
+ 	BMessage *mesg;
 };
 
 #endif
@@ -140,56 +140,56 @@ public:
 class StreamValue: public StreamItem
 {
 public:
-						StreamValue(class Time *tag, TypedValue *vp);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamValue(class Time *tag, TypedValue *vp);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	TypedValue			value;
+ 	TypedValue value;
 };
 
 class StreamSysX: public StreamItem
 {
 public:
-						StreamSysX(class Time *tag, class SysX *cp);
-						~StreamSysX();
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamSysX(class Time *tag, class SysX *cp);
+	~StreamSysX();
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	SysX				sysX;
+ 	SysX sysX;
 };
 
 class StreamJoy: public StreamItem
 {
 public:
-						StreamJoy(class Time *tag, class QuaJoy *cp);
-						StreamJoy(class Time *tag, uchar st, uchar wh, uchar cmd);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamJoy(class Time *tag, class QuaJoy *cp);
+	StreamJoy(class Time *tag, uchar st, uchar wh, uchar cmd);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	QuaJoy				joy;
+ 	QuaJoy joy;
 };
 
 class StreamLogEntry: public StreamItem
 {
 public:
-						StreamLogEntry(class Time *tag, class LogEntry *cp);
-	void				*operator new(size_t);
-	void				operator delete(void *);
-    virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp);
+	StreamLogEntry(class Time *tag, class LogEntry *cp);
+	void *operator new(size_t);
+	void operator delete(void *);
+    virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	LogEntry			logEntry;
+ 	LogEntry logEntry;
 };
 
 enum {
-	STR_FMT_RAW =		0,
-	STR_FMT_TEXT =		1
+	STR_FMT_RAW = 0,
+	STR_FMT_TEXT = 1
 };
 
 struct IXMLDOMElement;

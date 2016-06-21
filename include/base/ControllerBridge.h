@@ -17,25 +17,28 @@ class TimeKeeper;
 class QuaControllerBridge
 {
 public:
-					QuaControllerBridge(	TimeKeeper *,
-								Stacker *,
-								QuasiStack *,
-								StabEnt *p,
-								StabEnt *);
-					~QuaControllerBridge();
-	void			SetDisplayValue();
-	void			SetSymbolValue();
-	status_t		Save(FILE *, short);
-	bool			SetValue(Block *b);
+	 QuaControllerBridge(	TimeKeeper *,
+							Stacker *,
+							QuasiStack *,
+							StabEnt *p,
+							StabEnt *);
+	 ~QuaControllerBridge();
 
-	void			DrawNewEnvSegment(Envelope *, long);
-	void			DrawNewEnvSegPosition(Envelope *, long, bool);
+	void SetDisplayValue();
+	void SetSymbolValue();
+
+	status_t Save(FILE *fp, short indent);
+
+	bool SetValue(Block *b);
+
+	void DrawNewEnvSegment(Envelope *, long);
+	void DrawNewEnvSegPosition(Envelope *, long, bool);
 	
-	QuasiStack		*stackFrame;
-	StabEnt			*sym;
-	Stacker			*stacker;
-	StabEnt			*stackCtxt;
-	Envelope		*envelope;
+	QuasiStack *stackFrame;
+	StabEnt *sym;
+	Stacker *stacker;
+	StabEnt *stackCtxt;
+	Envelope *envelope;
 };
 
 #endif

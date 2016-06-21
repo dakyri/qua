@@ -3,6 +3,7 @@
 
 #if defined(WIN32)
 
+#include <windows.h>
 #include <mmsystem.h>
 
 #ifndef MOD_SWSYNTH
@@ -14,7 +15,7 @@
 #include <vector>
 
 #include "Note.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Stream.h"
 #include "QuaPort.h"
 
@@ -63,7 +64,7 @@ public:
 
 	uchar			sysxBuffer[256];
 	uchar			sysxFlag;
-	std::vector<uchar> sysxBuf;
+	std::vector<uchar*> sysxBuf;
 	std::vector<int> sysxBufLen;
 	MIDIHDR			midiHdr;
 
@@ -108,43 +109,43 @@ public:
 
 #endif
 
-class QuaMidiManager: public QuaPortManager
+class QuaMidiManager: public QuaPortManager<QuaMidiPort>
 {
 public:
 
-						QuaMidiManager();
-						~QuaMidiManager();
-	QuaMidiPort			*dfltInput;
-	QuaMidiPort			*dfltOutput;
-	bool				destinationIndex(KeyIndex *);
-	bool				sourceIndex(KeyIndex *);
+	 QuaMidiManager(Qua &q);
+	 ~QuaMidiManager();
+	QuaMidiPort	 *dfltInput;
+	QuaMidiPort	 *dfltOutput;
 
+	inline QuaMidiPort *port(int i) {
+		return (QuaMidiPort *)QuaPortManager::port(i);
+	}
 
-	inline QuaMidiPort *port(int i) { return (QuaMidiPort *)QuaPortManager::port(i); }
-	QuaMidiPort			*midiPortForId(int32);
+	QuaMidiPort *midiPortForId(int32);
 
-	virtual status_t	connect(Input *);
-	virtual status_t	connect(Output *);
-	virtual status_t	disconnect(Input *);
-	virtual status_t	disconnect(Output *);
+	virtual status_t connect(Input *);
+	virtual status_t connect(Output *);
+	virtual status_t disconnect(Input *);
+	virtual status_t disconnect(Output *);
 
 #if defined(WIN32)
 
-	QuaMidiOut			*OpenOutput(Qua *q, QuaMidiPort *d);
-	QuaMidiIn			*OpenInput(Qua *q, QuaMidiPort *d);
-	bool				closeOutput(QuaMidiOut *d);
-	bool				closeInput(QuaMidiIn *d);
-	bool				remove(QuaMidiOut *d);
-	bool				remove(QuaMidiIn *d);
+	QuaMidiOut *OpenOutput(Qua *q, QuaMidiPort *d);
+	QuaMidiIn *OpenInput(Qua *q, QuaMidiPort *d);
+	bool closeOutput(QuaMidiOut *d);
+	bool closeInput(QuaMidiIn *d);
+	bool remove(QuaMidiOut *d);
+	bool remove(QuaMidiIn *d);
 	
-	QuaMidiIn			*inputConnectionForPort(Qua *q, QuaMidiPort *);
-	QuaMidiOut			*outputConnectionForPort(Qua *q, QuaMidiPort *);
-	QuaMidiIn			*addInputConnection();
-	QuaMidiOut			*addOutputConnection();
+	QuaMidiIn *inputConnectionForPort(Qua *q, QuaMidiPort *);
+	QuaMidiOut *outputConnectionForPort(Qua *q, QuaMidiPort *);
+	QuaMidiIn *addInputConnection();
+	QuaMidiOut *addOutputConnection();
 
-	static MIDIINCAPS	*midiInDevices(int32 *nDevices);
-	static MIDIOUTCAPS	*midiOutDevices(int32 *nDevices);
-	static char			*mmTechName(int);
+	static MIDIINCAPS *midiInDevices(int32 *nDevices);
+	static MIDIOUTCAPS *midiOutDevices(int32 *nDevices);
+	static const char *mmTechName(int);
 
 	std::vector<QuaMidiIn*>	inputs;
 	std::vector<QuaMidiOut*> outputs;
@@ -152,20 +153,12 @@ public:
 };
 
 #include <string>
-class QuaMidiPort:
-#if defined(_BEOS)
-#ifdef MIDI_2_CONTROL
-#else
-	public BMidi,
-#endif
-#endif
- 	public QuaPort
+
+class QuaMidiPort: 	public QuaPort
 {
 public:
-#if defined(WIN32)
-					QuaMidiPort(std::string dmm, std::string nm, QuaMidiManager *, short, int32 myid);
-#endif
-					~QuaMidiPort();
+	QuaMidiPort(std::string dmm, std::string nm, QuaMidiManager *, short, int32 myid);
+	~QuaMidiPort();
 	virtual char *	Name(uchar);
 					
 	int32			id;

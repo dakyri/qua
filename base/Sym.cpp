@@ -62,7 +62,7 @@ flag	debug_symtab=0;
 flag	debug_save=1;
 
 StabEnt *
-FindBuiltin(char *nm, short dc, bool winge)
+findBuiltin(const string nm, short dc)
 {
 	StabEnt	*sym;
 	if((sym = glob.FindContextSymbol(nm,nullptr)) == nullptr) {
@@ -83,47 +83,41 @@ FindBuiltin(char *nm, short dc, bool winge)
  * FindSong:
  */
 Pool *
-FindPool(std::string nm, short dc, bool winge)
+findPool(const std::string nm, short dc)
 {
     StabEnt	*sym;
 
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge) reportError("Qua::FindPool() %s: not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_POOL) {
-		if (winge) reportError("Qua::FindPool() %s: not a pool\n", nm);
 		return nullptr;
     }
     return sym->PoolValue();
 }
 
 Sample *
-FindSample(std::string  nm, short dc, bool winge)
+findSample(const std::string  nm, short dc)
 {
     StabEnt	*sym;
 
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge) reportError("Qua::FindSample() %s: not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_SAMPLE) {
-		if (winge) reportError("Qua::FindSample() %s: not a sample\n", nm);
-	return nullptr;
+		return nullptr;
     }
     return sym->SampleValue();
 }
 
 Voice *
-FindVoice(std::string  nm, short dc, bool winge)
+findVoice(std::string  nm, short dc)
 {
     StabEnt	*sym;
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge) reportError("Qua::FindVoice(), symbol %s not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_VOICE) {
-		if (winge) reportError("Qua::FindVoice() %s: not a voice\n", nm);
 		return nullptr;
     }
     return sym->VoiceValue();
@@ -131,34 +125,28 @@ FindVoice(std::string  nm, short dc, bool winge)
 
 
 Channel *
-FindChannel(std::string nm, short dc, bool winge)
+findChannel(std::string nm, short dc)
 {
     StabEnt	*sym;
 
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge) reportError("Qua::FindChannel(), symbol %s not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_CHANNEL) {
-		if (winge) reportError("%s: not a channel\n", nm);
 		return nullptr;
     }
     return sym->ChannelValue();
 }
 
 Application *
-FindApplication(std::string nm, short dc, bool winge)
+findApplication(std::string nm, short dc)
 {
     StabEnt	*sym;
 
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge)
-			reportError("Qua::FindApp, symbol %s not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_APPLICATION) {
-		if (winge)
-			reportError("%s: not an app control\n", nm);
 		return nullptr;
     }
     return sym->ApplicationValue();
@@ -166,18 +154,14 @@ FindApplication(std::string nm, short dc, bool winge)
 
 
 Method *
-FindMethod(char *nm, short dc, bool winge)
+findMethod(const string nm, short dc)
 {
     StabEnt	*sym;
 
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
-		if (winge)
-			reportError("Qua::FindMethod() symbol %s not found\n", nm);
 		return nullptr;
     }
     if (sym->type != TypedValue::S_METHOD) {
-		if (winge)
-			reportError("%s: not a method\n", nm);
 		return nullptr;
     }
     return sym->MethodValue();
@@ -185,17 +169,13 @@ FindMethod(char *nm, short dc, bool winge)
 
 
 QuaPort *
-FindQuaPort(char *nm, short dc, bool winge)
+findQuaPort(const string nm, short dc)
 {
 	StabEnt		*sym = glob.FindContextSymbol(nm, nullptr, -1);
 	if (sym == nullptr) {
-		if (winge)
-			reportError("Qua::FindQuaPort, symbol %s not found", nm);
 		return nullptr;
 	}
 	if (sym->type != TypedValue::S_PORT) {
-		if (winge)
-			reportError("%s not a device", nm);
 		return nullptr;
 	}
 	return sym->PortValue();
@@ -203,7 +183,7 @@ FindQuaPort(char *nm, short dc, bool winge)
 
 
 Block *
-FindMethodMain(char *nm, short dc, bool winge)
+findMethodMain(const string nm, short dc)
 {
     StabEnt	*sym;
 
@@ -273,13 +253,13 @@ ulong
 SymTab::Hash(const std::string nm, StabEnt *context)
 {
 	ulong	shite=0;
-	short	nc = nm.length;
+	short	nc = nm.length();
 
 	for (short i = 0; i<nc; i++) {
 		shite += nm[i];
     }
 	if (debug_symtab >= 2)
-		fprintf(stderr, "hash %s %d\n", nm, ((ulong) context) % stabLen);
+		fprintf(stderr, "hash %s %d\n", nm.c_str(), ((ulong) context) % stabLen);
 	return (((ulong) context&0xffff) + shite) % stabLen;
 }
 
@@ -324,10 +304,10 @@ SymTab::FindContextSymbolInd(const std::string nm, StabEnt *contxt, short def_cn
     int		i = Hash(nm, contxt);
 
     if (1)//debug_symtab >= 2)
-    	fprintf(stderr, "symtab: looking for %s in context %s\n", nm, contxt?contxt->name:"<glbl>");
+    	fprintf(stderr, "symtab: looking for %s in context %s\n", nm.c_str(), contxt?contxt->name:"<glbl>");
     for (;;) {
 		if (debug_symtab >= 2) {
-   			fprintf(stderr, "stab[%d]: %x\n", i, stab[i]);
+   			fprintf(stderr, "stab[%d]: %x\n", i, (unsigned)stab[i]);
    			fprintf(stderr, "\t%s%s context %s\n",
    					stab[i]?stab[i]->name:"(not)",
    					stab[i]&&stab[i]->isDeleted?" (deleted)":"",
@@ -335,7 +315,7 @@ SymTab::FindContextSymbolInd(const std::string nm, StabEnt *contxt, short def_cn
    		}
     	if (stab[i] != nullptr && !stab[i]->isDeleted) {
 			if (debug_symtab >= 2)
-    			fprintf(stderr, "stab %d %x\n", i, stab[i]);
+    			fprintf(stderr, "stab %d %x\n", i, (unsigned)stab[i]);
 			if ( stab[i]->context == contxt
 				&& stab[i]->name == nm
 #ifdef DEFINE_COUNT
@@ -436,7 +416,7 @@ void
 SymTab::DumpContexts(FILE *fp)
 {
 	for (short i=0; i<contextCount; i++) {
-		reportError("Context %d %s", i, contextStack[i]?contextStack[i]->name:"null ctxt");
+		fprintf(fp, "Context %d %s", i, contextStack[i]?contextStack[i]->name:"null ctxt");
 	}
 }
 
@@ -493,7 +473,7 @@ SymTab::FindFreeInd(char *nm, StabEnt *context, short &defineCount)
 	}
 	
 	if (spot < 0) {
-		reportError("Qua: symbol table blowout");
+		internalError("Qua: symbol table blowout");
 	}
 	return spot;
 }
@@ -511,7 +491,7 @@ SymTab::AddSymbol(char *nm, base_type_t typ, StabEnt *context,
 		stab[ind]->defineCount = defineCount;
 #endif
 		if (debug_symtab >= 2)
-			fprintf(stderr, "%s/%d added to glob at %d %x\n", nm, defineCount, ind, stab[ind]);
+			fprintf(stderr, "%s/%d added to glob at %d %x\n", nm, defineCount, ind, (unsigned)stab[ind]);
 		return stab[ind];
 	}
 }
@@ -585,7 +565,7 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 		if (sp) {
 			*spp = sp->sibling;
 			if (debug_symtab >= 2)
-				fprintf(stderr, "delete %s from context %x\n", sym->name, sym->context);
+				fprintf(stderr, "delete %s from context %x\n", sym->name, (unsigned)sym->context);
 		}
 	}
 	
@@ -628,7 +608,7 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 				sym->context->SampleValue()->DeleteTake((SampleTake*)t, true);
 				break;
 			default: {
-				reportError("Failed attempt to delete take \"%s\" from unexpected schedulable \"%s\"", sym->name, sym->context->name);
+				internalError("Failed attempt to delete take \"%s\" from unexpected schedulable \"%s\"", sym->name, sym->context->name);
 				break;
 			}
 		}
@@ -691,7 +671,7 @@ SymTab::PushContext(StabEnt *contxt)
 		contextStack[contextCount] = contxt;
 		contextCount++;
     } else {
-		reportError("PushContext symtab crash ! \n");
+		internalError("PushContext symtab crash ! \n");
     }
 }
 
@@ -739,7 +719,7 @@ SymTab::FindSymbol(std::string nm, short def_cnt)
 	}
 	
     if (debug_symtab >= 2)
-    	reportError("symtab: looking for %s, def %d count %d\n", trueNm, def_cnt, contextCount);
+		fprintf(stderr, "symtab: looking for %s, def %d count %d\n", trueNm, def_cnt, contextCount);
     for (i=contextCount-1; i>=0; i--) {
 		if ((p=FindContextSymbol(trueNm, contextStack[i], def_cnt)) != nullptr) {
 		    return p;
@@ -835,20 +815,9 @@ StabEnt::SetDefaultBounds()
     	break;
     }
    	case S_PORTPARAM: {
-#ifdef NEW_MEDIA
-		BParameter	*p = val.parameter;
-		if (p) {
-			QuaAudioManager::SetParameterBounds(p, &minVal, &iniVal, &maxVal);
-		} else {
-		    minVal.Set(S_FLOAT, REF_VALUE); minVal.SetValue((float)0);
-		    iniVal.Set(S_FLOAT, REF_VALUE); iniVal.SetValue((float)5);
-		    maxVal.Set(S_FLOAT, REF_VALUE); maxVal.SetValue((float)11);
-		}
-#else
 	    minVal.Set(S_FLOAT, REF_VALUE); minVal.SetValue((float)0);
 	    iniVal.Set(S_FLOAT, REF_VALUE); iniVal.SetValue((float)0.7);
 	    maxVal.Set(S_FLOAT, REF_VALUE); maxVal.SetValue((float)1);
-#endif
    		break;
    	}
    	
@@ -1066,8 +1035,6 @@ StabEnt::PrintableName()
 #endif
 	return nm;
 }
-
-#ifdef QUA_V_SAVE_INITASXML
 
 status_t
 StabEnt::SaveSnapshot(FILE *fp)
@@ -1295,30 +1262,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 	return B_NO_ERROR;
 }
 
-status_t
-StabEnt::SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char *additionalAttributes)
-{
-	LValue	lv;
-	SetLValue(lv, nullptr, stacker, nullptr, qs);
-	ResultValue	rv=lv.CurrentValue();
-	if (isEnveloped) {
-		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\" %s>\n", name, rv.StringValue(), additionalAttributes);
-		} else {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\">\n", name, rv.StringValue());
-		}
-		fprintf(fp, "</envelope>\n");
-	} else {
-		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\" %s/>\n", name, rv.StringValue(), additionalAttributes);
-		} else {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\"/>\n", name, rv.StringValue());
-		}
-	}
-	return B_OK;
-}
 
-#else
 status_t
 StabEnt::SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack)
 {
@@ -1347,8 +1291,47 @@ StabEnt::SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack
 			return err;
 		}
 	}
+	return err;
 }
-#endif
+
+
+status_t
+StabEnt::SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char *additionalAttributes)
+{
+	LValue	lv;
+	SetLValue(lv, nullptr, stacker, nullptr, qs);
+	ResultValue	rv = lv.CurrentValue();
+	if (isEnveloped) {
+		if (additionalAttributes != nullptr) {
+			fprintf(fp, "<envelope name=\"%s\" value=\"%s\" %s>\n", name, rv.StringValue(), additionalAttributes);
+		}
+		else {
+			fprintf(fp, "<envelope name=\"%s\" value=\"%s\">\n", name, rv.StringValue());
+		}
+		fprintf(fp, "</envelope>\n");
+	}
+	else {
+		if (additionalAttributes != nullptr) {
+			fprintf(fp, "<fixed name=\"%s\" value=\"%s\" %s/>\n", name, rv.StringValue(), additionalAttributes);
+		}
+		else {
+			fprintf(fp, "<fixed name=\"%s\" value=\"%s\"/>\n", name, rv.StringValue());
+		}
+	}
+	return B_OK;
+}
+
+
+status_t
+StabEnt::SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack)
+{
+	char	*strval = StringValue(NULL, stacker, stack);
+	if (strval && *strval) {
+		tab(fp, indent);
+		fprintf(fp, "%s = %s", PrintableName(), strval);
+	}
+	return B_NO_ERROR;
+}
 
 status_t
 StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInternalRefs)
@@ -1370,7 +1353,7 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				break;
 				
 			case S_TEMPLATE:
-				if ((err=TemplateValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=TemplateValue()->save(fp, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
@@ -1506,7 +1489,7 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 		}
 	}
 	if (debug_save)
-		fprintf(stderr, "done %d: sibl %x\n", indent, sibling);
+		fprintf(stderr, "done %d: sibl %x\n", indent, (unsigned)sibling);
 	if (sibling) {
 		if ((err=sibling->SaveScript(fp, indent, saveControllers, saveInternalRefs)) != B_NO_ERROR)
 			return err;
@@ -1542,7 +1525,7 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		sprintf(buf, "%d", *((int32*)lval.addr));
 		return buf;
 	case S_LONG:
-		sprintf(buf, "%d%d", *((int64*)lval.addr));
+		sprintf(buf, "%lld", *((int64*)lval.addr));
 		return buf;
 	case S_FLOAT:
 		sprintf(buf, "%g", *((float*)lval.addr));
@@ -1577,7 +1560,7 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		if (!block) {
 			return "";
 		} else if (!(Esrap(block, buf, len, 10*1024, false, 0, 1))) {
-			reportError("block size too large...");
+			internalError("block size too large...");
 			return "";
 		} else {
 			return buf;
@@ -1595,7 +1578,7 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		}
 		return buf;
 	default:
-		reportError("string value of unexpected type %d", type);
+		internalError("string value of unexpected type %d", type);
 		sprintf(buf, "", type);
 		return buf;
 	}
@@ -1623,7 +1606,7 @@ StabEnt::SaveSimpleType(FILE *fp, short indent, bool saveInternalRefs)
 status_t
 StabEnt::SaveSimpleBits(FILE *fp, short indent)
 {
-	fprintf(fp, "%s", qut::unfind(typeIndex, (int)type));
+	fprintf(fp, "%s", qut::unfind(typeIndex, (int)type).c_str());
 	if (hasBounds) {
 		fprintf(fp, " range %s", minVal.StringValue());
 		fprintf(fp, " %s",  maxVal.StringValue());
@@ -1893,20 +1876,20 @@ DefineSymbol(std::string nm, base_type_t typ, int8 ndim,
 
 	if (sym == nullptr) {
 		if (defineCount >= 0)
-			reportError("Can't define %s#%d", nm, defineCount);
+			internalError("Can't define %s#%d", nm, defineCount);
 		else
-			reportError("Can't define %s", nm);
+			internalError("Can't define %s", nm);
 		return nullptr;
 	}
     if (debug_symtab)
 		fprintf(stderr, "define %s/%d type %d val %x ctxt %s %d: %s %s:",
-				nm,
+				nm.c_str(),
 #ifdef DEFINE_COUNT
 				sym->defineCount,
 #else
 				0,
 #endif
-				typ, val,
+				typ, (unsigned)val,
 				context?context->name:"<glbl>",
 				context?context->type:-1,
 				isClone?"clone":"", 
@@ -1971,7 +1954,7 @@ DefineSymbol(std::string nm, base_type_t typ, int8 ndim,
 	}
 
     if (debug_symtab)
-		fprintf(stderr, "!%x\n", sym);
+		fprintf(stderr, "!%x\n", (unsigned)sym);
     return sym;
 }
 

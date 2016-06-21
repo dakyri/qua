@@ -34,7 +34,6 @@ public:
 	std::string name;
 };
 
-
-Metric			*FindMetric(char *);
-extern std::vector<Metric*>		metrix;
+Metric *findMetric(std::string);
+extern std::vector<Metric*> metrix;
 #endif

@@ -342,7 +342,7 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		    	case Block::OP_NOT:	if (!AddToBuf("!", buf, pos, len)) return false; break;
 		    	case Block::OP_BNOT:	if (!AddToBuf("~", buf, pos, len)) return false; break;
 		    	default:
-					tragicError("Unimplimented Esrap: unop");
+					internalError("Unimplimented Esrap: unop");
 		    	}
 		    	if ((block->crap.op.l->isOperator())) if (!AddToBuf("(", buf, pos, len)) return false;
 		    	if (!Esrap(block->crap.op.l, buf,pos,len, do_indent, indent, crlf))
@@ -376,7 +376,7 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 				case Block::OP_BAND:	if (!AddToBuf("&", buf, pos, len)) return false; break;
 				case Block::OP_BOR:	if (!AddToBuf("|", buf, pos, len)) return false; break;
 		    	default:
-					reportError("Unimplimented Esrap: unop");
+					internalError("Unimplimented Esrap: unop");
 		    	}
 		
 		    	if ((block->crap.op.r->isOperator()))
@@ -445,7 +445,7 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		}
 		
 		default:
-		    reportError("Esrap: Bad block element %d", block->type);
+		    internalError("Esrap: Bad block element %d", block->type);
 		    return false;
 		}
 		

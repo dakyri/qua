@@ -3,6 +3,8 @@
 
 class SampleTake;
 
+#include "StdDefs.h"
+
 class SampleSplice
 {
 public:

@@ -15,7 +15,7 @@
 
 #include "StdDefs.h"
 
-#include "Time.h"	// so other doesn't barf
+#include "QuaTime.h"	// so other doesn't barf
 #include "Other.h"
 
 flag		roll_debug=0;
@@ -44,7 +44,7 @@ select_list(int n, float pr[])
 		fprintf(stderr, "\n");
     }
     if (n > MAX_SELECT_LIST) {
-		reportError("Error in SelectList: sample too big\n");
+		internalError("Error in SelectList: sample too big\n");
 	exit(1);
     }
     cum[0] = pr[0];
@@ -54,7 +54,7 @@ select_list(int n, float pr[])
 			fprintf(stderr, "cum %d %g %g\n", i, cum[i], pr[i]);
     }
     if (cum[n-1] == 0.0) {  /* Perhaps this should return rather than exit ? */
-		reportError("**** flatwall against the laws of statistics\n");
+		internalError("**** flatwall against the laws of statistics\n");
 		exit(0);
     }
     cnt = 0;
@@ -66,7 +66,7 @@ select_list(int n, float pr[])
 	    }
 		}
 		if (cnt ++ > 100) {
-		    reportError("**** statistical anomaly in select list\n");
+		    internalError("**** statistical anomaly in select list\n");
 			exit(1);
 		}
     } while (i==n);	/* in case the cumulative probs dont sum to 1 */

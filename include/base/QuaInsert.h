@@ -23,21 +23,16 @@ enum {
 	QN_BIDIRECT=3
 };
 
+
 #include <vector>
+#include "StdDefs.h"
 
 class QuaInsert
 {
 public:
-					QuaInsert(
-						Insertable *object,
-						QuaNexion *quanexion,
-						char *name,
-						int32 id,
-						short type,
-						int32,
-						int32);
-					QuaInsert();
-					~QuaInsert();
+	QuaInsert( Insertable *object, QuaNexion *quanexion, char *name, int32 id, short type, int32, int32);
+	QuaInsert();
+	~QuaInsert();
 	void			Set(
 						Insertable *object,
 						QuaNexion *quanexion,

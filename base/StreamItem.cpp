@@ -1,6 +1,8 @@
 #include "qua_version.h"
 
+
 #include <stdio.h>
+#include <algorithm>
 
 #if defined(WIN32)
 
@@ -46,7 +48,6 @@ void *
 StreamItemCache::Alloc()
 {
 	void *p;
-	status_t	err;
 	mutex.lock();
     if (free != nullptr) {
 		p = (void *)free;
@@ -62,7 +63,6 @@ StreamItemCache::Alloc()
 void
 StreamItemCache::Dealloc(void *p)
 {
-	status_t	err;
 	mutex.lock();
 //	fprintf(stderr, "Dealloc %x\n", p);
 	StreamItem	*q = (StreamItem *)p;
@@ -74,7 +74,7 @@ StreamItemCache::Dealloc(void *p)
 StreamItem *
 StreamItem::Clone()
 {
-	reportError("Clone: unexpected stream object %d",type);
+	internalError("Clone: unexpected stream object %d",type);
 	return nullptr;
 }
 
@@ -95,7 +95,7 @@ StreamItem::operator delete(void *q)
 	case TypedValue::S_LOG_ENTRY: 	delete (StreamLogEntry *)q; break;
 	case TypedValue::S_JOY:		 	delete (StreamJoy *)q; break;
 	default:
-		reportError("delete: Unexpected stream object %d",
+		internalError("delete: Unexpected stream object %d",
 			((StreamItem *)q)->type);
 	}
 }
@@ -252,8 +252,7 @@ StreamItem::Duration()
 	if (type == TypedValue::S_NOTE) {
 		StreamNote	*me = (StreamNote *)this;
 		if (me->note.duration == INFINITE_TICKS) {
-			StreamNote	*sub=
-					(StreamNote *)Subsequent(TypedValue::S_NOTE, MIDI_NOTE_OFF, me->note.pitch);
+			StreamNote	*sub= (StreamNote *)Subsequent(TypedValue::S_NOTE, MIDI_NOTE_OFF, me->note.pitch);
 			if (sub) {
 				return (dur_t)(sub->time.ticks-time.ticks);
 			}
@@ -345,9 +344,13 @@ StreamValue::Clone()
 status_t
 StreamValue::SaveSnapshot(FILE *fp)
 {
-	char	*typnm = typeIndex.KeyOf(value.type);
-	fprintf(fp, "<value time=\"%s\" valType=\"%s\" valValue=\"%s\"/>\n",
-		time.StringValue(), typnm, value.StringValue());
+	auto it = find_if(typeIndex.begin(), typeIndex.end(),
+		 [this](pair<string,int> vt) { return vt.second == value.type; }
+	);
+	if (it != typeIndex.end()) {
+		fprintf(fp, "<value time=\"%s\" valType=\"%s\" valValue=\"%s\"/>\n", time.StringValue(), it->first.c_str(), value.StringValue());
+	}
+	
 	return B_OK;
 }
 
@@ -653,15 +656,15 @@ StreamJoy::SaveSnapshot(FILE *fp)
 {
 	switch (joy.type) {
 		case QUA_JOY_AXIS:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"\%d\"  axis=\"\%g\"/>\n",
+			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  axis=\"%g\"/>\n",
 				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.axis);
 			break;
 		case QUA_JOY_BUTTON:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"\%d\"  button=\"\%d\"/>\n",
+			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  button=\"%d\"/>\n",
 				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.button);
 			break;
 		case QUA_JOY_HAT:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"\%d\"  hat=\"\%d\"/>\n",
+			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  hat=\"%d\"/>\n",
 				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.hat);
 			break;
 	}

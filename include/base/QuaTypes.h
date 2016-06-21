@@ -1,11 +1,13 @@
-#ifndef QUA_TYPES
-#define QUA_TYPES
+#ifndef _QUA_TYPES
+#define _QUA_TYPES
 
-typedef short	qua_status;
-typedef short	qua_chan_id;
-typedef	uint32	q_size_t;
-typedef	int8	base_type_t;
-typedef int16	port_chan_id;
+#include "StdDefs.h"
+
+typedef short qua_status;
+typedef short qua_chan_id;
+typedef	uint32 q_size_t;
+typedef	int8 base_type_t;
+typedef int16 port_chan_id;
 
 enum {
 	STATUS_UNKNOWN = -1,

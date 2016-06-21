@@ -318,16 +318,13 @@ Stream::PrintStream(FILE *fp)
 {
 	StreamItem	*p;
 	
-	fprintf(fp, "contents of stream %x (%d items)\n",
-		this, nItems);
+	fprintf(fp, "contents of stream %x (%d items)\n", (unsigned)this, nItems);
 	for (p=head; p!=nullptr; p=p->next) {
 		switch (p->type) {
 		case TypedValue::S_NOTE: {
 			StreamNote	*pt = (StreamNote *)p;
 			fprintf(fp, "note %x cmd %x pitch %d dyn %d dur %g @ %d\n",
-				p,
-				pt->note.cmd, pt->note.pitch, pt->note.dynamic,
-				pt->note.duration, p->time.ticks);
+				(unsigned)p, pt->note.cmd, pt->note.pitch, pt->note.dynamic, pt->note.duration, p->time.ticks);
 			break;
 		}
 		case TypedValue::S_JOY: {
@@ -336,14 +333,11 @@ Stream::PrintStream(FILE *fp)
 		}
 		case TypedValue::S_LOG_ENTRY: {
 			StreamLogEntry *pt = (StreamLogEntry *)p;
-			fprintf(fp, "log entry %x cmd %d\n",
-				p,
-				pt->logEntry.type);
+			fprintf(fp, "log entry %x cmd %d\n", (unsigned)p, pt->logEntry.type);
 			break;
 		}
 		default:
-			fprintf(fp, "item %x, type %d @ %d\n", p, p->type,
-					p->time.ticks);
+			fprintf(fp, "item %x, type %d @ %d\n", (unsigned) p, p->type, p->time.ticks);
 		}
 	}
 }	
@@ -390,8 +384,7 @@ Stream::ClearStream()
 	if (nItems > 0) {
 	    for (p=head; p!=nullptr; ) {
 			if (debug_stream)
-			    fprintf(stderr, "disposing %d %x\n",
-					 nItems,	p);
+			    fprintf(stderr, "disposing %d %x\n", nItems, (unsigned)p);
 			nItems --;
 			q = p->next;
 			delete p;
@@ -538,7 +531,7 @@ Stream::AddToStream(StreamItem *p, Time *tag)
 	case TypedValue::S_SYSC: return AddToStream(&((StreamSysC*)p)->sysC,tag);
 	case TypedValue::S_CTRL: return AddToStream(&((StreamCtrl*)p)->ctrl,tag);
 	case TypedValue::S_STREAM_ITEM: {
-		reportError("AddToStream: unexpected stream_item stream item");
+		internalError("AddToStream: unexpected stream_item stream item");
 		return nullptr;
 	}
 	case TypedValue::S_VALUE: {
@@ -554,7 +547,7 @@ Stream::AddToStream(StreamItem *p, Time *tag)
 	}
 	
 	default: {
-		reportError("unknown stream_item type");
+		internalError("unknown stream_item type");
 	}}
 	return nullptr;
 }
@@ -567,7 +560,7 @@ Stream::AddToStream(Stream *S, Time *offt)
     	Time	timeat = p->time;
     	if (offt) timeat = timeat - *offt;
     	if (debug_stream)
-    		fprintf(stderr, "chan:p = %x %d\n", p, p->type);
+    		fprintf(stderr, "chan:p = %x %d\n", (unsigned) p, p->type);
 		AddToStream(p, &timeat);
 
     }
@@ -580,7 +573,7 @@ Stream::AppendItem(StreamItem *l)
 {
     if (nItems < MAX_STREAM) {
 		if (debug_stream)
-			fprintf(stderr, "adding l = %x\n", l);
+			fprintf(stderr, "adding l = %x\n", (unsigned)l);
 		if (head == nullptr) {
 		    head = l;
 		} else {
@@ -589,11 +582,9 @@ Stream::AppendItem(StreamItem *l)
 		tail = l;
 		nItems++;
 		if (debug_stream)
-		    fprintf(stderr, "add to stream %x %d\n",
-				 l, nItems);
+		    fprintf(stderr, "add to stream %x %d\n", (unsigned)l, nItems);
     } else {
-		reportError("Stream buffer overflow in stream %x, %d\n", (long)this,
-			nItems);
+		internalError("Stream buffer overflow in stream %x, %d\n", (long)this, nItems);
 		delete l;
     }
 }
@@ -603,7 +594,7 @@ Stream::InsertItem(StreamItem *l)
 {
     if (nItems < MAX_STREAM) {
 		if (debug_stream)
-			fprintf(stderr, "inserting l = %x\n", l);
+			fprintf(stderr, "inserting l = %x\n", (unsigned)l);
 		StreamItem *p = head, **pp =&head;
 		while (p != nullptr) {
 			if (p->time > l->time) {
@@ -620,11 +611,9 @@ Stream::InsertItem(StreamItem *l)
 		
 		nItems++;
 		if (debug_stream)
-		    fprintf(stderr, "insert in stream %x %d\n",
-				 l, nItems);
+		    fprintf(stderr, "insert in stream %x %d\n", (unsigned)l, nItems);
     } else {
-		reportError("Stream buffer overflow in stream %x, %d\n", (long)this,
-			nItems);
+		internalError("Stream buffer overflow in stream %x, %d\n", (long)this, nItems);
 		delete l;
     }
 }
@@ -649,7 +638,7 @@ Stream::ModifyItemTime(StreamItem *l, Time *tag)
 	}
 	l->time = *tag;
 	if (take_from == nullptr) {
-		reportError("modifying demented stream...not");
+		internalError("modifying demented stream...not");
 		return;
 	}
 	if (insert_before == nullptr) {
@@ -672,7 +661,7 @@ Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
 
     if (nItems < MAX_STREAM) {
 		if (debug_stream)
-			fprintf(stderr, "adding list = %x\n", sp);
+			fprintf(stderr, "adding list = %x\n", (unsigned)sp);
 		if (sp) {
 			if (head == nullptr) {
 			    head = sp;
@@ -683,8 +672,7 @@ Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
 			Time startt = sp->time;
 			while (sp) {
 				if (debug_stream)
-				    fprintf(stderr, "add to stream %x %d\n",
-						 sp, sp->type);
+				    fprintf(stderr, "add to stream %x %d\n", (unsigned)sp, sp->type);
 				tail = sp;
 				if (sp->type == TypedValue::S_NOTE) {
 					((StreamNote*)sp)->note.duration /= r;
@@ -696,8 +684,7 @@ Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
 			}
 		}
     } else {
-		reportError("Stream buffer overflow in stream %x, %d\n", (long)this,
-			nItems);
+		internalError("Stream buffer overflow in stream %x, %d\n", (long)this, nItems);
     }
 }
 
@@ -759,7 +746,7 @@ void
 Stream::InsertStream(Stream *B, Time *tag)
 {
     if (B == nullptr) {
-		reportError("fatal in Insert!\n");
+		internalError("fatal in Insert!\n");
 		exit(1);
     }
     if (B->nItems > 0) {
@@ -804,7 +791,7 @@ Stream::InsertStream(Stream *B, Time *tag)
 		    }
 		}
 		if (debug_stream)
-			fprintf(stderr, "is %x %x\n", head, tail);
+			fprintf(stderr, "is %x %x\n", (unsigned)head, (unsigned)tail);
 		if (tail == nullptr)
 			tail = tailinsert;
 
@@ -823,14 +810,14 @@ void
 Stream::AppendStream(Stream *B)
 {
     if (B == nullptr) {
-		reportError("fatal in Append! null stream!\n");
+		internalError("fatal in Append! null stream!\n");
 		exit(1);
     }
 
     if (B->nItems > 0) {
 		if (debug_stream)
-			fprintf(stderr, "head %x tail %x len %d BHead %x Btail %x Blen %d\n",
-				head, tail, nItems, B->head, B->tail, B->nItems);
+			fprintf(stderr, "head %x tail %x len %d BHead %x Btail %x Blen %d\n", 
+				(unsigned)head, (unsigned)tail, nItems, (unsigned)B->head, (unsigned)B->tail, B->nItems);
         if (nItems > 0) {
             tail->next = B->head;
         } else {
@@ -1505,7 +1492,7 @@ Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 			}
 
 			default:
-				reportError("wierd stream item");
+				internalError("wierd stream item");
 			}
 		}
 		break;
@@ -1636,7 +1623,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 		default:
-			reportError("wierd stream item");
+			internalError("wierd stream item");
 		}
 	}
 	return B_NO_ERROR;

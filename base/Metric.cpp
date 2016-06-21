@@ -18,7 +18,7 @@
 
 ///////////////// Application headers
 #include "TimeKeeper.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Metric.h"
 
 TimeKeeper::TimeKeeper(Metric *m)
@@ -27,17 +27,17 @@ TimeKeeper::TimeKeeper(Metric *m)
 	theTime.Set(0, m);
 }
 	
-Metric		Metric::std("bbq", 12,4,4,120);
-Metric		Metric::mSec("msm", 1000,60,60,60);
-Metric		Metric::sampleRate("msf", 44100,60,60,60);
+Metric Metric::std("bbq", 12,4,4,120);
+Metric Metric::mSec("msm", 1000,60,60,60);
+Metric Metric::sampleRate("msf", 44100,60,60,60);
 
-std::vector<Metric*>		metrix;
+std::vector<Metric*> metrix;
 
 Metric *
 findMetric(std::string nm)
 {
 	Metric		*fnd = nullptr;
-	for (short i=0; i<metrix.size(); i++) {
+	for (short i=0; ((size_t)i)<metrix.size(); i++) {
 		if (metrix[i]->name == nm)
 			return metrix[i];
 	}

@@ -323,3 +323,104 @@ QuaBridge::RemoveDestinationRepresentation(Channel *c, Output *s)
 	}
 }
 
+#include <stdarg.h>
+
+
+void
+QuaBridge::parseErrorViewClear(QSParser *p) {
+	if (display != nullptr) {
+		return display->parseErrorViewClear(p);
+	}
+}
+
+void
+QuaBridge::parseErrorViewAddLine(QSParser *p, string s) {
+	if (display != nullptr) {
+		return display->parseErrorViewAddLine(p, s);
+	}
+}
+
+void
+QuaBridge::parseErrorViewShow(QSParser *p) {
+	if (display != nullptr) {
+		return display->parseErrorViewShow(p);
+	}
+}
+
+
+
+void
+QuaBridge::tragicError(char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		return display->tragicError(buf);
+	}
+	va_end(args);
+}
+
+void
+QuaBridge::reportError(char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		display->reportError(buf);
+	}
+	va_end(args);
+}
+
+int
+QuaBridge::retryError(char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		return display->retryError(buf);
+	}
+	va_end(args);
+	return 0;
+}
+
+bool
+QuaBridge::abortError(char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		return display->abortError(buf);
+	}
+	va_end(args);
+	return 0;
+}
+
+bool
+QuaBridge::continueError(char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		return display->continueError(buf);
+	}
+	va_end(args);
+	return 0;
+}
+
+int
+QuaBridge::optionWin(int i, char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	if (display != nullptr) {
+		return display->optionWin(i, buf);
+	}
+	va_end(args);
+	return 0;
+}

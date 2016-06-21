@@ -232,7 +232,7 @@ Insertable::RemoveInsert(short ind)
 {
 	QuaInsert	*i = inserts[ind];
 	inserts.erase(inserts.begin()+ind);
-	fprintf(stderr, "remove insert %x %x %x\n", i, i->quanexion, i->quanexion?i->quanexion->parent:nullptr);
+	fprintf(stderr, "remove insert %x %x %x\n", (unsigned)i, (unsigned)i->quanexion, (unsigned)i->quanexion?i->quanexion->parent:nullptr);
 	if (i->quanexion && i->quanexion->parent) {
 		if (i->quanexion->from == i)
 			i->quanexion->to->quanexion = nullptr;

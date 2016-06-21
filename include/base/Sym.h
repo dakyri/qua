@@ -238,15 +238,15 @@ StabEnt				*DupSymbol(StabEnt *S, StabEnt *C);
 StabEnt				*DefineSymbol(const std::string nm, base_type_t typ, int8 ndim, void *val,
 						StabEnt *context, ref_type_t reft,
 						bool isClone, bool isEnv, short disp_mode);
-Pool				*FindPool(const std::string nm, short def_cnt = -1, bool winge = true);
-Sample				*FindSample(const std::string nm, short def_cnt = -1, bool winge = true);
-Voice				*FindVoice(const std::string nm, short def_cnt = -1, bool winge = true);
-Channel				*FindChannel(const std::string nm, short def_cnt = -1, bool winge = true);
-Method				*FindMethod(const std::string nm, short def_cnt = -1, bool winge = true);
-Block				*FindMethodMain(const std::string nm, short def_cnt = -1, bool winge = true);
-Application			*FindApplication(const std::string nm, short def_cnt = -1, bool winge = true);
-QuaPort				*FindQuaPort(const std::string nm, short def_cnt = -1, bool winge = true);
-StabEnt				*FindBuiltin(const std::string nm, short def_cnt = -1, bool winge = true);
+Pool				*findPool(const std::string nm, short def_cnt = -1);
+Sample				*findSample(const std::string nm, short def_cnt = -1);
+Voice				*findVoice(const std::string nm, short def_cnt = -1);
+Channel				*findChannel(const std::string nm, short def_cnt = -1);
+Method				*findMethod(const std::string nm, short def_cnt = -1);
+Block				*findMethodMain(const std::string nm, short def_cnt = -1);
+Application			*findApplication(const std::string nm, short def_cnt = -1);
+QuaPort				*findQuaPort(const std::string nm, short def_cnt = -1);
+StabEnt				*findBuiltin(const std::string nm, short def_cnt = -1);
 
 void				MakeUniqueName(char *nm);
 status_t			LoadQuaSymbols(FILE *fp, StabEnt *c, Qua *u,

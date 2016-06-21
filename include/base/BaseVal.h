@@ -3,7 +3,7 @@
 
 #include "qua_version.h"
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "QuasiStack.h"
 
 //////////////////////////////////////////////////////////////////
@@ -191,11 +191,10 @@ union base_val_t {
 	Template			*qTemplate;
 	TypedValueList		list;
 
-#ifdef QUA_V_VST_HOST
 	VstPlugin			*vst;
 	int32				vstParam;
 	int32				vstProgram;
-#endif
+
 #ifdef QUA_V_PORT_PARAM
 	BParameter			*parameter;
 #endif
@@ -527,11 +526,6 @@ public:
 	int32			VstParamValue(); // the id of a param
 	int32			VstProgramValue(); // the value of a program
 #endif
-#if defined(QUA_V_PORT_PARAM)
-#ifdef _BEOS
-	BParameter		*PortParamValue();
-#endif
-#endif
 
 #if defined(QUA_V_STREAM_MESG)
 	BMessage		*MessageValue();
@@ -748,13 +742,11 @@ TypedValue::MethodValue()
 	return type == S_METHOD && refType == REF_VALUE? val.method: nullptr;
 }
 
-#ifdef QUA_V_VST_HOST
 inline VstPlugin *
 TypedValue::VstValue()
 {
 	return type == S_VST_PLUGIN && refType == REF_VALUE? val.vst: nullptr;
 }
-#endif
 
 inline Voice *
 TypedValue::VoiceValue(){

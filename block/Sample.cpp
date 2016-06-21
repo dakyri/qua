@@ -34,6 +34,7 @@
 #endif
 #endif
 
+
 Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short maxreq):
 	Schedulable(
 		DefineSymbol(nm, TypedValue::S_SAMPLE, 0,
@@ -127,7 +128,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	}
 	SynchronizeBuffers();
 #ifdef QUA_V_AUDIO
-	context.quaAudio->AddSample(this);
+	context.quaAudio->addSample(this);
 #endif
 }
 
@@ -158,7 +159,7 @@ Sample::RemoveClip(Clip *c, bool disp)
 Sample::~Sample()
 {
 #ifdef QUA_V_AUDIO
-	context.quaAudio->RemoveSample(this);
+	context.quaAudio->removeSample(this);
 #endif
 	delete fileBuffer;
 //	for (short i=0; i<CountTakes(); i++) {
@@ -209,11 +210,11 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 		path == uberQua->sampleDirectoryPath + "/" + filenm;
 	} while (!_access(path.c_str(), 04));
 	takenm = glob.MakeUniqueName(sym, "record", 1);
-	fprintf(stderr, "new take %s file %s path %s\n", filenm, takenm, path);
+	fprintf(stderr, "%s file %s path %s\n", filenm.c_str(), takenm.c_str(), path.c_str());
 
 	SampleFile	*file = new SampleFile(fileType, nChan, sampleSize, sampleRate);
 	if ((err = file->SetTo(path.c_str(), O_RDWR|O_CREAT)) != B_NO_ERROR) {
-		reportError("Can't set sample file... %s", errorStr(err));
+		uberQua->bridge.reportError("Can't set sample file... %s", errorStr(err));
 		delete file;
 		return nullptr;
 	}
@@ -228,7 +229,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 SampleTake	*
 Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 {
-	fprintf(stderr, "sample %s: adding sample take %s at %s\n", sym->name, nm, path);
+	fprintf(stderr, "sample %s: adding sample take %s at %s\n", sym->name, nm.c_str(), path.c_str());
 	SampleTake	*take;
 	take = new SampleTake(this, nm, path);
 
@@ -243,7 +244,7 @@ Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 	if (disp) {
 		uberQua->bridge.UpdateTakeIndexDisplay(sym);
 	}
-	fprintf(stderr, "sample %s: added sample take %s at %s\n", sym->name, nm, path);
+	fprintf(stderr, "sample %s: added sample take %s at %s\n", sym->name, nm.c_str(), path.c_str());
 	return take;
 }
 
@@ -251,7 +252,7 @@ Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 status_t
 Sample::SelectTake(SampleTake *take, bool disp)
 {
-	fprintf(stderr, "selecting take %x\n", take);
+	fprintf(stderr, "selecting take %x\n", (unsigned)take);
 	if (take) {
 		if (take != recordTake && take != sampleClip(0)->media) {
 //			selectedTake = take;
@@ -309,7 +310,7 @@ Sample::DeleteTake(SampleTake *take, bool disp)
 }
 
 Instance *
-Sample::AddInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
+Sample::addInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
 {
 	Time	at_t;
 	Time	dur_t;
@@ -335,11 +336,11 @@ Sample::AddInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return AddInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, at_t, dur_t, c);
 }
 
 Instance *
-Sample::AddInstance(std::string nm, Time t, Time d, Channel * chan)
+Sample::addInstance(std::string nm, Time t, Time d, Channel * chan)
 {
 // duration in sec: ((float)sample->selectedNFrames)/kSamplingRate,
 //		Time(((float)nFrames)/(kSamplingRate*tv->uberQua->timeQuanta), tv->metric),
@@ -368,7 +369,7 @@ Sample::RemoveInstance(Instance *i, bool display)
 	SampleInstance	*s = (SampleInstance *)i;
 	if (s->status == STATUS_RUNNING) {
 #ifdef QUA_V_AUDIO
-		context.quaAudio->StopInstance(s);
+		context.quaAudio->stopInstance(s);
 #endif
 	}
 	instanceLock.lock();
@@ -420,7 +421,7 @@ Sample::Wake(Instance *i)
 #endif
 		
 #ifdef QUA_V_AUDIO
-		context.quaAudio->StartInstance(i);
+		context.quaAudio->startInstance(i);
 #endif
 		return Schedulable::Wake(i);
 	}
@@ -436,7 +437,7 @@ Sample::Sleep(Instance *i)
 	if (i && i->status != STATUS_SLEEPING) {
 		SampleInstance	*inst = (SampleInstance *)i;
 #ifdef QUA_V_AUDIO
-		context.quaAudio->StopInstance(inst);
+		context.quaAudio->stopInstance(inst);
 #endif
 //		fprintf(stderr, "to sleep...\n");
 #ifdef LOTSALOX
@@ -611,6 +612,7 @@ Sample::LoadSnapshotElement(tinyxml2::XMLElement *element)
 	bool	hasNameAttr = false;
 	bool	hasScriptAttr = false;
 	bool	hasTypeAttr = false;
+	bool 	hasTakeAttr = false;
 
 	int		encoding = 0;
 	int		position = 0;
@@ -627,10 +629,10 @@ Sample::LoadSnapshotElement(tinyxml2::XMLElement *element)
 
 	std::string namestr = element->Value();
 
-	bool	hasNameAttr = false;
-	bool	hasTypeAttr = false;
-	bool	hasScriptAttr = false;
-	bool	hasTakeAttr = false;
+	hasNameAttr = false;
+	hasTypeAttr = false;
+	hasScriptAttr = false;
+	hasTakeAttr = false;
 	Time	startt = Time::zero;
 	Time	durt(12);
 
@@ -728,7 +730,7 @@ bool
 Sample::Init()
 {
 	if (sym == nullptr) {
-	    reportError("Qua: sampler not found");
+		uberQua->bridge.reportError("Qua: sampler not found");
 	}
 	glob.PushContext(sym);
 	fprintf(stderr, "Initing sample %s\n", sym->name);
@@ -868,7 +870,7 @@ Sample::FlushRecordBuffers(bool finalflush)
 			recordTake->file->NormalizeOutput(((float *)wb->data), wb->nFrames);
 			recordTake->file->SeekToFrame(wb->fromFrame);
 			if ((err=recordTake->file->Write(wb->data, toWrite)) != toWrite) {
-				reportError("Write error in sampler");
+				uberQua->bridge.reportError("Write error in sampler");
 				break;
 			}
 			recordbufLock.lock();
@@ -885,7 +887,9 @@ Sample::FlushRecordBuffers(bool finalflush)
 		delete freeRecordBuffers;
 		freeRecordBuffers = nullptr;
 		recordbufLock.unlock();
-		recordTake->file->Finalize();
+		if (recordTake->file->Finalize() != B_NO_ERROR) {
+			uberQua->bridge.reportError(recordTake->file->lastError);
+		}
 	}
 	return B_NO_ERROR;
 }
@@ -1005,7 +1009,7 @@ Sample::SynchronizeBuffers()
 					long		curFrame = chunkStart;
 					status_t	err = file->SeekToFrame(chunkStart);
 					if (err != B_NO_ERROR) {
-						reportError("qua: bufferaetor seek failed");
+						uberQua->bridge.reportError("qua: bufferaetor seek failed");
 						continue;
 					}
 				// looping not really necessary here, but may
@@ -1027,7 +1031,7 @@ Sample::SynchronizeBuffers()
 
 						if ((bytesRead=file->Read(fileBuffer, bytesToRead)) != bytesToRead) {
 							if (bytesRead < 0) {
-								reportError("qua: sample %s, error reading %d bytes at frame %d of %Ld: %s\n",
+								uberQua->bridge.reportError("qua: sample %s, error reading %d bytes at frame %d of %Ld: %s\n",
 									requestedTake[j]->path,
 									bytesToRead,
 									curFrame,
@@ -1035,14 +1039,14 @@ Sample::SynchronizeBuffers()
 									errorStr(bytesRead));
 								goto seriousBadCookie;
 							} else if (bytesRead == 0) {
-								reportError("qua: sample %s, null read, reading %d bytes at frame %d of %Ld\n",
+								uberQua->bridge.reportError("qua: sample %s, null read, reading %d bytes at frame %d of %Ld\n",
 									requestedTake[j]->path,
 									bytesToRead,
 									curFrame,
 									file->nFrames);
 								goto seriousBadCookie;
 							} else {
-								reportError("qua: sample %s, read count error, %d returned while reading %d bytes at frame %d of %Ld\n",
+								uberQua->bridge.reportError("qua: sample %s, read count error, %d returned while reading %d bytes at frame %d of %Ld\n",
 									requestedTake[j]->path,
 									bytesRead,
 									bytesToRead,
@@ -1671,14 +1675,8 @@ SampleInstance::Generate(float **outSig, long nFramesReqd, short nAudioChannels)
 SampleBuffer::SampleBuffer()
 {
 #ifdef QUA_V_RAM_LOCKED_BUFFERS
-#ifdef _BEOS
-	dataArea = create_area("sample data", (void **)&data,
-	     B_ANY_ADDRESS, bytesPerBuffer, B_NO_LOCK, 
-	      B_READ_AREA|B_WRITE_AREA); 
-	if (dataArea < B_NO_ERROR) { 
-		TragicError("Couldn't allocate sample buffer");
-	}
-#elif defined(WIN32)
+
+#if defined(WIN32)
 	data = new float[samplesPerBuffer];
 	if (data == nullptr) {
 		TragicError("SampleBuffer:: can't allocate a %d sample buffer", samplesPerBuffer);
@@ -1691,7 +1689,7 @@ SampleBuffer::SampleBuffer()
 	data = new float[samplesPerBuffer];
 //	fprintf(stderr, "alloc buffer %x, %d samples, %d bytes\n", data, samplesPerBuffer, sizeof(float)*samplesPerBuffer);
 	if (data == nullptr) {
-		tragicError("SampleBuffer:: can't allocate a %d sample buffer", samplesPerBuffer);
+		internalError("SampleBuffer:: can't allocate a %d sample buffer", samplesPerBuffer);
 	}
 #endif
 	nFrames = 0;
@@ -1705,9 +1703,7 @@ SampleBuffer::SampleBuffer()
 SampleBuffer::~SampleBuffer()
 {
 #ifdef QUA_V_RAM_LOCKED_BUFFERS
-#ifdef _BEOS
-	delete_area(dataArea);
-#else
+#if defined(WIN32)
 	if (!VirtualUnlock(data, samplesPerBuffer*sizeof(float))) {
 		fprintf(stderr, "virtual lock fails: %s\n", general_error_string(GetLastError()));
 	}

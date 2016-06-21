@@ -1,12 +1,12 @@
 #ifndef _QUA_AUDIO
 #define _QUA_AUDIO
+
 #ifdef QUA_V_AUDIO
 #include "qua_version.h"
 
 #include "QuaTypes.h"
 #include "QuaPort.h"
 
-class RosterView;
 class QuaPort;
 class ControllableNode;
 class Instance;
@@ -19,11 +19,12 @@ class FloatQueue;
 class QuaAudioPort;
 class Channel;
 class Sample;
-class KeyIndex;
 
 
-
-#if defined(WIN32)
+#include <vector>
+#include <thread>
+#include <mutex>
+using namespace std;
 
 #include "QuaStreamIO.h"
 
@@ -31,53 +32,42 @@ class KeyIndex;
 class QuaAudioStreamIO: public QuaStreamIO
 {
 public:
-						QuaAudioStreamIO(Qua *q, QuaAudioPort *, long, long, char *, short, short);
-	char				insertName[QUA_INSERT_NAME_LENGTH+1];
-	long				insertId;
-	long				groupId;
+	QuaAudioStreamIO(Qua *q, QuaAudioPort *, long, long, char *, short, short);
+	string insertName;
+	long insertId;
+	long groupId;
 
-	short				sampleFormat;
-	short				nChannel; // stereo, mono, or better.
+	short sampleFormat;
+	short nChannel; // stereo, mono, or better.
 };
 
 class QuaAudioIn: public QuaAudioStreamIO
 {
 public:
-						QuaAudioIn(Qua *q, QuaAudioPort *, long, long, char *, short, short);
-						~QuaAudioIn();
-	FloatQueue			*data;
+	QuaAudioIn(Qua *q, QuaAudioPort *, long, long, char *, short, short);
+	~QuaAudioIn();
+	FloatQueue *data;
 };
 
 class QuaAudioOut: public QuaAudioStreamIO
 {
 public:
-						QuaAudioOut(Qua *q, QuaAudioPort *, long, long, char *, short, short);
-						~QuaAudioOut();
-	float				*outbuf;
-	long				offset;
+	QuaAudioOut(Qua *q, QuaAudioPort *, long, long, char *, short, short);
+	~QuaAudioOut();
+	float *outbuf;
+	long offset;
 };
-
-#endif
 
 class QuaAudioPort
 	: public QuaPort
 {
 public:
-						QuaAudioPort(char *, QuaAudioManager *, short st
-#if defined(BEOS) && defined(NEW_MEDIA)
-									, media_node *
-#endif
-									 );
-						~QuaAudioPort();
+	QuaAudioPort(char *, QuaAudioManager *, short st);
+	~QuaAudioPort();
 					
 
 #ifdef QUA_V_PORT_PARAM
 	void				ZotParameterGroup(BParameterGroup *, StabEnt *);
-#endif
-#ifdef QUA_V_ARRANGER_INTERFACE
-#ifdef _BEOS
-	void				ZotParameterMenu(BMenu *, StabEnt *, class ArrangerObject *);
-#endif
 #endif
 	void				ZotInsertCheck(bool, bool, bool, bool);
 
@@ -87,17 +77,11 @@ public:
 	short				NOutputs();
 	short				NInputChannels(short);
 	short				NOutputChannels(short);
-	const char			*InputName(port_chan_id);
-	const char			*OutputName(port_chan_id);
+	const string InputName(port_chan_id);
+	const string OutputName(port_chan_id);
 
 	QuaAudioManager		*quaAudio;
 
-#if defined(BEOS) && defined(NEW_MEDIA)
-	void				KickStart();
-	void				KickStop();
-	media_node			mediaNode;
-	BParameterWeb		*parameterWeb;
-#endif
 };
 
 #ifdef QUA_V_AUDIO_ASIO
@@ -134,81 +118,77 @@ enum {
 #endif
 
 class QuaAudioManager
-	: public QuaPortManager
+	: public QuaPortManager<QuaAudioPort>
 {
 public:
-						QuaAudioManager();
-						~QuaAudioManager();
+	QuaAudioManager(Qua &q);
+	~QuaAudioManager();
 	
-	inline QuaAudioPort *Port(int i) {return (QuaAudioPort *)QuaPortManager::Port(i); }
-
-	virtual status_t	Connect(Input *);
-	virtual status_t	Connect(Output *);
-	virtual status_t	Disconnect(Input *);
-	virtual status_t	Disconnect(Output *);
+	virtual status_t connect(Input *);
+	virtual status_t connect(Output *);
+	virtual status_t disconnect(Input *);
+	virtual status_t disconnect(Output *);
 
 	status_t			StartAudio();
 	status_t			StopAudio();
 
 	char *				ErrorString(status_t err);
 
-#if defined(WIN32)
 	bool				Generate(size_t nFrames);
-
-#endif
 
 #ifdef QUA_V_AUDIO_ASIO
 	static QuaAsio		asio;
 #endif
-	static char *		SampleFormatName(long);
+	static char * sampleFormatName(const long);
 
 	
-	status_t			StartRecording(SampleInstance *ri);
-	void				StopRecording(SampleInstance *ri);
+	status_t startRecording(SampleInstance *ri);
+	void stopRecording(SampleInstance *ri);
 
-	void				StartInstance(Instance *s);
-	void				StopInstance(Instance *s);
+	void startInstance(Instance *s);
+	void stopInstance(Instance *s);
 
-	void				StartChannel(Channel *);
+	void startChannel(Channel *);
 	
-	void				AddSample(Sample *S);
-	void				RemoveSample(Sample *S);
+	void addSample(Sample *S);
+	void removeSample(Sample *S);
 
-	static int32		BuffaeratorWrapper(void *data);
-	int32				Buffaerator();
-	thread_id			buffyThread;
+	void buffaerator();
+	void pauseBuffaerator();
+	void resumeBuffaerator();
+	thread buffyThread;
+	mutex buffyMux;
+	condition_variable buffyCV;
 
-	static long			WriterWrapper(void *data);
-	long				Writer();
-	thread_id			writerThread;
+	void writer();
+	void pauseWriter();
+	void resumeWriter();
+	thread writerThread;
+	mutex writerMux;
+	condition_variable writerCV;
 
-	float				sampleRate;
-	long				bufferSize;
+	float sampleRate;
+	long bufferSize;
 
-	RWLock				sampleLock;
-	SchLock				recordInstanceLock;
-	SchLock				channelLock;
-	BList				samples;
-	BList				recordInstances;
-	BList				channels;
+	mutex sampleLock;// was an rwlock
+	mutex recordInstanceLock; // an schlock ... is a lock with finer grain control on rescheduling
+	mutex channelLock;
+	vector<Sample *> samples;
+	vector<SampleInstance *> recordInstances;
+	vector<Channel *> channels;
 	
+	QuaAudioPort * dfltOutput;
+	QuaAudioPort * dfltInput;
 
+	QuaAudioIn *OpenInput(QuaAudioPort *, short which, short nch);
+	status_t CloseInput(QuaAudioIn *);
+	QuaAudioOut *OpenOutput(QuaAudioPort  *, short which, short nch);
+	status_t CloseOutput(QuaAudioOut *);
 
-#if defined(WIN32)
-	QuaAudioPort *		dfltOutput;
-	QuaAudioPort *		dfltInput;
-
-	QuaAudioIn			*OpenInput(QuaAudioPort *, short which, short nch);
-	status_t			CloseInput(QuaAudioIn *);
-	QuaAudioOut			*OpenOutput(QuaAudioPort  *, short which, short nch);
-	status_t			CloseOutput(QuaAudioOut *);
-
-	QuaAudioIn			*InputConnectionForPort(QuaAudioPort *, short);
-	QuaAudioOut			*OutputConnectionForPort(QuaAudioPort *, short);
-	QuaAudioIn			*AddInputConnection();
-	QuaAudioOut			*AddOutputConnection();
-
-#endif
+	QuaAudioIn *InputConnectionForPort(QuaAudioPort *, short);
+	QuaAudioOut *OutputConnectionForPort(QuaAudioPort *, short);
+	QuaAudioIn *AddInputConnection();
+	QuaAudioOut *AddOutputConnection();
 };
 
 enum {

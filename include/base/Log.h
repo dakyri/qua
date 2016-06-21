@@ -2,7 +2,7 @@
 #define _LOGENTRY
 
 #include "BaseVal.h"
-#include "Time.h"
+#include "QuaTime.h"
 
 enum {
 	ACTION_NONE		= 0,

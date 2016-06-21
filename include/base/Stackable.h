@@ -30,7 +30,9 @@ public:
 		return false;
 	}
 	inline void clearControllers() { return controllers.clear(); }
-	inline StabEnt *controller(int i) { return i>=0 && i<controllers.size()? controllers[i]:nullptr; }
+	inline StabEnt *controller(int i) { 
+		return i >= 0 && ((size_t)i) < controllers.size() ? controllers[i] : nullptr;
+	}
 	inline int countControllers() { return controllers.size(); }
 	status_t saveControllers(FILE *, int);
 	std::vector<StabEnt*> controllers;
@@ -40,7 +42,9 @@ public:
 #ifdef LOTSALOX    
     std::mutex stackableLock;
 #endif
-	inline QuasiStack *stack(int i) { return i>=0 && i<stacksO.size()? stacksO[i]:nullptr; }
+	inline QuasiStack *stack(int i) {
+		return i >= 0 && ((size_t)i) < stacksO.size() ? stacksO[i] : nullptr;
+	}
 	inline void addStack(QuasiStack *i) { stacksO.push_back(i); }
 	inline bool removeStack(QuasiStack *i) {
 		for (auto ci = stacksO.begin(); ci != stacksO.end(); ++ci) {

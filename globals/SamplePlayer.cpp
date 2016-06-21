@@ -25,10 +25,10 @@ void
 PlaySample::Generate(float *outSig, long nFramesReqd, short nChannel)
 {
 	long	outFrame = 0;
-	if (!QSample() || !QSample()->selectedFile)
+	if (!QSample() || !QSample()->selectedFile())
 		return;
-	short		nc = QSample()->selectedFile->nChannels;
-	SampleFile	*f = QSample()->selectedFile;
+	short nc = QSample()->selectedFile()->nChannels;
+	SampleFile *f = QSample()->selectedFile();
 	
 	if (startFrame.ticks < endFrame.ticks) {
 		while (outFrame < nFramesReqd) {
@@ -68,7 +68,7 @@ PlaySample::Generate(float *outSig, long nFramesReqd, short nChannel)
 		}
 	}
 
-	for (short i=outFrame; i<nFramesReqd; i++) {
+	for (int i=outFrame; i<nFramesReqd; i++) {
 		currentFrame++;
 		outSig[2*i] = 0;
 		outSig[2*i+1] = 0;
@@ -82,14 +82,19 @@ PlaySample::Generate(float *outSig, long nFramesReqd, short nChannel)
 	float		gainl = gain * ((1-(pan))/2),
 				gainr = gain * ((1+(pan))/2);		
 	if (nChannel == 2) {
-		for (short i=0; i<nFramesReqd; i++) {
+		for (int i=0; i<nFramesReqd; i++) {
 			outSig[2*i] = gainl*outSig[2*i];
 			outSig[2*i+1] = gainr*outSig[2*i+1];
 		}
 	} else if (nChannel == 1) {
-		for (short i=nFramesReqd-1; i>=0; i--) {
+		for (int i=nFramesReqd-1; i>=0; i--) {
 			outSig[2*i] = gainl*outSig[i];
 			outSig[2*i+1] = gainr*outSig[i];
 		}
 	}
+}
+
+void
+PlaySample::SetParameters(ResultValue *, short) {
+
 }

@@ -1,11 +1,8 @@
 #include "qua_version.h"
 
 #if defined(WIN32)
-
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
 #endif
 
 #include "QuaPort.h"
@@ -47,16 +44,6 @@ QuaPort::isMultiSchedulable()
 	if (deviceType != QUA_DEV_AUDIO)
 		return false;
 	QuaAudioPort	*p = (QuaAudioPort *)this;
-#ifdef NEW_MEDIA
-	if (p->mediaNode.kind & (B_PHYSICAL_INPUT|
-						  B_PHYSICAL_OUTPUT|
-						  B_SYSTEM_MIXER)) {
-		return false;
-	}
-	if (p->mediaNode.kind & B_CONTROLLABLE) {
-		return true;
-	}
-#endif
 	return false;
 }
 

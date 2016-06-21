@@ -35,7 +35,7 @@
 #include "Template.h"
 #include "MidiDefs.h"
 #include "Metric.h"
-#ifdef QUA_V_AUDIO_ASIO
+#ifdef QUA_V_AUDIO
 #include "QuaAudio.h"
 #endif
 #ifdef QUA_V_VST_HOST
@@ -380,13 +380,7 @@ Find(Stream *S, Block *Query)
 
 QuaGlobalContext::QuaGlobalContext()
 {
-	version =
-#ifdef WIN32
-						"qua 0.93, windows vc6"
-#elif defined(_BEOS)
-						"qua 0.93, beos"
-#endif
-		;
+	version = "qua 0.94, universal";
 #ifdef QUA_V_AUDIO
 	quaAudio = NULL;
 #endif
@@ -398,16 +392,16 @@ QuaGlobalContext::QuaGlobalContext()
 }
 
 int
-QuaGlobalContext::SetupDevices()
+QuaGlobalContext::SetupDevices(Qua &q)
 {
 #ifdef QUA_V_AUDIO
-	quaAudio = new QuaAudioManager();
+	quaAudio = new QuaAudioManager(q);
 #endif
 #ifdef QUA_V_JOYSTICK
-	quaJoystick = new QuaJoystickManager();
+	quaJoystick = new QuaJoystickManager(q);
 #endif
-    quaMidi = new QuaMidiManager();    	
-    quaParallel = new QuaParallelManager();  
+    quaMidi = new QuaMidiManager(q);    	
+    quaParallel = new QuaParallelManager(q);  
 
 	return B_OK;
 }
@@ -709,6 +703,7 @@ QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 				}
 				return true;
 			}
+#ifdef QUA_V_VST_HOST
 			case SET_VST: {
 				FILE	*fp = fopen("vstplugins.qs", "w");
 				setbuf(fp, NULL);
@@ -722,6 +717,7 @@ QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 				fclose(fp);
 				return true;
 			}
+#endif
 #ifdef QUA_V_ASIO
 			case LOAD_ASIO: {
 				int n = atoi(arg);
@@ -745,7 +741,7 @@ QuaCommandLine::ListingCommands()
 {
 	if ((commands & (LIST_GLOB|LIST_VST|LIST_ASIO|LIST_MIDI|LIST_JOY)) != 0) {
 		FILE	*fp = fopen("qua.lst", "w");
-		fprintf(fp, "%%%%% Qua listing %%%%%\n");
+		fprintf(fp, "****** Qua listing ******\n");
 		if (commands & LIST_GLOB) {
 			glob.DumpGlobals(fp);
 		}
@@ -843,21 +839,21 @@ QuaCommandLine::ListMidi(FILE *fp)
 #ifdef QUA_V_DIRECT_MIDI
 	int32		ni = 0;
 	int32		no = 0;
-	MIDIINCAPS *icap = QuaMidiManager::MidiInDevices(&ni);
-	MIDIOUTCAPS *ocap = QuaMidiManager::MidiOutDevices(&no);
+	MIDIINCAPS *icap = QuaMidiManager::midiInDevices(&ni);
+	MIDIOUTCAPS *ocap = QuaMidiManager::midiOutDevices(&no);
 	short j;
 	fprintf(fp, "%d input ports and %d output ports\n", ni, no);
 	for (j=0; j<ni; j++) {
-		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, icap[j].szPname,
+		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, wc2string(icap[j].szPname),
 			icap[j].wMid, icap[j].wPid,
 			icap[j].vDriverVersion&0xFF, (icap[j].vDriverVersion&0xFF00)>>8);
 	}
 	for (j=0; j<no; j++) {
-		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, ocap[j].szPname,
+		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, wc2string(ocap[j].szPname),
 			ocap[j].wMid, ocap[j].wPid,
 			ocap[j].vDriverVersion&0xFF, (ocap[j].vDriverVersion&0xFF00)>>8,
 //					ocap[j].wTechnology);
-			QuaMidiManager::MMTechName(ocap[j].wTechnology));
+			QuaMidiManager::mmTechName(ocap[j].wTechnology));
 	}
 	delete icap;
 	delete ocap;
@@ -886,3 +882,4 @@ QuaCommandLine::ListJoy(FILE *fp)
 #endif
 #endif
 }
+

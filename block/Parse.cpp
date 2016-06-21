@@ -647,67 +647,6 @@ TxtParser::seek(off_t ind)
 }
 
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
-
-#ifdef _BEOS
-TvParser::TvParser(BTextView *txt, const char *srcnm, Qua *q):
-	QSParser(q, srcnm)
-{
-	tv = txt;
-	text_buf_ind = 0;
-}
-
-TvParser::~TvParser()
-{
-}
-
-
-void
-TvParser::Rewind()
-{
-	rrVew.Clear();
-	err_cnt = 0;
-	text_buf_ind = 0;
-}
-
-void
-TvParser::seek(off_t ind)
-{
-	text_buf_ind = ind;
-}
-
-bool
-TvParser::atEof()
-{
-	return text_buf_ind > tv->TextLength();
-}
-
-off_t
-TvParser::Position()
-{
-	return text_buf_ind;
-}
-
-void
-TvParser::unGetChar()
-{
-   	if (text_buf_ind > 0) text_buf_ind--;
-}
-
-char
-TvParser::getChar()
-{
-	if (text_buf_ind < tv->TextLength())
-		return tv->ByteAt(text_buf_ind++);
-	else {
-		if (text_buf_ind == tv->TextLength())
-			text_buf_ind++;
-		return '\0';
-	}
-}
-#endif
-
-#endif
 
 QSParser::QSParser(Qua *q, const std::string srcnm)
 {
@@ -722,7 +661,7 @@ QSParser::QSParser(Qua *q, const std::string srcnm)
 
 	comment = nullptr;
 	
-	if (srcnm.size > 0) {
+	if (srcnm.size() > 0) {
 		txtSrcName = srcnm;
 	} 
 }
@@ -767,13 +706,7 @@ QSParser::ParseError(char *msg, ...)
 	    sprintf(buf, "Parse error, line %d: %s", lineno, buf1);
 	}
 	std::string errMsg = buf;
-#if defined(WIN32)
-//	reportError(buf);
 	uberQua->bridge.parseErrorViewAddLine(this, errMsg);
-#elif defined(_BEOS)
-	BAlert* about = new BAlert( "", buf, "Yes, and?" );
-	about->Go( );
-#endif
 	err_cnt++;
 }
 
@@ -1104,7 +1037,7 @@ check_token:
 									at_eof = atEof();
 							    }
 							    *p = '\0';
-							    met=FindMetric(tfstr);
+							    met=findMetric(tfstr);
 							}
 					    } else {
 					    	unGetChar();
@@ -1528,7 +1461,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
     char	name[MAX_QUA_NAME_LENGTH];
     
 	curFunk = Block::C_UNKNOWN;
-	StabEnt		*builtinSym = FindBuiltin(currentToken);
+	StabEnt		*builtinSym = findBuiltin(currentToken);
 	if (builtinSym == nullptr) {
 		fprintf(stderr, "<%s> not recognised as builtin ...\n", currentToken);
 		return nullptr;
@@ -1540,16 +1473,16 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 
 	if (curFunk == Block::C_GENERIC_PLAYER && schedSym) {
 		if (schedSym->type == TypedValue::S_SAMPLE) {
-			builtinSym = FindBuiltin("sampleplay");
+			builtinSym = findBuiltin("sampleplay");
 			if (builtinSym == nullptr) {
-				reportError("Sample player not found... oops");
+				uberQua->bridge.reportError("Sample player not found... oops");
 				return nullptr;
 			}
 			curFunk = builtinSym->BuiltinValue()->type;
 		} else if (schedSym->type == TypedValue::S_VOICE || schedSym->type == TypedValue::S_POOL) {
-			builtinSym = FindBuiltin("streamplay");
+			builtinSym = findBuiltin("streamplay");
 			if (builtinSym == nullptr) {
-				reportError("Stream player not found... oops");
+				uberQua->bridge.reportError("Stream player not found... oops");
 				return nullptr;
 			}
 			curFunk = builtinSym->BuiltinValue()->type;
@@ -1648,7 +1581,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 					break;
 				}
 				default: {
-					abortError("Unknown builtin function ...");
+					uberQua->bridge.abortError("Unknown builtin function ...");
 					varp = p;
 					break;
 				}
@@ -1701,7 +1634,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 		}
 		
 		default: {
-			abortError("Unknown builtin function ...");
+			uberQua->bridge.abortError("Unknown builtin function ...");
 			varp = p;
 		}
 	}
@@ -2232,8 +2165,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 	
 		GetToken();
 		chan = atoi(currentToken);
-		if (debug_parse) fprintf(stderr, "\tout %d %x\n", chan,
-											context);
+		if (debug_parse) fprintf(stderr, "\tout %d %x\n", chan, (unsigned)context);
 	
 		p = new Block( Block::C_OUTPUT);
 		if (uberQua)
@@ -2537,10 +2469,10 @@ QSParser::ParseSchedulable(Schedulable *S)
 	Method	*So;
 	
 	if (debug_parse)
-		fprintf(stderr, "reading schedulable %x %x\n", S, S->sym);
+		fprintf(stderr, "reading schedulable %x %x\n", (unsigned)S, (unsigned)S->sym);
     ParseFormalsList(S->sym, S->sym, true);
     S->mainBlock = ParseBlockInfo(S->sym, S->sym);
-	if (S->sym->type == TypedValue::S_POOL && (So=FindMethod("Init", -1, false))) {
+	if (S->sym->type == TypedValue::S_POOL && (So=findMethod("Init", -1))) {
 		((Pool *)S)->initBlock = So->mainBlock;
 	}
 }
@@ -2779,7 +2711,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_WORD) {
 				if (nport == 0 || (trxport[nport-1] != nullptr && trxport[nport-1]->deviceType == QUA_DEV_AUDIO)) {
 					QuaPort	*pt;
-					pt = FindQuaPort(currentToken);
+					pt = findQuaPort(currentToken);
 					if (pt == nullptr) {
 						ParseError("audio port '%s' not found", currentToken);
 					} else {
@@ -2814,7 +2746,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_WORD) {
 				if (nport == 0) {
 					QuaPort	*pt;
-					pt = FindQuaPort(currentToken);
+					pt = findQuaPort(currentToken);
 					if (pt == nullptr) {
 						ParseError("midi port '%s' not found", currentToken);
 					} else {
@@ -2842,7 +2774,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_WORD) {
 				if (nport == 0) {
 					QuaPort	*pt;
-					pt = FindQuaPort(currentToken);
+					pt = findQuaPort(currentToken);
 					if (pt == nullptr) {
 						ParseError("parallel port '%s' not found", currentToken);
 					} else {
@@ -2862,7 +2794,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_WORD) {
 				if (nport == 0) {
 					QuaPort	*pt;
-					pt = FindQuaPort(currentToken);
+					pt = findQuaPort(currentToken);
 					if (pt == nullptr) {
 						ParseError("parallel port '%s' not found", currentToken);
 					} else {
@@ -3193,7 +3125,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			Channel		*cha=context->ChannelValue();
 			Input *s = cha->AddInput(nm, trxport[0], sch[0], true);
 			for (short i=1; i<nport; i++) {
-				s->SetPortInfo(trxport[i], sch[i], i);
+				s->setPortInfo(trxport[i], sch[i], i);
 			}
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
@@ -3243,7 +3175,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			Channel		*cha=context->ChannelValue();
 			Output *s = cha->AddOutput(nm, trxport[0], sch[0], true);
 			for (short i=1; i<nport; i++) {
-				s->SetPortInfo(trxport[i], sch[i], i);
+				s->setPortInfo(trxport[i], sch[i], i);
 			}
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
@@ -3352,7 +3284,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 					}
 				}
 			}
-			Instance	*instance = sch->AddInstance(
+			Instance	*instance = sch->addInstance(
 					nmbuf,
 					chan_id,
 					&at_t, &dur_t, false);
@@ -3445,11 +3377,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		QuaPort		*P;
 		if (!uberQua || context != uberQua->sym)
 			ParseError("port must be in outer context.");
-		P = FindQuaPort(currentToken, -1, false);
+		P = findQuaPort(currentToken, -1);
 		if (P == nullptr) {
 			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
 //			, quapp->quaSmallIcon, quapp->quaBigIcon);
-			fprintf(stderr, "Can't find port %s\n");
+			fprintf(stderr, "Can't find port %s\n", currentToken);
 		}
 //		else if (P->uberQua && P->uberQua != uberQua) {
 //			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
@@ -3585,7 +3517,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    ParseFormalsList(method->sym, schedSym, true);
 	    glob.PushContext(method->sym);
 	    method->mainBlock = ParseBlockInfo(method->sym, schedSym);
-		fprintf(stderr, "method block %x\n", method->mainBlock);
+		fprintf(stderr, "method block %x\n", (unsigned) method->mainBlock);
 	    sym = method->sym;
 	    glob.PopContext(method->sym);
 	    
@@ -3695,7 +3627,6 @@ bool
 QSParser::ParseProgFile()
 {
     GetToken();
-	rrVew.Clear();
     err_cnt = 0;
     while (!atEof()) {
        	Block *b = ParseBlockInfo(uberQua? uberQua->sym: nullptr, nullptr);
@@ -3777,7 +3708,7 @@ QSParser::ParsePortId(short *s)
 		}
 	} else if (currentTokenType == TOK_VAL){
 		if (currentTokenVal.type == TypedValue::S_STRING) {
-			pt = FindQuaPort(currentTokenVal.StringValue());
+			pt = findQuaPort(currentTokenVal.StringValue());
 			if (pt == nullptr) {
 				ParseError("port '%s' not found", currentTokenVal.StringValue());
 			}
@@ -3804,7 +3735,7 @@ QSParser::ParseBlockSequenceToList(StabEnt *ctxt)
 	short nc = 0;
 	for (;;) {
 		*bp = ParseBlockInfo(ctxt, ctxt);
-		fprintf(stderr, "parse block info returns %x %x\n", *bp, b);
+		fprintf(stderr, "parse block info returns %x %x\n", (unsigned) *bp, (unsigned)b);
 		if (*bp == nullptr)
 			break;
 		nc++;
@@ -3828,7 +3759,7 @@ QSParser::ParseBlockSequenceToList(StabEnt *ctxt)
 				l->crap.list.nChildren));
 		b = l;
 	}
-	fprintf(stderr, "return ing %x\n", b);
+	fprintf(stderr, "return ing %x\n", (unsigned)b);
 	return b;
 }
 
@@ -3906,11 +3837,11 @@ TypedValue::SetValue(char *strval)
 		case S_SHORT:		val.Short = atoi(strval); break;
 		case S_LONG:		val.Long = atoi(strval); break;
 	    case S_FLOAT:		val.Float = atof(strval); break;
-	    case S_POOL:		val.pool = FindPool(strval); break;
-	    case S_SAMPLE:		val.sample = FindSample(strval); break;
+	    case S_POOL:		val.pool = findPool(strval); break;
+	    case S_SAMPLE:		val.sample = findSample(strval); break;
 	    case S_STRING:		val.string = strval; break;
 	    default:
-	    	abortError("can't set value to string, type = %d", type);
+	    	internalError("can't set value to string, type = %d", type);
 		}
 //		fprintf(stderr, "SetVal: %s %d %d\n", strval, type, val.Int);
 	}

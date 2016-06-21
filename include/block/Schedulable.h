@@ -1,7 +1,7 @@
 #ifndef _SCHEDULABLE_H
 #define _SCHEDULABLE_H
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "Metric.h"
 #include "Stream.h"
 #include "QuaTypes.h"
@@ -27,9 +27,9 @@ public:
 							~Schedulable();
 						
 	virtual bool			Init();
-	virtual Instance		*AddInstance(std::string, Time startt, Time dur, Channel * chan);
-	virtual Instance		*AddInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp);
-	virtual void			RemoveInstance(Instance *i, bool display);
+	virtual Instance		*addInstance(std::string, Time startt, Time dur, Channel * chan);
+	virtual Instance		*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp);
+	virtual void			removeInstance(Instance *i, bool display);
 
 	virtual void			Cue(Time &t)=0;
 	virtual status_t		Wake(Instance *i);
@@ -64,7 +64,7 @@ public:
     std::mutex instanceLock;
 	inline Instance *instanceAt(int i) {
 		instanceLock.lock();
-		Instance *inst = i>=0 && i<instances.size()? instances[i]: nullptr;
+		Instance *inst = i >= 0 && ((size_t)i) < instances.size() ? instances[i] : nullptr;
 		instanceLock.unlock();
 		return inst;
 	}

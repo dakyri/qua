@@ -14,12 +14,7 @@
 #include "QuaInsert.h"
 
 #ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
-#elif defined(_BEOS)
-#include "RosterView.h"
-#include "SequencerWindow.h"
-#include "AQuarium.h"
-#endif
+#include "QuaDisplay.h"
 #endif
 
 QuaParallelPort::QuaParallelPort(char *devnm, QuaParallelManager *qj):
@@ -121,7 +116,8 @@ QuaParallelPort::HasStreamItems()
 }
 
 
-QuaParallelManager::QuaParallelManager()
+QuaParallelManager::QuaParallelManager(Qua &q)
+	: QuaPortManager(q)
 {
 }
 

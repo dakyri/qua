@@ -1,7 +1,7 @@
 #ifndef _CLIP
 #define _CLIP
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "Stream.h"
 
 class StabEnt;

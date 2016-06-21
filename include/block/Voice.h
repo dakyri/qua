@@ -30,8 +30,8 @@ public:
 	virtual status_t	QuaStart() override;
 	virtual status_t	QuaRecord() override;
 
-	virtual Instance	*AddInstance(std::string, Time, Time, Channel *) override;
-	virtual Instance	*AddInstance(std::string, short ch_idx, Time *startt, Time *dur, bool) override;
+	virtual Instance	*addInstance(std::string, Time, Time, Channel *) override;
+	virtual Instance	*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool) override;
 	
 	status_t			Save(FILE *fp, short indent);
 	status_t			SaveSnapshot(FILE *fp);
@@ -48,7 +48,9 @@ public:
 
 	Clip				*AddClip(std::string nm, StreamTake *, Time&, Time&, bool disp);
 	void				RemoveClip(Clip *, bool disp);
-	inline Clip			*streamClip(long i) {  return i<clips.size() && i>=0? clips[i]:nullptr; }
+	inline Clip			*streamClip(long i) {
+		return ((size_t)i)<clips.size() && i>=0? clips[i]:nullptr;
+	}
 	long				nClip() {	return clips.size(); }
 
 	std::vector<Clip*>	clips;

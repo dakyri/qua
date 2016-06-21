@@ -14,7 +14,7 @@ class Qua;
 
 #include <mutex>
 
-#include "Time.h"
+#include "QuaTime.h"
 #include "Stacker.h"
 #include "QuaTypes.h"
 #include "QuasiStack.h"

@@ -404,7 +404,7 @@ Block::Block(Block *model, StabEnt *newContext, bool unwind)
 		break;
 	}
 	default:
-		reportError("new Block copy: bad block %d", type);
+		internalError("new Block copy: bad block %d", type);
 	}
 	if (model->next)
 		next = new Block(model->next, newContext, unwind);
@@ -548,7 +548,7 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	    StabEnt	*S;
 	    S = glob.FindSymbol(crap.name);
 	    if (S == nullptr) {
-			reportError("Qua linkage error: \"%s\" not found", crap.name);
+			internalError("Qua linkage error: \"%s\" not found", crap.name);
 			status = B_ERROR;
 			return B;
 	    }
@@ -567,13 +567,12 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	}
 	
 	case C_UNLINKED_CALL: {
-	    QDBMSG_BLK("Setting up unlinked call element: %s\n",
-			crap.call.crap.name,0);
+	    QDBMSG_BLK("Setting up unlinked call element: %s\n", crap.call.crap.name,0);
     
-    	StabEnt		*S = glob.FindSymbol(crap.call.crap.name);
+    	StabEnt *S = glob.FindSymbol(crap.call.crap.name);
 
 	    if (S == nullptr) {
-			reportError("Init: call symbol \"%s\" not found\n", crap.call.crap.name);
+			internalError("Init: call symbol \"%s\" not found\n", crap.call.crap.name);
 			status = B_ERROR;
 			return B;
 	    }
@@ -609,7 +608,7 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	    	break;
 
 	    default:
-  			reportError("Init: call symbol \"%s\" not a method\n", crap.call.crap.name);
+  			internalError("Init: call symbol \"%s\" not a method\n", crap.call.crap.name);
   			crap.call.crap.sym = S;
 			return B;
 		}
@@ -623,7 +622,7 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 		if (crap.call.crap.method && crap.call.crap.method->sym)
 			glob.PushContext(crap.call.crap.method->sym);
 		else {
-			reportError("Strange call...");
+			internalError("Strange call...");
 			type = C_UNLINKED_CALL;
 		}
 		break;
@@ -1590,7 +1589,7 @@ Block::Traverse(BlockFnPtr f, void *x, VBlockFnPtr g, void *y, int z)
 		break;
 		
 	default:
-	    reportError("Traverse: Bad block element %d", type);
+	    internalError("Traverse: Bad block element %d", type);
 	    return false;
 	}
 
@@ -1644,7 +1643,7 @@ WriteHandlerBlock(FILE *fp, char *which, Block *b, short indent)
 	len=0;
 	txt[0] = 0;
 	if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
-		reportError("block size too large...");
+		internalError("block size too large...");
 		return B_ERROR;
 	}
 	if (fwrite(txt, len, 1, fp) != 1) {
@@ -1695,11 +1694,13 @@ SaveHandlers(FILE *fp, short indent, StabEnt *sym, bool force_brace)
 //		if (sym->children) {
 //			err=sym->children->Save(fp, indent+1);
 //		}
+		i = 0;
 		for (auto ci: channel->inputs) {
-			ci->Save(fp, indent, i);
+			ci->Save(fp, indent, i++);
 		}
+		i = 0;
 		for (auto ci: channel->outputs) {
-			ci->Save(fp, indent, i);
+			ci->Save(fp, indent, i++);
 		}
 		if (channel->rx.block) {
 			WriteHandlerBlock(fp, "rx", channel->rx.block, indent);
@@ -1746,7 +1747,7 @@ SaveMainBlock(Block *b, FILE *fp, short indent, StabEnt *sym, bool force_brace, 
 		fprintf(fp, "\n");
 		tab(fp, indent);
 		if (!Esrap(b, txt, len, 10*1024, true, indent, 0)) {
-			reportError("block size too large...");
+			internalError("block size too large...");
 			return B_ERROR;
 		}
 		int l2 = strchr(txt, ' ') - txt;
@@ -1771,7 +1772,7 @@ SaveMainBlock(Block *b, FILE *fp, short indent, StabEnt *sym, bool force_brace, 
 		return B_NO_ERROR;
 	} else if (sym->children || force_brace) {
 		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
-			reportError("block size too large...");
+			internalError("block size too large...");
 			return B_ERROR;
 		}
 		fprintf(fp, "{\n");
@@ -1792,7 +1793,7 @@ SaveMainBlock(Block *b, FILE *fp, short indent, StabEnt *sym, bool force_brace, 
 	} else {	
 		fprintf(fp, "\t");
 		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
-			reportError("block size too large...");
+			internalError("block size too large...");
 			return B_ERROR;
 		}
 //		err = fp->Write(txt, len);
@@ -1989,7 +1990,7 @@ Block::Dump(FILE *fp, short indent)
 	    break;
 
 	case C_WITH:
-		tragicError("Unimplimented dump");
+		internalError("Unimplimented dump");
 //		    if (crap.with.withBlock &&!crap.with.withBlock->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
 //		    if (crap.with.withoutBlock &&!crap.with.withoutBlock->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
 //		    if (crap.with.condition && !crap.with.condition->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
@@ -2002,7 +2003,7 @@ Block::Dump(FILE *fp, short indent)
 	    	case OP_NOT:	fprintf(fp, "!"); break;
 	    	case OP_BNOT:	fprintf(fp, "~"); break;
 	    	default:
-				tragicError("Unimplimented Esrap: unop");
+				internalError("Unimplimented Esrap: unop");
 	    	}
 			if (crap.op.l->isOperator()) fprintf(fp, "(");
 			crap.op.l->Dump(fp, 0);
@@ -2028,13 +2029,13 @@ Block::Dump(FILE *fp, short indent)
 			case OP_DIV:	fprintf(fp, "/"); break;
 			case OP_ADD:	fprintf(fp, "+"); break;
 			case OP_SUB:	fprintf(fp, "-"); break;
-			case OP_MOD:	fprintf(fp, "%"); break;
+			case OP_MOD:	fprintf(fp, "%%"); break;
 			case OP_AND:	fprintf(fp, "&&"); break;
 			case OP_OR:		fprintf(fp, "||"); break;
 			case OP_BAND:	fprintf(fp, "&"); break;
 			case OP_BOR:	fprintf(fp, "|"); break;
 	    	default:
-				tragicError("Unimplimented Esrap: unop");
+				internalError("Unimplimented Esrap: unop");
 	    	}
 	
 			if (crap.op.r->isOperator()) fprintf(fp, "(");
@@ -2102,7 +2103,7 @@ Block::Dump(FILE *fp, short indent)
 	}
 	
 	default:
-	    reportError("Esrap: Bad block element %d", type);
+		internalError("Esrap: Bad block element %d", type);
 	    return;
 	}
 	
@@ -2141,6 +2142,6 @@ TypedValue::SetToSymbol(char *nm, StabEnt *ctxt)
 		Set(sym);
 		QDBMSG_BLK("set %d %s\n", val.stackAddress.offset, val.stackAddress.context->name);
 	} else {
-		reportError("internal error: %s var not found in %s", nm, ctxt->name);
+		internalError("internal error: %s var not found in %s", nm, ctxt->name);
 	}
 }

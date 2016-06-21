@@ -16,37 +16,37 @@ class Executable;
 #include "QuaDisplay.h"
 #include "Executable.h"
 
-#if defined(WIN32)
-class BBitmap;
-#endif
+#include <string>
+using namespace std;
 
 class Template: public Executable
 {
 public:					
-							Template(char *nm, StabEnt *S, long type, char *mim, char *path);
-							~Template();
-	bool					Init();
-	status_t				Instantiate(StabEnt *q);
+	Template(string nm, StabEnt *S, long type, string mim, string path);
+	~Template();
+
+	bool initialize();
+	status_t instantiate(StabEnt *q);
 	
-	status_t				Save(FILE *fp, short indent);
+	status_t save(FILE *fp, short indent);
 	
-	long					type;
-	char					*mimeType;
-	char					*path;
+	long type;
+	string mimeType;
+	string path;
 	
-	Event					rx,
-							tx,
-							wake,
-							sleep,
-							receive,
-							cue,
-							start,
-							stop,
-							record,
-							init;
+	Event	rx,
+			tx,
+			wake,
+			sleep,
+			receive,
+			cue,
+			start,
+			stop,
+			record,
+			init;
 
 	
-	Template				*next;
+	Template *next;
 };
 
 #endif

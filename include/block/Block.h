@@ -38,21 +38,8 @@ enum {
 };
 
 
-struct BlockDisplayInfo {
-	BlockDisplayInfo()
-	{
-#if defined(_BEOS)
-		rect.Set(0,0,0,0);
-		view = nullptr;
-		mode = BLOCK_DISPLAY_CLOSE;
-#endif
-	}
-	
-#if defined(_BEOS)
-	BRect			rect;
-	BView			*view;
-#endif
-	
+/* todo perhaps ditch this i think it's historical */
+struct BlockDisplayInfo {		
 	short			mode;
 };
 
@@ -502,6 +489,15 @@ public:
 
 
 };
+
+enum BlockStatus {
+	BLOCK_INCOMPLETE = 0,
+	BLOCK_COMPLETE = 1,
+	BLOCK_COOKED = 2	// so outputs, and other things don't block
+						// in lists which are incomplete... i.e.
+						// always do in a list...
+};
+
 
 Block			*LoadBlock(FILE *fp, Qua *uberQ);
 

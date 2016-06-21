@@ -1,15 +1,6 @@
 #ifndef _POOL
 #define _POOL
 
-#if defined(WIN32)
-
-#elif defined(_BEOS)
-
-#ifdef __INTEL__ 
-#include <SupportDefs.h>
-#endif
-
-#endif
 
 #include <stdio.h>
 #include <mutex>
@@ -37,12 +28,12 @@ struct IXMLDOMElement;
 class Pool: public Schedulable
 {
 public:
-						Pool(char *nm, Qua *uq, StabEnt *c, bool);
+						Pool(string nm, Qua *uq, StabEnt *c, bool);
 						~Pool();
 						
 						virtual bool		Init() override;
-	virtual Instance	*AddInstance(std::string, Time startt, Time dur, Channel * chan) override;
-	virtual void		RemoveInstance(Instance *i, bool display) override;
+	virtual Instance	*addInstance(std::string, Time startt, Time dur, Channel * chan) override;
+	virtual void		removeInstance(Instance *i, bool display) override;
 
 	virtual void		Cue(Time &t) override;
 	virtual status_t	Wake(Instance *i) override;

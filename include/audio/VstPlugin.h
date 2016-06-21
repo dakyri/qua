@@ -3,7 +3,13 @@
 
 #define LNGRNFRA_VST_NAME	24
 
+#include <vector>
+#include <string>
+using namespace std;
+
+#ifdef QUA_V_VST_HOST
 #include "aeffectx.h"
+#endif
 
 #include "QuaDisplay.h"
 
@@ -41,7 +47,7 @@ public:
 
 	status_t			Load();
 	status_t			Unload();
-
+#ifdef QUA_V_VST_HOST
 	static void			LoadTest(char *);
 	static void			TestDrive(AEffect *);
 
@@ -51,16 +57,19 @@ public:
 	static status_t		LoadPlugins(BList *vstlist);
 
 	static long __cdecl HostCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
+#endif
+	string pluginExecutablePath;
+	string name;
+	bool enabled;
 
-	BPath				pluginExecutable;
-	char				name[MAX_QUA_NAME_LENGTH];
-	bool				enabled;
-
-	status_t			status;
+	status_t status;
+#ifdef QUA_V_VST_HOST
 	AEffect*			(__cdecl* aEffectFactory)(audioMasterCallback);
 
+#if defined(WIN32)
 	HINSTANCE			libhandle;
-
+#endif
+#endif
 	static void			ScanFile(char *path, FILE *scriptFile, FILE *lstfile, bool recurse);
 
 // plugin properties, so we can know beforehand
@@ -112,6 +121,7 @@ public:
 	bool				plugAsSend;
 	bool				mixDryWet;
 
+#ifdef QUA_V_VST_HOST
 	VstPinProperties	*inputPinProperties;
 	VstPinProperties	*outputPinProperties;
 	VstParameterProperties	*paramProperties;
@@ -150,7 +160,7 @@ public:
 
 	void					OutputStream(AEffect *, Stream *S);
 	void					InputStream(AEffect *, Stream *S);
-
+#endif
 #ifdef QUA_V_VST_HOST_GUI
 	static	long			EditorGetRect(AEffect *afx, CRect &r);
 	static	long			EditorOpen(AEffect *afx, HWND);
@@ -159,17 +169,24 @@ public:
 
 };
 
-class VstPluginList: public BList
+class VstPluginList: public std::vector<VstPlugin *>
 {
 public:
 	VstPluginList();
-	inline VstPlugin	*ItemAt(int i) { return (VstPlugin *)BList::ItemAt(i); }
-	inline bool			AddItem(VstPlugin *v) { return BList::AddItem(v); }
-	inline bool			AddItem(VstPlugin *v, int32 i) { return BList::AddItem(v, i); }
-	inline bool			AddList(VstPluginList *v) { return BList::AddList(v); }
-	inline bool			AddList(VstPluginList *v, int32 i) { return BList::AddList(v, i); }
-	VstPlugin			*ItemForPath(char *);
-	VstPlugin			*ItemForName(char *);
+	inline VstPlugin *ItemAt(int i) {
+		return at(i);
+	}
+	inline void AddItem(VstPlugin *v) {
+		push_back(v);
+	}
+	inline bool AddList(VstPluginList &vl) {
+		for (auto v : vl) {
+			push_back(v);
+		}
+	}
+
+	VstPlugin *ItemForPath(char *);
+	VstPlugin *ItemForName(char *);
 };
 
 #endif

@@ -20,19 +20,14 @@
 #include "Channel.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
+
 #include "QuaDisplay.h"
-#elif defined(_BEOS)
-#include "QuaObject.h"
-#include "ArrangerObject.h"
-#include "SequencerWindow.h"
-#include "PoolEditor.h"
-#endif
+
 #endif
 
 flag debug_anal = 0;
 
-Pool::Pool(char *nm, Qua *uq, StabEnt *context, bool addTake):
+Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
 	Schedulable(
 		DefineSymbol(nm, TypedValue::S_POOL, 0,
 					this, context,
@@ -162,7 +157,7 @@ bool
 Pool::Init()
 {
 	if (sym == nullptr) {
-	    reportError("Qua: pool not found\n");
+	    uberQua->bridge.reportError("Qua: pool not found\n");
 	}
 	glob.PushContext(sym);
 	fprintf(stderr, "Initing pool %s\n", sym->name);
@@ -198,7 +193,7 @@ err_ex:
 }
 
 Instance *
-Pool::AddInstance(std::string nm, Time t, Time d, Channel * chan)
+Pool::addInstance(std::string nm, Time t, Time d, Channel * chan)
 {
 //	ArrangerObject *p =  new ArrangerObject(representation->label, this,
 //		 chan, start,
@@ -223,7 +218,7 @@ Pool::AddInstance(std::string nm, Time t, Time d, Channel * chan)
 }
 
 void
-Pool::RemoveInstance(Instance *i, bool disp)
+Pool::removeInstance(Instance *i, bool disp)
 {
 	PoolInstance	*p = (PoolInstance *) i;
 	
@@ -429,7 +424,7 @@ Pool::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		durt.Set(durVal);
 	}
 	const char *namep = element->Value();
-	std::string namestr = namep;
+	namestr = namep;
 
 	if (namestr == "snapshot") {
 		LoadSnapshotChildren(element);

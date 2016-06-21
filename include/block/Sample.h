@@ -8,7 +8,7 @@
 #include "SampleFile.h"
 
 #include "Schedulable.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Instance.h"
 
 class SampleInstance;
@@ -44,8 +44,8 @@ public:
 						~Sample();
 						
 	virtual bool		Init();
-	virtual Instance	*AddInstance(std::string, Time startt, Time dur, Channel *chan) override;
-	virtual Instance	*AddInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp) override;
+	virtual Instance	*addInstance(std::string, Time startt, Time dur, Channel *chan) override;
+	virtual Instance	*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp) override;
 	virtual void		RemoveInstance(Instance *i, bool display);
 
 	virtual void		Cue(Time &t) override;
@@ -75,28 +75,32 @@ public:
 	long				ResetTake(SampleTake *take);
 
 	
-	long				sampleRate;
-	std::mutex			flock;
+	long sampleRate;
+	std::mutex flock;
 	
 	SampleFile *selectedFile();
 	std::string selectedPath();
 
-	Clip				*AddClip(std::string nm, SampleTake *, Time&, Time&, bool disp);
-	void				RemoveClip(Clip *, bool disp);
-	inline Clip			*sampleClip(long i) { return i >= 0 && i<clips.size() ? clips[i]: nullptr; }
-	long				nClip() {	return clips.size(); }
+	Clip *AddClip(std::string nm, SampleTake *, Time&, Time&, bool disp);
+	void RemoveClip(Clip *, bool disp);
+	inline Clip *sampleClip(long i) {
+		return i >= 0 && ((size_t)i) < clips.size() ? clips[i]: nullptr; 
+	}
+	long nClip() {	return clips.size(); }
 
-	std::vector<Clip*>	clips;
+	std::vector<Clip*> clips;
 
 	std::vector<SampleTake*> takes;
 
-	inline SampleTake * Sample::take(short i) { return i >= 0 && i<takes.size() ? takes[i] : nullptr; }
+	inline SampleTake * Sample::take(short i) { 
+		return i >= 0 && ((size_t)i)<takes.size() ? takes[i] : nullptr; 
+	}
 	inline int Sample::countTakes() { return takes.size(); }
 
-	SampleTake			*AddSampleTake(std::string nm, std::string path, bool disp);
-	status_t			DeleteTake(SampleTake *, bool disp);
-	status_t			SelectTake(SampleTake *, bool disp);
-	SampleTake			*AddRecordTake(long fileType, short nChan, short sampleSize, float sampleRate);
+	SampleTake *AddSampleTake(std::string nm, std::string path, bool disp);
+	status_t DeleteTake(SampleTake *, bool disp);
+	status_t SelectTake(SampleTake *, bool disp);
+	SampleTake *AddRecordTake(long fileType, short nChan, short sampleSize, float sampleRate);
 	
 	status_t			SetTakeList(Block *b);
 	

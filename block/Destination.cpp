@@ -88,10 +88,6 @@ Input::Input(std::string nm,
 	gain = 1;
 	pan = 0;
 	src.audio.port = src.audio.xport = nullptr;
-#ifdef NEW_MEDIA
-	source = media_source::null;
-	xsource = media_source::null;
-#endif
 }	
 
 Output::Output(std::string nm,
@@ -108,10 +104,6 @@ Output::Output(std::string nm,
 	gain = 1;
 	pan = 0;
 	dst.audio.port = dst.audio.xport = nullptr;
-#ifdef NEW_MEDIA
-	destination = media_destination::null;
-	xdestination = media_destination::null;
-#endif
 }
 
 void
@@ -286,11 +278,12 @@ Output::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 }
 
 
-void
-Place::SetPortInfo(QuaPort *port, port_chan_id chan, short ind)
+bool
+Place::setPortInfo(QuaPort *port, port_chan_id chan, short ind)
 {
 	if (ind > 1) {
-		reportError("OOpps. Only 1 extra port is allowed per destination");
+		internalError("OOpps. Only 1 extra port is allowed per destination");
+		return false;
 	}
 	bool	wasEn = false;
 	if (enabled) {
@@ -312,6 +305,7 @@ Place::SetPortInfo(QuaPort *port, port_chan_id chan, short ind)
 	if (wasEn) {
 		SetEnabled(1);
 	}
+	return true;
 }
 
 
@@ -347,12 +341,7 @@ Output::SetEnabled(uchar en)
 	enabled = 2;
 //	DrawEnableButton();
 //	Sync();
-#ifdef _BEOS
-	BMessage	enableMsg(ENABLE_PLACE);
-	enableMsg.AddPointer("output", this);
-	enableMsg.AddInt32("enable", en);
-	channel->uberQua->Looper()->PostMessage(&enableMsg, channel->uberQua);
-#endif
+// todo maybe inform the display?
 	return B_OK;
 }
 
@@ -364,12 +353,6 @@ Input::SetEnabled(uchar en)
 		enabled = 2;
 //		DrawEnableButton();
 //		Sync();
-#ifdef _BEOS
-		BMessage	enableMsg(ENABLE_PLACE);
-		enableMsg.AddPointer("input", this);
-		enableMsg.AddInt32("enable", en);
-		channel->uberQua->Looper()->PostMessage(&enableMsg, channel->uberQua);
-#endif
 	}
 	return B_OK;
 }
@@ -518,7 +501,8 @@ Output::OutputStream(Time &t, Stream *stream)
 		break;
 #endif
 	default: {
-		reportError("Unim chan");
+		internalError("Unim chan");
+		return false;
 	}}
 	return true;
 }
@@ -551,7 +535,8 @@ Output::ClearStream(Stream *outStream)
 		break;
 	
 	default: {
-		reportError("Unim chan");
+		internalError("Unim chan");
+		return false;
 	}}
 	return true;
 }
@@ -665,346 +650,4 @@ Output::Save(FILE *fp, short indent, short i)
 	return true;
 }
 
-// these are called by the MassageReceived() routine of main qua loop
-#ifdef _BEOS
-void
-Input::SetSource(BMessage *inMsg)
-{
-	if (inMsg->what == SET_SOURCE) {
-		if (inMsg->HasPointer("audio port")) {
-			QuaAudioPort	*a = nullptr;
-			inMsg->FindPointer("audio port", (void **)&a);
-			if (a) {
-				bool				wasen = enabled;
-				media_source		src, xsrc;
-				media_format		f;
-				NoodleEnable(false);
-#ifdef NEW_MEDIA
-				if (inMsg->HasPointer("qua input")) {
-					QuaAudioIn	*op=nullptr, *xp=nullptr;
-					inMsg->FindPointer("qua input", (void **)&op);
-					inMsg->FindPointer("qua xinput", (void **)&xp);
-					src = op->source;
-					if (xp) {
-						xsrc = xp->source;
-					}
-					f = op->input.format;
-				} else if (inMsg->HasData("source", B_RAW_TYPE)) {
-					ssize_t				sz;
-					media_source		*dp;
-					media_format		*fp;
-					inMsg->FindData("source", B_RAW_TYPE, (const void **)&dp, &sz);
-					src = *dp;
-					if (inMsg->HasData("xsource", B_RAW_TYPE)) {
-						inMsg->FindData("xsource", B_RAW_TYPE, (const void **)&dp, &sz);
-						xsrc = *dp;
-					}
-					if (inMsg->HasData("format", B_RAW_TYPE)) {
-						inMsg->FindData("format", B_RAW_TYPE, (const void **)&fp, &sz);
-						f = *fp;
-					} else {
-//						f = src.format;
-					}
-					if (inMsg->HasInt32("channels")) {
-						needed_channels = inMsg->FindInt32("channels");
-					} else {
-						needed_channels = f.u.raw_audio.channel_count;
-					}
-				}
-				device = a;
-				deviceChannel = src.id;
-				SetMediaInfo(src, xsrc, f, needed_channels, false);
-#endif
-				NoodleEnable(wasen);
-				BMessage	enableMsg(ENABLE_PLACE);
-				enableMsg.AddInt32("enable", enabled);
-				Window()->PostMessage(&enableMsg, this);
-			}
-		} else if (inMsg->HasPointer("midi port")) {
-			QuaAudioPort	*a = nullptr;
-			inMsg->FindPointer("midi port", (void **)&a);
-			if (a) {
-				bool				wasen = enabled;
-				media_destination	dst, xdest;
-				media_format		f;
-				NoodleEnable(false);
-				device = a;
-				deviceChannel = inMsg->FindInt32("channel");
-				NoodleEnable(wasen);
-				BMessage	enableMsg(ENABLE_PLACE);
-				enableMsg.AddInt32("enable", enabled);
-				Window()->PostMessage(&enableMsg, this);
-			}
-		}
-	}
-}
 	
-void
-Output::SetDestination(BMessage *inMsg)
-{
-	if (inMsg->what == SET_DESTINATION) {
-		if (inMsg->HasPointer("audio port")) {
-			QuaAudioPort	*a = nullptr;
-			inMsg->FindPointer("audio port", (void **)&a);
-			if (a) {
-				bool				wasen = enabled;
-				media_destination	dst, xdest;
-				media_format		f;
-				NoodleEnable(false);
-#ifdef NEW_MEDIA
-				if (inMsg->HasPointer("qua output")) {
-					QuaAudioOut	*op=nullptr, *xp=nullptr;
-					inMsg->FindPointer("qua output", (void **)&op);
-					inMsg->FindPointer("qua xoutput", (void **)&xp);
-					dst = op->destination;
-					if (xp) {
-						xdest = xp->destination;
-					}
-					f = op->output.format;
-				} else if (inMsg->HasData("destination", B_RAW_TYPE)) {
-					ssize_t				sz;
-					media_destination	*dp;
-					media_format		*fp;
-					inMsg->FindData("destination", B_RAW_TYPE, (const void **)&dp, &sz);
-					dst = *dp;
-					if (inMsg->HasData("xdestination", B_RAW_TYPE)) {
-						inMsg->FindData("xdestination", B_RAW_TYPE, (const void **)&dp, &sz);
-						xdest = *dp;
-					}
-					if (inMsg->HasData("format", B_RAW_TYPE)) {
-						inMsg->FindData("format", B_RAW_TYPE, (const void **)&fp, &sz);
-						f = *fp;
-					} else {
-//						f = dst.format;
-					}
-					if (inMsg->HasInt32("channels")) {
-						needed_channels = inMsg->FindInt32("channels");
-					} else {
-						needed_channels = f.u.raw_audio.channel_count;
-					}
-				}
-				device = a;
-				deviceChannel = dst.id;
-				SetMediaInfo(dst, xdest, f, needed_channels, false);
-#endif
-				NoodleEnable(wasen);
-				BMessage	enableMsg(ENABLE_PLACE);
-				enableMsg.AddInt32("enable", enabled);
-				Window()->PostMessage(&enableMsg, this);
-			}
-		} else if (inMsg->HasPointer("midi port")) {
-			QuaAudioPort	*a = nullptr;
-			inMsg->FindPointer("midi port", (void **)&a);
-			if (a) {
-				bool				wasen = enabled;
-				media_destination	dst, xdest;
-				media_format		f;
-				NoodleEnable(false);
-				device = a;
-				deviceChannel = inMsg->FindInt32("channel");
-				NoodleEnable(wasen);
-				BMessage	enableMsg(ENABLE_PLACE);
-				enableMsg.AddInt32("enable", enabled);
-				Window()->PostMessage(&enableMsg, this);
-			}
-		}
-	}
-}
-#endif
-#ifdef _BEOS
-void
-Input::SetMediaInfo(
-#ifdef NEW_MEDIA
-	media_source &l, media_source &r, media_format &f, short nc,
-#endif
-	bool	resize
-	)
-
-{
-#ifdef NEW_MEDIA
-	source = l;
-	xsource = r;
-	format = f;
-	needed_channels = nc;
-	if (resize)
-		ResizeTo(3+StringWidth(Name())+3+12, 11);
-#endif
-}
-
-void
-Output::SetMediaInfo(
-#ifdef NEW_MEDIA
-	media_destination &l, media_destination &r, media_format &f, short nc,
-#endif
-	bool resize
-	)
-{
-#ifdef NEW_MEDIA
-	destination = l;
-	xdestination = r;
-	format = f;
-	needed_channels = nc;
-	if (resize)
-		ResizeTo(3+StringWidth(Name())+3+12, 11);
-#endif
-}
-#endif
-	
-/*
-bool
-Place::Set(QuaPort *dev, int32 devChan)
-{
-	if ((dev == device)  && (device != nullptr) &&
-			((	device->deviceType == QUA_DEV_MIDI && devChan == deviceChannel) ||
-				device->deviceType != QUA_DEV_MIDI)
-			 )
-		return true;
-	if (channel && channel->status == STATUS_RECORDING) {
-		reportError("Not while recording, you don't");
-		return false;
-	}
-	
-	bool		en=enabled;
-	
-	SetEnabled(false);
-
-	device = dev;
-	deviceChannel = devChan;
-	
-	SetEnabled(en);
-
-	ResizeTo(3+StringWidth(Name())+3+12, 11);
-	if (Window())
-		Window()->Lock();
-	Invalidate();
-	if (Window())
-		Window()->Unlock();
-	return true;
-}
-*/
-/*
-#ifdef _BEOS
-void
-Output::MessageReceived(BMessage *inMsg)
-{
-	if (inMsg->WasDropped()) {
-		
-		BPoint	dropPoint, offsetPoint;
-		dropPoint = inMsg->DropPoint(&offsetPoint);
-		ConvertFromScreen(&dropPoint);
-
-		switch (inMsg->what) {
-
-		case MOVE_OBJECT: {
-			if (inMsg->HasPointer("sym_object")) {
-				QuaSymbolBridge *O = nullptr;
-				inMsg->FindPointer("sym_object", (void **)&O);
-				if (O) {
-					StabEnt		*S = O->sym;
-					if (S->type == S_PORT) {
-						QuaPort		*dropDev = S->PortValue();
-						if (  dropDev != nullptr &&
-							  ValidDevice(dropDev)) {
-							channel->SetOutput(this, dropDev, deviceChannel);
-						}	
-					}
-				} else {
-				}
-			}
-			break;
-		}
-		}		
-	} else {
-		switch (inMsg->what) {
-		case ENABLE_PLACE: {
-			enabled = (inMsg->FindInt32("enable")?1:0);
-			ResizeTo(3+StringWidth(Name())+3+12, 11);
-//			DrawEnableButton();
-//			Sync();
-			Invalidate();
-			break;
-		}
-			
-		default:
-			BView::MessageReceived(inMsg);
-		}
-	}
-}
-
-void
-Input::MessageReceived(BMessage *inMsg)
-{
-	if (inMsg->WasDropped()) {
-		
-		BPoint	dropPoint, offsetPoint;
-		dropPoint = inMsg->DropPoint(&offsetPoint);
-		ConvertFromScreen(&dropPoint);
-
-		switch (inMsg->what) {
-		case MOVE_OBJECT:
-//			if (inMsg->HasPointer("arranger_object")) {
-//				ArrangerObject	*A = nullptr;
-//				inMsg->FindPointer("arranger_object", (void **)&A);
-//				if (device && A && 
-//					((A->type == S_POOL &&
-//						device->deviceType == QUA_DEV_MIDI) ||
-//					(A->type == S_SAMPLE &&
-//						device->deviceType == QUA_DEV_AUDIO))) {
-//					EnableRecord(A->instance);
-//					Invalidate();
-//				}
-//			} else if (inMsg->HasPointer("qua_object")) {
-//				QuaObject	*A = nullptr;
-//				inMsg->FindPointer("qua_object", (void **)&A);
-//				if (device && A && A->schedulable &&
-//						((A->schedulable->sym->type == S_POOL &&
-//							device->deviceType == QUA_DEV_MIDI) ||
-//						(A->schedulable->sym->type == S_SAMPLE &&
-//							device->deviceType == QUA_DEV_AUDIO))) {
-//
-//					Time dur((long)50, channel->uberQua->metric);
-//					ArrangerObject *SO =
-//						 A->schedulable->CloneArrangerObject(
-//								channel->chanId,
-//								channel->uberQua->theTime,
-//								dur,
-//								channel->uberQua->sequencerWindow->arrange);
-//
-//					EnableRecord(SO->instance);
-//					Invalidate();
-//				}
-//			} else
-			if (inMsg->HasPointer("sym_object")) {
-				QuaSymbolBridge *O = nullptr;
-				inMsg->FindPointer("sym_object", (void **)&O);
-				if (O) {
-					StabEnt		*S = O->sym;
-					if (S->type == S_PORT) {
-						QuaPort		*dropDev = S->PortValue();
-						if (  dropDev != nullptr &&
-							  ValidDevice(dropDev)) {
-							channel->SetInput(this, dropDev, deviceChannel);
-						}	
-					}
-				} else {
-				}
-			}
-		}
-	} else {
-		switch (inMsg->what) {
-		case ENABLE_PLACE: {
-			enabled = (inMsg->FindInt32("enable")?1:0);
-			ResizeTo(3+StringWidth(Name())+3+12, 11);
-//			DrawEnableButton();
-//			Sync();
-			Invalidate();
-			break;
-		}
-			
-		default:
-			BView::MessageReceived(inMsg);
-		}
-	}
-}
-#endif
-*/

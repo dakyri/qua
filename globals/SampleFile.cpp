@@ -1,9 +1,12 @@
+#include "qua_version.h"
+
 #if defined(WIN32)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <errno.h>
 #endif
+
 #include "SampleFile.h"
 #include "StdDefs.h"
 
@@ -106,19 +109,6 @@ SampleFile::SampleFile(short typ, short nc, short dsze, float sr, uint32 mode)
 	nFrames = 0;
 }
 
-#ifdef _BEOS
-SampleFile::SampleFile(entry_ref *f, uint32 mode)
-{
-	SetFormat(2,4,44100.0);
-	openMode = mode;
-	sampleType = 0;
-	sampleDataStart = 0;
-	nFrames = 0;
-	fd = -1;
-
-	SetTo(f, mode);
-}
-#endif
 
 SampleFile::SampleFile(char *f, uint32 mode)
 {
@@ -153,9 +143,6 @@ SampleFile::~SampleFile()
 status_t
 SampleFile::Finalize()
 {
-#ifdef _BEOS
-	BNodeInfo	info(this);
-#endif
 	status_t	err;
 	char		*type;
 
@@ -166,14 +153,14 @@ SampleFile::Finalize()
 	case SND_TYPE:
 		type = "audio/snd";
 		if ((err=WriteSndHeader()) != B_NO_ERROR) {
-			reportError("No can write snd header: how unfortunate");
+			lastError = ("No can write snd header: how unfortunate");
 			return err;
 		}
 		break;
 	case WAVE_TYPE: {
 		type = "audio/x-wav";
 		if ((err=WriteWaveHeader()) != B_NO_ERROR) {
-			reportError("No can write wave header: how unfortunate");
+			lastError = ("No can write wave header: how unfortunate");
 			return err;
 		}
 		break;
@@ -181,7 +168,7 @@ SampleFile::Finalize()
 	case AIFF_TYPE:
 		type = "audio/x-aiff";
 		if ((err=WriteAiffHeader()) != B_NO_ERROR) {
-			reportError("No can write aiff header: how unfortunate");
+			lastError = ("No can write aiff header: how unfortunate");
 			return err;
 		}
 		break;
@@ -190,12 +177,6 @@ SampleFile::Finalize()
 	default:
 		type = "audio/raw";
 	}
-#ifdef _BEOS
-	if ((err=info.SetType(type)) != B_NO_ERROR) {
-		reportError("blah, blah, and i can't set the file type");
-		return B_ERROR;
-	}
-#endif
 	SetSize(sampleDataStart + (nFrames*sampleSize*nChannels));
 	return B_NO_ERROR;
 }
@@ -283,7 +264,7 @@ SampleFile::WriteAiffHeader()
 	sampleDataStart = Position();
 
 	if (debug_sample)	
-		fprintf(stderr, "aiff file header written: %d chans, %d size, %d sr, %d%d frames %d%d pos\n",
+		fprintf(stderr, "aiff file header written: %d chans, %d size, %d sr, %d frames %d pos\n",
 				nChannels, sampleSize,
 				sampleRate, nFrames, sampleDataStart);
 
@@ -367,7 +348,7 @@ SampleFile::WriteWaveHeader()
 	sampleDataStart = Position();
 
 	if (debug_sample)
-		fprintf(stderr, "wave file header written: %d chans, %d size, %d sr, %d%d frames %d%d pos\n",
+		fprintf(stderr, "wave file header written: %d chans, %d size, %d sr, %d frames %d pos\n",
 				nChannels, sampleSize,
 				sampleRate, nFrames, sampleDataStart);
 
@@ -401,7 +382,7 @@ SampleFile::TryAiffFile()
 		}
 		off_t cs = Position();
 		if (debug_sample)
-			fprintf(stderr, "chunk at %d: %s %d\n", cs, uintstr(chunkHead.ckID), big_endian_to_native32(chunkHead.ckSize));
+			fprintf(stderr, "chunk at %d: %s %d\n", cs, uintstr(chunkHead.ckID).c_str(), big_endian_to_native32(chunkHead.ckSize));
 		if (big_endian_to_native32(chunkHead.ckID) == CommonID) {
 			if (debug_sample) fprintf(stderr, "SampleFile::TryAiffFile: reading common chunk...\n");
 			if (Read(&commonChunk, 18) != 18) {
@@ -457,7 +438,7 @@ SampleFile::TryRawFile()
 	sampleDataStart = 0;
 	
 	if (debug_sample)
-		fprintf(stderr, "raw file %d chans, %d size, %d sr, %d%d frames %d%d pos\n", nChannels, sampleSize,
+		fprintf(stderr, "raw file %d chans, %d size, %d sr, %d frames %d pos\n", nChannels, sampleSize,
 				sampleRate, nFrames, sampleDataStart);
 
 	return HEADER_OK;
@@ -536,29 +517,13 @@ SampleFile::TryWaveFile()
 	sampleDataStart = Position();
 	
 	if (debug_sample)
-		fprintf(stderr, "wave file %d chans, %d size, %d sr, %d%d frames %d%d pos\n",
+		fprintf(stderr, "wave file %d chans, %d size, %d sr, %d frames %d pos\n",
 				nChannels, sampleSize,
 				sampleRate, nFrames, sampleDataStart);
 
 	return HEADER_OK;	
 }
 
-#ifdef _BEOS
-status_t
-SampleFile::SetTo(entry_ref *refp, uint32 mode)
-{
-	status_t err;
-	if ((err=BFile::SetTo(refp, mode)) != B_NO_ERROR) {
-		return err;
-	}
-	
-	openMode = mode;
-	if ((err=ProcessHeaderInfo()) != B_NO_ERROR) {
-		return err;
-	}
-	return B_NO_ERROR;
-}
-#endif
 
 status_t
 SampleFile::SetTo(const char *refp, uint32 mode)
@@ -579,11 +544,11 @@ SampleFile::SetTo(const char *refp, uint32 mode)
 	if (fd < 0) {
 		if (debug_sample) fprintf(stderr, "fopen error...\n");
 		switch(errno) {
-			case EACCES: return B_PERMISSION_DENIED;
-			case EEXIST: return B_FILE_EXISTS;
+			case EACCES: return ERRNO_PERMISSION_DENIED;
+			case EEXIST: return ERRNO_FILE_EXISTS;
 			case EINVAL: return B_ERROR;
-			case EMFILE: return B_NO_MORE_FDS;
-			case ENOENT: return B_FILE_NOT_FOUND;
+			case EMFILE: return ERRNO_NO_MORE_FDS;
+			case ENOENT: return ERRNO_FILE_NOT_FOUND;
 		}
 		return B_ERROR;
 	}
@@ -615,8 +580,8 @@ SampleFile::ProcessHeaderInfo()
 			}
 		}
 	} else {
-		reportError("openning file in wierd mode");
-		// were doing something very strange!
+		lastError = ("openning file in wierd mode");
+		return B_ERROR;
 	}
 	
 	return B_NO_ERROR;
@@ -1019,7 +984,8 @@ SampleFile::NormalizeInputCpy(float *dstBuf, char *srcBuf, long nb)
 		}
 		return nb/(2*nChannels);
 	} else {
-		reportError("sample file type not known");
+		lastError = ("sample file type not known");
+		return B_ERROR;
 	}
 	return 0;
 }
@@ -1095,7 +1061,8 @@ SampleFile::NormalizeInputCpy(short *dstBuf, char *srcBuf, long nb)
 
 		return nb/(2*nChannels);
 	} else {
-		reportError("sample file type not known");
+		lastError = ("sample file type not known");
+		return B_ERROR;
 	}
 	return 0;
 }
@@ -1103,7 +1070,7 @@ SampleFile::NormalizeInputCpy(short *dstBuf, char *srcBuf, long nb)
 status_t
 SampleFile::Plonk(short *theBuf)
 {
-	char	buf[B_PAGE_SIZE * 4];
+	char	buf[CHUNK_SIZE];
 	
 	SeekToFrame(0);
 	off_t	toRead = nFrames;

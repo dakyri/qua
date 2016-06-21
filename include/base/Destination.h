@@ -29,7 +29,7 @@ class Block;
 class StabEnt;
 
 #include "QuaTypes.h"
-#include "Time.h"
+#include "QuaTime.h"
 
 enum {
 	NMFMT_NONE = 0,
@@ -48,7 +48,7 @@ public:
 	virtual status_t	SetEnabled(uchar);
 	virtual char		*Name(uchar nfmt, uchar cfmt);
 
-	void				SetPortInfo(QuaPort *, port_chan_id chan, short ind);
+	bool setPortInfo(QuaPort *, port_chan_id chan, short ind);
 	
 	void				Reset();
 				
@@ -92,11 +92,8 @@ public:
 	union source_info_t
 	{
 		struct audio_source_info_t {
-
-#if defined(WIN32) || defined(NEW_MEDIA)
 			QuaAudioIn		*port;
 			QuaAudioIn		*xport;
-#endif
 		}					audio;
 		QuaMidiIn			*midi;
 		QuaJoystickPort		*joy;
@@ -104,16 +101,6 @@ public:
 
 	float				gain;
 	float				pan;
-
-#if defined(_BEOS)
-#ifdef NEW_MEDIA
-	media_source		source;		// primary source
-	media_source		xsource;	// secondary source for paired mono
-	media_format		format;		// format of the primary source
-#endif
-
-#elif defined(WIN32)
-#endif
 		
 };
 

@@ -61,7 +61,7 @@ Attributable::AddProperties(Block *b)
 		if (b->type == Block::C_VALUE) {
 			auto fi = propertyIndex.find(b->crap.constant.value.StringValue());
 			if (fi != propertyIndex.end()) {
-				AddProperty(fi);
+				AddProperty(fi->second);
 			} else {
 				fprintf(stderr, "unknown property %s\n", b->crap.constant.value.StringValue());
 			}

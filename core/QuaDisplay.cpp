@@ -95,7 +95,7 @@ QuaDisplay::RemoveHigherFrameRepresentations(StabEnt *stkSym, QuasiStack *parent
 						}
 					}
 				}
-				for (j=0; j<hfs.size(); j++) {
+				for (j=0; ((size_t)j)<hfs.size(); j++) {
 					ir->DeleteFrameRepresentation(stkSym, hfs[j]);
 				}
 			}
@@ -684,7 +684,6 @@ void
 QuaDisplay::DeleteInstance(StabEnt *instSym)
 {
 	Instance	*inst = instSym->InstanceValue();
-	short i;
 	if (inst) {
 		RemoveInstanceRepresentations(instSym);
 		glob.DeleteSymbol(instSym, true); 
@@ -706,7 +705,7 @@ QuaDisplay::CreateInstance(StabEnt *schSym, short chan, Time *at_t, Time *dur_t)
 	short	i;
 	Schedulable	*sch = schSym->SchedulableValue();
 	if (sch) {
-		Instance	*instance = sch->AddInstance(nullptr, chan, at_t, dur_t, false);
+		Instance	*instance = sch->addInstance(nullptr, chan, at_t, dur_t, false);
 		if (instance) {
 			for (i=0; i<NIndexer(); i++) {
 				Indexer(i)->addToSymbolIndex(instance->sym);
@@ -726,7 +725,6 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 {
 	// create sample
 	std::string	sample_nm;
-	short	i;
 
 	if (nm != "") {
 		sample_nm = nm;
@@ -746,7 +744,7 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 			sample->AddSampleTake(b, p, false);
 		}
 		// update index displays
-		Instance	*instance = sample->AddInstance(nm, chan, at_t, dur_t, false);
+		Instance	*instance = sample->addInstance(nm, chan, at_t, dur_t, false);
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(sample->sym);
 			if (instance) {
@@ -791,14 +789,14 @@ QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short
 	Voice	*voice = qua->CreateVoice(voice_nm, false);
 	if (voice) {
 //		fprintf(stderr, "created voice %s\n", voice->sym->name);
-		for (i=0; i<pathList.size(); i++) {
+		for (i=0; ((size_t)i)<pathList.size(); i++) {
 			std::string nm = Qua::nameFromLeaf(pathList[i]);
 			voice->AddStreamTake(nm, pathList[i], true);
 		}
 		// update index displays
 		Instance	*instance=nullptr;
 		if (chan >= 0 && at_t != nullptr && dur_t != nullptr) {
-			instance = voice->AddInstance(nullptr, chan, at_t, dur_t, false);
+			instance = voice->addInstance(nullptr, chan, at_t, dur_t, false);
 		}
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(voice->sym);
@@ -837,13 +835,13 @@ QuaDisplay::CreateChannel(char *nm, short chan,
 				)
 {
 	// create voice
-	char	channel_nm[512];
+	string channel_nm;
 	short	i;
 
 	if (nm != nullptr  && *nm != '\0') {
-		strcpy(channel_nm, nm);
+		channel_nm = nm;
 	} else {
-		sprintf(channel_nm, "channel%d", chan>=0?chan+1:qua->nChannel+1);
+		channel_nm = "channel" + (chan>=0?chan+1:qua->nChannel+1);
 	}
 
 	std::string nmbuf = glob.MakeUniqueName(qua->sym, channel_nm, 0);
@@ -1132,10 +1130,7 @@ QuaDisplay::ControllerChanged(
 		default: {
 			LValue	l;
 			ResultValue	r;
-			sym->SetLValue(l, nullptr,
-				qs->stacker,
-				qs->stackerSym,
-				qs);
+			sym->SetLValue(l, nullptr, qs->stacker, qs->stackerSym, qs);
 			l.StoreValue(&v);
 			break;
 		}
@@ -1251,7 +1246,7 @@ QuaDisplay::RequestPopFrameRepresentation(
 					}
 				}
 			}
-			fprintf(stderr, "request pop: stack is %x\n", stack);
+			fprintf(stderr, "request pop: stack is %x\n", ((unsigned)stack));
 			if (stack) {
 #ifdef Q_FRAME_MAP
 				if (stack->GetFrameMap(map)) {
@@ -1331,6 +1326,43 @@ QuaDisplay::RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation * i
 	if (ir) {
 		ir->DeleteFrameRepresentation(stacker, stack);
 	}
+}
+
+void
+QuaDisplay::parseErrorViewClear(QSParser *p) {
+}
+
+void
+QuaDisplay::parseErrorViewAddLine(QSParser *p, string s) {
+}
+
+void
+QuaDisplay::parseErrorViewShow(QSParser *p) {
+}
+
+void
+QuaDisplay::tragicError(char *str, ...) {
+
+}
+void
+QuaDisplay::reportError(char *str, ...) {
+
+}
+int
+QuaDisplay::retryError(char *str, ...) {
+	return 0;
+}
+bool
+QuaDisplay::abortError(char *str, ...) {
+	return false;
+}
+bool
+QuaDisplay::continueError(char *str, ...) {
+	return false;
+}
+int
+QuaDisplay::optionWin(int, char *str, ...) {
+	return 0;
 }
 
 //////////////////////////////////////////////
@@ -1441,12 +1473,12 @@ void
 QuaChannelRepresentation::AddDestinationRepresentations()
 {
 	if (channel != nullptr) {
-		for (short i=0; i<channel->inputs.size(); i++) {
+		for (short i=0; ((size_t)i)<channel->inputs.size(); i++) {
 			if (InputRepresentationFor(channel->inputs.Item(i)) == nullptr) {
 				AddInputRepresentation(channel->inputs.Item(i));
 			}
 		}
-		for (short i=0; i<channel->outputs.size(); i++) {
+		for (short i=0; ((size_t)i)<channel->outputs.size(); i++) {
 			if (OutputRepresentationFor(channel->outputs.Item(i)) == nullptr) {
 				AddOutputRepresentation(channel->outputs.Item(i));
 			}
@@ -1554,7 +1586,7 @@ void
 QuaOutputRepresentation::UpdateDestination(QuaPort *port, port_chan_id ch, short flg)
 {
 	if (output) {
-		output->SetPortInfo(port, ch, flg);
+		output->setPortInfo(port, ch, flg);
 		DisplayDestination();
 	}
 }
@@ -1637,7 +1669,7 @@ void
 QuaInputRepresentation::UpdateDestination(QuaPort *port, port_chan_id ch, short flg)
 {
 	if (input) {
-		input->SetPortInfo(port, ch, flg);
+		input->setPortInfo(port, ch, flg);
 		DisplayDestination();
 	}
 }

@@ -37,14 +37,6 @@ flag		debug_update=0;
 /*
  * perhaps a good idea to recognise parameter expressions that are constant, and don't need constant update
  */
-enum BlockStatus {
-	BLOCK_INCOMPLETE = 0,
-	BLOCK_COMPLETE = 1,
-	BLOCK_COOKED = 2	// so outputs, and other things don't block
-						// in lists which are incomplete... i.e.
-						// always do in a list...
-};
-
 /*
  * UpdateActiveBlock:
  *  generally tones are buffered in the voice stream structure. this
@@ -769,7 +761,7 @@ UpdateActiveBlock(Qua *uberQua,
 		    fprintf(stderr, "wake %s\n", B->crap.call.crap.sym->name);
 #endif
 		// schedule this for whenever, or now...
-		reportError("wake unimplimented");
+		internalError("wake unimplimented");
 		B->type = Block::C_UNKNOWN;
 		ua_complete = true;
 		break;
@@ -780,7 +772,7 @@ UpdateActiveBlock(Qua *uberQua,
 		if (debug_update >= 2)
 		    fprintf(stderr, "suspend %s\n", B->crap.sym->name);
 #endif
-		reportError("suspend unimplimented");
+		internalError("suspend unimplimented");
 		B->type = Block::C_UNKNOWN;
 		ua_complete = true;
 		break;

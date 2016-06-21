@@ -12,6 +12,7 @@
 #include "BaseVal.h"
 #include "Sym.h"
 
+
 int32
 TypedValue::IntValue(QuasiStack *stack)
 {
@@ -37,7 +38,7 @@ TypedValue::IntValue(QuasiStack *stack)
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 		return 0;
 	} else if (refType == REF_POINTER) {
 		switch (type) {
@@ -65,7 +66,7 @@ TypedValue::IntValue(QuasiStack *stack)
 			return (int32)val.pointer;
 		}
 	} else {
-		reportError("boo");
+		internalError("boo");
 	}
 	return 0;
 }
@@ -112,7 +113,7 @@ TypedValue::TimeValue(QuasiStack *stack)
 			return Time::zero;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 		return Time::zero;
 	} else if (refType == REF_POINTER) {
 		switch (type) {
@@ -125,7 +126,7 @@ TypedValue::TimeValue(QuasiStack *stack)
 		default: 			return Time::zero;
 		}
 	} else {
-		reportError("boo");
+		internalError("boo");
 	}
 	return Time::zero;
 }
@@ -185,7 +186,7 @@ TypedValue::FloatValue(QuasiStack *stack)
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 		return 0;
 	} else if (refType == REF_POINTER) {
 		switch (type) {
@@ -214,7 +215,7 @@ TypedValue::FloatValue(QuasiStack *stack)
 		}
 		}
 	} else {
-		reportError("boo");
+		internalError("boo");
 	}
 	return 0;
 }
@@ -244,16 +245,16 @@ TypedValue::DoubleValue(QuasiStack *stack)
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("double val of instance var???");
+		internalError("double val of instance var???");
 		return 0;
 	} else if (refType == REF_POINTER) {
-		reportError("double val of pointer var???");
+		internalError("double val of pointer var???");
 		return 0;
 	} else if (refType == REF_VALUE) {
-		reportError("double val of value var???");
+		internalError("double val of value var???");
 		return 0;
 	} else {
-		reportError("boo");
+		internalError("boo");
 	}
 	return 0;
 }
@@ -281,7 +282,7 @@ TypedValue::LongValue(QuasiStack *stack)
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 		return 0;
 	} else if (refType == REF_POINTER) {
 		switch (type) {
@@ -309,7 +310,7 @@ TypedValue::LongValue(QuasiStack *stack)
 			return (int32)val.pointer;
 		}
 	} else {
-		reportError("boo");
+		internalError("boo");
 	}
 	return 0;
 }
@@ -341,7 +342,7 @@ TypedValue::PointerValue(QuasiStack *stack)
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("PointerValue: instance reference unexpected on stack");
+		internalError("PointerValue: instance reference unexpected on stack");
 		return 0;
 	} else if (refType == REF_POINTER) {
 		return (void *)val.pointer;
@@ -358,7 +359,7 @@ TypedValue::PointerValue(QuasiStack *stack)
 			return (void *)val.pointer;
 		}
 	} else {
-		reportError("PointerValue: unexpected reference type");
+		internalError("PointerValue: unexpected reference type");
 		return 0;
 	}
 	return 0;
@@ -385,10 +386,10 @@ TypedValue::SetValue(int64 v, class QuasiStack *stack)
 							*((void**)addr) = (void *)v;
 							break;
 		default:
-			reportError("strange ... ref type %d set to int64", type);
+			internalError("strange ... ref type %d set to int64", type);
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 	} else if (refType == REF_POINTER) {
 		switch (type) {
 		case S_BOOL:	*val.boolP = (v!=0); break;
@@ -399,7 +400,7 @@ TypedValue::SetValue(int64 v, class QuasiStack *stack)
 		case S_LONG:	*val.longP = v; break;
 		case S_TIME:	if (val.timeP) val.timeP->ticks = ((int32)v); break;
 		default:
-			reportError("strange ... type %d set to int64", type);
+			internalError("strange ... type %d set to int64", type);
 		}
 	} else if (refType == REF_VALUE) {
 		switch (type) {
@@ -410,7 +411,7 @@ TypedValue::SetValue(int64 v, class QuasiStack *stack)
 		case S_INT:			val.Int = ((int32)v); break;
 		case S_LONG:		val.Long = v; break;
 		default:
-			reportError("strange ... type %d set to int64", type);
+			internalError("strange ... type %d set to int64", type);
 		}
 	}
 }
@@ -435,10 +436,10 @@ TypedValue::SetValue(int32 v, class QuasiStack *stack)
 							*((void**)addr) = (void *)v;
 							break;
 		default:
-			reportError("strange ... ref type %d set to long", type);
+			internalError("strange ... ref type %d set to long", type);
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 	} else if (refType == REF_POINTER) {
 		switch (type) {
 		case S_BOOL:	*val.boolP = (v!=0); break;
@@ -449,7 +450,7 @@ TypedValue::SetValue(int32 v, class QuasiStack *stack)
 		case S_LONG:	*val.longP = v; break;
 		case S_TIME:	if (val.timeP) val.timeP->ticks = v; break;
 		default:
-			reportError("strange ... type %d set to long", type);
+			internalError("strange ... type %d set to long", type);
 		}
 	} else if (refType == REF_VALUE) {
 		switch (type) {
@@ -462,7 +463,7 @@ TypedValue::SetValue(int32 v, class QuasiStack *stack)
 		case S_TIME:		val.time.ticks = v; break;
 //		case S_TIME:		((Time*)(val.timeBuf))->ticks = v; break;
 		default:
-			reportError("strange ... type %d set to long", type);
+			internalError("strange ... type %d set to long", type);
 		}
 	}
 }
@@ -484,10 +485,10 @@ TypedValue::SetValue(float v, class QuasiStack *stack)
 		case S_LONG:		*((int64*)addr) = ((int64)v); break;
 		case S_TIME:		((Time*)addr)->ticks = ((tick_t)v); break;
 		default:
-			reportError("strange ... ref type %d set to int64", type);
+			internalError("strange ... ref type %d set to int64", type);
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("boo");
+		internalError("boo");
 	} else if (refType == REF_POINTER) {
 		switch (type) {
 		case S_BOOL:	*val.boolP = (v!=0); break;
@@ -498,7 +499,7 @@ TypedValue::SetValue(float v, class QuasiStack *stack)
 		case S_LONG:	*val.longP = ((int64)v); break;
 		case S_TIME:	if (val.timeP) val.timeP->ticks = ((tick_t)v); break;
 		default:
-			reportError("strange ... type %d set to float", type);
+			internalError("strange ... type %d set to float", type);
 		}
 	} else if (refType == REF_VALUE) {
 		switch (type) {
@@ -511,7 +512,7 @@ TypedValue::SetValue(float v, class QuasiStack *stack)
 		case S_TIME:		val.time.ticks = v; break;
 //		case S_TIME:		((Time*)(val.timeBuf))->ticks = ((tick_t)v); break;
 		default:
-			reportError("strange ... type %d set to float", type);
+			internalError("strange ... type %d set to float", type);
 		}
 	}
 }
@@ -534,19 +535,19 @@ TypedValue::SetDoubleValue(double v, class QuasiStack *stack)
 		case S_LONG:		*((int64*)addr) = ((int64)v); break;
 		case S_TIME:		((Time*)addr)->ticks = ((tick_t)v); break;
 		default:
-			reportError("strange ... ref type %d set to double", type);
+			internalError("strange ... ref type %d set to double", type);
 		}
 	} else if (refType == REF_INSTANCE) {
-		reportError("strange ... instance type %d set to double", type);
+		internalError("strange ... instance type %d set to double", type);
 	} else if (refType == REF_POINTER) {
 		switch (type) {
 		default:
-			reportError("strange ... type %d set to double", type);
+			internalError("strange ... type %d set to double", type);
 		}
 	} else if (refType == REF_VALUE) {
 		switch (type) {
 		default:
-			reportError("strange ... type %d set to double", type);
+			internalError("strange ... type %d set to double", type);
 		}
 	}
 }
@@ -554,7 +555,7 @@ void
 TypedValue::SetValue(Time *d, class QuasiStack *stack)
 {
 	if (type != S_TIME) {
-		reportError("must be a valid time");
+		internalError("must be a valid time");
 		return;
 	}
 	if (refType == REF_STACK) {
@@ -580,7 +581,7 @@ TypedValue::SetValue(void *d, class QuasiStack *stack)
 			return;
 		void **addr = (void**)(stack->stk.vars + val.stackAddress.offset);
 		*addr = d;
-		fprintf(stderr, "set %x in %x\n", *addr, addr);
+		fprintf(stderr, "set %x in %x\n", (unsigned) *addr, (unsigned) addr);
 	} else if (refType == REF_VALUE) {	// should be cool for all pointer types
 		val.pointer = d;
 	} else if (refType == REF_POINTER) {
@@ -595,7 +596,7 @@ void
 TypedValue::SetValue(Pool *d)
 {
 	if (type != S_POOL) {
-		reportError("must be a valid pool");
+		internalError("must be a valid pool");
 	} else {
 		val.pool = d;
 	}
@@ -605,7 +606,7 @@ void
 TypedValue::SetValue(FILE *d)
 {
 	if (type != S_FILE) {
-		reportError("must be a valid file ref");
+		internalError("must be a valid file ref");
 	} else {
 		val.file = d;
 	}
@@ -614,7 +615,7 @@ void
 TypedValue::SetValue(Channel *d)
 {
 	if (type != S_CHANNEL) {
-		reportError("must be a valid channel");
+		internalError("must be a valid channel");
 	} else {
 		val.channel = d;
 	}
@@ -752,7 +753,7 @@ TypedValue::Set(Instance *d)
 //    case S_LONG:		val.Long = val;
 //    	break;
 //    default:
-//		reportError("Set(int64): Unexpected type %d", typ);
+//		internalError("Set(int64): Unexpected type %d", typ);
 //    }
 //}
 //
@@ -803,10 +804,10 @@ TypedValue::Set(Instance *d)
 //    case S_STRUCT:		break;
 //    case S_FLOAT:
 //    	val.Float = *((float*) &val);
-//    	reportError("Set(void *)invalid float conversion?? %g\n", *((float *) &val));
+//    	internalError("Set(void *)invalid float conversion?? %g\n", *((float *) &val));
 //    	break;
 //    default:
-//		reportError("Set(void *):Unexpected type %d", typ);
+//		internalError("Set(void *):Unexpected type %d", typ);
 //    }
 //}
 //
@@ -822,7 +823,7 @@ TypedValue::Set(Instance *d)
 //    case S_LONG:		val.Long = (int64) val; break;
 //    case S_FLOAT:		val.Float = (float) val; break;
 //    default:
-//		reportError("Set(int32):Unexpected type %d", typ);
+//		internalError("Set(int32):Unexpected type %d", typ);
 //    }
 //}
 
@@ -988,7 +989,7 @@ TypedValue	&
 TypedValue::operator % (TypedValue &t2)
 {
 	if (type == S_FLOAT || t2.type == S_FLOAT) {
-		reportError("Dodgy mod: float to float");
+		internalError("Dodgy mod: float to float");
 		return Int((int32)-1);
 	}
 	if (type == S_LONG || t2.type == S_LONG)
@@ -1022,7 +1023,7 @@ TypedValue	&
 TypedValue::operator ~ ()
 {
 	if (type == S_FLOAT) {
-		reportError("dodgy bitwise operand");
+		internalError("dodgy bitwise operand");
 		return Int((int32)-1);
 	}
 	if (type == S_LONG)

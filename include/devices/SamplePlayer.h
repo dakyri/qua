@@ -1,7 +1,7 @@
 #ifndef _SAMPLEPLAYER
 #define _SAMPLEPLAYER
 
-#include "Time.h"
+#include "QuaTime.h"
 
 class Sample;
 class ResultValue;

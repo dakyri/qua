@@ -35,7 +35,7 @@ Stacker::AddEnvelope(Envelope *e)
 void
 Stacker::RemoveEnvelope(Envelope *e)
 {
-	for (auto ci = envelopes.begin(); ci != envelopes.end; ++ci) {
+	for (auto ci = envelopes.begin(); ci != envelopes.end(); ++ci) {
 		if (*ci == e) {
 			envelopes.erase(ci);
 			return;
@@ -46,7 +46,7 @@ Stacker::RemoveEnvelope(Envelope *e)
 Envelope*
 Stacker::EnvelopeAt(int i)
 {
-	return i>=0 && i<envelopes.size()? envelopes[i]:nullptr;
+	return i>=0 && ((unsigned)i)<envelopes.size()? envelopes[i]:nullptr;
 }
 
 int

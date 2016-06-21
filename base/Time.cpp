@@ -11,7 +11,7 @@
 #include "StdDefs.h"
 
 ///////////////// Application headers
-#include "Time.h"
+#include "QuaTime.h"
 
 Time	Time::infinity(INFINITE_TICKS,&Metric::std);
 Time	Time::zero(0,&Metric::std);
@@ -50,7 +50,7 @@ Time::Set(const char *txt)
 	metric_nm[0] = '\0';
 	sscanf(txt, "%d:%d.%d %s", &ba, &be, &c, metric_nm);
 	if (*metric_nm) {
-		metric = FindMetric(metric_nm);
+		metric = findMetric(metric_nm);
 	}
 	if (metric == nullptr) {
 		metric = &Metric::std;

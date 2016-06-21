@@ -3,30 +3,23 @@
 #ifdef QUA_V_JOYSTICK
 
 #if defined(WIN32)
-
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
 #endif
+
 #include "QuaJoystick.h"
-#include "Stream.h"
-#include "Qua.h"
 #include "QuaInsert.h"
 #include "Destination.h"
 #include "Channel.h"
+#include "Qua.h"
 
 #ifdef QUA_V_JOYSTICK_DX
-#include "include/QuaDirect.h"
+#include "QuaDirect.h"
 #endif
 
 #ifdef QUA_V_ARRANGER_INTERFACE
 #if defined(WIN32)
-#elif defined(_BEOS)
-#include "RosterView.h"
-#include "JoyPanel.h"
-#include "SequencerWindow.h"
-#include "AQuarium.h"
+#else
 #endif
 #endif
 
@@ -35,7 +28,7 @@
 
 flag debug_joy=0;
 
-
+#ifdef QUA_V_JOYSTICK_MMC
 // here for now as it probably should be in a library
 char *
 mmc_error_string(MMRESULT err)
@@ -49,6 +42,7 @@ mmc_error_string(MMRESULT err)
 	}
 	return "Unexpected mmc error";
 }
+#endif
 
 #ifdef QUA_V_JOYSTICK_DX
 joy_cap::joy_cap(GUID gui, char *nm, bool hf)
@@ -294,35 +288,8 @@ DIDC_STARTDELAY
 
 #endif
 
-#elif defined(_BEOS)
-	if (stick.Open(sym->name, true) == B_ERROR) {
-		return B_ERROR;
-	}
-	nHats = stick.CountHats();
-	nAxes = stick.CountAxes();
-	nButtons = stick.CountButtons();
-	
-	nSticks = stick.CountSticks();
-	
-	fprintf(stderr, "enhanced joy stick %s open: %d sticks, %d axes, %d hats, %d buttons\n",
-					sym->name, nSticks, nAxes, nHats, nButtons);
-	
-	hatVal = new uint8[nHats];
-	axisVal = new int16[nAxes];
-	lastHatVal = new uint8[nHats];
-	lastAxisVal = new int16[nAxes];
-	
-	buttonVal = lastButtonVal = 0;
-	for (short i=0; i<nAxes; i++) {
-		axisVal[i] = lastAxisVal[i] = 0;
-	}
-	for (short i=0; i<nHats; i++) {
-		hatVal[i] = lastHatVal[i] = 0;
-	}
-	stick.Update();
-	stickHorzCenter = stick.horizontal;
-	stickVertCenter = stick.vertical;
-	isOpen = true;
+#else
+;
 #endif
 	return B_NO_ERROR;
 }
@@ -339,19 +306,6 @@ QuaJoystickPort::Close()
 	}
 #elif defined(QUA_V_JOYSTICK_MMC)
 #endif
-#elif defined(_BEOS)
-	if (isOpen)
-		stick.Close();
-	isOpen = false;
-	if (hatVal)
-		delete [] hatVal;
-	if (axisVal)
-		delete [] axisVal;
-	if (lastHatVal)
-		delete [] lastHatVal;
-	if (lastAxisVal)
-		delete [] lastAxisVal;
-	
 #endif
 	return B_NO_ERROR;
 }
@@ -361,7 +315,7 @@ QuaJoystickPort::GetStreamItems(Stream *S)
 {
 	if (recv.nItems > 0) {	
 
-		schlock.WriteLock();
+		schlock.lock();
 		StreamItem	*p=recv.head,
 					**pp = &recv.head,
 					*prev = nullptr;
@@ -395,7 +349,7 @@ QuaJoystickPort::GetStreamItems(Stream *S)
 	    }
 	    recv.tail = prev;
 	
-		schlock.WriteUnlock();
+		schlock.unlock();
 		return true;
 	}
 	return false;
@@ -565,50 +519,13 @@ QuaJoystickPort::Update()
 		}
 		lastJoyState = joyState;
 #endif
-#elif defined(_BEOS)
-		float		timeDelta;	// in secs
-		
-		if (stick.Update() < B_NO_ERROR) {
-			reportError("JoystickL: can't update");
-			isOpen = false;
-		}
-
-		
-		if ((timeDelta = ((stick.timestamp - lastUpdate) / 1000000.0))
-								> minUpdate) {
-
-			memcpy(lastAxisVal, axisVal, nAxes*sizeof(int16));
-			memcpy(lastHatVal, hatVal, nHats*sizeof(int8));
-			lastButtonVal = buttonVal;
-			
-			stick.GetHatValues(hatVal, 0);
-			stick.GetAxisValues(axisVal, 0);
-			buttonVal = stick.ButtonValues(0);
-			
-			for (short i=0; i<nAxes; i++) {
-				int16 deltaxi = (axisVal[i] - lastAxisVal[i]);
-				if (Abs(deltaxi) >= AXIS_NOISE) {
-					float	axisv = ((float)axisVal[i])/RAW_AXIS_RANGE;
-					upd_stream.AddJoyAxisToStream(0,i,axisv,&t);
-				}
-			}
-			for (short i=0; i<nHats; i++) {
-				if (hatVal[i] != lastHatVal[i]) {
-					upd_stream.AddJoyHatToStream(0,i,hatVal[i],&t);
-				}
-			}
-			for (short i=0; i<nButtons; i++) {
-				if ((buttonVal&(1<<i)) != (lastButtonVal&(1<<i))) {
-					upd_stream.AddJoyButtonToStream(0,i,buttonVal&(1<<i),&t);
-				}
-			}
-		}
+#else
 
 #endif
 		if (upd_stream.nItems > 0) {
-			schlock.WriteLock();
+			schlock.lock();
 			recv.AppendStream(&upd_stream);
-			schlock.WriteUnlock();
+			schlock.unlock();
 		}
 	}
 	return true;
@@ -773,20 +690,11 @@ QuaJoystickPort::OutputStream(Time TC, Stream *A, short chan)
 
 
 
-QuaJoystickManager::QuaJoystickManager()
+QuaJoystickManager::QuaJoystickManager(Qua &q)
+	: QuaPortManager(q)
 {
-#ifdef _BEOS
-	BJoystick	bum;
-	int nJoyDevices = bum.CountDevices();
 
-	for (short i=0; i<nJoyDevices; i++) {
-		char	devnm[B_OS_NAME_LENGTH];
-		bum.GetDeviceName(i, devnm);
-		QuaJoystickPort *jp = new QuaJoystickPort(devnm, this, quapp->joySmallIcon, quapp->joyBigIcon);
-		jp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);
-		ports.AddItem(jp);
-	}
-#elif defined(WIN32)
+#if defined(WIN32)
 
 #ifdef QUA_V_JOYSTICK_DX
 	direct_setup();
@@ -813,9 +721,7 @@ QuaJoystickManager::QuaJoystickManager()
 
 #endif
 	readerRunning = false;
-    updateThread = spawn_thread(UpdateWrapper, "joystick reader",
-						B_NORMAL_PRIORITY, this);
-						
+    updateThread = spawn_thread(UpdateWrapper, "joystick reader", B_NORMAL_PRIORITY, this);
 	resume_thread(updateThread);
 }
 
@@ -827,10 +733,10 @@ QuaJoystickManager::~QuaJoystickManager()
 	resume_thread(updateThread);
 	wait_for_thread(updateThread, &exit_val);
 
-	int nd = CountPorts();
+	int nd = countPorts();
 	for (short i=0; i<nd; i++) {
 		delete (QuaJoystickPort *)Port(0);
-		RemovePort(0);
+		removePort(0);
 	}
 
 	fprintf(stderr, "deleted joystick manager\n");
@@ -969,20 +875,19 @@ QuaJoystickManager::Update()
 	readerRunning = true;
 	while(readerRunning) {
 		bool		nothinDoin = true;
-		for (short i=0; i<CountPorts(); i++) {
+		for (short i=0; i<countPorts(); i++) {
 			if (Port(i)->isOpen)
 				nothinDoin = false;
 		}
 		if (nothinDoin) {
 			suspend_thread(updateThread);
 		}
-		for (short i=0; i<CountPorts(); i++) {
+		for (short i=0; i<countPorts(); i++) {
 			Port(i)->Update();
 		}
 #ifdef WIN32
 //		sleep(20);
-#elif defined(_BEOS)
-		snooze(2000.0);
+#else
 #endif
 	}
 	return B_ERROR;
@@ -1049,29 +954,6 @@ QuaJoystickManager::Disconnect(Output *s)
 	}
 	s->dst.joy = nullptr;
 	return B_OK;
-}
-
-bool
-QuaJoystickManager::SourceIndex(KeyIndex *index)
-{
-	index->ClearIndex();
-	for (short i=0; i<CountPorts(); i++) {
-		if (Port(i)->mode&QUA_PORT_IN) {
-			index->AddToIndex(Port(i)->sym->name, (long)Port(i));
-		}
-	}
-	return true;
-}
-
-bool
-QuaJoystickManager::DestinationIndex(KeyIndex *index)
-{
-	for (short i=0; i<CountPorts(); i++) {
-		if (Port(i)->mode&QUA_PORT_OUT) {
-			index->AddToIndex(Port(i)->sym->name, (long)Port(i));
-		}
-	}
-	return true;
 }
 
 #endif

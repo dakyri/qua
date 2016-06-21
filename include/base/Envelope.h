@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#include "Time.h"
+#include "QuaTime.h"
 
 enum {
 	ENV_SEG_TYPE_FIXED = 0,

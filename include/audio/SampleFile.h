@@ -4,7 +4,12 @@
 #include "StdDefs.h"
 #include <stdio.h>
 #include <fcntl.h>
+#if defined(WIN32)
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+
 enum {
 	HEADER_OK = 0,
 	FILE_ERROR = -1,
@@ -230,6 +235,8 @@ public:
 	short				sampleType;
 	off_t				sampleDataStart;
 	long				sampleRate;
+
+	char * lastError = "no error";
 
 	enum {
 		NO_TYPE = 0,

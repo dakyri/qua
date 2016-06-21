@@ -999,6 +999,7 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="test.htm" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

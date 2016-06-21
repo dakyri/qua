@@ -38,7 +38,7 @@ struct EnvelopeSegment;
 // class B3dUniverse;
 
 #include "Metric.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "QuaTypes.h"
 #include "QuasiStack.h"
 #include "Stacker.h"
@@ -49,7 +49,6 @@ struct EnvelopeSegment;
 #ifdef QUA_V_ARRANGER_INTERFACE
 #include "QuaDisplay.h"
 #endif
-
 
 char				*NameStr(short s);
 
@@ -98,12 +97,12 @@ public:
 
 	void					SequencerIteration();
 #ifdef QUA_V_MULTIMEDIA_TIMER
-	static TIMECALLBACK		MMEventProc;
-	MMRESULT				mmTimerId;
+	static TIMECALLBACK MMEventProc;
+	MMRESULT mmTimerId;
 #else
-	static int32			MainWrapper(void *arg);
-	long					Main();
-	std::thread				myThread;
+	static int32 MainWrapper(void *arg);
+	long Main();
+	std::thread myThread;
 #endif
 
 	void					ResetTicks();
@@ -162,18 +161,18 @@ public:
 
 	class QuasiStack		*theStack;
 
-	QuaBridge				bridge;
+	QuaBridge bridge;
 
-	Method					*methods;
-	Schedulable				*schedulees;
+	Method *methods;
+	Schedulable *schedulees;
 	
-	Channel					*channel[MAX_CHANNEL];
-	long					nChannel;
+	Channel *channel[MAX_CHANNEL];
+	long nChannel;
 
 #ifdef QUA_V_BETTER_SCHEDULER
-	status_t				CheckScheduledActivations();
-	bool					AddToSchedule(Instance *);
-	bool					RemoveFromSchedule(Instance *);
+	status_t CheckScheduledActivations();
+	bool AddToSchedule(Instance *);
+	bool RemoveFromSchedule(Instance *);
 	status_t				Wake(Instance *inst);
 	status_t				Sleep(Instance *inst);
 
@@ -260,7 +259,7 @@ public:
 							~QuaGlobalContext();
 
 	int						Setup();
-	int						SetupDevices();
+	int						SetupDevices(Qua &q);
 
 	bool					SetVstPluginDir(char *path, bool add, bool reload);
 

@@ -27,15 +27,9 @@
 #include "Application.h"
 #endif
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
+
 #include "QuaDisplay.h"
-#elif defined(_BEOS)
-#include "SequencerWindow.h"
-#include "QuaObject.h"
-#include "ArrangerObject.h"
-#include "Editor.h"
-#include "MixerWindow.h"
-#endif
+
 #endif
 
 
@@ -152,7 +146,7 @@ otherwise once for each created instance ... ????????!!!!!!!!!!
 }
 
 Instance *
-Schedulable::AddInstance(char *nm, Time t, Time d, Channel * chan)
+Schedulable::addInstance(string nm, Time t, Time d, Channel * chan)
 {
 	Instance *i = new Instance(this, nm, t, d, chan);
 	instanceLock.lock();
@@ -174,7 +168,7 @@ Schedulable::AddInstance(char *nm, Time t, Time d, Channel * chan)
 }
 
 Instance *
-Schedulable::AddInstance(char *nm, short chan_id, Time *t, Time *d, bool disp)
+Schedulable::addInstance(string nm, short chan_id, Time *t, Time *d, bool disp)
 {
 	Time	at_t;
 	Time	dur_t;
@@ -192,11 +186,11 @@ Schedulable::AddInstance(char *nm, short chan_id, Time *t, Time *d, bool disp)
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return AddInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, at_t, dur_t, c);
 }
 
 void
-Schedulable::RemoveInstance(Instance *i, bool display)
+Schedulable::removeInstance(Instance *i, bool display)
 {
 	instanceLock.lock();
 	auto ci = qut::find(instances, i);
@@ -274,7 +268,7 @@ Schedulable::Schedule(Block *b)
 			c = uberQua->channel[chid];
 		}
 	}
-	i = AddInstance(nullptr, v1.type == TypedValue::S_TIME?
+	i = addInstance(nullptr, v1.type == TypedValue::S_TIME?
 						*v1.TimeValue():
 						Time(v1.IntValue(nullptr), uberQua->metric),
 					v2.type == TypedValue::S_TIME?

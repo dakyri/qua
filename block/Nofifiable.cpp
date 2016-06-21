@@ -1,13 +1,7 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#include <stdio.h>
-#endif
-
+#include "StdDefs.h"
 #include "Executable.h"
 #include "Qua.h"
 #include "Block.h"
@@ -110,13 +104,13 @@ bool
 Notified::Init(Notifiable *n, StabEnt *ss, QuasiStack *lowerFrame)
 {
 	if (n->stop.block != nullptr &&	!n->stop.block->Reset(stopStack)){
-			return FALSE;
+			return false;
 	}
 	if (n->start.block != nullptr && !n->start.block->Reset(startStack)){
-			return FALSE;
+			return false;
 	}
 	if (n->record.block != nullptr && !n->record.block->Reset(recordStack)){
-			return FALSE;
+			return false;
 	}
 
 	fprintf(stderr, "seq start stack...\n");
@@ -124,21 +118,21 @@ Notified::Init(Notifiable *n, StabEnt *ss, QuasiStack *lowerFrame)
 		startStack = new QuasiStack(n->start.sym,
 									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Start");
 		if (!n->start.block->StackOMatic(startStack, 3))
-			return FALSE;
+			return false;
 	}
 //	fprintf(stderr, "seq stop stack...\n");
 	if (stopStack == nullptr && n->stop.block) {
 		stopStack = new QuasiStack(n->stop.sym,
 									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Stop");
 		if (!n->stop.block->StackOMatic(stopStack, 3))
-			return FALSE;
+			return false;
 	}
 //	fprintf(stderr, "seq rec stack...\n");
 	if (recordStack == nullptr && n->record.block) {
 		recordStack = new QuasiStack(n->record.sym,
 									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Record");
 		if (!n->record.block->StackOMatic(recordStack, 3))
-			return FALSE;
+			return false;
 	}
 	return true;
 }

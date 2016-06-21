@@ -367,7 +367,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 //		StabEnt	*sym;
 	
 		if (debug_exp >= 2)
-		    fprintf(stderr, "assign %x %x str\n", block, block->next);
+		    fprintf(stderr, "assign %x %x str\n", (unsigned)block, (unsigned)block->next);
 	
 		p = items;
 		
@@ -384,7 +384,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 			    			block->crap.assign.exp,
 			    			p, stacker, stackCtxt, stack);
 				if (debug_exp)
-					fprintf(stderr, "EvaluateExpression: stream item assign %x %x lval %x-> %s\n", block, block->next, lval.addr, ret_val.StringValue());
+					fprintf(stderr, "EvaluateExpression: stream item assign %x %x lval %x-> %s\n", (unsigned)block, (unsigned)block->next, (unsigned)lval.addr, ret_val.StringValue());
 			    if (!ret_val.Blocked()) {
 			    	lval.StoreValue(&ret_val);
 			    }
@@ -402,10 +402,10 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 		} else {
 			ret_val = EvaluateExpression(block->crap.assign.exp, items, stacker, stackCtxt, stack);
 			if (debug_exp)
-				fprintf(stderr, "EvaluateExpression: assign %x %x lval %x -> %s flags %d\n", block, block->next, lval.addr, ret_val.StringValue(), ret_val.flags);
+				fprintf(stderr, "EvaluateExpression: assign %x %x lval %x -> %s flags %d\n", (unsigned)block, (unsigned)block->next, (unsigned)lval.addr, ret_val.StringValue(), ret_val.flags);
 			if (!ret_val.Blocked()) {
 			    lval.StoreValue(&ret_val);
-				fprintf(stderr, "EvaluateExpression: assign %x %x lval %x -> %s flags %d\n", block, block->next, lval.addr, ret_val.StringValue(), ret_val.flags);
+				fprintf(stderr, "EvaluateExpression: assign %x %x lval %x -> %s flags %d\n", (unsigned)block, (unsigned)block->next, (unsigned)lval.addr, ret_val.StringValue(), ret_val.flags);
 //				lval.sym->UpdateControllerBridge(tag_time, &val, stack);
 //?????????????????????????????????????????
 				// and if this is a display var, display it
@@ -420,7 +420,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 	case Block::C_STRUCTURE_REF:
     case Block::C_SYM: {
 		if (debug_exp >= 2) {
-		    fprintf(stderr, "eval (*lval) %x\n", block);
+		    fprintf(stderr, "eval (*lval) %x\n", (unsigned)block);
 		}
 		LValue		lval;
 		LValueAte(lval,
@@ -530,7 +530,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
     
     case Block::C_VALUE: {
 		if (debug_exp >= 2)
-		    fprintf(stderr, "eval const %x %s\n", block, block->crap.constant.value.StringValue());
+		    fprintf(stderr, "eval const %x %s\n", (unsigned)block, block->crap.constant.value.StringValue());
 		ret_val.Set(&block->crap.constant.value);
 		ret_val.flags = ResultValue::COMPLETE;
 		break;
@@ -540,7 +540,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 		ResultValue		lv, rv;
 	
 		if (debug_exp >= 2)
-		    fprintf(stderr, "doowop:eval op %x %d\n", block, block->type);
+		    fprintf(stderr, "doowop:eval op %x %d\n", (unsigned)block, block->type);
 		lv = EvaluateExpression(block->crap.op.l, items, stacker, stackCtxt, stack);
 		if (lv.Blocked()) return lv;
 	
@@ -548,7 +548,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 		if (rv.Blocked()) return rv;
 	
 		if (debug_exp >= 2)
-		    fprintf(stderr, "eval op %x %d\n", block, block->subType);
+		    fprintf(stderr, "eval op %x %d\n", (unsigned)block, block->subType);
         switch (block->subType) {
         case Block::OP_GT:	ret_val = (lv > rv); break;
         case Block::OP_LT:	ret_val = lv < rv; break;
@@ -566,7 +566,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 		case Block::OP_DIV: ret_val = lv / rv; break;
 		case Block::OP_MOD:ret_val = lv % rv; break;
         default:
-	    	tragicError("Unknown binary operator %d\n", block->subType);
+			internalError("Unknown binary operator %d\n", block->subType);
         }
         if (debug_exp >= 2) {
         	fprintf(stderr, "ret: %s", lv.StringValue());
@@ -578,7 +578,7 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 	
 	case Block::C_UNOP: {
 		if (debug_exp >= 2)
-		    fprintf(stderr, "unoop:eval unop %x %d\n", block, block->subType);
+		    fprintf(stderr, "unoop:eval unop %x %d\n", (unsigned)block, block->subType);
 		ResultValue lv = EvaluateExpression(block->crap.op.l, items, stacker, stackCtxt, stack);
 		switch (block->subType) {
 		case Block::OP_NOT: ret_val = ! lv; break;

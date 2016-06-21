@@ -1,30 +1,31 @@
 #ifndef _STATEH
 #define _STATEH
 
-#include "KeyVal.h"
+#include <string>
+#include <unordered_map>
+using namespace std;
 
 // kind of a crude enum, for state machine type thang, numbered in order of arrival
 class State
 {
 public:
 	State(char *);
-	State(char *, KeyVal *, int);
+	State(char *, unordered_map<int,string>&map, int);
 	~State();
 
-	static void	RemoveAllStates();	
+	static void	removeAllStates();	
 
-	void		AddState(char *nm);
-	void		SetStates(KeyVal *, int);
-	void		ClearStates();
+	void addState(char *nm);
+	void setStates(unordered_map<int, string>&map);
+	void clearStates();
 
-	char		*name;
-	KeyIndex	states;
-	State		*next;
+	string name;
+	unordered_map<int, string> states;
+	State *next;
 };
 
-extern State	*quaStates;
-
-extern State	play_state;
+extern State *quaStates;
+extern State play_state;
 
 enum {
 	PLAYSTATE_PLAY = 0,

@@ -43,7 +43,7 @@ size_t
 ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, short nChan)
 {
 	if (debug_quafx)
-		fprintf(stderr, "Apply Quafx %x %d stack %x\n", fxBlock, fxBlock?fxBlock->type:-1,stack); 
+		fprintf(stderr, "Apply Quafx %x %d stack %x\n", (unsigned)fxBlock, fxBlock?fxBlock->type:-1, (unsigned)stack);
 
 	if (!fxBlock)
 		return nFrames;

@@ -1,7 +1,7 @@
 #ifndef _TIMEKEEPER
 #define _TIMEKEEPER
 
-#include "include/Time.h"
+#include "QuaTime.h"
 
 class TimeKeeper
 {

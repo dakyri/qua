@@ -10,8 +10,11 @@
 
 #endif
 
+
+#ifdef QUA_V_VST_HOST
 #include "aeffectx.h"
 #include "AEffEditor.hpp"
+#endif
 
 #include "BaseVal.h"
 #include "Stackable.h"
@@ -40,18 +43,20 @@ VstPlugin::VstPlugin(char *plugin, char *nm, bool doLoad, bool doMap, bool isasy
 {
 	mapParams = doMap;
 	loadPlugin = doLoad;
-	aEffectFactory = nullptr;
 	numInputs = ni;
 	numOutputs = no;
 	numParams = npar;
 	numPrograms = nprog;
+#ifdef QUA_V_VST_HOST
+	aEffectFactory = nullptr;
 	inputPinProperties = nullptr;
 	outputPinProperties = nullptr;
 	paramProperties = nullptr;
+#endif
 	isSynth = isasyn;
 	status = VST_PLUG_UNLOADED;	
 	SetPluginPath(plugin);
-	strcpy(name, sym->name);
+	name = sym->name;
 //	interfaceBridge.SetSymbol(sym);
 //	fprintf(stderr, "path %s\n", pluginExecutable.Path());
 //	afxVar.Set(TypedValue::S_STRANGE_POINTER, TypedValue::REF_STACK, sym,
@@ -69,6 +74,8 @@ VstPlugin::Init()
 {
 	status = VST_PLUG_UNSET;
 }
+
+#ifdef QUA_V_VST_HOST
 
 AEffect *
 VstPlugin::AEffectInstance()
@@ -236,30 +243,33 @@ VstPlugin::Unload()
 	status = VST_PLUG_UNLOADED;
 	return B_OK;
 }
-
+#endif
 
 status_t
 VstPlugin::SetPluginPath(char *plug)
 {
-	pluginExecutable.SetTo(plug);
+	pluginExecutablePath = plug;
 	status = VST_PLUG_UNLOADED;
 	return B_OK;
 }
 
 VstPlugin::~VstPlugin()
 {
+#ifdef QUA_V_VST_HOST
 	if (inputPinProperties)
 		delete inputPinProperties;
 	if (outputPinProperties)
 		delete outputPinProperties;
 	if (paramProperties)
 		delete paramProperties;
+#endif
 }
 
 // wrappers round commmon dispatcher calls
 //	long (VSTCALLBACK *dispatcher)(AEffect *effect, long opCode, long index, long value,
 //		void *ptr, float opt);
 
+#ifdef QUA_V_VST_HOST
 void
 VstPlugin::LoadTest(char *plugpath)
 {
@@ -529,6 +539,8 @@ VstPlugin::LoadTest(char *plugpath)
 		FreeLibrary(libhandle);
 	}
 }
+
+
 
 void
 VstPlugin::TestDrive(AEffect *plugin)
@@ -1130,6 +1142,7 @@ VstPlugin::EditorClose(AEffect *afx)
 }
 
 #endif
+
 
 
 // bit of an issue here
@@ -1741,6 +1754,8 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 	return retval;
 };
 
+
+
 void
 VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 {
@@ -1835,8 +1850,7 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 			if (*qnmbuf == '\0') {
 				strcpy(qnmbuf, "vstfx");
 			}
-			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n",
-				path, uintstr(afx->uniqueID));
+			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n", path, uintstr(afx->uniqueID).c_str());
 			fprintf(scriptFile, "\t\\noload\n");
 			if (asynth) {
 				fprintf(scriptFile, "\t\\synth\n");
@@ -1874,8 +1888,9 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 	}
 }
 
-VstPluginList::VstPluginList():
-	BList()
+#endif
+
+VstPluginList::VstPluginList()
 {
 	;
 }
@@ -1883,9 +1898,9 @@ VstPluginList::VstPluginList():
 VstPlugin *
 VstPluginList::ItemForPath(char *path)
 {
-	for (short i=0; i<CountItems(); i++) {
+	for (short i=0; ((unsigned)i)<size(); i++) {
 		VstPlugin	*p = ItemAt(i);
-		if (strcmp(p->pluginExecutable.Path(), path) == 0) {
+		if (p->pluginExecutablePath == path) {
 			return p;
 		}
 	}
@@ -1895,7 +1910,7 @@ VstPluginList::ItemForPath(char *path)
 VstPlugin *
 VstPluginList::ItemForName(char *nm)
 {
-	for (short i=0; i<CountItems(); i++) {
+	for (short i=0; ((unsigned)i)<size(); i++) {
 		VstPlugin	*p = ItemAt(i);
 		if (p->sym != nullptr && strcmp(p->sym->name, nm) == 0) {
 			return p;

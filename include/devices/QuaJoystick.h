@@ -102,59 +102,46 @@ public:
 	int					stickId;
 #endif
 
-#elif defined(_BEOS)
-	int16				*rawAxisVal;
-	BJoystick			stick;
-
-	float				*axisVal;
-	uint8				*hatVal;
-	uint32				buttonVal;
-	float				*lastAxisVal;
-	uint8				*lastHatVal;
-	uint32				lastButtonVal;
-
 #endif
 };
 
 class QuaJoy;
 class RWLock;
 
-class QuaJoystickManager: public QuaPortManager
+class QuaJoystickManager: public QuaPortManager<QuaJoystickPort>
 {
 public:
-						QuaJoystickManager();
-						~QuaJoystickManager();
+	 QuaJoystickManager(Qua &q);
+	 ~QuaJoystickManager();
 					
-	virtual status_t	Connect(Input *);
-	virtual status_t	Connect(Output *);
-	virtual status_t	Disconnect(Input *);
-	virtual status_t	Disconnect(Output *);
+	virtual status_t Connect(Input *);
+	virtual status_t Connect(Output *);
+	virtual status_t Disconnect(Input *);
+	virtual status_t Disconnect(Output *);
 
-	QuaJoystickPort		*OpenInput(Qua *, QuaJoystickPort*);
-	QuaJoystickPort		*OpenOutput(Qua *, QuaJoystickPort*);
+	QuaJoystickPort *OpenInput(Qua *, QuaJoystickPort*);
+	QuaJoystickPort *OpenOutput(Qua *, QuaJoystickPort*);
 
-	bool				DestinationIndex(std::unordered_map<std::string, int> );
-	bool				SourceIndex(std::unordered_map<std::string, int>);
-
-	static int32		UpdateWrapper(void *userData);
-	virtual int32		Update();
+	static int32 UpdateWrapper(void *userData);
+	virtual int32 Update();
 	
 	inline QuaJoystickPort *Port(int i) {
-		return (QuaJoystickPort *)QuaPortManager::port(i); }
+		return (QuaJoystickPort *)QuaPortManager::port(i);
+	}
 
-	bool				readerRunning;
-	thread_id			updateThread;
+	bool readerRunning;
+	std::thread	updateThread;
 
 #ifdef QUA_V_JOYSTICK_DX
-	void				FetchDIJoysticks();
-	void				ClearDIJoysticks();
-	BList				diJoystix;
+	void FetchDIJoysticks();
+	void ClearDIJoysticks();
+	BList diJoystix;
 	static BOOL CALLBACK EnumJoysticksCallback(
 								const DIDEVICEINSTANCE* pdidInstance,
 								VOID* pContext);
 	BOOL CALLBACK		EnumJoysticks(const DIDEVICEINSTANCE*pdidInstance);
 #elif defined(QUA_V_JOYSTICK_MMC)
-	static JOYCAPS		*GetJoyCaps(int32 *);
+	static JOYCAPS *GetJoyCaps(int32 *);
 #endif
 
 };

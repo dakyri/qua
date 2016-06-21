@@ -86,31 +86,39 @@ public:
 	inline void	AddChannelRack(QuaChannelRackPerspective *i) { channelRacks.push_back(i); }
 	inline void	RemoveChannelRack(long i) { channelRacks.erase(channelRacks.begin() + i); }
 	inline int NChannelRack() { return channelRacks.size(); }
-	inline QuaChannelRackPerspective *ChannelRack(long i) { return i >= 0 && i<channelRacks.size() ? channelRacks[i] : nullptr; }
+	inline QuaChannelRackPerspective *ChannelRack(long i) {
+		return i >= 0 && ((size_t)i)<channelRacks.size() ? channelRacks[i] : nullptr;
+	}
 
 	inline void	AddArranger(QuaArrangerPerspective *i) { arrangers.push_back(i); }
 	inline void	RemoveArranger(long i) { arrangers.erase(arrangers.begin() + i); }
 	inline int NArranger() { return arrangers.size(); }
-	inline QuaArrangerPerspective *Arranger(long i) { return i >= 0 && i<arrangers.size() ? arrangers[i] : nullptr; }
+	inline QuaArrangerPerspective *Arranger(long i) {
+		return i >= 0 && ((size_t)i) < arrangers.size() ? arrangers[i] : nullptr;
+	}
 
 	inline void	AddIndexer(QuaIndexPerspective *i) { indexers.push_back(i); }
 	inline void	RemoveIndexer(long i) { indexers.erase(indexers.begin() + i); }
 	inline int NIndexer() { return indexers.size(); }
 	inline QuaIndexPerspective *Indexer(long i) {
-		return i >= 0 && i<indexers.size() ? indexers[i] : nullptr;
+		return i >= 0 && ((size_t)i) < indexers.size() ? indexers[i] : nullptr;
 	}
 
 	inline void	AddObjectRack(QuaObjectRackPerspective *i) { objectRacks.push_back(i); }
-	inline void	RemoveObjectRack(long i) { objectRacks.erase(objectRacks.begin()+i); }
+	inline void	RemoveObjectRack(long i) {
+		objectRacks.erase(objectRacks.begin()+i);
+	}
 	inline int NObjectRack() { return objectRacks.size(); }
 	inline QuaObjectRackPerspective *ObjectRack(long i) {
-		return i >= 0 && i<objectRacks.size() ? objectRacks[i] : nullptr;
+		return i >= 0 && ((size_t)i) < objectRacks.size() ? objectRacks[i] : nullptr;
 	}
 
 	inline void	AddTransporter(QuaTransportPerspective *i) { transporters.push_back(i); }
 	inline void	RemoveTransporter(long i) { objectRacks.erase(objectRacks.begin() + i); }
 	inline int NTransporter() { return transporters.size(); }
-	inline QuaTransportPerspective *Transporter(long i) { return i>=0 && i<transporters.size()? transporters[i]:nullptr; }
+	inline QuaTransportPerspective *Transporter(long i) {
+		return i>=0 && ((size_t)i) < transporters.size()? transporters[i] : nullptr;
+	}
 
 	std::vector<QuaChannelRackPerspective *> channelRacks;
 	std::vector<QuaArrangerPerspective *> arrangers;
@@ -209,6 +217,8 @@ public:
 	virtual Metric			*QMetric() = 0;
 };
 
+class QSParser;
+
 // local display
 class QuaDisplay: public QuaPerceptualSet
 {
@@ -304,6 +314,17 @@ public:
 	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *) override;
 
 	Qua						*qua;
+
+	virtual void parseErrorViewClear(QSParser *);
+	virtual void parseErrorViewAddLine(QSParser *, std::string);
+	virtual void parseErrorViewShow(QSParser *);
+
+	virtual void tragicError(char *str, ...);
+	virtual void reportError(char *str, ...);
+	virtual int retryError(char *str, ...);
+	virtual bool abortError(char *str, ...);
+	virtual bool continueError(char *str, ...);
+	virtual int optionWin(int, char *str, ...);
 };
 
 
@@ -320,12 +341,16 @@ public:
 	inline void	AddGlobalIndexer(QuaGlobalIndexPerspective *i) { globindexers.push_back(i); }
 	inline void	RemoveGlobalIndexer(long i) { globindexers.erase(globindexers.begin()+i); }
 	inline int NGlobalIndexer() { return globindexers.size(); }
-	inline QuaGlobalIndexPerspective *GlobalIndexer(long i) { return i >= 0 && i<globindexers.size() ? globindexers[i] : nullptr; }
+	inline QuaGlobalIndexPerspective *GlobalIndexer(long i) {
+		return i >= 0 && ((size_t)i) < globindexers.size() ? globindexers[i] : nullptr;
+	}
 
 	inline void	AddEnvironment(QuaEnvironmentPerspective *i) { environments.push_back(i); }
 	inline void	RemoveEnvironment(long i) { environments.erase(environments.begin()+i); }
 	inline int NEnvironment() { return environments.size(); }
-	inline QuaEnvironmentPerspective *Environment(long i) { return i>=0 && i<environments.size()? environments[i]:nullptr; }
+	inline QuaEnvironmentPerspective *Environment(long i) {
+		return i >= 0 && ((size_t)i) < environments.size() ? environments[i] : nullptr;
+	}
 
 	std::vector<QuaGlobalIndexPerspective*> globindexers;
 	std::vector<QuaEnvironmentPerspective*>	environments;
@@ -341,8 +366,11 @@ public:
 };
 
 
-// possibly a networked app will have lots of interfaces, 
-//  [a local display] or not? and a set of networked interfaces
+/**
+ * QuaBridge: this bridge between the main qua object and the display, which is the View in an MVC sense
+ *possibly a networked app will have lots of interfaces, 
+ *  [a local display] or not? and a set of networked interfaces
+ */
 class QuaBridge
 {
 public:
@@ -405,6 +433,13 @@ public:
 	void parseErrorViewAddLine(QSParser *, std::string);
 	void parseErrorViewShow(QSParser *);
 
+	void tragicError(char *str, ...);
+	void reportError(char *str, ...);
+	int retryError(char *str, ...);
+	bool abortError(char *str, ...);
+	bool continueError(char *str, ...);
+	int optionWin(int, char *str, ...);
+
 	QuaDisplay				*display;	// may be null if there is no display
 	Qua						*uberQua;
 };
@@ -433,9 +468,18 @@ public:
 	virtual ~QuaArrangerPerspective();
 
 	std::vector<QuaInstanceRepresentation*> instanceRepresentations;
-	inline long NIR() { return instanceRepresentations.size(); }
-	inline QuaInstanceRepresentation *IR(long i) { return i>=0 && i<instanceRepresentations.size? instanceRepresentations[i]: nullptr; }
-	inline void	AddI(QuaInstanceRepresentation *i) { instanceRepresentations.push_back(i); }
+	inline long NIR() {
+		return instanceRepresentations.size();
+	}
+
+	inline QuaInstanceRepresentation *IR(long i) {
+		return (i >= 0 && ((size_t)i) < instanceRepresentations.size()? instanceRepresentations[i]: nullptr);
+	}
+
+	inline void	AddI(QuaInstanceRepresentation *i) { 
+		instanceRepresentations.push_back(i);
+	}
+
 	inline bool	RemI(QuaInstanceRepresentation *i) {
 		for (auto ci = instanceRepresentations.begin(); ci != instanceRepresentations.end(); ++ci) {
 			if (*ci == i) {
@@ -476,9 +520,15 @@ public:
 	virtual ~QuaChannelRackPerspective();
 
 	std::vector<QuaChannelRepresentation*> channelRepresentations;
-	inline long		NCR() { return channelRepresentations.size(); }
-	inline QuaChannelRepresentation	*CR(long i) { return i >= 0 && i < channelRepresentations.size()? channelRepresentations[i]:nullptr; }
-	inline void	AddCR(QuaChannelRepresentation *i) { channelRepresentations.push_back(i); }
+	inline long		NCR() { 
+		return channelRepresentations.size(); 
+	}
+	inline QuaChannelRepresentation	*CR(long i) { 
+		return i >= 0 && ((size_t)i) < channelRepresentations.size()? channelRepresentations[i]:nullptr; 
+	}
+	inline void	AddCR(QuaChannelRepresentation *i) {
+		channelRepresentations.push_back(i);
+	}
 	inline bool	RemCR(QuaChannelRepresentation *i) {
 		for (auto ci = channelRepresentations.begin(); ci != channelRepresentations.end(); ++ci) {
 			if (*ci == i) {
@@ -553,8 +603,12 @@ public:
 
 	std::vector<QuaObjectRepresentation*> objectRepresentations;
 	inline long		NOR() { return objectRepresentations.size(); }
-	inline QuaObjectRepresentation	*OR(long i) { return i>=0 && i<objectRepresentations.size()? objectRepresentations[i]:nullptr; }
-	inline void	AddOR(QuaObjectRepresentation *i) { objectRepresentations.push_back(i); }
+	inline QuaObjectRepresentation	*OR(long i) {
+		return i >= 0 && ((size_t)i) < objectRepresentations.size() ? objectRepresentations[i] : nullptr;
+	}
+	inline void	AddOR(QuaObjectRepresentation *i) { 
+		objectRepresentations.push_back(i); 
+	}
 	inline bool	RemOR(QuaObjectRepresentation *i) {
 		for (auto ci = objectRepresentations.begin(); ci != objectRepresentations.end(); ++ci) {
 			if (*ci == i) {
@@ -658,8 +712,12 @@ public:
 
 	std::vector<QuaControllerRepresentation*> controllerRepresentations;
 	inline long	NCR() { return controllerRepresentations.size(); }
-	inline QuaControllerRepresentation	*CR(long i) { return i >= 0 && i<controllerRepresentations.size()? controllerRepresentations[i]:nullptr; }
-	inline void	AddCR(QuaControllerRepresentation *i) { controllerRepresentations.push_back(i); }
+	inline QuaControllerRepresentation	*CR(long i) {
+		return i >= 0 && ((size_t)i) < controllerRepresentations.size() ? controllerRepresentations[i] : nullptr;
+	}
+	inline void	AddCR(QuaControllerRepresentation *i) {
+		controllerRepresentations.push_back(i); 
+	}
 	inline bool	RemCR(QuaControllerRepresentation *i) {
 		for (auto ci = controllerRepresentations.begin(); ci != controllerRepresentations.end(); ++ci) {
 			if (*ci == i) {
@@ -719,8 +777,12 @@ public:
 
 	std::vector<QuaObjectRepresentation*> childRepresentations;
 	inline long	NCOR() { return childRepresentations.size(); }
-	inline QuaObjectRepresentation	*COR(long i) { return i >= 0 && i<childRepresentations.size() ? childRepresentations[i] : nullptr; }
-	inline void	AddCOR(QuaObjectRepresentation *i) { childRepresentations.push_back(i); }
+	inline QuaObjectRepresentation	*COR(long i) { 
+		return i >= 0 && ((size_t)i)<childRepresentations.size() ? childRepresentations[i] : nullptr;
+	}
+	inline void	AddCOR(QuaObjectRepresentation *i) {
+		childRepresentations.push_back(i);
+	}
 	inline bool	RemCOR(QuaObjectRepresentation *i) {
 		for (auto ci = childRepresentations.begin(); ci != childRepresentations.end(); ++ci) {
 			if (*ci == i) {
@@ -756,7 +818,9 @@ public:
 
 	std::vector<QuaFrameRepresentation*> frameRepresentations;
 	inline long	NFR() { return frameRepresentations.size(); }
-	inline QuaFrameRepresentation	*FR(long i) { return i >= 0 && i<frameRepresentations.size() ? frameRepresentations[i] : nullptr; }
+	inline QuaFrameRepresentation	*FR(long i) { 
+		return i >= 0 && ((size_t)i) < frameRepresentations.size() ? frameRepresentations[i] : nullptr;
+	}
 	inline void	AddFR(QuaFrameRepresentation *i) { frameRepresentations.push_back(i); }
 	inline bool	RemFR(QuaFrameRepresentation *i) {
 		for (auto ci = frameRepresentations.begin(); ci != frameRepresentations.end(); ++ci) {
@@ -846,8 +910,12 @@ public:
 	std::vector<QuaOutputRepresentation*> outputRepresentations;
 	inline long NInR() { return inputRepresentations.size(); }
 	inline long NOutR() { return outputRepresentations.size(); }
-	inline QuaInputRepresentation	*InR(long i) { return i >= 0 && i<inputRepresentations.size() ? inputRepresentations[i] : nullptr; }
-	inline QuaOutputRepresentation	*OutR(long i) { return i >= 0 && i<outputRepresentations.size() ? outputRepresentations[i] : nullptr; }
+	inline QuaInputRepresentation	*InR(long i) {
+		return i >= 0 && ((size_t)i) < inputRepresentations.size() ? inputRepresentations[i] : nullptr;
+	}
+	inline QuaOutputRepresentation	*OutR(long i) {
+		return i >= 0 && ((size_t)i) < outputRepresentations.size() ? outputRepresentations[i] : nullptr;
+	}
 	inline void	AddInR(QuaInputRepresentation *i) { inputRepresentations.push_back(i); }
 	inline void	AddOutR(QuaOutputRepresentation *i) { outputRepresentations.push_back(i); }
 	inline bool	RemoveInR(QuaInputRepresentation *i) {

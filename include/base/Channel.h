@@ -3,15 +3,6 @@
 
 #include "qua_version.h"
 
-#if defined(WIN32)
-
-#elif defined(_BEOS)
-
-#ifdef __INTEL__ 
-#include <SupportKit.h>
-#endif
-
-#endif
 
 #include <stdio.h>
 #include <vector>
@@ -20,7 +11,7 @@ class Qua;
 
 #include "Stream.h"
 #include "Note.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Edittable.h"
 #include "Stacker.h"
 #include "Executable.h"
@@ -30,7 +21,7 @@ class InputList: public std::vector<Input *>
 {
 public:
 	inline bool Has(Input *i) { return qut::find(*this, i) != end(); }
-	inline Input *Item(short i) { return i>=0 && i<size()? at(i): nullptr; }
+	inline Input *Item(short i) { return i >= 0 && ((size_t)i) < size() ? at(i) : nullptr; }
 	inline void Add(Input *p) { if (!Has(p)) push_back(p); }
 	inline void Del(Input *i) { auto ci = qut::find(*this, i); if (ci != end()) erase(ci); }
 };
@@ -39,7 +30,7 @@ class OutputList: public std::vector<Output *>
 {
 public:
 	inline bool Has(Output *i) { return qut::find(*this, i) != end();	}
-	inline Output *Item(short i) { return i >= 0 && i<size() ? at(i) : nullptr; }
+	inline Output *Item(short i) { return i >= 0 && ((size_t)i) < size() ? at(i) : nullptr; }
 	inline void Add(Output *p) { if (!Has(p)) push_back(p); }
 	inline void Del(Output *i) { auto ci = qut::find(*this, i); if (ci != end()) erase(ci); }
 };
@@ -109,28 +100,8 @@ public:
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	size_t				Generate(
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-							bigtime_t event_time, size_t nf
-#else
-							float *buf, size_t nf
-#endif
-#else
-							size_t nf
-#endif
-						);
-	size_t				Receive(
-#ifdef _BEOS
-#ifdef NEW_MEDIA
-							size_t nf
-#else
-							float *buf, long nf, short nc
-#endif
-#else
-							size_t nf
-#endif
-						);
+	size_t				Generate(size_t nf);
+	size_t				Receive(size_t nf);
 	
 	Event				rx;
 	Event				tx;

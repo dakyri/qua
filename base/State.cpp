@@ -1,56 +1,46 @@
 #include "qua_version.h"
 
-#if defined(WIN32)
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-
-#endif
-
 // are these global objects or connected with a symbol table entry?
 
 #include "State.h"
 
-KeyVal	player_state_values[] = {
-	{ "playing", PLAYSTATE_PLAY},
-	{ "loopend", PLAYSTATE_LOOPEND},
-	{ "stopped", PLAYSTATE_STOPPED},
-	{ "started", PLAYSTATE_LOOPSTART}
-};
-
-State	player_state("player state", player_state_values, sizeof(player_state_values)/sizeof(KeyVal));
+/*
+* todo xxxx this stuff was in transition I think ... there seem to be two approaches running in parallel. the POP list is probably the older
+* and defunkt path ... need to reexamine this ... the idea has potential even if the implementation sucks
+*/
+unordered_map<int, string> player_state {
+		{ PLAYSTATE_PLAY, "playing" },
+		{ PLAYSTATE_LOOPEND, "loopend" },
+		{ PLAYSTATE_STOPPED, "stopped" },
+		{ PLAYSTATE_LOOPSTART, "started" }
+	};
 
 State	*quaStates = nullptr;
 
 State::State(char *nm)
 {
-	name = new char[strlen(nm)+1];
-	strcpy(name, nm);
+	name = nm;
 	next = quaStates;
 	quaStates = next;
 }
 
 State::~State()
 {
-	delete name;
 	// shouldn't delete a state if we're adding at the beginning of a linked list
 	// doin that so we could just use the enums without quotes within scripts 
 	// yeah right
-	states.ClearIndex(); // keyindex should do this anyway
 }
 
-State::State(char *nm, KeyVal *k, int n)
+State::State(char *nm, unordered_map<int, string> &map, int n)
 {
-	name = new char[strlen(nm)+1];
-	strcpy(name, nm);
-	states.SetKeyVal(k, n);
+	name = nm;
+	states = map;
 	next = quaStates;
 	quaStates = next;
 }
 
 void
-State::RemoveAllStates()
+State::removeAllStates()
 {
 	State *p = quaStates, *q;
 
@@ -62,19 +52,20 @@ State::RemoveAllStates()
 }
 
 void
-State::AddState(char *nm)
+State::addState(char *nm)
 {
-	states.AddToIndex(nm, states.nkv);
+	int n = states.size();
+	states[n] = nm;
 }
 
 void
-State::SetStates(KeyVal *k, int n)
+State::setStates(unordered_map<int, string> &map)
 {
-	states.SetKeyVal(k, n);
+	states = map;
 }
 
 void
-State::ClearStates()
+State::clearStates()
 {
-	states.ClearIndex();
+	states.clear();
 }

@@ -11,8 +11,9 @@
 #undef QUA_V_ARRANGER_INTERFACE
 #undef QUA_V_EDITOR_INTERFACE
 #undef QUA_V_MIXER_INTERFACE
-#undef QUA_V_AUDIO
+#define QUA_V_AUDIO
 #undef QUA_V_AUDIO_ASIO
+#define QUA_V_DIRECT_MIDI
 #undef QUA_V_JOYSTICK
 #undef QUA_V_JOYSTICK_DX
 #undef QUA_V_JOYSTICK_MMC
@@ -24,33 +25,6 @@
 // different structural versions ...
 #define QUA_V_BETTER_SCHEDULER
 #undef QUA_V_HAS_POOLPLAYER
-
-#elif defined(_BEOS)
-
-#define QUA_V_APP_HANDLER
-#define QUA_V_PORT_PARAM
-#define QUA_V_QUADDON
-#define QUA_V_STREAM_MESG
-#define QUA_V_CONTROLLER_INTERFACE
-#define QUA_V_ARRANGER_INTERFACE
-#define QUA_V_EDITOR_INTERFACE
-#define QUA_V_MIXER_INTERFACE
-#define QUA_V_AUDIO
-#undef QUA_V_AUDIO_ASIO
-#define QUA_V_JOYSTICK
-#undef QUA_V_JOYSTICK_DX
-#undef QUA_V_JOYSTICK_MMC
-#undef QUA_V_VST
-#undef QUA_V_VST_HOST
-#undef QUA_V_VST_HOST_GUI
-#define QUA_V_RAM_LOCKED_BUFFERS
-
-#define QUA_V_BETTER_SCHEDULER
-#undef QUA_V_HAS_POOLPLAYER
-
-
-#define NEW_MEDIA
-#define MIDI_2_CONTROL
 
 #endif
 
@@ -78,12 +52,9 @@
 #define MAX_REQUESTS_PER_SAMPLE	64
 #define QUA_DFLT_SAMPLE_READ_BUF_BYTES	(16*4*1024)	
 
-#ifdef _BEOS
-#define bytesPerBuffer	(16*B_PAGE_SIZE)
-#define samplesPerBuffer	(bytesPerBuffer/sizeof(float))
-#else
+
 #define samplesPerBuffer	(16*1024)
 #define bytesPerBuffer	(samplesPerBuffer*sizeof(float))
-#endif
+#define CHUNK_SIZE samplesPerBuffer
 
 #endif

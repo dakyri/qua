@@ -1,15 +1,17 @@
 #include "qua_version.h"
 
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+
 #if defined(WIN32)
 
 #define WIN32_LEAN_AND_MEAN
 #include <stdafx.h>
+#else
+#include <time.h>
 #endif
 
-#include <stdio.h>
-#include <time.h>
-#include <ctype.h>
-#include <stdlib.h>
 
 #include <vector>
 #include <mutex>
@@ -44,7 +46,6 @@
 //#include "include/PoolPlayer.h"
 #include "Template.h"
 #include "Clock.h"
-#include "QuaMidi.h"
 #include "QuaParallel.h"
 
 #ifdef QUA_V_VST_HOST
@@ -66,8 +67,6 @@
 #include "MFCErrorViewer.h"
 #endif
 #endif
-
-time_t				time();
 
 QuaGlobalContext	context;
 
@@ -208,11 +207,10 @@ Qua::OnCreationInit(bool chan_add)
 
 	if (chan_add) {	
 	    for (short i=0; i<16; i++) {
-	    	char		nm[30];	
-			sprintf(nm, "channel%d", i+1);
+	    	string nm = string("channel") + std::to_string(i+1);	
 			AddChannel(nm, i, 2, 2, false, false, true,true,true,true, i+1);
 			if (!channel[i]->Init()) {
-		  		tragicError("cant initialize channel %d", i+1);
+		  		bridge.tragicError("cant initialize channel %d", i+1);
 			}
 	    }
 		AddChannel("system", 16, 2, 2, false, false, true, true,true,true,0);
@@ -258,9 +256,9 @@ status_t
 Qua::PostCreationInit()
 {
 
-	fprintf(stderr, "PostCreationInit: initializing main %x\n", mainBlock);
+	fprintf(stderr, "PostCreationInit: initializing main %x\n", (unsigned)mainBlock);
 	if (mainBlock && !mainBlock->Init(this)) {
-		reportError("main qua block not initialised");
+		bridge.reportError("main qua block not initialised");
 	}
 
 #define INIT_BY_METHOD
@@ -291,7 +289,7 @@ Qua::PostCreationInit()
 			
 			fprintf(stderr, "Executing Init method of %s...\n", sym->name);
 			
-			bool ua_complete = UpdateActiveBlock(
+			bool ua_complete = (UpdateActiveBlock(
 		    					this,
 		    					&mainStream,
 		    					initBlock,
@@ -300,7 +298,7 @@ Qua::PostCreationInit()
 								sym,
 		    					initStack,
 								1,
-								true);
+								true) == BLOCK_COMPLETE);
 		}	
 		mainStream.ClearStream();
 	}
@@ -332,7 +330,7 @@ Qua::PostCreationInit()
 // this may open and or load actual devices
 	for (short i=0; i<nChannel; i++) {
 		if (!channel[i]->Init()) {
-		    reportError("can't init channel");
+		    bridge.reportError("can't init channel");
 		}
 	}
 
@@ -356,7 +354,7 @@ Qua::PostCreationInit()
 	mmTimerId = timeSetEvent(
 		theApp.wTimerRes,0,&MMEventProc,(DWORD_PTR)this,TIME_PERIODIC);
 	if (mmTimerId == nullptr) {
-		reportError("Qua::PostCreationInit(): failed to set multimedia timer event, res %dms", theApp.wTimerRes);
+		bridge.reportError("Qua::PostCreationInit(): failed to set multimedia timer event, res %dms", theApp.wTimerRes);
 	}
 #else
 	myThread = std::thread(MainWrapper, this);
@@ -365,7 +363,7 @@ Qua::PostCreationInit()
 #ifdef QUA_V_AUDIO
 	status_t err=context.quaAudio->StartAudio();
 	if (err != B_OK) {
-		reportError("Can't start audio: %s\n", context.quaAudio->ErrorString(err));
+		bridge.reportError("Can't start audio: %s\n", context.quaAudio->ErrorString(err));
 	}
 #endif
 	return B_OK;
@@ -386,7 +384,7 @@ Qua::AddChannel(std::string nm, short ch_id,
 		ch_id = nChannel;
 	}
 	if (channel[ch_id] != nullptr) {
-		reportError("Channel with id %d already present: not added", ch_id);
+		bridge.reportError("Channel with id %d already present: not added", ch_id);
 		return nullptr;
 	}
  	Channel *c = new Channel(nm, ch_id, au_thru, midi_thru, nAudioIns, nAudioOuts, this);
@@ -402,27 +400,7 @@ Qua::AddChannel(std::string nm, short ch_id,
 	}
 #ifdef QUA_V_AUDIO
  	if (add_dflt_au_in) {
-#if defined(_BEOS)
-		if (context.quaAudio && context.quaAudio->dfltInput.device) {
-#if  defined(NEW_MEDIA)
-			Input *s = c->AddInput("audin", context.quaAudio->dfltInput.device,
-								context.quaAudio->dfltInput.source.id
-								);
-			s->SetMediaInfo(
-					context.quaAudio->dfltInput.source,
-					context.quaAudio->dfltInput.xsource,
-					context.quaAudio->dfltInput.format,
-					2,
-					true);
-#else
-			Input *s = c->AddInput("audin",
-								context.quaAudio->dfltInput.device,
-								0, false, false
-								);
-#endif
-//			Enable(s, false);
-		}
-#else	// something not BeOS
+
 		if (context.quaAudio && context.quaAudio->dfltInput) {
 			Input *s = c->AddInput("audin", context.quaAudio->dfltInput,
 								0, true
@@ -430,7 +408,7 @@ Qua::AddChannel(std::string nm, short ch_id,
 			// try and make a stereo pair
 			if (nAudioIns == 2) {
 				if (context.quaAudio->dfltInput->NInputChannels(0) == 1) {
-					s->SetPortInfo(context.quaAudio->dfltInput, 1, 1);
+					s->setPortInfo(context.quaAudio->dfltInput, 1, 1);
 				} else if (context.quaAudio->dfltInput->NInputChannels(0) == 2) {
 					;
 				} else {
@@ -439,34 +417,15 @@ Qua::AddChannel(std::string nm, short ch_id,
 			}
 //			Enable(s, false);
 		}
-#endif
 	}
 	if (add_dflt_au_out) {
-#if defined(_BEOS)
-		if (context.quaAudio && context.quaAudio->dfltOutput.device) {
-#if defined(NEW_MEDIA)
-			Output *d = c->AddOutput("audout", context.quaAudio->dfltOutput.device,
-						context.quaAudio->dfltOutput.destination.id);
-			d->SetMediaInfo(
-					context.quaAudio->dfltOutput.destination,
-					context.quaAudio->dfltOutput.xdestination,
-					context.quaAudio->dfltOutput.format,
-					2,
-					true);
-#else
-			Output *d = c->AddOutput("audout", context.quaAudio->dfltOutput.device,
-						0, false, false);
-#endif
-//			Enable(d, true);
-		}
-#else	// something not BeOS
 		if (context.quaAudio && context.quaAudio->dfltOutput) {
 			Output *d = c->AddOutput("audout", context.quaAudio->dfltOutput,
 						0, true);
 			// try and make a stereo pair
 			if (nAudioOuts == 2) {
 				if (context.quaAudio->dfltOutput->NOutputChannels(0) == 1) {
-					d->SetPortInfo(context.quaAudio->dfltOutput, 1, 1);
+					d->setPortInfo(context.quaAudio->dfltOutput, 1, 1);
 				} else if (context.quaAudio->dfltOutput->NOutputChannels(0) == 2) {
 					;
 				} else {
@@ -475,11 +434,10 @@ Qua::AddChannel(std::string nm, short ch_id,
 			}
 //			Enable(d, true);
 		}
-#endif
 	}
 #endif
 
-	fprintf(stderr, "adding channel %d %x\n", nChannel, c);
+	fprintf(stderr, "adding channel %d %x\n", nChannel, (unsigned)c);
 	channel[ch_id] = c;
 	if (ch_id >= nChannel) {
 		nChannel++;
@@ -498,12 +456,12 @@ status_t
 Qua::RemoveChannel(short ch_id, bool updateDisplay)
 {
 	if (ch_id >= nChannel || channel[ch_id] == nullptr) {
-		reportError("Channel with id %d not present: not removed", ch_id);
+		bridge.reportError("Channel with id %d not present: not removed", ch_id);
 		return B_ERROR;
 	}
 	Channel *c = channel[ch_id];
 	if (c == nullptr) {
-		reportError("Attemt to delete null channel %d fails", ch_id);
+		bridge.reportError("Attemt to delete null channel %d fails", ch_id);
 	}
 	StreamItem	*p =nullptr;
 	p = schedule.head;
@@ -512,7 +470,7 @@ Qua::RemoveChannel(short ch_id, bool updateDisplay)
 			StreamValue	*q = ((StreamValue *)p);
 			Instance	*i = q->value.InstanceValue();
 			if (i && i->channel == c) {
-				reportError("Channel must be clear before deletion");
+				bridge.reportError("Channel must be clear before deletion");
 				return B_ERROR;
 			}
 		}
@@ -532,8 +490,6 @@ Qua::RemoveChannel(short ch_id, bool updateDisplay)
 
 Qua::~Qua()
 {
-	status_t 		err;
-
 	fprintf(stderr, "Qua: about to delete %s\n", sym->name);
 #ifdef QUA_V_AUDIO
 	context.quaAudio->StopAudio();
@@ -633,8 +589,7 @@ static int		new_id = 0;
 Pool *
 Qua::NewPool(short chan)
 {
-	char			pool_nm[30];
-	sprintf(pool_nm, "new%d", new_id++);
+	string pool_nm = string("new") + std::to_string(new_id++);
 	
     Pool *S = new Pool(pool_nm, this, sym, true);
     AddSchedulable(S);
@@ -645,12 +600,10 @@ Qua::NewPool(short chan)
 Sample *
 Qua::CreateSample(std::string nm, bool andD)
 {
-	char			samp_nm[256];
 	static int		new_sample_id = 0;
 
 	if (nm.size() == 0) {
-		sprintf(samp_nm, "sample%d", new_sample_id++);
-		nm = samp_nm;
+		nm = string("sample") + std::to_string(new_sample_id++);
 	}
 	Sample *S = new Sample(nm, nullptr, this, MAX_BUFFERS_PER_SAMPLE, MAX_REQUESTS_PER_SAMPLE);
     AddSchedulable(S);
@@ -665,12 +618,10 @@ Qua::CreateSample(std::string nm, bool andD)
 Voice *
 Qua::CreateVoice(std::string nm, bool andD)
 {
-	char			voice_nm[30];
 	static int		new_voice_id = 0;
 
 	if (nm.size() == 0) {
-		sprintf(voice_nm, "voice%d", new_voice_id++);
-		nm = voice_nm;
+		nm = string("voice")+ std::to_string(new_voice_id++);
 	}
 
 	Voice *S = new Voice(nm, this);
@@ -685,11 +636,9 @@ Qua::CreateVoice(std::string nm, bool andD)
 Method *
 Qua::CreateMethod(std::string nm, StabEnt *ctxt, bool andD)
 {
-	char			method_nm[30];
 	static int		new_method_id = 0;
 	if (nm.size() == 0) {
-		sprintf(method_nm, "method%d", new_method_id++);
-		nm = method_nm;
+		nm = string("method") + std::to_string(new_method_id++);
 	}
 
 	Method *S = new Method(nm, ctxt, this);
@@ -721,7 +670,7 @@ Qua::Start()
 			mmTimerId = timeSetEvent(
 				theApp.wTimerRes,0,&MMEventProc,(DWORD_PTR)this,TIME_PERIODIC);
 			if (mmTimerId == nullptr) {
-				reportError("Failed to set multimedia timer event");
+				bridge.reportError("Failed to set multimedia timer event");
 			}
 		}
 #else
@@ -766,7 +715,7 @@ Qua::Stop()
 {
 	if (status != STATUS_SLEEPING) {
     	for (Schedulable *p = schedulees; p!=nullptr; p=p->next) {
-    		fprintf(stderr, "Stopping %x %s: ", p, p->sym->name);
+    		fprintf(stderr, "Stopping %x %s: ", (unsigned)p, p->sym->name);
     		p->QuaStop();
     		fprintf(stderr, "done\n");
     	}
@@ -860,7 +809,7 @@ Qua::loadObject(StabEnt *obj)
 			if (t->mimeType && !found) {
 				err = be_roster->FindApp(t->mimeType, &app_ref);
 				if (err != B_OK) {
-					reportError("Can't find application binary for type %s", t->mimeType);
+					bridge.reportError("Can't find application binary for type %s", t->mimeType);
 					return nullptr;
 				}
 				ent.SetTo(&app_ref, true);
@@ -870,7 +819,7 @@ Qua::loadObject(StabEnt *obj)
 			api = new Application(((char *)appPath.Leaf()), &appPath, this, t->mimeType);			
 			
 			if (t->Instantiate(api->sym) != B_OK) {
-				reportError("Can't instantiate template");
+				bridge.reportError("Can't instantiate template");
 			}
 
 			newObj = CreateDisplayObjects(api->sym, where);
@@ -883,27 +832,21 @@ Qua::loadObject(StabEnt *obj)
 #endif
 
 		case TypedValue::S_SAMPLE: {
-			if (t->path || t->mimeType) {
-				// don't really expect this....
-			}
 			Sample			*sam;
 			sam = CreateSample(nullptr, true);
-			if (t->Instantiate(sam->sym) != B_OK) {
-				reportError("Can't instantiate template");
+			if (t->instantiate(sam->sym) != B_OK) {
+				bridge.reportError("Can't instantiate template");
 			}
 
 			break;
 		}
 		
 		case TypedValue::S_POOL: {
-			if (t->path || t->mimeType) {
-				// don't really expect this....
-			}
 			Pool			*sam;
 			sam = NewPool(0);
 
-			if (t->Instantiate(sam->sym) != B_OK) {
-				reportError("Can't instantiate template");
+			if (t->instantiate(sam->sym) != B_OK) {
+				bridge.reportError("Can't instantiate template");
 			}
 
 			break;
@@ -925,7 +868,6 @@ StabEnt *
 Qua::loadFile(std::string path)
 {
 	StabEnt	*newObj = nullptr;
-	status_t	err;
 	std::string	fileMainType;
 	std::string	fileSuperType;
 	
@@ -961,7 +903,7 @@ Qua::loadFile(std::string path)
 			schedulees = sample;
 //			newObj = display.CreateSchedulableBridge(sample);
 		} else if (fileMainType == "audio/x-midi") {
-			reportError("Cannot yet import standard midi files");
+			bridge.reportError("Cannot yet import standard midi files");
 		} else if (fileMainType == "audio/x-quascript") {
 //			if (quapp->LoadQua(path->Path())) {
 //			} else {
@@ -980,7 +922,7 @@ Qua::loadFile(std::string path)
 				return nullptr;
 			}	
 		} else {
-			reportError("what the hell do i do with %s files?", fileMainType);
+			bridge.reportError("what the hell do i do with %s files?", fileMainType);
 		}
 	} else 	if (fileSuperType == "text") {
 	
@@ -1000,7 +942,7 @@ Qua::loadFile(std::string path)
 
 		return nullptr;
 	} else {
-		reportError("what a strange file! do you want me to sit on it?");
+		bridge.reportError("what a strange file! do you want me to sit on it?");
 	}
 	
 	return newObj;
@@ -1028,10 +970,10 @@ Qua::LoadScriptFile(const char *path)
 			q=p->ParseQua();
 			p->ShowErrors();
 			if (q != nullptr && p->err_cnt == 0) {
-				fprintf(stderr, "parsed a qua, proceeding with initialization %x\n", q->mainBlock);
+				fprintf(stderr, "parsed a qua, proceeding with initialization %x\n", (unsigned)q->mainBlock);
 //		    	BPoint		where(0,0);
 		    	q->ParsePass2(p, nullptr);	
-				fprintf(stderr, "initialised a qua, proceeding post initialization %x\n", q->mainBlock);
+				fprintf(stderr, "initialised a qua, proceeding post initialization %x\n", (unsigned)q->mainBlock);
 				q->PostCreationInit();
 			    fprintf(stderr, "fully initialized qua!\n");
 			}
@@ -1049,7 +991,7 @@ Qua::LoadSnapshotFile(const char *path)
 	tinyxml2::XMLError err = doc.LoadFile(xml);
 	if (err != tinyxml2::XML_NO_ERROR) {
 		fclose(xml);
-		return;
+		return B_ERROR;
 	}
 	tinyxml2::XMLElement* root = doc.RootElement();
 	if (LoadSnapshotElement(root) != B_OK) {
@@ -1085,38 +1027,38 @@ Qua::LoadSnapshotElement(tinyxml2::XMLElement* element)
 		LoadSnapshotChildren(element);
 	} else if (namestr == "voice") {
 		if (hasNameAttr) {
-			Voice	*v = FindVoice(nameAttr.c_str(), -1, false);
+			Voice	*v = findVoice(nameAttr.c_str(), -1);
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				reportError("voice '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("voice '%s' not found while loading snapshot", nameAttr);
 			}
 		}
 	} else if (namestr == "sample") {
 		if (hasNameAttr) {
-			Sample	*v = FindSample(nameAttr.c_str(), -1, false);
+			Sample	*v = findSample(nameAttr.c_str(), -1);
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				reportError("sample '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("sample '%s' not found while loading snapshot", nameAttr);
 			}
 		}
 	} else if (namestr == "pool") {
 		if (hasNameAttr) {
-			Pool	*v = FindPool(nameAttr.c_str(), -1, false);
+			Pool	*v = findPool(nameAttr.c_str(), -1);
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				reportError("pool '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("pool '%s' not found while loading snapshot", nameAttr);
 			}
 		}
 	} else if (namestr == "channel") {
 		if (hasNameAttr) {
-			Channel	*v = FindChannel(nameAttr.c_str(), -1, false);
+			Channel	*v = findChannel(nameAttr.c_str(), -1);
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				reportError("channel '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("channel '%s' not found while loading snapshot", nameAttr);
 			}
 		}
 	} else if (namestr == "instance") {
@@ -1191,7 +1133,7 @@ Qua::ParsePass2(Parser *prog, StabEnt **likelyLoad)
     		schedulable->next = schedulees;
     		schedulees = schedulable;
 	    } else {
-	    	reportError("initialization failure");
+	    	bridge.reportError("initialization failure");
 	    }
     }
     
@@ -1281,9 +1223,13 @@ Qua::CheckScheduledActivations()
 		}
 		cueItem = schedule.head;
 	}
-	if (debug_schedule) fprintf(stderr, "Scheduling %x at %s\r", cueItem, theTime.StringValue());
+	if (debug_schedule) {
+		fprintf(stderr, "Scheduling %x at %s\r", (unsigned)cueItem, theTime.StringValue());
+	}
 	while (cueItem && cueItem->time <= theTime) {
-		if (debug_schedule) fprintf(stderr, "Scheduling %x %s ", cueItem, cueItem->time.StringValue());
+		if (debug_schedule) {
+			fprintf(stderr, "Scheduling %x %s ", (unsigned)cueItem, cueItem->time.StringValue());
+		}
 		if (debug_schedule) fprintf(stderr, "at %s ", theTime.StringValue());
 			switch (cueItem->type) {
 
@@ -1399,9 +1345,9 @@ Qua::SequencerIteration()
 
 			// set up timer for next event.
 				theTime.ticks++;
-				fprintf(stderr, "tick %d actual time %Ldus", theTime.ticks, usecTime);
-				fprintf(stderr, " optimal time %Ldus", nextTickTime);
-				fprintf(stderr, " process time %Ldus\n", tickProcessEndTime);
+				fprintf(stderr, "tick %d actual time %lldus", theTime.ticks, usecTime);
+				fprintf(stderr, " optimal time %lldus", nextTickTime);
+				fprintf(stderr, " process time %lldus\n", tickProcessEndTime);
 				if (currentLoop && currentLoop->duration.ticks > 0) {
 					if (theTime >= (currentLoop->start + currentLoop->duration)) {
 						if (loop) {
@@ -1458,8 +1404,6 @@ Qua::MainWrapper(void *data)
 long
 Qua::Main()
 {
-	int		i;
-
 	while (status != STATUS_DEAD) {
 		SequencerIteration();
 
@@ -1534,7 +1478,7 @@ Qua::AddSchedulable(Schedulable *p)
 }
 
 void
-Qua::RemoveSchedulable(Schedulable *p, bool andDel, bool updateDisplay)
+Qua::RemoveSchedulable(Schedulable *p, bool andDel, bool updateDisplay) 
 {
 	Schedulable		*q, **qp;
 	
@@ -1554,7 +1498,7 @@ Qua::RemoveSchedulable(Schedulable *p, bool andDel, bool updateDisplay)
 	short	cnt = p->countInstances();
 	for (short i=0; i<cnt; i++) {
 		Instance	*inst = p->instanceAt(0);
-		p->RemoveInstance(inst, updateDisplay);
+		p->removeInstance(inst, updateDisplay);
 	}
 	if (updateDisplay) {
 		bridge.RemoveSchedulableRepresentations(p->sym);
@@ -1606,17 +1550,17 @@ Qua::DoSave(const char *fileName)
 	SetName(nm);
 	FILE	*scriptfp = fopen(projectScriptPath.Path(), "w");
 	if (scriptfp == nullptr) {
-		reportError("Can't open file '%s' for writing", projectScriptPath.Path());
+		bridge.reportError("Can't open file '%s' for writing", projectScriptPath.Path());
 		return B_ERROR;
 	}
 	status_t	err = sym->SaveScript(scriptfp, 0, true, false);
 	if (err != B_NO_ERROR) {
-		reportError("can't save arrangement to %s", projectScriptPath.Path());
+		bridge.reportError("can't save arrangement to %s", projectScriptPath.Path());
 	}
 	fclose(scriptfp);
 	FILE	*snapfp = fopen(projectSnapshotPath.Path(), "w");
 	if (snapfp == nullptr) {
-		reportError("Can't open file '%s' for writing", projectSnapshotPath.Path());
+		bridge.reportError("Can't open file '%s' for writing", projectSnapshotPath.Path());
 		return B_ERROR;
 	}
 	fprintf(snapfp, "<?xml version = '1.0'?>\n");
@@ -1629,7 +1573,7 @@ Qua::DoSave(const char *fileName)
 	err = sym->SaveSnapshot(snapfp);
 	fprintf(snapfp, "</snapshot>\n");
 	if (err != B_NO_ERROR) {
-		reportError("can't save arrangement to %s", projectSnapshotPath.Path());
+		bridge.reportError("can't save arrangement to %s", projectSnapshotPath.Path());
 	}
 	fclose(snapfp);
 	return err;
@@ -1685,19 +1629,19 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 {
 	status_t err=B_NO_ERROR;
 	if (fwrite(&type, sizeof(type), 1, fp) != 1) {
-		reportError("cant write chunk type");
+		bridge.reportError("cant write chunk type");
 		return err;
 	}
 	off_t		sizePos = ftell(fp);
 	if (fwrite(&size, sizeof(size), 1, fp) != 1) {
-		reportError("cant write chunk size");
+		bridge.reportError("cant write chunk size");
 		return err;
 	}
 	off_t		dataStart = ftell(fp);
 	switch (type) {
 	case 'NAME': {
 		if (fwrite(data, size, 1, fp) != 1) {
-			reportError("cant write name chunk");
+			bridge.reportError("cant write name chunk");
 			return err;
 		} else {
 			err = B_NO_ERROR;
@@ -1722,13 +1666,13 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 
 		int32		nTakes = P->outTakes.size();
 		if (fwrite(&nTakes, sizeof(nTakes), 1, fp) != 1) {
-			reportError("Qua::WriteChunk() cant write take chunk");
+			bridge.reportError("Qua::WriteChunk() cant write take chunk");
 			return err;
 		} else {
 			err = B_NO_ERROR;
 		}
 
-		for (short i = 0; i<P->outTakes.size(); i++) {
+		for (short i = 0; ((unsigned)i)<P->outTakes.size(); i++) {
 			if ((err=WriteChunk(fp, 'TAKE', P->outTakes[i], 0)) != B_NO_ERROR) {
 				return err;
 			}
@@ -1751,7 +1695,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 		break;
 	}
 	default:
-		reportError("bad chunk %x", type);
+		bridge.reportError("bad chunk %x", type);
 		return B_ERROR;
 	}
 	if (size == 0) {
@@ -1759,7 +1703,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 		size = endPos - dataStart;
 		fseek(fp, sizePos, SEEK_SET);
 		if (fwrite(&size, sizeof(size), 1, fp) != 1) {
-			reportError("cant write chunk size");
+			bridge.reportError("cant write chunk size");
 			return err;
 		} else {
 			err = B_NO_ERROR;
@@ -1776,11 +1720,11 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 	status_t	err=B_OK;
 	
 	if (fread(&type, sizeof(type), 1, fp) != 1) {
-		reportError("Qua: can't read chunk type");
+		bridge.reportError("Qua: can't read chunk type");
 		return 0;
 	}
 	if (fread(&type, sizeof(type), 1, fp) != 1) {
-		reportError("Qua: can't read chunk size");
+		bridge.reportError("Qua: can't read chunk size");
 		return 0;
 	}
 
@@ -1791,7 +1735,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 	case 'QUAP': {
 		void	*data;
 		ulong	datalen;
-		while (ftell(fp)-pos < size) {
+		while (ftell(fp) - pos < ((int)size)) {
 			if (!ReadChunk(fp, &data, &datalen)) {
 				return 0;
 			}
@@ -1804,7 +1748,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 	case 'NAME': {
 		char *buf = new char[size+1];
 		if (fread(buf, size, 1, fp) != 1) {
-			reportError("Qua::ReadChunk() can't read name");
+			bridge.reportError("Qua::ReadChunk() can't read name");
 			return 0;
 		} else {
 			err = B_NO_ERROR;
@@ -1820,7 +1764,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		ulong		len;
 		
 		if (ReadChunk(fp, (void**)&nm, &len)!='NAME') {
-			reportError("Read chunk, expected name");
+			bridge.reportError("Read chunk, expected name");
 			if (len)	delete nm;
 			break;
 		}
@@ -1828,15 +1772,15 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		int32		nTakes = 0;
 		
 		if (fread(&nTakes, sizeof(nTakes), 1, fp) != 1) {
-			reportError("Qua::ReadChunk() cant read stream takes");
+			bridge.reportError("Qua::ReadChunk() cant read stream takes");
 			return err;
 		} else {
 			err = B_NO_ERROR;
 		}
 
-		Pool	*P = FindPool(nm);
+		Pool	*P = findPool(nm);
 		if (P == nullptr) {
-			reportError("Qua::ReadChunk() can't find pool %s", nm);
+			bridge.reportError("Qua::ReadChunk() can't find pool %s", nm);
 			break;
 		}
 		
@@ -1851,12 +1795,12 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		ulong	datalen;
 
 		if (nTakes == 0) {
-			reportError("Pool with null takes! This looks dodgy");
+			bridge.reportError("Pool with null takes! This looks dodgy");
 			P->SelectTake(nullptr);
 		} else {
 			for (short i=0; i<nTakes; i++) {
 				if (ReadChunk(fp, &data, &datalen) != 'TAKE') {
-					reportError("Expected take data");
+					bridge.reportError("Expected take data");
 					if (datalen) delete data;
 					break;
 				}
@@ -1874,7 +1818,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		ulong		len;
 		
 		if (ReadChunk(fp, (void**)&nm, &len)!='NAME') {
-			reportError("Expected name");
+			bridge.reportError("Expected name");
 			if (len)	delete nm;
 			break;
 		}
@@ -1885,7 +1829,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		void	*data;
 		ulong	datalen;
 		if (ReadChunk(fp, &data, &datalen) != 'STRM') {
-			reportError("Expected take data");
+			bridge.reportError("Expected take data");
 			if (datalen) delete data;
 			break;
 		}
@@ -1906,7 +1850,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		break;
 	}
 	default:
-		reportError("mysterious quap");
+		bridge.reportError("mysterious quap");
 		break;
 	}
 	fseek(fp, pos+size, SEEK_SET);
@@ -1947,7 +1891,7 @@ TypedValue::StringValue()
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%d%d", val.Long);
+			sprintf(buf, "%lld", val.Long);
 		return buf;
 	case S_FLOAT:
 		if (refType != REF_VALUE)
@@ -1998,7 +1942,7 @@ TypedValue::StringValue()
 		if (!block) {
 			return "";
 		} else if (!(Esrap(block, txt, len, 10*1024, false, 0, false))) {
-			reportError("block size too large...");
+			internalError("block size too large...");
 			return "";
 		} else {
 			return txt;
@@ -2013,8 +1957,8 @@ TypedValue::StringValue()
 			return val.timeP->StringValue();
 		}
 	default:
-		reportError("TypedValue::StringValue of unexpected type %d", type);
-		sprintf(buf, "", type);
+		internalError("TypedValue::StringValue of unexpected type %d", type);
+		sprintf(buf, "%d", type);
 		return buf;
 	}
 }
@@ -2050,7 +1994,7 @@ Qua::ToPreviousMarker()
 		fprintf(stderr, "to next marker %d\n", nClip());
 		for (short i=0; i<nClip(); i++) {
 			Clip	*c = regionClip(i);
-			fprintf(stderr, "to clip %x\n", c);
+			fprintf(stderr, "to clip %x\n", (unsigned)c);
 			if (c != NULL) {
 				if (c->start < theTime && (gotClip == nullptr || c->start > gotClip->start)) {
 					gotClip = c;
@@ -2079,7 +2023,7 @@ Qua::ToNextMarker()
 	fprintf(stderr, "to next marker %d\n", nClip());
 	for (short i=0; i<nClip(); i++) {
 		Clip	*c = regionClip(i);
-		fprintf(stderr, "to clip %x\n", c);
+		fprintf(stderr, "to clip %x\n", (unsigned)c);
 		if (c != nullptr) {
 			if (c->start > theTime && (gotClip == nullptr || c->start < gotClip->start)) {
 				gotClip = c;
@@ -2136,4 +2080,3 @@ Qua::FetchEnvelopeSegments(StabEnt *, StabEnt *, long, EnvelopeSegment *)
 {
 	;
 }
-

@@ -10,7 +10,7 @@
 #include "tinyxml2.h"
 #include "Instance.h"
 #include "Qua.h"
-#include "Time.h"
+#include "QuaTime.h"
 #include "Sym.h"
 #include "Block.h"
 #include "Method.h"
@@ -25,13 +25,7 @@
 #include "Application.h"
 #endif
 
-#ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
-#elif defined(_BEOS)
-#include "SequencerWindow.h"
-#include "InstancePanel.h"
-#endif
-#endif
+
 
 status_t
 Loggable::SaveLogInfo(FILE *fp, short indent)
@@ -84,7 +78,7 @@ Instance::Instance(class Schedulable *s, std::string nm, Time t, Time d, Channel
 						this, s->sym,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT);
 //		interfaceBridge.SetSymbol(sym);
-		fprintf(stderr, "instance %s of %s defined at %s on %d\n",sym->UniqueName(), s->sym->name, startTime.StringValue(), channel);
+		fprintf(stderr, "instance %s of %s defined at %s on %d\n",sym->UniqueName(), s->sym->name, startTime.StringValue(), (unsigned)channel);
 	}
 
 // keep a list of  the standard controllers
@@ -114,7 +108,7 @@ bool
 Instance::Init()
 {
 	if (sym == nullptr) {
-		tragicError("hmmm ... interesting ... instance of nullptr");
+		uberQua->bridge.tragicError("hmmm ... interesting ... instance of nullptr");
 	}
 	glob.PushContext(sym);
 	fprintf(stderr, "instance: initting children\n");
@@ -150,7 +144,7 @@ err_ex:
 
 Instance::~Instance()
 {
-	schedulable->RemoveInstance(this, false);
+	schedulable->removeInstance(this, false);
 }
 
 void
@@ -535,7 +529,7 @@ Instance::StopRecording()
 	} 
 	
 	default: {
-		reportError("what a strange thing to be recording");
+		uberQua->bridge.reportError("what a strange thing to be recording");
 	}}
 #ifdef QUA_V_ARRANGER_INTERFACE
 	uberQua->bridge.DisplayDuration(this);

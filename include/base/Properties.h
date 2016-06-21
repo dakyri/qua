@@ -4,6 +4,10 @@
 typedef short property_id;
 typedef short property_value;
 
+#include <unordered_map>
+#include <string>
+using namespace std;
+
 class Property {
 public:
 					Property(property_id ty, property_value val);
@@ -45,8 +49,7 @@ public:
 	Property		*properties;
 };
 
-extern KeyIndex		propertyIndex;
-
+extern unordered_map<string, int32> propertyIndex;
 
 enum {
 	PROP_UNKNOWN	= 0,

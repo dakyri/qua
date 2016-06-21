@@ -18,12 +18,8 @@
 #include "Qua.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
-#include "include/QuaDisplay.h"
-#elif defined(_BEOS)
-#include "include/QuaObject.h"
-#include "EnvelopePanel.h"
-#endif
+#include "QuaDisplay.h"
+
 #endif
 
 Envelope::Envelope(StabEnt *symbol,
@@ -113,7 +109,7 @@ Envelope::Print(FILE *fp)
 bool
 Envelope::Cue(Time &t)
 {
-	segLock.ReadLock();
+	segLock.lock();
 	
 	cueTime = t;
 	Time	envTime = t - startTime;
@@ -149,13 +145,13 @@ Envelope::Cue(Time &t)
 	float	nueValue = cueValue;
 
 	if (cueSegment < 0) {
-		segLock.ReadUnlock();
+		segLock.unlock();
 		cueValue = nSeg?segment[0].val:0;
 		return cueValue != nueValue;
 	}
 		
 	if (cueSegment >= nSeg-1) {
-		segLock.ReadUnlock();
+		segLock.unlock();
 		cueValue = segment[nSeg-1].val;
 //		fprintf(stderr, "lastseg cuev %g\n", cueValue);
 		return cueValue != nueValue;
@@ -180,14 +176,14 @@ Envelope::Cue(Time &t)
 	}
 //	fprintf(stderr, "cued... %g\n", cueValue);
 
-	segLock.ReadUnlock();
+	segLock.unlock();
 	return cueValue != nueValue;
 }
 
 int	
 Envelope::AddSegment(Time &t, float v, uchar type, bool draw)
 {
-	segLock.WriteLock();
+	segLock.lock();
 	if (nSeg == segSize) {
 		segSize += DEFAULT_SEG;
 		EnvelopeSegment		*e = new EnvelopeSegment[segSize];
@@ -208,7 +204,7 @@ Envelope::AddSegment(Time &t, float v, uchar type, bool draw)
 		ins_at = Segment(t) + 1;
 		
 		if (t == segment[ins_at].time || (ins_at > 0 && t == segment[ins_at-1].time)) {
-			segLock.WriteUnlock();
+			segLock.unlock();
 			return -1;
 		}
 
@@ -221,7 +217,7 @@ Envelope::AddSegment(Time &t, float v, uchar type, bool draw)
 	segment[ins_at].type = type;
 
 	nSeg++;
-	segLock.WriteUnlock();
+	segLock.unlock();
 	
 	if (ins_at <= cueSegment) {
 // cued segment may have changed, though not necessarily value.
@@ -244,12 +240,12 @@ Envelope::DelSegment(int s, bool draw)
 {
 	if (nSeg == 1)		// or maybe s == nSeg-1
 		return FALSE;
-	segLock.WriteLock();
+	segLock.lock();
 	for (short i=s; i<nSeg; i++) {
 		segment[i] = segment[i+1];
 	}
 	nSeg--;	
-	segLock.WriteUnlock();
+	segLock.unlock();
 	
 	if (s <= cueSegment) {
 // cued segment may have changed, though not necessarily value.
