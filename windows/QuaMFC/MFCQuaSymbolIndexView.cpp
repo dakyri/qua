@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCArrangeView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -128,9 +128,9 @@ MFCQuaSymbolIndexView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of symbol index finds a null sequencer document");
+		reportError("initial update of symbol index finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		ReportError("initial update finds a null sequencer");
+		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddIndexer(this);

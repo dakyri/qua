@@ -6,7 +6,7 @@
 //	* class for a Qua document: CQuaMFCDoc,
 //	* class for the MDI child frame: QuaChildFrame
 //  * class for the view on the document CQuaMFCView
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 
@@ -53,6 +53,8 @@ ULONG_PTR gdiplusToken;
 #include "Qua.h"
 #include "QuaEnvironment.h"
 
+#include <iostream>
+
 HINSTANCE quaAppInstance = NULL;
 HMODULE quaAppModule = NULL;
 
@@ -62,7 +64,7 @@ HMODULE quaAppModule = NULL;
 static char THIS_FILE[] = __FILE__;
 #endif
 
-FILE *trace_fp;
+FILE *trace_fp = nullptr;
 
 HCURSOR pointCursor;
 HCURSOR drawCursor;
@@ -78,11 +80,7 @@ class QuaCommandLineInfo: public CCommandLineInfo, public QuaCommandLine
 public:
 	QuaCommandLineInfo();
 
-	virtual void ParseParam(
-			const char* pszParam,
-			BOOL bFlag,
-			BOOL bLast
-		);
+	virtual void ParseParam(const char* pszParam, BOOL bFlag, BOOL bLast);
 	long	argCount;
 };
 
@@ -124,13 +122,13 @@ CQuaMFCApp::CQuaMFCApp()
 	TIMECAPS tc;
 
 	if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-		ReportError("Failed to access multimedia timer capabilities");
+		reportError("Failed to access multimedia timer capabilities");
 	}
 
 	wTimerRes = min(max(tc.wPeriodMin, 1), tc.wPeriodMax);
 	fprintf(stderr, "mm resolution %dms", wTimerRes);
 	if (timeBeginPeriod(wTimerRes) != TIMERR_NOERROR) {
-		ReportError("Failed to set requested timer resolution %dms", wTimerRes); 
+		reportError("Failed to set requested timer resolution %dms", wTimerRes); 
 	}
 #endif
 }
@@ -138,7 +136,7 @@ CQuaMFCApp::CQuaMFCApp()
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CQuaMFCApp object
 CQuaMFCApp theApp;
-extern void * hInstance;
+//extern void * hInstance;
 /////////////////////////////////////////////////////////////////////////////
 // CQuaMFCApp initialization
 // Place all significant initialization in InitInstance
@@ -146,21 +144,23 @@ BOOL
 CQuaMFCApp::InitInstance()
 {
 	quaAppInstance = m_hInstance;
-	hInstance = m_hInstance;
+
+//	hInstance = m_hInstance;
 	// CG: The following block was added by the Splash Screen component.
+#define QUA_V_DEBUG_CONSOLE
 #ifdef QUA_V_DEBUG_CONSOLE
 	AllocConsole();
 	freopen("conin$", "r", stdin); 
 	freopen("conout$", "w", stdout); 
 	freopen("conout$", "w", stderr); 
-
 #endif
+	fprintf(trace_fp, "InitInstance()\n");
 	QuaCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 	cmdInfo.ListingCommands();
 	CSplashWnd::EnableSplashScreen(cmdInfo.m_bShowSplash);
 	AfxEnableControlContainer();
-
+	fprintf(trace_fp, "InitInstance() done basics\n");
 ////////////////////////////////////////////////////////
 // global initializations for Qua
 	define_global_symbols();
@@ -178,7 +178,7 @@ CQuaMFCApp::InitInstance()
 #endif
 
 	if (!QuaDrop::Initialize()) {
-		ReportError("AfxOleInit failed.  Could not initialized OLE 2; Ole2View cannot run.") ;
+		reportError("AfxOleInit failed.  Could not initialized OLE 2; Ole2View cannot run.") ;
 		return FALSE;
 	}
 
@@ -191,7 +191,7 @@ CQuaMFCApp::InitInstance()
 #ifdef _AFXDLL
 //	Enable3dControls();			// Call this when using MFC in a shared DLL
 #else
-	Enable3dControlsStatic();	// Call this when linking to MFC statically
+//	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
 	// Change the registry key under which our settings are stored.
@@ -204,118 +204,118 @@ CQuaMFCApp::InitInstance()
 ////////////////////////////////////////////////////
 
 	if (!MFCChannelView::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make channel view font");
+		reportError("can't make channel view font");
 	}
 	if (!MFCObjectView::displayFont.CreatePointFont(90, "Arial")) {
-		ReportError("can't make object view font");
+		reportError("can't make object view font");
 	}
 	if (!MFCStackFrameView::displayFont.CreatePointFont(90, "Arial")) {
-		ReportError("can't make frame view font");
+		reportError("can't make frame view font");
 	}
 	if (!MFCDeviceSelector::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make selector font");
+		reportError("can't make selector font");
 	}
 	if (!MFCQuaButton::displayFont.CreatePointFont(120, "Arial")) {
-		ReportError("can't make button font");
+		reportError("can't make button font");
 	}
 	if (!MFCQuaChkButton::displayFont.CreatePointFont(120, "Arial")) {
-		ReportError("can't make check button font");
+		reportError("can't make check button font");
 	}
 	if (!MFCSmallQuaChkBut::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make small button font");
+		reportError("can't make small button font");
 	}
 	if (!MFCQuaRotor::displayFont.CreatePointFont(120, "Arial")) {
-		ReportError("can't make large rotor font");
+		reportError("can't make large rotor font");
 	}
 	if (!MFCSmallQuaRotor::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make small rotor font");
+		reportError("can't make small rotor font");
 	}
 	if (!MFCQuaTransportBar::displayFont.CreatePointFont(80, "Arial")) {
-		ReportError("can't make time ctrl font");
+		reportError("can't make time ctrl font");
 	}
 	if (!MFCQuaTransportBar::labelFont.CreatePointFont(90, "Arial")) {
-		ReportError("can't make time ctrl font");
+		reportError("can't make time ctrl font");
 	}
 	if (!MFCQuaTextCtrl::defaultDisplayFont.CreatePointFont(90, "Arial")) {
-		ReportError("can't make time ctrl font");
+		reportError("can't make time ctrl font");
 	}
 	if (!MFCBlockEdit::displayFont.CreatePointFont(90, "Arial")) {
-		ReportError("can't make block ctrl font");
+		reportError("can't make block ctrl font");
 	}
 	if (!MFCQuaStateDisplay::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make state display font");
+		reportError("can't make state display font");
 	}
 	if (!MFCQuaClipController::displayFont.CreatePointFont(80, "Arial")) {
-		ReportError("can't make state display font");
+		reportError("can't make state display font");
 	}
 	if (!MFCQuaChannelController::displayFont.CreatePointFont(80, "Arial")) {
-		ReportError("can't make state display font");
+		reportError("can't make state display font");
 	}
 	if (!MFCQuaVstProgramController::displayFont.CreatePointFont(80, "Arial")) {
-		ReportError("can't make state display font");
+		reportError("can't make state display font");
 	}
 	if (!MFCQuaTimeController::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make time display font");
+		reportError("can't make time display font");
 	}
 	if (!MFCQuaIntController::displayFont.CreatePointFont(70, "Arial")) {
-		ReportError("can't make int display font");
+		reportError("can't make int display font");
 	}
 	if (!MFCStreamEditorYScale::displayFont.CreatePointFont(60, "Arial")) {
-		ReportError("can't make editor x scale display font");
+		reportError("can't make editor x scale display font");
 	}
 	if (!MFCDataEditorTScale::displayFont.CreatePointFont(60, "Arial")) {
-		ReportError("can't make editor t scale display font");
+		reportError("can't make editor t scale display font");
 	}
 	if (!MFCSmallQuaLetterBut::displayFont.CreatePointFont(60, "Arial")) {
-		ReportError("can't make small button display font");
+		reportError("can't make small button display font");
 	}
-
+	fprintf(trace_fp, "InitInstance() created fonts\n");
 ////////////////////////////////////////////////////
 // load default bitmaps from resources            //
 ////////////////////////////////////////////////////
 
 	if (!MFCDeviceSelector::midiImg.LoadBitmap(IDB_ICO_SM_MDI)) {
-		ReportError("Can't load small midi bitmap");
+		reportError("Can't load small midi bitmap");
 	}
 	if (!MFCDeviceSelector::audioImg.LoadBitmap(IDB_ICO_SM_AUD)) {
-		ReportError("Can't load small audio bitmap");
+		reportError("Can't load small audio bitmap");
 	}
 	if (!MFCDeviceSelector::joyImg.LoadBitmap(IDB_ICO_SM_JOY)) {
-		ReportError("Can't load small joystick bitmap");
+		reportError("Can't load small joystick bitmap");
 	}
 	if (!MFCDeviceSelector::otherImg.LoadBitmap(IDB_ICO_SM_NON)) {
-		ReportError("Can't load small null device bitmap");
+		reportError("Can't load small null device bitmap");
 	}
 	if (!MFCChannelView::inArrowImg.LoadBitmap(IDB_ARROW_R_SM)) {
-		ReportError("Can't load small arrow bitmap");
+		reportError("Can't load small arrow bitmap");
 	}
 	if (!MFCChannelView::outArrowImg.LoadBitmap(IDB_ARROW_L_SM)) {
-		ReportError("Can't load small arrow bitmap");
+		reportError("Can't load small arrow bitmap");
 	}
-
+	fprintf(trace_fp, "InitInstance() loaded bitmaps\n");
 ////////////////////////////////////////////////////
 // load specific cursors from resources           //
 ////////////////////////////////////////////////////
 	if ((pointCursor=LoadCursor(IDC_ARTOOL_POINT)) == NULL) {
-		ReportError("Can't load custom point cursor");
+		reportError("Can't load custom point cursor");
 	}
 	if ((drawCursor=LoadCursor(IDC_ARTOOL_DRAW)) == NULL) {
-		ReportError("Can't load custom draw cursor");
+		reportError("Can't load custom draw cursor");
 	}
 	if ((pointCtlCursor=LoadCursor(IDC_ARTOOL_POINT_CTL)) == NULL) {
-		ReportError("Can't load custom point control cursor");
+		reportError("Can't load custom point control cursor");
 	}
 	if ((drawCtlCursor=LoadCursor(IDC_ARTOOL_DRAW_CTL)) == NULL) {
-		ReportError("Can't load custom draw control cursor");
+		reportError("Can't load custom draw control cursor");
 	}
 	if ((regionCursor=LoadCursor(IDC_ARTOOL_REGION)) == NULL) {
-		ReportError("Can't load custom region cursor");
+		reportError("Can't load custom region cursor");
 	}
 	if ((sliceCursor=LoadCursor(IDC_ARTOOL_SLICE)) == NULL) {
-		ReportError("Can't load custom slice cursor");
+		reportError("Can't load custom slice cursor");
 	}
 	quaPopupClassName = AfxRegisterWndClass(0, 0, (HBRUSH)(COLOR_INFOBK + 1), 0);             // [1]
-
+	fprintf(trace_fp, "InitInstance() setup registry\n");
 // initializations for other bits of MFC stuff
 
 	// Register the application's document templates.  Document templates
@@ -334,21 +334,32 @@ CQuaMFCApp::InitInstance()
 		RUNTIME_CLASS(QuaContextFrame), // custom MDI child frame
 		RUNTIME_CLASS(MFCContextView));
 	AddDocTemplate(pContextTemplate);
-
+	fprintf(trace_fp, "InitInstance() created templates\n");
 	// create main MDI Frame window
-	QuaMainFrame* pMainFrame = new QuaMainFrame;
-	if (!pMainFrame->LoadFrame(IDR_MAINFRAME))
+	QuaMainFrame* pMainFrame = new QuaMainFrame();
+	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) {
+		fprintf(trace_fp, "InitInstance() LoadFrame fails\n");
+		reportError("LoadFrame() fails m.a.f.");
 		return FALSE;
+	}
+
 	m_pMainWnd = pMainFrame;
 
-	// Dispatch commands specified on the command line
-	if (!ProcessShellCommand(cmdInfo))
-		return FALSE;
+	fprintf(trace_fp, "InitInstance() frame is loaded ... \n");
 
+	// Dispatch commands specified on the command line
+	
+	if (cmdInfo.argCount > 0) {
+		if (!ProcessShellCommand(cmdInfo)) {
+			reportError("ProcessShellCommand() fails m.a.f.");
+			return FALSE;
+		}
+	}
+	fprintf(trace_fp, "InitInstance() almost done\n");
 	// The main window has been initialized, so show and update it.
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
-
+	fprintf(trace_fp, "InitInstance() totally done\n");
 	return TRUE;
 }
 
@@ -360,7 +371,7 @@ CQuaMFCApp::ExitInstance( )
 #endif
 #ifdef QUA_V_MULTIMEDIA_TIMER
 	if (timeEndPeriod(wTimerRes) != TIMERR_NOERROR) {
-		ReportError("Failed to multimedia timer period"); 
+		reportError("Failed to multimedia timer period"); 
 	}
 #endif
 	return CWinApp::ExitInstance();
@@ -479,9 +490,30 @@ QuaCommandLineInfo::ParseParam(
 			BOOL bLast
 		)
 {
+	if (trace_fp != nullptr) {
+		fprintf(trace_fp, "QuaCommandLineInfo::ParseParam(%d)\n", argCount);
+	}
 	if (!ProcessCommandLineWord(argCount, (char *)pszParam, bFlag)) {
 		CCommandLineInfo::ParseParam(pszParam, bFlag, bLast);
 	}
 	argCount++;
+}
+
+#include <afxwin.h>
+#include <string>
+#include <stdarg.h>
+using namespace std;
+
+void reportError(const char *fmt, ...)
+{
+	char		buf[2056];
+
+	va_list		args;
+	va_start(args, fmt);
+
+	vsprintf(buf, fmt, args);
+	strcat(buf, "\n...");
+	AfxMessageBox(buf);
+	va_end(args);
 }
 

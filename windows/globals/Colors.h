@@ -1,7 +1,7 @@
 #ifndef _COLORSOFEVERYTHING
 #define _COLORSOFEVERYTHING
 
-#if defined(WIN32)
+#include <afxwin.h>
 
 typedef COLORREF		rgb_color;
 class CDC;
@@ -33,8 +33,6 @@ class CFont;
 class CWnd;
 long AvgStringWidth(char *s, CFont *f);
 void StringExtent(char *s, CFont *f, CWnd *w, long &cx, long &cy);
-
-#endif
 
 rgb_color	StrColor(char *str);
 char		*ColorStr(rgb_color color);

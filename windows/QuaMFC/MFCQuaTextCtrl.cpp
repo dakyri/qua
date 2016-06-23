@@ -3,7 +3,7 @@
 // MFCQuaTextCtrl.cpp : implementation file
 // base class for controls that are shown with text indented in a background with a label
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "qua_version.h"
 

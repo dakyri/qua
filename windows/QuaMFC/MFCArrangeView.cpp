@@ -1,7 +1,7 @@
 
 // MFCArrangeView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 
@@ -594,9 +594,9 @@ MFCArrangeView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of arrange view finds a null sequencer document");
+		reportError("initial update of arrange view finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		ReportError("initial update finds a null sequencer");
+		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddArranger(this);
@@ -1325,7 +1325,7 @@ MFCArrangeView::SetHVScroll()
 		MFCChannelView *ev =(MFCChannelView *)channeler->CR(channeler->NCR()-1);
 		if (ev) {
 //			SetScrollRange(SB_VERT, 0, ev->frame.bottom-bounds.bottom);
-//			ReportError("%d %d", bounds.right, ev->frame.bottom-bounds.bottom);
+//			reportError("%d %d", bounds.right, ev->frame.bottom-bounds.bottom);
 			if (ev->frame.bottom > 0) {
 				SetScrollSizes(MM_TEXT, CSize(2*Time2Pix(lastScheduledEvent), ev->frame.bottom));
 			}

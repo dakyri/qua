@@ -4,7 +4,7 @@
 // of a running project/sequence/sequencer
 ////////////////////////////////////////////////////////////////////////
 
-#define _AFXDLL
+//#define _AFXDLL
 
 #include "stdafx.h"			// all the bog standard windows bits
 

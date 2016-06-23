@@ -327,7 +327,7 @@ SymTab::FindContextSymbolInd(const std::string nm, StabEnt *contxt, short def_cn
 }
 
 bool
-SymTab::Rename(StabEnt *sym, char *nm)
+SymTab::Rename(StabEnt *sym, const char *nm)
 {
 	short	defcnt=-1;
 	
@@ -412,7 +412,7 @@ SymTab::DumpContexts(FILE *fp)
 }
 
 long
-SymTab::FindFreeInd(char *nm, StabEnt *context, short &defineCount)
+SymTab::FindFreeInd(const char *nm, StabEnt *context, short &defineCount)
 {
 	int 	i = Hash(nm, context);
 	bool	foundDefCount = (defineCount >= 0);

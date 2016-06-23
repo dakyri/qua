@@ -3,7 +3,7 @@
 //
 // a lot of the fixed bits could/should be changed from being being dynamically allocated.
 // however this has caused problems with 
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -105,7 +105,7 @@ QuaPopupWnd::CreatePopup(char *nm, long x, long y, long w, long h, HWND parent)
 
 // MFCQuaObjectView
 
-//IMPLEMENT_DYNCREATE(MFCObjectView, CView)
+IMPLEMENT_DYNCREATE(MFCObjectView, CView)
 
 MFCObjectView::MFCObjectView()
 {
@@ -722,7 +722,7 @@ MFCChannelObjectView::PopFrameRepresentation(
 void
 MFCChannelObjectView::RefreshFrameRepresentation(StabEnt *, QuasiStack *)
 {
-	ReportError("refresh unimp");
+	reportError("refresh unimp");
 }
 
 void
@@ -1636,9 +1636,9 @@ MFCStackFrameView::CreateFrameView(
 		}
 		if (frame->callingBlock->type == C_VST) {
 			VstPlugin	*vst = frame->callingBlock->crap.call.crap.vstplugin;
-			ReportError("vst");
+			reportError("vst");
 			if (vst->hasEditor) {
-				ReportError("has editor");
+				reportError("has editor");
 				eButton = new MFCSmallQuaLetterBut;
 				eButton->CreateButton(NULL, CRect(1,1,12, 12), this, 6969);
 				eButton->SetLCMsgParams(QM_MINIMIZE_VIEW,vst,(LPARAM)this);
@@ -2268,13 +2268,13 @@ MFCInstanceObjectView::PopFrameRepresentation(
 void
 MFCInstanceObjectView::RefreshFrameRepresentation(StabEnt *, QuasiStack *)
 {
-	ReportError("refresh unimp");
+	reportError("refresh unimp");
 }
 
 void
 MFCInstanceObjectView::HideFrameRepresentation(StabEnt *, QuasiStack *stack)
 {
-	ReportError("hide unimp");
+	reportError("hide unimp");
 }
 
 void
@@ -2699,7 +2699,7 @@ MFCSampleObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 	if (orac) {
 		orac->PostMessage(QM_CLOSE_VIEW, QCID_OV_SAMPLE_ED, (LPARAM)this);
 	} else {
-		ReportError("trying to close parentless window. unimp ...");
+		reportError("trying to close parentless window. unimp ...");
 		// we've probably popped up a standalone window. we just close it, i think
 	}
 	return 0;
@@ -2713,7 +2713,7 @@ MFCSampleObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_SAMPLE_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to minimize parentless window. unimp ...");
+			reportError("trying to minimize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -2728,7 +2728,7 @@ MFCSampleObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_SAMPLE_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to maximize parentless window. unimp ...");
+			reportError("trying to maximize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -3191,7 +3191,7 @@ MFCVoiceObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 	if (orac) {
 		orac->PostMessage(QM_CLOSE_VIEW, QCID_OV_VOICE_ED, (LPARAM)this);
 	} else {
-		ReportError("trying to close parentless window. unimp ...");
+		reportError("trying to close parentless window. unimp ...");
 		// we've probably popped up a standalone window. we just close it, i think
 	}
 	return 0;
@@ -3205,7 +3205,7 @@ MFCVoiceObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_VOICE_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to minimize parentless window. unimp ...");
+			reportError("trying to minimize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -3220,7 +3220,7 @@ MFCVoiceObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_VOICE_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to maximize parentless window. unimp ...");
+			reportError("trying to maximize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -3688,7 +3688,7 @@ MFCMethodObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_CLOSE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to close parentless window. unimp ...");
+			reportError("trying to close parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -3703,7 +3703,7 @@ MFCMethodObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to minimize parentless window. unimp ...");
+			reportError("trying to minimize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}
@@ -3718,7 +3718,7 @@ MFCMethodObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);
 		} else {
-			ReportError("trying to maximize parentless window. unimp ...");
+			reportError("trying to maximize parentless window. unimp ...");
 			// we've probably popped up a standalone window. we just close it, i think
 		}
 	}

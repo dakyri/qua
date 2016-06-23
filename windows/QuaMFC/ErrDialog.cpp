@@ -1,6 +1,6 @@
 // ErrDialog.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "QuaMFC.h"
 #include "ErrDialog.h"

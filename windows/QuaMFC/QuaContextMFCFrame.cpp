@@ -3,7 +3,7 @@
 //  this is the frame for the view/s through which a particular open Qua document is
 // viewed and accessed.
 
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 
 #include "qua_version.h"

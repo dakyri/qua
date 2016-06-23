@@ -3,7 +3,7 @@
 //  For a bog standard MDI implementation of Qua, this is the main window frame in
 // which the open Qua document frames will appear ...
 
-#define _AFXDLL
+//#define _AFXDLL
 
 #include "stdafx.h"
 
@@ -263,10 +263,10 @@ CPalette* QuaMainFrame::SetPalette(CPalette* pPalette)
 BOOL
 QuaMainFrame::OnViewToolBar(UINT nID)
 {
-	ReportError("qmf: view tool bar %d", nID);
+	reportError("qmf: view tool bar %d", nID);
 	CWnd* pBar;
 	if ((pBar = GetDlgItem(nID)) == NULL) {
-		ReportError("don't find it");
+		reportError("don't find it");
 		return FALSE;   // not for us
 	}
 	// toggle visible state

@@ -120,7 +120,7 @@ class MFCSequenceEditor : public CScrollView
 public:
 	MFCSequenceEditor();           // protected constructor used by dynamic creation
 	virtual						~MFCSequenceEditor();
-//	DECLARE_DYNCREATE(MFCSequenceEditor)
+	DECLARE_DYNCREATE(MFCSequenceEditor)
 
 	virtual void				PostNcDestroy();
 
@@ -139,9 +139,9 @@ public:
 	CWnd						*yscale;
 	MFCDataEditorTScale			*xscale;
 
-	virtual long				NHorizontalPix()=NULL;
-	virtual long				HorizontalPix(long)=NULL;
-	virtual void				SetHVScroll()=NULL;
+	virtual long				NHorizontalPix() { return 0;  };
+	virtual long				HorizontalPix(long) { return 0; };
+	virtual void				SetHVScroll() { };
 
 	virtual void				EditorContextMenu(CPoint &p, UINT nf);
 	void						TrackPopupMenu(CPoint &pos, UINT nMenuID);
@@ -284,7 +284,7 @@ public:
 
 	bool 						CreateEditor(CRect &, MFCObjectView *, UINT);
 
-	virtual bool				SetToTake(Take *t)=NULL;
+	virtual bool				SetToTake(Take *t)=0;
 };
 
 class MFCDataEditorTScale: public CWnd

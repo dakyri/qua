@@ -288,7 +288,7 @@ class MFCObjectView : public CView
 public:
 	MFCObjectView();           // protected constructor used by dynamic creation
 	virtual ~MFCObjectView();
-//	DECLARE_DYNCREATE(MFCObjectView)
+	DECLARE_DYNCREATE(MFCObjectView)
 
 	CRect						bounds;
 	CRect						frame;
@@ -300,8 +300,8 @@ public:
 	COLORREF					bgColor;
 
 	virtual void				ArrangeChildren();
-	virtual StabEnt				*Symbol()=NULL;
-	virtual QuaPerceptualSet	*QuaLink()=NULL;
+	virtual StabEnt				*Symbol() { return nullptr; }
+	virtual QuaPerceptualSet	*QuaLink() { return nullptr; }
 //	virtual void				ReSized(int, int)=NULL;
 
 	static MFCObjectView		*ToObjectView(QuaObjectRepresentation *);

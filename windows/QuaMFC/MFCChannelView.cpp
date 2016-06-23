@@ -1,7 +1,7 @@
 
 // MFCChannelView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 

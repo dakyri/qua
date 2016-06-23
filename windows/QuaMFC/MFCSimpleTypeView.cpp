@@ -1,7 +1,7 @@
 // MFCClipListView.cpp : implementation file
 //
 
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -931,7 +931,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 	long	item = ItemAtPoint(point);
 	for (short i=0; i<sizeof(caty)/sizeof(caty[0]); i++) {
 		if (ID_VARIABLECONTEXT_ADD_VAR + caty[i] > ID_VARIABLECONTEXT_ADD_VAR_TYPE_RANGE) {
-			ReportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
+			reportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 					caty[i], ID_VARIABLECONTEXT_ADD_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_ADD_VAR);
 		} else {
 			string tnm = qut::unfind(typeIndex, (int)caty[i]);
@@ -957,7 +957,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			setVarTypeMenu->CreatePopupMenu();
 			for (short i=0; i<sizeof(caty)/sizeof(caty[0]); i++) {
 				if (ID_VARIABLECONTEXT_SET_VAR_TYPE + caty[i] > ID_VARIABLECONTEXT_SET_VAR_TYPE_RANGE) {
-					ReportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
+					reportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 							caty[i], ID_VARIABLECONTEXT_SET_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_SET_VAR_TYPE);
 				} else {
 					string tnm = qut::unfind(typeIndex, (int)caty[i]);
@@ -1083,6 +1083,6 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			GetListCtrl().SetItemText(item, 3, "C");
 		}
 	} else if (ret == ID_VARIABLECONTEXT_SET_LENGTH_SELECTED) {
-		ReportError("Currently only undimensioned data are supported by this interface .... but they can be added manually by hand-editting the script");
+		reportError("Currently only undimensioned data are supported by this interface .... but they can be added manually by hand-editting the script");
 	}
 }

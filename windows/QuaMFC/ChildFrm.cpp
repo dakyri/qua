@@ -3,7 +3,7 @@
 //  this is the frame for the view/s through which a particular open Qua document is
 // viewed and accessed.
 
-#define _AFXDLL
+//#define _AFXDLL
 
 #include "stdafx.h"
 
@@ -102,7 +102,7 @@ afx_msg BOOL
 QuaChildFrame::OnToolTipNeedsTxt( UINT id, NMHDR * pTTTStruct, LRESULT * pResult )
 {
 	NMTTDISPINFO *ttip = ((NMTTDISPINFO*)pTTTStruct);
-//	ReportError("%x", ttip->lpszText);
+//	reportError("%x", ttip->lpszText);
 //	wsprintf(ttip->lpszText,"hmmm");
 //	ttip->hinst = quaAppInstance;
 //	strcpy(((NMTTDISPINFO*)pTTTStruct)->szText, "hmmm");
@@ -359,22 +359,22 @@ QuaChildFrame::OnUpdateUIArrangerTools(CCmdUI* pCmdUI)
 // control and menu handlers
 void QuaChildFrame::OnEditUndo()
 {
-    ReportError("Edit undo");
+    reportError("Edit undo");
 }
 
 void QuaChildFrame::OnEditCut()
 {
-    ReportError("Edit cut");
+    reportError("Edit cut");
 }
 
 void QuaChildFrame::OnEditCopy()
 {
-    ReportError("Edit copy");
+    reportError("Edit copy");
 }
 
 void QuaChildFrame::OnEditPaste()
 {
-    ReportError("Edit paste");
+    reportError("Edit paste");
 }
 
 

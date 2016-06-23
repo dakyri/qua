@@ -26,6 +26,7 @@
 // different structural versions ...
 #define QUA_V_BETTER_SCHEDULER
 #undef QUA_V_HAS_POOLPLAYER
+#define QUA_V_SAVE_INITASXML
 
 #endif
 

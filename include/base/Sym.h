@@ -203,7 +203,7 @@ public:
 	static bool		MakeValidSymbolName(char *orig, char *valid);
 
 	ulong			Hash(const std::string nm, StabEnt *context);
-	long			FindFreeInd(char *nm, StabEnt *context, short &dcp);
+	long			FindFreeInd(const char *nm, StabEnt *context, short &dcp);
 	StabEnt			*AddSymbol(char *nm, base_type_t typ,
 						 StabEnt *context, int8 nd, ref_type_t refc,
 						 short defcnt);
@@ -213,7 +213,7 @@ public:
 	StabEnt			*FindSymbol(const std::string nm, short def_cnt = -1);
 	StabEnt			*FindContextSymbol(const std::string nm, StabEnt *S, short def_cnt = -1);
 	void			DeleteSymbol(StabEnt *S, bool cleanup);
-	bool			Rename(StabEnt *S, char *nm);
+	bool			Rename(StabEnt *S, const char *nm);
 	std::string MakeUniqueName(StabEnt *ctxt, std::string basenm, long startind);
 	void			MoveSymbol(StabEnt *S, StabEnt *ctxt, StabEnt *np);
 	void			DumpGlobals(FILE *fp);

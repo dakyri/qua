@@ -55,8 +55,7 @@ bool
 QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 {
 	if (cmd) {
-		if (strcmp(arg, "help") == 0 ||
-			strcmp(arg, "about") == 0) {
+		if (strcmp(arg, "help") == 0 || strcmp(arg, "about") == 0) {
 			last_command = PRINT_HELP;
 			commands |= PRINT_HELP;
 			return true;
@@ -87,8 +86,7 @@ QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 			return true;
 		}
 		else if (strcmp(arg, "listglob") == 0) {
-			last_command = LIST_GLOB;
-			commands |= LIST_GLOB;
+			glob.DumpGlobals(fp);
 			return true;
 		}
 		else if (strcmp(arg, "listjoy") == 0) {
@@ -175,7 +173,6 @@ QuaCommandLine::ListingCommands()
 		FILE	*fp = fopen("qua.lst", "w");
 		fprintf(fp, "****** Qua listing ******\n");
 		if (commands & LIST_GLOB) {
-			glob.DumpGlobals(fp);
 		}
 #ifdef QUA_V_ASIO
 

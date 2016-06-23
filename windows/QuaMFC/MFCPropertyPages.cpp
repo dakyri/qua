@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MyPropertyPage1.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "resource.h"
 

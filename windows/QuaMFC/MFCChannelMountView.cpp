@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCChannelMountView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
@@ -166,7 +166,7 @@ afx_msg BOOL
 MFCChannelMountView::OnToolTipNeedsTxt( UINT id, NMHDR * pTTTStruct, LRESULT * pResult )
 {
 	NMTTDISPINFO *ttip = ((NMTTDISPINFO*)pTTTStruct);
-//	ReportError("%x", ttip->lpszText);
+//	reportError("%x", ttip->lpszText);
 //	wsprintf(ttip->lpszText,"hmmm");
 //	ttip->hinst = quaAppInstance;
 //	strcpy(((NMTTDISPINFO*)pTTTStruct)->szText, "hmmm");
@@ -178,9 +178,9 @@ MFCChannelMountView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of channel mount finds a null sequencer document");
+		reportError("initial update of channel mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		ReportError("initial update finds a null sequencer");
+		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddChannelRack(this);

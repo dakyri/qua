@@ -537,7 +537,7 @@ Qua::SetTempo(float t, bool disp)
 
 
 void
-Qua::SetName(char *nm, bool setTitle)
+Qua::setName(const char *nm, bool setTitle)
 {
 	if (strcmp(nm, sym->name) != 0) {
 		glob.Rename(sym, nm);
@@ -1398,8 +1398,8 @@ Qua::Main()
 
 #ifdef QUA_V_ALARMCLOCK
 		usecTime = theClock->WakeMeAfter(nextTickTime, 5000000); // 5 sec timeout on clock
-		fprintf(stderr, "next tick = %Ld\n", nextTickTime);
-		fprintf(stderr, "usecs = %Ld\n", usecTime);
+		fprintf(stderr, "next tick = %lld\n", nextTickTime);
+		fprintf(stderr, "usecs = %lld\n", usecTime);
 #else
 		usecTime = theClock->USecTime();
 		while (usecTime < nextTickTime) {
@@ -1411,8 +1411,8 @@ Qua::Main()
 #endif
 			std::this_thread::sleep_for(std::chrono::milliseconds(0));
 			usecTime = theClock->USecTime();
-//			fprintf(stderr, "usecs = %Ld", usecTime);
-//			fprintf(stderr," nextTickTime = %Ld\n", nextTickTime);
+//			fprintf(stderr, "usecs = %lld", usecTime);
+//			fprintf(stderr," nextTickTime = %lld\n", nextTickTime);
 		}
 //		total_err += (nextTickTime-usecTime);
 #endif
@@ -1527,29 +1527,30 @@ NameStr(short s)
 	}
 }
 
-#ifdef  QUA_V_SAVE_INITASXML
+
 status_t
 Qua::DoSave(const char *fileName)
 {
-	projectScriptPath.SetTo(fileName);
-	projectScriptPath.SetExtension("qs");
-	projectSnapshotPath.SetTo(fileName);
-	projectSnapshotPath.SetExtension("qx");
-	char *nm = (char *)projectScriptPath.Basename();
-	SetName(nm);
-	FILE	*scriptfp = fopen(projectScriptPath.Path(), "w");
+	projectScriptPath = getParent(fileName) + getBase(fileName) + ".qs";
+#ifdef  QUA_V_SAVE_INITASXML
+	projectSnapshotPath = getParent(fileName) + getBase(fileName) + ".qx";
+#endif
+
+	setName(getBase(fileName).c_str());
+	FILE	*scriptfp = fopen(projectScriptPath.c_str(), "w");
 	if (scriptfp == nullptr) {
-		bridge.reportError("Can't open file '%s' for writing", projectScriptPath.Path());
+		bridge.reportError("Can't open file '%s' for writing", projectScriptPath.c_str());
 		return B_ERROR;
 	}
 	status_t	err = sym->SaveScript(scriptfp, 0, true, false);
 	if (err != B_NO_ERROR) {
-		bridge.reportError("can't save arrangement to %s", projectScriptPath.Path());
+		bridge.reportError("can't save arrangement to %s", projectScriptPath.c_str());
 	}
 	fclose(scriptfp);
-	FILE	*snapfp = fopen(projectSnapshotPath.Path(), "w");
+#ifdef  QUA_V_SAVE_INITASXML
+	FILE	*snapfp = fopen(projectSnapshotPath.c_str(), "w");
 	if (snapfp == nullptr) {
-		bridge.reportError("Can't open file '%s' for writing", projectSnapshotPath.Path());
+		bridge.reportError("Can't open file '%s' for writing", projectSnapshotPath.c_str());
 		return B_ERROR;
 	}
 	fprintf(snapfp, "<?xml version = '1.0'?>\n");
@@ -1558,16 +1559,17 @@ Qua::DoSave(const char *fileName)
 //		<!ENTITY gender_codes SYSTEM "gender_codes.xml">
 //		<!ENTITY rsc_codes SYSTEM "rsc_codes.xml">
 //	fprintf(snapfp, "]>\n");
-	fprintf(snapfp, "<snapshot script=\"%s\">\n", projectScriptPath.Leaf());
+	fprintf(snapfp, "<snapshot script=\"%s\">\n", getLeaf(fileName).c_str());
 	err = sym->SaveSnapshot(snapfp);
 	fprintf(snapfp, "</snapshot>\n");
 	if (err != B_NO_ERROR) {
-		bridge.reportError("can't save arrangement to %s", projectSnapshotPath.Path());
+		bridge.reportError("can't save arrangement to %s", projectSnapshotPath.c_str());
 	}
 	fclose(snapfp);
+#endif
 	return err;
 }
-#endif
+
 status_t
 Qua::Save(FILE *fp, short indent, bool clearHistory)
 {

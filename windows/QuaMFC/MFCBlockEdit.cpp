@@ -1,6 +1,6 @@
 // MFCBlockEdit.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -517,7 +517,7 @@ MFCErrorViewer::Show()
 			buf.push_back('\r');
 			buf.push_back('\n');
 		}
-		ReportError(buf);
+		reportError(buf.c_str());
 //		txtv->SetWindowText(buf);
 //		errd.ShowWindow(TRUE);
 	}

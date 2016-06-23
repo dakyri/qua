@@ -29,6 +29,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -76,6 +77,11 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>Qua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\src\cpp\Qua\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -130,7 +136,7 @@
     <ClCompile Include="MFCObjectView.cpp" />
     <ClCompile Include="MFCPropertyPages.cpp" />
     <ClCompile Include="MFCQuaButton.cpp" />
-    <ClCompile Include="MFCQuaChannelController.cpp" />
+    <ClCompile Include="MFCQuaChannelBox.cpp" />
     <ClCompile Include="MFCQuaContextIndexView.cpp" />
     <ClCompile Include="MFCQuaFloatCtrl.cpp" />
     <ClCompile Include="MFCQuaIntCtrl.cpp" />
@@ -247,7 +253,7 @@
     <ClInclude Include="MFCObjectView.h" />
     <ClInclude Include="MFCPropertyPages.h" />
     <ClInclude Include="MFCQuaButton.h" />
-    <ClInclude Include="MFCQuaChannelController.h" />
+    <ClInclude Include="MFCQuaChannelBox.h" />
     <ClInclude Include="MFCQuaContextIndexView.h" />
     <ClInclude Include="MFCQuaFloatCtrl.h" />
     <ClInclude Include="MFCQuaIntCtrl.h" />

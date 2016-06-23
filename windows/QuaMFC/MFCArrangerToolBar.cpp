@@ -1,7 +1,7 @@
 
 // MFCArrangerToolBar.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "qua_version.h"
 

@@ -1023,7 +1023,7 @@ Sample::SynchronizeBuffers()
 
 						if ((bytesRead=file->Read(fileBuffer, bytesToRead)) != bytesToRead) {
 							if (bytesRead < 0) {
-								uberQua->bridge.reportError("qua: sample %s, error reading %d bytes at frame %d of %Ld: %s\n",
+								uberQua->bridge.reportError("qua: sample %s, error reading %d bytes at frame %d of %lld: %s\n",
 									requestedTake[j]->path,
 									bytesToRead,
 									curFrame,
@@ -1031,14 +1031,14 @@ Sample::SynchronizeBuffers()
 									errorStr(bytesRead));
 								goto seriousBadCookie;
 							} else if (bytesRead == 0) {
-								uberQua->bridge.reportError("qua: sample %s, null read, reading %d bytes at frame %d of %Ld\n",
+								uberQua->bridge.reportError("qua: sample %s, null read, reading %d bytes at frame %d of %lld\n",
 									requestedTake[j]->path,
 									bytesToRead,
 									curFrame,
 									file->nFrames);
 								goto seriousBadCookie;
 							} else {
-								uberQua->bridge.reportError("qua: sample %s, read count error, %d returned while reading %d bytes at frame %d of %Ld\n",
+								uberQua->bridge.reportError("qua: sample %s, read count error, %d returned while reading %d bytes at frame %d of %lld\n",
 									requestedTake[j]->path,
 									bytesRead,
 									bytesToRead,

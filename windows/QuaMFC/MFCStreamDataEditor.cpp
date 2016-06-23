@@ -1,6 +1,6 @@
 
 
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -22,9 +22,9 @@
 
 CFont		MFCStreamEditorYScale::displayFont;
 
-IMPLEMENT_DYNCREATE(MFCStreamDataEditor, MFCDataEditor)
+IMPLEMENT_DYNCREATE(MFCStreamDataEditor, MFCSequenceEditor)
 
-BEGIN_MESSAGE_MAP(MFCStreamDataEditor, MFCDataEditor)
+BEGIN_MESSAGE_MAP(MFCStreamDataEditor, MFCSequenceEditor)
 	//{{AFX_MSG_MAP(MFCDataEditor)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
@@ -88,7 +88,7 @@ MFCStreamDataEditor::SetHVScroll()
 //		MFCChannelView *ev =(MFCChannelView *)channeler->CR(channeler->NCR()-1);
 //		if (ev) {
 //			SetScrollRange(SB_VERT, 0, ev->frame.bottom-bounds.bottom);
-//			ReportError("%d %d", bounds.right, ev->frame.bottom-bounds.bottom);
+//			reportError("%d %d", bounds.right, ev->frame.bottom-bounds.bottom);
 //			if (ev->frame.bottom > 0) {
 //			}
 //		}
@@ -168,14 +168,14 @@ MFCStreamDataEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-//		ReportError("initial update of stream data editor finds a null sequencer document");
+//		reportError("initial update of stream data editor finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-//		ReportError("initial update of stream data editor finds a null sequencer");
+//		reportError("initial update of stream data editor finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = qdoc->qua->bridge.display;
 //		quaLink->AddArranger(this);
 //		SetScrollSizes(MM_TEXT, CSize(bounds.right, bounds.bottom));
-//		ReportError("%d %d", bounds.right, bounds.bottom);
+//		reportError("%d %d", bounds.right, bounds.bottom);
 //		display->AddChannelRepresentations(this);
 	}
 	SetHVScroll();

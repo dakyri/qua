@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCChannelView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 
 #include "StdDefs.h"
@@ -122,7 +122,7 @@ MFCDestinationView::OnToolTipNeedsTxt( UINT id, NMHDR * pTTTStruct, LRESULT * pR
 {
 //	NMTTDISPINFO *ttip = ((NMTTDISPINFO*)pTTTStruct);
 //    int control_id =  ::GetDlgCtrlID((HWND)ttip->hdr.idFrom);
-//	ReportError("tool tip %d %d", gainor.GetDlgCtrlID(), control_id);
+//	reportError("tool tip %d %d", gainor.GetDlgCtrlID(), control_id);
 //	wsprintf(ttip->lpszText,"hmmm");
 //	ttip->hinst = quaAppInstance;
 //	strcpy(ttip->szText, "hmmm");

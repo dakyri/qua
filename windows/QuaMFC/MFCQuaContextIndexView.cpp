@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCArrangeView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -115,9 +115,9 @@ MFCQuaContextIndexView::OnInitialUpdate()
 {
 	CQuaContextMFCDoc	*qdoc = (CQuaContextMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of context view mount finds a null context document");
+		reportError("initial update of context view mount finds a null context document");
 //	} else if (qdoc->qua == NULL) {
-//		ReportError("initial update finds a null sequencer");
+//		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = &qdoc->qua->display;
 //		quaLink->AddIndexer(this);
@@ -708,7 +708,7 @@ MFCQuaContextIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
 			case TypedValue::S_QUA:
-				sym->QuaValue()->SetName(tvp->item.pszText);
+				sym->QuaValue()->setName(tvp->item.pszText);
 				*result = 1;
 				break;
 			case TypedValue::S_METHOD:
@@ -857,7 +857,7 @@ MFCQuaContextIndexView::OnVstPluginView()
 			case TypedValue::S_VST_PLUGIN: {
 				VstPlugin	*vst=sym->VstValue();
 #ifdef QUA_V_VST_HOST
-				ReportError("%s\nFile: %s\n%d inputs\n%d outputs\n%d paramaters\n%d programs\n",
+				reportError("%s\nFile: %s\n%d inputs\n%d outputs\n%d paramaters\n%d programs\n",
 					sym->name, 
 					vst->pluginExecutable.Path(),
 					vst->numInputs,

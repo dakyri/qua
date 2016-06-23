@@ -11,6 +11,8 @@
 
 #include "Clock.h"
 
+#include <iostream>
+
 // Clock
 // runs from 0 till late o clock
 // the time is measured in integer ticks
@@ -112,13 +114,13 @@ Clock::WakeMeAfter(bigtime_t alm, bigtime_t timeout)
 	if (theTime < alarmTime) {
 		alarmOn = true;
 		if (debug_clock)
-			fprintf(stderr, "Waiting on alarm clock till %gms @ %gms\n", alm/1000.0, Count2MSec(theTime));
+			cerr << "Waiting on alarm clock till "<< alm / 1000.0 << "ms @ "<< Count2MSec(theTime) <<"ms\n" << endl;
 		status_t	err;
 
 		spring.wait(underTheSheets);
 	} else {
 		if (debug_clock)
-			fprintf(stderr, "The wait time is now: %gms @ %gms\nn", alm/1000.0, Count2MSec(theTime));
+			cerr << "The wait time is now: " << alm / 1000.0 << "ms @ " << Count2MSec(theTime) << "ms\n" << endl;
 	}
 	return theTime*usecsPerCount;
 }
@@ -135,7 +137,7 @@ Clock::Tick()
 {
 	theTime = CounterTime();
 	if (debug_clock)
-		fprintf(stderr, "tick %gms\n", Count2MSec(theTime));
+		cerr << "tick "<< Count2MSec(theTime) << "ms" << endl;
 	if (alarmOn && theTime >= (alarmTime-timingError)) {
 		alarmOn = false;
 	}
@@ -160,7 +162,7 @@ Clock::Clock(bool e)
 #if defined(WIN32)
 	LARGE_INTEGER	pcf;
 	QueryPerformanceFrequency(&pcf);
-	printf("performance freq %Ld, err %d\n", pcf.QuadPart, GetLastError());
+	cout << "performance freq " << pcf.QuadPart << ", err " << GetLastError() << endl;
 	performanceFrequency = pcf.QuadPart;
 	usecsPerCount = 1000000.0/((double)performanceFrequency);
 	timingError = MSec2Count(1);

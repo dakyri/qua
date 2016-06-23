@@ -4,7 +4,7 @@
 // of a running project/sequence/sequencer
 ////////////////////////////////////////////////////////////////////////
 
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"			// all the bog standard windows bits
 
 #include "qua_version.h"	// file of basic versioning definitions
@@ -181,7 +181,7 @@ CQuaMFCDoc::SaveModified()
 void
 CQuaMFCDoc::Serialize(CArchive& ar)
 {
-	ReportError("Serialize");
+	reportError("Serialize");
 	if (ar.IsStoring())	{
 		// TODO: add storing code here
 	} else {

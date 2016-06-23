@@ -1,5 +1,5 @@
 
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
@@ -19,9 +19,9 @@
 #include "Sample.h"
 #include "Parse.h"
 
-IMPLEMENT_DYNCREATE(MFCSampleDataEditor, MFCDataEditor)
+IMPLEMENT_DYNCREATE(MFCSampleDataEditor, MFCSequenceEditor)
 
-BEGIN_MESSAGE_MAP(MFCSampleDataEditor, MFCDataEditor)
+BEGIN_MESSAGE_MAP(MFCSampleDataEditor, MFCSequenceEditor)
 	//{{AFX_MSG_MAP(MFCSampleDataEditor)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
@@ -189,9 +189,9 @@ MFCSampleDataEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-//		ReportError("initial update of channel mount finds a null sequencer document");
+//		reportError("initial update of channel mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-//		ReportError("initial update finds a null sequencer");
+//		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 	}
 	SetHVScroll();

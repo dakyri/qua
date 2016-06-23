@@ -68,12 +68,13 @@ extern LPCTSTR quaPopupClassName;
 #ifdef WIN32
 extern HINSTANCE quaAppInstance;
 extern HMODULE quaAppModule;
-#endif
+#endif
+
 
 #include <string>
 using namespace std;
 
-extern void ReportError(string fmt, ...);
+extern void reportError(const char *fmt, ...);
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,5 @@
 #include "qua_version.h"
 
-
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>

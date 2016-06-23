@@ -112,7 +112,9 @@ public:
 	ulong					ReadChunk(FILE *fp, void **, ulong*);
 	status_t				SaveQuap(FILE *fp);
 
+#ifdef  QUA_V_SAVE_INITASXML
 	status_t				DoSave(const char *file);
+#endif
 
 	void					AddSchedulable(Schedulable *p);
 	void					RemoveSchedulable(Schedulable *p, bool andD, bool andDisplay);
@@ -125,7 +127,7 @@ public:
 	Voice					*CreateVoice(std::string, bool andD);
 	Method					*CreateMethod(std::string, StabEnt *ctxt, bool andD);
 	bool					ParsePass2(class Parser *p, StabEnt **loadable);
-	void					SetName(char *nm, bool setTitle=true);
+	void setName(const char *nm, bool setTitle=true);
 	void 					UpdateRecordDisplay();
 
 	Channel					*AddChannel(
@@ -255,14 +257,14 @@ class QuaCommandLine
 public:
 	QuaCommandLine();
 
-	int						ProcessCommandLine(int argc, char **argv);
-	bool					ProcessCommandLineWord(long argno, char *arg, bool cmd);
+	int ProcessCommandLine(int argc, char **argv);
+	bool ProcessCommandLineWord(long argno, char *arg, bool cmd);
 
-	void					ListAsio(FILE *fp);
-	void					ListMidi(FILE *fp);
-	void					ListJoy(FILE *fp);
-	bool					ListingCommands();
-	void					LoadAsio(int n, FILE *fp);
+	void ListAsio(FILE *fp);
+	void ListMidi(FILE *fp);
+	void ListJoy(FILE *fp);
+	bool ListingCommands();
+	void LoadAsio(int n, FILE *fp);
 
 	enum {
 		LIST_GLOB = 0x0001,
@@ -283,9 +285,9 @@ public:
 	std::vector<char *> loadNames;
 	std::vector<std::string> loaded;
 
-	static char				*usage_str;
-	long					commands;
-	long					last_command;
+	static char	 *usage_str;
+	long commands;
+	long last_command;
 
   
 };

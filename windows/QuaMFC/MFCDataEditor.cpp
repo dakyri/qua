@@ -1,7 +1,7 @@
 
 // MFCDataEditor.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 #include "qua_version.h"
@@ -34,7 +34,7 @@ CFont		MFCDataEditorTScale::displayFont;
 /////////////////////////////////////////////////////////////////////////////
 // MFCDataEditor
 
-//IMPLEMENT_DYNCREATE(MFCSequenceEditor, CScrollView)
+IMPLEMENT_DYNCREATE(MFCSequenceEditor, CScrollView)
 
 MFCSequenceEditor::MFCSequenceEditor()
 {
@@ -347,14 +347,14 @@ MFCSequenceEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of sequence editor finds a null sequencer document");
+		reportError("initial update of sequence editor finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		ReportError("initial update finds a null sequencer");
+		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = qdoc->qua->bridge.display;
 //		quaLink->AddArranger(this);
 //		SetScrollSizes(MM_TEXT, CSize(bounds.right, bounds.bottom));
-//		ReportError("%d %d", bounds.right, bounds.bottom);
+//		reportError("%d %d", bounds.right, bounds.bottom);
 		SetHVScroll();
 //		display->AddChannelRepresentations(this);
 	}

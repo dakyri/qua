@@ -430,7 +430,6 @@ SampleTake::ClosePeakCache()
 #endif
 //FILE *sstderr = fopen("debug", "w");
 
-#ifdef QUA_V_SAMPLE_DRAW
 bool
 SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float &loVal)
 {
@@ -515,7 +514,7 @@ SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float 
 			}
 			peakBufferNFrames = nr/(file->nChannels*file->sampleSize);
 			fprintf(stderr, "nread %d nframes %d at frame %d\n", nr, peakBufferNFrames, frame);
-			long nr = file->NormalizeInputCpy(peakBuffer, rawBuffer, nr);
+			nr = file->NormalizeInputCpy(peakBuffer, rawBuffer, nr);
 			if (nr < 0) {
 				// todo xxxx an error
 			}
@@ -537,7 +536,6 @@ SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float 
 	return true;
 #endif
 }
-#endif
 
 Clip::Clip(std::string nm, StabEnt *ctxt)
 {

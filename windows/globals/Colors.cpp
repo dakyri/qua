@@ -1,13 +1,6 @@
-#define _AFXDLL
+//#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
-
-#include <afxwin.h>
  
 #include "StdDefs.h"
 #include "Colors.h"
@@ -44,7 +37,7 @@ rgb_color rgb_indigo = RGB(100, 10, 100);
 rgb_color rgb_deepblue = RGB(60, 10, 100);
                     
 rgb_color
-Lighter(rgb_color col, uchar a)
+Lighter(rgb_color col, uint8 a)
 {
 #ifdef WIN32
 	uchar r=GetRValue(col);
@@ -128,7 +121,7 @@ GreenEr(rgb_color col, int8 a)
 }
                     
 rgb_color
-Darker(rgb_color col, uchar a)
+Darker(rgb_color col, uint8 a)
 {
 #ifdef WIN32
 	uchar r=GetRValue(col);

@@ -1,7 +1,7 @@
 
 // MFCChannelMountView.cpp : implementation file
 //
-#define _AFXDLL
+//#define _AFXDLL
 #include "stdafx.h"
 #include "qua_version.h"
 #include "QuaMFC.h"
@@ -220,9 +220,9 @@ MFCObjectMountView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		ReportError("initial update of object mount finds a null sequencer document");
+		reportError("initial update of object mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		ReportError("initial update finds a null sequencer");
+		reportError("initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddObjectRack(this);
@@ -455,7 +455,7 @@ MFCObjectMountView::DeleteObjectRepresentation(QuaObjectRepresentation	*nv)
 				break;
 			}
 			default: {
-				ReportError("Deleting view for unknown symbol type %d", nv->symbol->type);
+				reportError("Deleting view for unknown symbol type %d", nv->symbol->type);
 				return false;
 				break;
 			}
