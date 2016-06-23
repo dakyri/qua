@@ -7,6 +7,7 @@
 #include "Sym.h"
 #include "Qua.h"
 #include "QuaEnvironment.h"
+#include "QuaCommandLine.h"
 
 int main(char **argv, int argc)
 {
@@ -18,16 +19,12 @@ int main(char **argv, int argc)
 	//	exit(0);
 	environment.Setup();	// some app setup may rely on command line
 	environment.SetupDevices();
+	QuaCommandLine cmd;
+	cmd.processCommandLine(argc, argv);
+	setup_application_globals();	// some app setup may rely on command line, but probably not these days
 
-	if (process_command_line(argc, argv) == 0) {
-		return 0;
-	}
-	setup_application_globals();	// some app setup may rely on command line
-	if (listGlobals) {
-		glob.DumpGlobals(stderr);
-	}
-	for (int i = 0; i < quaLoadNames.CountItems(); i++) {
-		Qua * q = Qua::LoadQuaFile((char *)quaLoadNames.ItemAt(i));
+	for (string qnm: cmd.loadNames) {
+		Qua * q = Qua::loadScriptFile(qnm.c_str());
 		if (q != NULL) {
 			fprintf(stderr, "got a qua\n");
 			//			q->sym->Dump(stderr, 0);

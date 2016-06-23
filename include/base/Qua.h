@@ -78,6 +78,7 @@ public:
 							Qua(std::string path, bool chan_add=true);
 							Qua(char *nm, bool chan_add=true);							
 							~Qua();
+
 	status_t				OnCreationInit(bool chan_add);
 	status_t				PostCreationInit();
 	long					Start();
@@ -91,6 +92,8 @@ public:
 	long					ToPreviousMarker();
 	long					FastForward();
 
+	static string getVersionString();
+	static string getCapabilityString();
 
 	void					SequencerIteration();
 #ifdef QUA_V_MULTIMEDIA_TIMER
@@ -246,56 +249,12 @@ enum {
 };
 
 
-int						stringToNote();
-// this now serves no purpose other than to remind me that this all started in 1992 on an atari st;)
-#ifdef QUA_V_VST_HOST
-#include "VstPlugin.h"
-#endif
+int stringToNote(); // this now serves no purpose other than to remind me that this all started in 1992 on an atari st;)
 
-class QuaCommandLine
-{
-public:
-	QuaCommandLine();
-
-	int ProcessCommandLine(int argc, char **argv);
-	bool ProcessCommandLineWord(long argno, char *arg, bool cmd);
-
-	void ListAsio(FILE *fp);
-	void ListMidi(FILE *fp);
-	void ListJoy(FILE *fp);
-	bool ListingCommands();
-	void LoadAsio(int n, FILE *fp);
-
-	enum {
-		LIST_GLOB = 0x0001,
-		PRINT_VERSION= 0x0002,
-		PRINT_HELP= 0x0004,
-		LIST_VST =0x0008,
-		SET_VST= 0x0010,
-		ADD_VST= 0x0020,
-		LIST_ASIO= 0x0040,
-		LOAD_ASIO= 0x0080,
-		LIST_MIDI =0x0100,
-		LIST_JOY=0x0200,
-		LINT_QUA= 0x0400
-	};
-
-	std::vector<std::string> asioLoad;
-	std::vector<std::string> vstList;
-	std::vector<char *> loadNames;
-	std::vector<std::string> loaded;
-
-	static char	 *usage_str;
-	long commands;
-	long last_command;
-
-  
-};
 
 class QuaEnvironment;
 
 extern QuaEnvironment	environment;
-
 
 
 // ...oh and some random global variables
@@ -307,13 +266,12 @@ extern HMODULE			quaAppModule;
 #endif
 #endif
 
-
 enum {
 	QERR_WRONG_DEVICE=-5000
 };
 
-int			select_list(int n, float pr[]);
-bool		roll(float chance);
-float		frandom();
+int select_list(int n, float pr[]);
+bool roll(float chance);
+float frandom();
 
 #endif

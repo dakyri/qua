@@ -12,7 +12,7 @@
 QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
 	: display(d)
 {
-	version = "qua 0.94, universal";
+	version = Qua::getVersionString();
 #ifdef QUA_V_AUDIO
 	quaAudio = nullptr;
 #endif

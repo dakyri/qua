@@ -2071,3 +2071,69 @@ Qua::FetchEnvelopeSegments(StabEnt *, StabEnt *, long, EnvelopeSegment *)
 {
 	;
 }
+
+string
+Qua::getVersionString()
+{
+	return "0.94, universal";
+}
+
+string
+Qua::getCapabilityString()
+{
+	string caps;
+#ifdef QUA_V_APP_HANDLER
+#endif
+#ifdef QUA_V_QUADDON
+#endif
+#ifdef QUA_V_PORT_PARAM
+#endif
+#ifdef QUA_V_STREAM_MESG
+#endif
+#ifdef QUA_V_CONTROLLER_INTERFACE
+#endif
+#ifdef QUA_V_ARRANGER_INTERFACE
+#endif
+#ifdef QUA_V_EDITOR_INTERFACE
+#endif
+#ifdef QUA_V_MIXER_INTERFACE
+#endif
+#ifdef QUA_V_AUDIO
+#ifdef QUA_V_AUDIO_ASIO
+	caps += "asio ";
+#endif
+#endif
+#ifdef QUA_V_DIRECT_MIDI
+	caps += "dxmidi ";
+#endif
+#ifdef QUA_V_JOYSTICK
+#ifdef QUA_V_JOYSTICK_DX
+	caps += "dxjoy ";
+#endif
+#ifdef QUA_V_JOYSTICK_MMC
+	caps += "mmcjoy ";
+#endif
+#endif
+#ifdef QUA_V_VST
+#if defined(QUA_V_VST_HOST_GUI)
+	caps += "vstgui "; 
+#elif defined(QUA_V_VST_HOST)
+	caps += "vsthost ";
+#else
+#endif
+#endif
+#ifdef QUA_V_RAM_LOCKED_BUFFERS
+#endif
+#ifdef QUA_V_GDI_PLUS
+#endif
+
+	// different structural versions ...
+#ifdef QUA_V_BETTER_SCHEDULER
+#endif
+#ifdef QUA_V_HAS_POOLPLAYER
+#endif
+#ifdef QUA_V_SAVE_INITASXML
+#endif
+
+	return caps;
+}

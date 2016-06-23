@@ -3,6 +3,7 @@
 #include "Qua.h"
 #include "QuaMidi.h"
 #include "QuaAudio.h"
+#include "QuaCommandLine.h"
 
 
 char			*QuaCommandLine::usage_str = "\
@@ -25,8 +26,10 @@ Options:\n\
 Anything else is presumed to be a script file to be run,\n\
 Scripts are run with preceding command line options/conditions set.";
 
+#include <iostream>
+
 int
-QuaCommandLine::ProcessCommandLine(int argc, char **argv)
+QuaCommandLine::processCommandLine(int argc, char **argv)
 {
 	int		i = 1;
 	bool	wait_stop = true;
@@ -34,99 +37,88 @@ QuaCommandLine::ProcessCommandLine(int argc, char **argv)
 
 	while (i<argc) {
 		if (argv[i][0] == '/' || argv[i][0] == '-') {
-			ProcessCommandLineWord(i, argv[i] + 1, true);
-		}
-		else {
-			ProcessCommandLineWord(i, argv[i], false);
+			processCommandLineWord(i, argv[i] + 1, true);
+		} else {
+			processCommandLineWord(i, argv[i], false);
 		}
 		i++;
 	}
-
+	closeListFile();
 	return 1;
 }
 
 QuaCommandLine::QuaCommandLine()
 {
-	commands = 0;
 	last_command = 0;
+	listFile = nullptr;
 }
 
 bool
-QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
+QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 {
 	if (cmd) {
-		if (strcmp(arg, "help") == 0 || strcmp(arg, "about") == 0) {
-			last_command = PRINT_HELP;
-			commands |= PRINT_HELP;
+		if (arg == "help" || arg == "about") {
+			cout << usage_str << endl;
 			return true;
-		}
-		else if (strcmp(arg, "version") == 0) {
-			last_command = PRINT_VERSION;
-			commands |= PRINT_VERSION;
+		} else if (arg == "version") {
+			cout << Qua::getVersionString() << endl;
 			return true;
-		}
-		else if (strcmp(arg, "setvst") == 0) {
+		} else if (arg == "caps") {
+			cout << Qua::getCapabilityString() << endl;
+			return true;
+		} else if (arg =="setvst") {
 			last_command = SET_VST;
-			commands |= SET_VST;
 			return true;
-		}
-		else if (strcmp(arg, "addvst") == 0) {
+		} else if (arg =="addvst") {
 			last_command = ADD_VST;
-			commands |= ADD_VST;
 			return true;
-		}
-		else if (strcmp(arg, "listvst") == 0) {
-			last_command = LIST_VST;
-			commands |= LIST_VST;
+		} else if (arg =="listvst") {
+#ifdef QUA_V_VST_HOST
+			for (short i = 0; i<vstList.CountItems(); i++) {
+				VstPlugin::ScanFile((char *)vstList.ItemAt(i), NULL, listFile, true);
+			}
+#endif
 			return true;
-		}
-		else if (strcmp(arg, "lint") == 0) {
+		} else if (arg =="lint") {
 			last_command = LINT_QUA;;
-			commands |= LINT_QUA;
 			return true;
-		}
-		else if (strcmp(arg, "listglob") == 0) {
-			glob.DumpGlobals(fp);
-			return true;
-		}
-		else if (strcmp(arg, "listjoy") == 0) {
-			last_command = LIST_JOY;
-			commands |= LIST_JOY;
-			return true;
-		}
-		else if (strcmp(arg, "listasio") == 0) {
-			last_command = LIST_ASIO;
-			commands |= LIST_ASIO;
-			return true;
-		}
-		else if (strcmp(arg, "loadasio") == 0) {
+		} else if (arg =="loadasio") {
 			last_command = LOAD_ASIO;
-			commands |= LOAD_ASIO;
 			return true;
-		}
-		else if (strcmp(arg, "listmidi") == 0) {
-			last_command = LIST_MIDI;
-			commands |= LIST_MIDI;
+		} else if (arg =="listglob") {
+			openListFile();
+			glob.DumpGlobals(listFile);
+			return true;
+		} else if (arg =="listjoy") {
+			openListFile();
+			listJoy(listFile);
+			return true;
+		} else if (arg =="listasio") {
+			openListFile();
+			listAsio(listFile);
+			return true;
+		} else if (arg =="listmidi") {
+			openListFile();
+			listMidi(listFile);
 			return true;
 		}
 		/*
-		else if (strcmp(arg, "wait") == 0) {
+		else if (arg =="wait") {
 		if (++i > argc) {
 		printf(usage_str);
 		return 1;
 		}
-		if (strcmp(arg, "stop") == 0) {
+		if (arg =="stop") {
 		wait_stop = true;
 		} else {
 		}
 		}*/
-	}
-	else {
+	} else {
 		// anything else will be a file to run, using any prior commandline options/settings
 		switch (last_command) {
 		case LINT_QUA: {
-			Qua * q = Qua::LoadScriptFile((char *)arg);
-			if (q != NULL) {
+			Qua * q = Qua::LoadScriptFile((char *)arg.c_str());
+			if (q != nullptr) {
 				fprintf(stderr, "got a qua\n");
 				q->sym->Dump(stderr, 0);
 				delete q;
@@ -148,10 +140,10 @@ QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 			return true;
 		}
 #endif
-#ifdef QUA_V_ASIO
+#ifdef QUA_V_AUDIO_ASIO
 		case LOAD_ASIO: {
-			int n = atoi(arg);
-			asioLoad.push_back(n);
+			int n = atoi(arg.c_str());
+			loadAsio(n, listFile);
 			return true;
 		}
 #endif
@@ -166,46 +158,27 @@ QuaCommandLine::ProcessCommandLineWord(long argno, char *arg, bool cmd)
 	return false;
 }
 
-bool
-QuaCommandLine::ListingCommands()
+void
+QuaCommandLine::closeListFile()
 {
-	if ((commands & (LIST_GLOB | LIST_VST | LIST_ASIO | LIST_MIDI | LIST_JOY)) != 0) {
-		FILE	*fp = fopen("qua.lst", "w");
-		fprintf(fp, "****** Qua listing ******\n");
-		if (commands & LIST_GLOB) {
-		}
-#ifdef QUA_V_ASIO
-
-		if (commands & LOAD_ASIO) {
-			for (short i = 0; i<asioLoad.CountItems(); i++) {
-				LoadAsio((int)vstList.ItemAt(i), fp);
-			}
-		}
-#endif
-		if (commands & LIST_ASIO) {
-			ListAsio(fp);
-		}
-		if (commands & LIST_MIDI) {
-			ListMidi(fp);
-		}
-		if (commands & LIST_JOY) {
-			ListJoy(fp);
-		}
-#ifdef QUA_V_VST_HOST
-		if (commands & LIST_VST) {
-			for (short i = 0; i<vstList.CountItems(); i++) {
-				VstPlugin::ScanFile((char *)vstList.ItemAt(i), NULL, fp, true);
-			}
-		}
-#endif
-		fclose(fp);
-		return true;
+	if (listFile != nullptr) {
+		fclose(listFile);
+		listFile = nullptr;
 	}
-	return false;
 }
 
 void
-QuaCommandLine::ListAsio(FILE *fp)
+QuaCommandLine::openListFile()
+{
+	if (listFile != nullptr) {
+		closeListFile();
+	}
+	listFile = fopen("qua.lst", "w");
+	fprintf(listFile, "%s\n", Qua::getVersionString());
+}
+
+void
+QuaCommandLine::listAsio(FILE *fp)
 {
 #ifdef QUA_V_AUDIO_ASIO
 	int32		na = QuaAudioManager::asio.nDrivers;
@@ -221,7 +194,7 @@ QuaCommandLine::ListAsio(FILE *fp)
 }
 
 void
-QuaCommandLine::LoadAsio(int devind, FILE *fp)
+QuaCommandLine::loadAsio(int devind, FILE *fp)
 {
 #ifdef QUA_V_AUDIO_ASIO
 	int32		na = QuaAudioManager::asio.nDrivers;
@@ -263,7 +236,7 @@ QuaCommandLine::LoadAsio(int devind, FILE *fp)
 }
 
 void
-QuaCommandLine::ListMidi(FILE *fp)
+QuaCommandLine::listMidi(FILE *fp)
 {
 #ifdef WIN32
 #ifdef QUA_V_DIRECT_MIDI
@@ -292,7 +265,7 @@ QuaCommandLine::ListMidi(FILE *fp)
 }
 
 void
-QuaCommandLine::ListJoy(FILE *fp)
+QuaCommandLine::listJoy(FILE *fp)
 {
 #ifdef QUA_V_JOYSTICK
 #ifdef QUA_V_JOYSTICK_DX

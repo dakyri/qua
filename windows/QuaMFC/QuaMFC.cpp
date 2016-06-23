@@ -52,6 +52,7 @@ ULONG_PTR gdiplusToken;
 
 #include "Qua.h"
 #include "QuaEnvironment.h"
+#include "QuaCommandLine.h"
 
 #include <iostream>
 
@@ -157,7 +158,6 @@ CQuaMFCApp::InitInstance()
 	fprintf(trace_fp, "InitInstance()\n");
 	QuaCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-	cmdInfo.ListingCommands();
 	CSplashWnd::EnableSplashScreen(cmdInfo.m_bShowSplash);
 	AfxEnableControlContainer();
 	fprintf(trace_fp, "InitInstance() done basics\n");
@@ -493,10 +493,13 @@ QuaCommandLineInfo::ParseParam(
 	if (trace_fp != nullptr) {
 		fprintf(trace_fp, "QuaCommandLineInfo::ParseParam(%d)\n", argCount);
 	}
-	if (!ProcessCommandLineWord(argCount, (char *)pszParam, bFlag)) {
+	if (!processCommandLineWord(argCount, (char *)pszParam, bFlag)) {
 		CCommandLineInfo::ParseParam(pszParam, bFlag, bLast);
 	}
 	argCount++;
+	if (bLast) {
+		closeListFile();
+	}
 }
 
 #include <afxwin.h>

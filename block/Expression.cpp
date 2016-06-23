@@ -21,7 +21,7 @@ int			debug_exp = 0;
  * StringToNote:
  */
 int
-StringToNote(char *buf)
+stringToNote(char *buf)
 {
     short	pitch, rej;
 

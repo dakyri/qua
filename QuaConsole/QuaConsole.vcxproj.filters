@@ -29,7 +29,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="QuaConsole.cpp">
+    <ClCompile Include="Qua.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

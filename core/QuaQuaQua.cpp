@@ -73,7 +73,7 @@ CreateNewNote(int type, Block *P,
 		ret_val.flags |= ~ResultValue::COMPLETE;
 	}
     if (val.type == TypedValue::S_STRING)
-    	noteTo.pitch = StringToNote(val.StringValue());
+    	noteTo.pitch = stringToNote(val.StringValue());
     else
     	noteTo.pitch = val.ByteValue(NULL);
 

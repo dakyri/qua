@@ -22,7 +22,7 @@ public:
 
 	bool					SetVstPluginDir(char *path, bool add, bool reload);
 
-	char					*version;
+	string version;
 	std::string				appPath;
 	std::string				homePath;
 	std::string				configDirectory;
