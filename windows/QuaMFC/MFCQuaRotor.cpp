@@ -1,6 +1,9 @@
-#include "qua_version.h"
 
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,12 +14,10 @@
 #include <afxwin.h>
 #include <afxcmn.h>
 
-
-#include "DaBasicTypes.h"
-#include "DaErrorCodes.h"
+#include "StdDefs.h"
 #include "Colors.h"
 #include "MemDC.h"
-#include "StdDefs.h"
+
 #include "QuaMFC.h"
 #include "MFCQuaRotor.h"
 
@@ -351,7 +352,7 @@ MFCQuaRotor::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 	CRect	tr(0,0,labelWidth, bounds.bottom);
-	dc.DrawText(label(), -1, &tr, DT_LEFT|DT_VCENTER);
+	dc.DrawText(label.c_str (), -1, &tr, DT_LEFT | DT_VCENTER);
 	dc.ExcludeClipRect(0,0,labelWidth, bounds.bottom);
 	dc.SetBkMode(TRANSPARENT);
 	PaintRotor(&dc);
@@ -645,8 +646,8 @@ MFCQuaRotor::OnToolTipNotify(NMHDR *pNMHDR, LRESULT *pResult)
 //	fprintf(stderr, "ottn\n");
 
 	char buf[256];
-	if (label()) {
-		sprintf(buf, "%s:%g", label(), fValue);
+	if (label.size()) {
+		sprintf(buf, "%s:%g", label.c_str(), fValue);
 	} else {
 		sprintf(buf, "%g", fValue);
 	}
@@ -709,7 +710,7 @@ MFCSmallQuaRotor::OnPaint()
 	dc.SetBkMode(TRANSPARENT);
 	CRect	tr(0,0,labelWidth, bounds.bottom);
 	dc.SelectObject(&displayFont);
-	dc.DrawText(shortLabel(), -1, &tr, DT_CENTER|DT_VCENTER);
+	dc.DrawText(shortLabel.c_str(), -1, &tr, DT_CENTER|DT_VCENTER);
 	dc.ExcludeClipRect(0,0,labelWidth, bounds.bottom);
 	PaintRotor(&dc);
 	return;

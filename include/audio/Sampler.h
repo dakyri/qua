@@ -1,7 +1,7 @@
 #ifndef _SAMPLER
 #define _SAMPLER
 
-// actually the main audio generator for qua.
+// historically the main audio generator for qua.
 // audio port and audio manager represent the actual hardware
 // devices and a roster of such that this beast talks to.
 

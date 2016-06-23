@@ -1,4 +1,3 @@
-#include "qua_version.h"
 
 // QuaMFC.cpp : Defines the class behaviors for the application.
 //
@@ -7,8 +6,12 @@
 //	* class for a Qua document: CQuaMFCDoc,
 //	* class for the MDI child frame: QuaChildFrame
 //  * class for the view on the document CQuaMFCView
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
+
+#include "qua_version.h"
+
 #ifdef QUA_V_GDI_PLUS
 #include <gdiplus.h>
 using namespace Gdiplus;
@@ -16,18 +19,6 @@ GdiplusStartupInput gdiplusStartupInput;
 ULONG_PTR gdiplusToken;
 #endif
 
-#include "DaBasicTypes.h"
-#include "DaList.h"
-#include "DaErrorCodes.h"
-#include "DaKernel.h"
-#include "DaPath.h"
-#include "DaFile.h"
-#include "DaMimeType.h"
-#include "DaRect.h"
-//#include "DaMessage.h"
-//#include "DaApplication.h"
-//#include "DaAudio.h"
-//#include "DaPoint.h"
 #include "QuaMFC.h"
 
 #include "MainFrm.h"
@@ -59,7 +50,11 @@ ULONG_PTR gdiplusToken;
 ////////////////////////////////////////
 
 
-#include "inx/Qua.h"
+#include "Qua.h"
+#include "QuaEnvironment.h"
+
+HINSTANCE quaAppInstance = NULL;
+HMODULE quaAppModule = NULL;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -174,8 +169,8 @@ CQuaMFCApp::InitInstance()
 //		"F:/progs/VstPlugins/Native Instruments/Absynth 3.dll"
 //		);
 //	exit(0);
-	context.Setup();	// some app setup may rely on command line
-	context.SetupDevices();
+	environment.Setup();	// some app setup may rely on command line
+	environment.SetupDevices();
 ////////////////////////////////////////////////////////
 
 #ifdef QUA_V_GDI_PLUS
@@ -194,7 +189,7 @@ CQuaMFCApp::InitInstance()
 	//  the specific initialization routines you do not need.
 
 #ifdef _AFXDLL
-	Enable3dControls();			// Call this when using MFC in a shared DLL
+//	Enable3dControls();			// Call this when using MFC in a shared DLL
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif

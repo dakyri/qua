@@ -1,15 +1,13 @@
 #include "qua_version.h"
 // MFCArrangeView.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
-#include "DaFile.h"
 
 #include "QuaMFC.h"
 #include "QuaContextMFCDoc.h"
@@ -20,13 +18,14 @@
 
 #include "StdDefs.h"
 
-#include "inx/Qua.h"
-#include "inx/Channel.h"
-#include "inx/Sample.h"
-#include "inx/Voice.h"
-#include "inx/Method.h"
-#include "inx/QuaPort.h"
-#include "inx/Sym.h"
+#include "Qua.h"
+#include "QuaEnvironment.h"
+#include "Channel.h"
+#include "Sample.h"
+#include "Voice.h"
+#include "Method.h"
+#include "QuaPort.h"
+#include "Sym.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,12 +68,18 @@ BEGIN_MESSAGE_MAP(MFCQuaContextIndexView, CTreeView)
 	ON_COMMAND(ID_VSTPLUGIN_GLOBAL_SET_DIRECTORY, OnVstPluginSetDirectory)
 	ON_COMMAND(ID_VSTPLUGIN_GLOBAL_ADD_DIRECTORY, OnVstPluginSetDirectory)
 	ON_COMMAND(ID_INSTANCE_DELETE, OnPopupDelete)
-	ON_NOTIFY_REFLECT(TVN_SELCHANGED,OnNodeSelect)
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_SELCHANGED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeSelect))},
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINDRAG, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginDrag)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ITEMEXPANDED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeExpand)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ENDLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnEndLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)NM_RCLICK, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnRightClick)) },
+/*ON_NOTIFY_REFLECT(TVN_SELCHANGED,OnNodeSelect)
 	ON_NOTIFY_REFLECT(TVN_BEGINDRAG,OnBeginDrag)
 	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED,OnNodeExpand)
 	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT,OnBeginLabelEdit)
 	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT,OnEndLabelEdit)
-	ON_NOTIFY_REFLECT(NM_RCLICK,OnRightClick)
+	ON_NOTIFY_REFLECT(NM_RCLICK,OnRightClick)*/
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -82,7 +87,7 @@ END_MESSAGE_MAP()
 // MFCQuaContextIndexView drawing
 
 void
-MFCQuaContextIndexView::DisplayArrangementTitle(const char *nm)
+MFCQuaContextIndexView::displayArrangementTitle(const char *nm)
 {
 	;
 }
@@ -117,12 +122,12 @@ MFCQuaContextIndexView::OnInitialUpdate()
 //		quaLink = &qdoc->qua->display;
 //		quaLink->AddIndexer(this);
 //		top = AddTopLevelClass(qdoc->qua->sym->name, S_QUA, TVI_ROOT);
-		quas = AddTopLevelClass("Arrangements", S_QUA, TVI_ROOT, 0);
-		vstplugins = AddTopLevelClass("VST Plugins", S_VST_PLUGIN, TVI_ROOT, 0);
-		builtins = AddTopLevelClass("Builtin", S_BUILTIN, TVI_ROOT, 0);
-		methods = AddTopLevelClass("Methods", S_METHOD, TVI_ROOT, 0);
-		templates = AddTopLevelClass("Templates", S_TEMPLATE, TVI_ROOT, 0);
-		ports = AddTopLevelClass("Ports", S_PORT, TVI_ROOT, 0);
+		quas = AddTopLevelClass("Arrangements", TypedValue::S_QUA, TVI_ROOT, 0);
+		vstplugins = AddTopLevelClass("VST Plugins", TypedValue::S_VST_PLUGIN, TVI_ROOT, 0);
+		builtins = AddTopLevelClass("Builtin", TypedValue::S_BUILTIN, TVI_ROOT, 0);
+		methods = AddTopLevelClass("Methods", TypedValue::S_METHOD, TVI_ROOT, 0);
+		templates = AddTopLevelClass("Templates", TypedValue::S_TEMPLATE, TVI_ROOT, 0);
+		ports = AddTopLevelClass("Ports", TypedValue::S_PORT, TVI_ROOT, 0);
 
 		AddAllIndexItems();
 	}
@@ -132,30 +137,32 @@ MFCQuaContextIndexView::OnInitialUpdate()
 // MFCQuaContextIndexView members
 /////////////////////////////////////////////////////////////////////////////
 void
-MFCQuaContextIndexView::AddToSymbolIndex(StabEnt *s)
+MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 {
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_QUA: {
+			case TypedValue::S_QUA: {
 				HTREEITEM	it = IndexItemFor(s, quas);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, quas, 2);
 				}
 				break;
 			}
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				HTREEITEM	it = IndexItemFor(s, vstplugins);
 				if (it == NULL) {
+#ifdef QUA_V_VST_HOST
 					VstPlugin	*vp = s->VstValue();
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, vstplugins,
 							(vp->status==VST_PLUG_LOADED)?
 								(vp->isSynth?11:3):
 								(vp->isSynth?12:10));
 					GetTreeCtrl().SortChildren(vstplugins);
+#endif
 				}
 				break;
 			}
-			case S_BUILTIN: {
+			case TypedValue::S_BUILTIN: {
 				HTREEITEM	it = IndexItemFor(s, builtins);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, builtins, 5);
@@ -163,7 +170,7 @@ MFCQuaContextIndexView::AddToSymbolIndex(StabEnt *s)
 				}
 				break;
 			}
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				HTREEITEM	it = IndexItemFor(s, methods);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, methods, 6);
@@ -171,14 +178,14 @@ MFCQuaContextIndexView::AddToSymbolIndex(StabEnt *s)
 				}
 				break;
 			}
-			case S_TEMPLATE: {
+			case TypedValue::S_TEMPLATE: {
 				HTREEITEM	it = IndexItemFor(s, templates);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, templates, 4);
 				}
 				break;
 			}
-			case S_PORT: {
+			case TypedValue::S_PORT: {
 				HTREEITEM	it = IndexItemFor(s, ports);
 				if (it == NULL) {
 					QuaPort	*p = s->PortValue();
@@ -202,7 +209,7 @@ MFCQuaContextIndexView::AddToSymbolIndex(StabEnt *s)
 }
 
 void
-MFCQuaContextIndexView::RemoveFromSymbolIndex(StabEnt *s)
+MFCQuaContextIndexView::removeFromSymbolIndex(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
@@ -212,7 +219,7 @@ MFCQuaContextIndexView::RemoveFromSymbolIndex(StabEnt *s)
 
 
 void
-MFCQuaContextIndexView::SymbolNameChanged(StabEnt *s)
+MFCQuaContextIndexView::symbolNameChanged(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
@@ -281,32 +288,32 @@ MFCQuaContextIndexView::IndexItemFor(StabEnt *s)
 {
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_QUA: {
+			case TypedValue::S_QUA: {
 				return IndexItemFor(s, quas);
 				break;
 			}
-			case S_BUILTIN: {
+			case TypedValue::S_BUILTIN: {
 				return IndexItemFor(s, builtins);
 				break;
 			}
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				return IndexItemFor(s, vstplugins);
 				break;
 			}
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				return IndexItemFor(s, methods);
 				break;
 			}
-			case S_TEMPLATE: {
+			case TypedValue::S_TEMPLATE: {
 				return IndexItemFor(s, templates);
 				break;
 			}
-			case S_PORT: {
+			case TypedValue::S_PORT: {
 				return IndexItemFor(s, ports);
 				break;
 			}
 		   /*
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
 				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
 				switch (p->type) {
@@ -340,7 +347,7 @@ MFCQuaContextIndexView::AddAllIndexItems()
 {
 	for (int i=0; i<MAX_SYMBOLS; i++) {
 		if (glob[i] != NULL && !glob[i]->isDeleted && glob[i]->context == NULL) {
-			AddToSymbolIndex(glob[i]);
+			addToSymbolIndex(glob[i]);
 		}
 	}
 }
@@ -357,27 +364,27 @@ MFCQuaContextIndexView::OnBeginDrag(NMHDR *pnmh, LRESULT* bHandled)
 			bool	draggable = false;
 			UINT	dragFormat = 0;
 			switch (s->type) {
-				case S_BUILTIN: {
+				case TypedValue::S_BUILTIN: {
 					draggable = true;
 					dragFormat = QuaDrop::builtinFormat;
 					break;
 				}
-				case S_VST_PLUGIN: {
+				case TypedValue::S_VST_PLUGIN: {
 					draggable = true;
 					dragFormat = QuaDrop::vstpluginFormat;
 					break;
 				}
-				case S_METHOD: {	// move an instance
+				case TypedValue::S_METHOD: {	// move an instance
 					draggable = true;
 					dragFormat = QuaDrop::methodFormat;
 					break;
 				}
-				case S_TEMPLATE: {
+				case TypedValue::S_TEMPLATE: {
 					draggable = true;
 					dragFormat = QuaDrop::templateFormat;
 					break;
 				}
-				case S_PORT: {
+				case TypedValue::S_PORT: {
 					draggable = true;
 					dragFormat = QuaDrop::portFormat;
 					break;
@@ -671,15 +678,15 @@ MFCQuaContextIndexView::OnBeginLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_QUA:
-			case S_METHOD:
-			case S_TEMPLATE:
-			case S_VST_PLUGIN:
+			case TypedValue::S_QUA:
+			case TypedValue::S_METHOD:
+			case TypedValue::S_TEMPLATE:
+			case TypedValue::S_VST_PLUGIN:
 				*result = 0;
 				break;
 			default:
-			case S_PORT:
-			case S_BUILTIN:
+			case TypedValue::S_PORT:
+			case TypedValue::S_BUILTIN:
 				*result = 1;
 				break;
 		}
@@ -700,25 +707,25 @@ MFCQuaContextIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM && SymTab::ValidSymbolName(tvp->item.pszText)) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_QUA:
+			case TypedValue::S_QUA:
 				sym->QuaValue()->SetName(tvp->item.pszText);
 				*result = 1;
 				break;
-			case S_METHOD:
+			case TypedValue::S_METHOD:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
-			case S_TEMPLATE:
+			case TypedValue::S_TEMPLATE:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
-			case S_VST_PLUGIN:
+			case TypedValue::S_VST_PLUGIN:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			default:
-			case S_PORT:
-			case S_BUILTIN:
+			case TypedValue::S_PORT:
+			case TypedValue::S_BUILTIN:
 				*result = 0;
 				break;
 		}
@@ -744,28 +751,28 @@ MFCQuaContextIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_QUA:
+			case TypedValue::S_QUA:
 				DoPopupMenu(IDR_QUA_RCLICK);
 				break;
-			case S_BUILTIN:
+			case TypedValue::S_BUILTIN:
 				DoPopupMenu(IDR_BUILTIN_RCLICK);
 				break;
-			case S_VST_PLUGIN:
+			case TypedValue::S_VST_PLUGIN:
 				DoPopupMenu(IDR_VSTPLUGIN_RCLICK);
 				break;
-			case S_TEMPLATE:
+			case TypedValue::S_TEMPLATE:
 				DoPopupMenu(IDR_TEMPLATE_RCLICK);
 				break;
-			case S_METHOD:
+			case TypedValue::S_METHOD:
 				DoPopupMenu(IDR_METHOD_RCLICK);
 				break;
-			case S_PORT:
+			case TypedValue::S_PORT:
 				DoPopupMenu(IDR_PORT_RCLICK);
 				break;
 		}
 	} else {
 		switch (selectedData) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				DoPopupMenu(IDR_VSTPLUGIN_GLOBAL_RCLICK);
 				break;
 			}
@@ -804,7 +811,7 @@ MFCQuaContextIndexView::OnPopupDelete()
 		StabEnt	*sym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
 		switch (sym->type) {
-			case S_QUA:
+			case TypedValue::S_QUA:
 //				quaLink->DeleteObject(sym);
 				break;
 		}
@@ -818,7 +825,7 @@ MFCQuaContextIndexView::OnPopupControl()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_PORT:
+			case TypedValue::S_PORT:
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -832,7 +839,7 @@ MFCQuaContextIndexView::OnPopupEdit()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_QUA:
+			case TypedValue::S_QUA:
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -847,8 +854,9 @@ MFCQuaContextIndexView::OnVstPluginView()
 		char	buf[1024];
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				VstPlugin	*vst=sym->VstValue();
+#ifdef QUA_V_VST_HOST
 				ReportError("%s\nFile: %s\n%d inputs\n%d outputs\n%d paramaters\n%d programs\n",
 					sym->name, 
 					vst->pluginExecutable.Path(),
@@ -857,6 +865,7 @@ MFCQuaContextIndexView::OnVstPluginView()
 					vst->numParams,
 					vst->numPrograms,
 				buf);
+#endif
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 			}
@@ -871,7 +880,7 @@ MFCQuaContextIndexView::OnVstPluginSave()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN:
+			case TypedValue::S_VST_PLUGIN:
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -885,7 +894,7 @@ MFCQuaContextIndexView::OnVstPluginDisable()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN:
+			case TypedValue::S_VST_PLUGIN:
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -899,7 +908,7 @@ MFCQuaContextIndexView::OnVstPluginReload()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN:
+			case TypedValue::S_VST_PLUGIN:
 //				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -914,20 +923,20 @@ MFCQuaContextIndexView::OnVstPluginSetDirectory()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				char	buf[1024];
 				if (XBrowseForFolder(m_hWnd, "", buf, 1024)) {
-					context.SetVstPluginDir(buf, false, true);
+					environment.SetVstPluginDir(buf, false, true);
 				}
 				break;
 			}
 		}
 	} else {
 		switch (selectedData) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				char	buf[1024];
 				if (XBrowseForFolder(m_hWnd, "", buf, 1024)) {
-					context.SetVstPluginDir(buf, false, true);
+					environment.SetVstPluginDir(buf, false, true);
 				}
 				break;
 			}
@@ -942,20 +951,20 @@ MFCQuaContextIndexView::OnVstPluginAddDirectory()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				char	buf[1024];
 				if (XBrowseForFolder(m_hWnd, "", buf, 1024)) {
-					context.SetVstPluginDir(buf, true, true);
+					environment.SetVstPluginDir(buf, true, true);
 				}
 				break;
 			}
 		}
 	} else {
 		switch (selectedData) {
-			case S_VST_PLUGIN: {
+			case TypedValue::S_VST_PLUGIN: {
 				char	buf[1024];
 				if (XBrowseForFolder(m_hWnd, "", buf, 1024)) {
-					context.SetVstPluginDir(buf, true, true);
+					environment.SetVstPluginDir(buf, true, true);
 				}
 				break;
 			}

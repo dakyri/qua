@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCChannelMountView.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
@@ -10,10 +10,10 @@
 #include "MFCArrangeView.h"
 #include "MFCQuaMessageId.h"
 
-#include "DaKernel.h"
-#include "DaBasicTypes.h"
-#include "inx/Qua.h"
+
 #include "StdDefs.h"
+#include "Qua.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,7 +59,7 @@ void MFCChannelMountView::OnDraw(CDC* pdc)
 
 
 void
-MFCChannelMountView::DisplayArrangementTitle(const char *nm)
+MFCChannelMountView::displayArrangementTitle(const char *nm)
 {
 	;
 }

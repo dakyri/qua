@@ -1,15 +1,11 @@
-#include "qua_version.h"
+
 // MFCChannelView.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
-#include "DaErrorCodes.h"
-#include "DaList.h"
-
-#include "Colors.h"
+#include "qua_version.h"
 
 #include "QuaMFC.h"
 #include "MFCChannelView.h"
@@ -19,12 +15,15 @@
 #include "MFCQuaMessageId.h"
 #include "ChildFrm.h"
 
+#include "Colors.h"
+
 // Qua main includes
-#include "inx/Qua.h"
-#include "inx/Channel.h"
-#include "inx/QuaAudio.h"
-#include "inx/QUaMidi.h"
-#include "inx/QuaJoystick.h"
+#include "Qua.h"
+#include "QuaEnvironment.h"
+#include "Channel.h"
+#include "QuaAudio.h"
+#include "QuaMidi.h"
+#include "QuaJoystick.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -228,12 +227,12 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 
 	short	i;
 	char	buf[128];
-	for (i=0; i<channel->inputs.CountItems(); i++) {
+	for (i=0; i<channel->inputs.size(); i++) {
 		fprintf(stderr, "input menu item %d\n", i);
 		sprintf(buf, "input %d (%s)", i+1, channel->inputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
 		chInputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 3), buf);
 	}
-	for (i=0; i<channel->outputs.CountItems(); i++) {
+	for (i=0; i<channel->outputs.size(); i++) {
 		fprintf(stderr, "output menu item %d\n", i);
 		sprintf(buf, "output %d (%s)", i+1, channel->outputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
 		chOutputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 2), buf);
@@ -253,7 +252,7 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 	if (ret == 0) {	// cancel
 		return;
 	}
-	menu_idx_item	*p = (menu_idx_item *)pp.menuIdx.ItemAt(ret);
+	menu_idx_item	*p = pp.menuIdx[ret];
 
 	if (p && channel) {
 		selPort = p->port;
@@ -401,20 +400,20 @@ PortPopup::AudioMenu(bool isInput, short nch)
 {
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
-	short n_p = context.quaAudio->CountPorts();
+	short n_p = environment.quaAudio->countPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaAudioPort *p = context.quaAudio->Port(i);
+		QuaAudioPort *p = environment.quaAudio->port(i);
 		CMenu	*chmenu = new CMenu;
 		chmenu->CreatePopupMenu();
 		if (isInput) {
 			short n_c = p->NInputs();
 			for (short j=0; (j+nch-1)<n_c; j+=nch) {
-				chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), p->InputName(j));
+				chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), p->InputName(j).c_str());
 			}
 		} else {
 			short n_c = p->NOutputs();
 			for (short j=0; (j+nch-1)<n_c; j+=nch) {
-				chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), p->OutputName(j));
+				chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), p->OutputName(j).c_str());
 			}
 		}
 		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->Name(NMFMT_NAME));
@@ -427,9 +426,9 @@ PortPopup::MidiMenu(bool isInput)
 {
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
-	short n_p = context.quaMidi->CountPorts();
+	short n_p = environment.quaMidi->countPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaMidiPort *p = context.quaMidi->Port(i);
+		QuaMidiPort *p = environment.quaMidi->port(i);
 		if (	(isInput && (p->mode & QUA_PORT_IN)) ||
 				(!isInput && (p->mode & QUA_PORT_OUT))) {
 			CMenu	*chmenu = new CMenu;
@@ -457,13 +456,15 @@ PortPopup::JoyMenu(bool isInput)
 {
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
-	short n_p = context.quaJoystick->CountPorts();
+#ifdef QUA_V_JOYSTICK
+	short n_p = environment.quaJoystick->CountPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaJoystickPort *p = context.quaJoystick->Port(i);
+		QuaJoystickPort *p = environment.quaJoystick->Port(i);
 		CMenu	*chmenu = new CMenu;
 		chmenu->CreatePopupMenu();
 		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->Name(NMFMT_NAME));
 	}
+#endif
 	return menu;
 }
 
@@ -538,20 +539,18 @@ PortPopup::PortMenu(bool isInput)
 void
 PortPopup::ClearMenuIndex()
 {
-	for (short i=0; i<menuIdx.CountItems(); i++) {
-		if (menuIdx.ItemAt(i) != NULL) {
-			delete menuIdx.ItemAt(i);
-		}
+	for (auto it: menuIdx) {
+		delete it;
 	}
-	menuIdx.MakeEmpty();
+	menuIdx.clear();
 }
 
 long
 PortPopup::MenuIndexItem(QuaPort *qp, long r, short sub)
 {
 	struct menu_idx_item *p = new menu_idx_item(qp, r, sub);
-	long ind = menuIdx.AppendItem(p);
-	return ind;
+	menuIdx.push_back(p);
+	return 0;
 }
 
 bool
@@ -571,7 +570,7 @@ PortPopup::DoPopup(CWnd *wnd, CPoint &scrPt, QuaPort *&port, port_chan_id &chan,
 		ClearMenuIndex();
 		return false;
 	}
-	menu_idx_item	*p = (menu_idx_item *)menuIdx.ItemAt(ret);
+	menu_idx_item	*p = menuIdx[ret];
 
 	if (p) {
 		port = p->port;

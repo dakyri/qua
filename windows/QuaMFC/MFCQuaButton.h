@@ -1,8 +1,8 @@
 #pragma once
 
-#include "DaBasicTypes.h"
-#include "DaBitmap.h"
-#include "DaRect.h"
+#include "StdDefs.h"
+#include "BBitmap.h"
+#include "BRect.h"
 
 // MFCQuaButton
 
@@ -12,7 +12,6 @@ enum {
 	QUA_BPS_DOWN=2
 };
 
-#include "DString.h"
 
 class MFCQuaButton : public CButton
 {
@@ -62,9 +61,9 @@ public:
 	uchar				buttonPressState;
 	bool				mouseTracking;
 
-	DString				tooltipText;
+	string tooltipText;
 
-	static CFont		displayFont;
+	static CFont displayFont;
 protected:
 	DECLARE_MESSAGE_MAP()
 };

@@ -5,6 +5,7 @@
 #include "Destination.h"
 #include "Instance.h"
 #include "QuaMidi.h"
+#include "QuaOSC.h"
 #include "QuaPort.h"
 #include "Channel.h"
 #include "Qua.h"

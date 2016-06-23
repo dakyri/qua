@@ -1,22 +1,22 @@
 // MFCClipListView.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
-
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
 
 #include "QuaMFC.h"
 #include "MFCClipListView.h"
 #include "MFCObjectView.h"
 #include "MFCDataEditor.h"
 
-#include "inx/Sym.h"
-#include "inx/Clip.h"
-#include "inx/Voice.h"
-#include "inx/Sample.h"
-#include "inx/Metric.h"
+#include "Sym.h"
+#include "Clip.h"
+#include "Voice.h"
+#include "Sample.h"
+#include "Metric.h"
 
+#include <algorithm>
 // MFCClipListView
 
 IMPLEMENT_DYNCREATE(MFCClipListView, CTreeView)
@@ -49,13 +49,21 @@ BEGIN_MESSAGE_MAP(MFCClipListView, CTreeView)
 	ON_COMMAND(ID_CLIP_DELETE, OnPopupDeleteClip)
 	ON_COMMAND(ID_CLIP_CREATE, OnPopupCreateClip)
 
-	ON_NOTIFY_REFLECT(TVN_KEYDOWN,OnKeyDown)
-	ON_NOTIFY_REFLECT(TVN_SELCHANGED,OnNodeSelect)
-	ON_NOTIFY_REFLECT(TVN_BEGINDRAG,OnBeginDrag)
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED,OnNodeExpand)
-	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT ,OnBeginLabelEdit)
-	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT ,OnEndLabelEdit)
-	ON_NOTIFY_REFLECT(NM_RCLICK,OnRightClick)
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_KEYDOWN, 0, 0, AfxSigNotify_v, (AFX_PMSG) (static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnKeyDown))},
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_SELCHANGED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeSelect)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINDRAG, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginDrag)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ITEMEXPANDED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeExpand)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ENDLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnEndLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)NM_RCLICK, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnRightClick)) },
+
+/*	ON_NOTIFY_REFLECT(TVN_KEYDOWN, OnKeyDown)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, OnNodeSelect)
+	ON_NOTIFY_REFLECT(TVN_BEGINDRAG, OnBeginDrag)
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED, OnNodeExpand)
+	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
+	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT, OnEndLabelEdit)
+	ON_NOTIFY_REFLECT(NM_RCLICK,OnRightClick)*/
 END_MESSAGE_MAP()
 
 
@@ -143,10 +151,10 @@ MFCClipListView::OnBeginLabelEdit(NMHDR *pNotifyStruct, LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_CLIP:
+		case TypedValue::S_CLIP:
 				*result = 0;
 				break;
-			case S_TAKE:
+			case TypedValue::S_TAKE:
 				*result = 0;
 				break;
 			default:
@@ -169,11 +177,11 @@ MFCClipListView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM && SymTab::ValidSymbolName(tvp->item.pszText)) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
-			case S_TAKE:
+			case TypedValue::S_TAKE:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
@@ -295,13 +303,13 @@ MFCClipListView::OnNodeSelect(NMHDR *pNotifyStruct,LRESULT *result)
 	if (tvp->itemNew.lParam > QCI_SYMBOL_LPARAM) {
 		StabEnt *s = (StabEnt *)tvp->itemNew.lParam;
 		switch (s->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				if (editor) {
 					;
 				}
 				break;
 			}
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 	fprintf(stderr, "take node select %x %x\n", tvp->itemOld.lParam, tvp->itemNew.lParam);
 				if (editor) {
 	fprintf(stderr, "editor node select %x %x\n", tvp->itemOld.lParam, tvp->itemNew.lParam);
@@ -327,7 +335,7 @@ MFCClipListView::OnNodeExpand(NMHDR *pNotifyStruct,LRESULT *result)
 	if (tvp->itemNew.lParam > QCI_SYMBOL_LPARAM) {
 		StabEnt *s = (StabEnt *)tvp->itemNew.lParam;
 		switch (s->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				Clip	*c = s->ClipValue(NULL);
 				short img = 10;
 				if (c->media != NULL) {
@@ -344,7 +352,7 @@ MFCClipListView::OnNodeExpand(NMHDR *pNotifyStruct,LRESULT *result)
 				}
 				break;
 			}
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				if (tvp->itemNew.cChildren == 0) {
 					Take	*t = s->TakeValue();
 					short img = 13;
@@ -445,7 +453,7 @@ MFCClipListView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 	ScreenToClient(&curPoint);
 	selectedItem = ctl.HitTest(curPoint, &nFlags);
 	if (selectedItem == NULL) {
-		if (parent != NULL && parent->symbol != NULL && parent->symbol->type == S_SAMPLE) {
+		if (parent != NULL && parent->symbol != NULL && parent->symbol->type == TypedValue::S_SAMPLE) {
 			DoPopupMenu(IDR_SAMPLETAKENULL_RCLICK, false);
 		} else {
 			DoPopupMenu(IDR_STREAMTAKENULL_RCLICK, false);
@@ -458,11 +466,11 @@ MFCClipListView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				DoPopupMenu(IDR_CLIP_RCLICK, false);
 				break;
-			case S_TAKE:
-				if (sym->context && sym->context->type == S_SAMPLE) {
+			case TypedValue::S_TAKE:
+				if (sym->context && sym->context->type == TypedValue::S_SAMPLE) {
 					DoPopupMenu(IDR_SAMPLETAKE_RCLICK, false);
 				} else {
 					DoPopupMenu(IDR_STREAMTAKE_RCLICK, false);
@@ -558,10 +566,10 @@ MFCClipListView::ItemFor(StabEnt *s)
 {
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				return ItemFor(s, TVI_ROOT);
 			}
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				Clip	*c = s->ClipValue(NULL);
 				if (c->media == NULL || c->media->sym == NULL) {
 					return ItemFor(s, TVI_ROOT);
@@ -621,7 +629,7 @@ MFCClipListView::AddItem(StabEnt *s)
 	HTREEITEM	it = NULL;
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				it = ItemFor(s, TVI_ROOT);
 				Take	*t = s->TakeValue();
 				if (it == NULL) {
@@ -631,7 +639,7 @@ MFCClipListView::AddItem(StabEnt *s)
 				}
 				break;
 			}
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				Clip	*c = s->ClipValue(NULL);
 				if (c->media == NULL) { // an unattached clip object
 					it = ItemFor(s, TVI_ROOT);
@@ -697,7 +705,7 @@ MFCClipListView::OnPopupDeleteTake()
 		StabEnt	*pSym = parent->symbol;
 		Take	*t = sym->TakeValue();
 		switch (pSym->type) {
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				StreamTake	*c = NULL;
 				if (t->type == Take::STREAM) {
 					c = ((StreamTake *)t);
@@ -708,7 +716,7 @@ MFCClipListView::OnPopupDeleteTake()
 				}
 				break;
 			}
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				SampleTake	*c = NULL;
 				if (t->type == Take::SAMPLE) {
 					c = ((SampleTake *)t);
@@ -734,30 +742,28 @@ MFCClipListView::OnPopupCreateClip()
 		Time	dur_time;
 		Time	at_time;
 		switch (sym->type) {
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				StabEnt	*chSym = parent->symbol;
 				if (chSym) {
 					switch (chSym->type) {
-						case S_VOICE: {
+						case TypedValue::S_VOICE: {
 							at_time.Set(1,0,0,&Metric::std);
 							dur_time.Set(1,0,0,&Metric::std);
 							Voice	*v;
 							StreamTake	*take=sym->StreamTakeValue();
-							char	nmbuf[120];
-							glob.MakeUniqueName(chSym, "clip", nmbuf, 120, 1);
+							string	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
 							if (take != NULL && (v = chSym->VoiceValue()) != NULL) {
 								Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //								MFCEditorItemView	*added_item = AddClipItemView(c);
 							}
 							break;
 						}
-						case S_SAMPLE: {
+						case TypedValue::S_SAMPLE: {
 							Sample	*v;
 							at_time.Set(0,0,0,&Metric::std);
 							SampleTake	*take=sym->SampleTakeValue();
 							dur_time = take->Duration();
-							char	nmbuf[120];
-							glob.MakeUniqueName(chSym, "clip", nmbuf, 120, 1);
+							string 	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
 							if (take != NULL && (v = chSym->SampleValue()) != NULL) {
 								Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //								MFCEditorItemView	*added_item = AddClipItemView(c);
@@ -768,7 +774,7 @@ MFCClipListView::OnPopupCreateClip()
 				}
 				break;
 			}
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 //				quaLink->DeleteObject(sym);
 				break;
 		}
@@ -785,14 +791,14 @@ MFCClipListView::OnPopupDeleteClip()
 		if (c != NULL) {
 			StabEnt	*pSym = parent->symbol;
 			switch (pSym->type) {
-				case S_VOICE: {
+				case TypedValue::S_VOICE: {
 					Voice	*v;
 					if ((v = pSym->VoiceValue()) != NULL && c != NULL) {
 						v->RemoveClip(c, true);
 					}
 					break;
 				}
-				case S_SAMPLE: {
+				case TypedValue::S_SAMPLE: {
 					Sample	*v;
 					if ((v = pSym->SampleValue()) != NULL && c != NULL) {
 						v->RemoveClip(c, true);
@@ -812,10 +818,10 @@ MFCClipListView::OnPopupEditClip()
 		StabEnt	*sym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
 		switch (sym->type) {
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 //				quaLink->DeleteObject(sym);
 				break;
-			case S_TAKE:
+			case TypedValue::S_TAKE:
 //				quaLink->DeleteObject(sym);
 				break;
 		}
@@ -825,7 +831,7 @@ MFCClipListView::OnPopupEditClip()
 void
 MFCClipListView::OnPopupCreateStream()
 {
-	if (parent != NULL && parent->symbol != NULL && parent->symbol->type == S_VOICE) {
+	if (parent != NULL && parent->symbol != NULL && parent->symbol->type == TypedValue::S_VOICE) {
 		parent->quaLink->CreateStreamTake(parent->symbol);
 	}
 }
@@ -833,7 +839,7 @@ MFCClipListView::OnPopupCreateStream()
 void
 MFCClipListView::OnPopupLoadSample()
 {
-	if (parent != NULL && parent->symbol != NULL && parent->symbol->type == S_SAMPLE) {
+	if (parent != NULL && parent->symbol != NULL && parent->symbol->type == TypedValue::S_SAMPLE) {
 		CFileDialog		fileOpenDlg(
 							true, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 							"Audio files (*.wav,*.aif)|*.wav;*.aif;*.aiff;*.wave||"
@@ -841,7 +847,7 @@ MFCClipListView::OnPopupLoadSample()
 		INT_PTR	ret = fileOpenDlg.DoModal();
 		if (ret == IDOK) {
 			CString pathName = fileOpenDlg.GetPathName();
-			BPath	samplePath((LPCTSTR)pathName);
+			string	samplePath((LPCTSTR)pathName);
 			parent->quaLink->LoadSampleTake(parent->symbol, samplePath);
 		}
 	}
@@ -854,9 +860,9 @@ MFCClipListView::OnPopupEditTake()
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				break;
-			case S_TAKE:
+			case TypedValue::S_TAKE:
 				break;
 		}
 	}
@@ -956,7 +962,7 @@ MFCClipListView::OnBeginDrag(NMHDR *pnmh, LRESULT* bHandled)
 }
 
 bool
-MFCClipListView::RemoveClipsNotIn(BList &present)
+MFCClipListView::RemoveClipsNotIn(vector<StabEnt*> &present)
 {
 	HTREEITEM hItem=NULL;
 	hItem = GetTreeCtrl().GetNextItem(TVI_ROOT, TVGN_CHILD);
@@ -968,11 +974,11 @@ MFCClipListView::RemoveClipsNotIn(BList &present)
 		BOOL bWorked = GetTreeCtrl().GetItem(&item);
 		if (item.lParam >= QCI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
-			if (s->type == S_CLIP) {
-				if (present.IndexOf(s) < 0) {
+			if (s->type == TypedValue::S_CLIP) {
+				if (find(present.begin(), present.end(), s) == present.end()) {
 					GetTreeCtrl().DeleteItem(hItem);
 				}
-			} else if (s->type == S_TAKE) {
+			} else if (s->type == TypedValue::S_TAKE) {
 				HTREEITEM hTakeChild=NULL;
 				hTakeChild = GetTreeCtrl().GetNextItem(hItem, TVGN_CHILD);
 				while (hTakeChild != NULL) {
@@ -982,8 +988,8 @@ MFCClipListView::RemoveClipsNotIn(BList &present)
 					bWorked = GetTreeCtrl().GetItem(&sitem);
 					if (sitem.lParam >= QCI_SYMBOL_LPARAM) {
 						StabEnt	*ss = (StabEnt *)sitem.lParam;
-						if (ss->type == S_CLIP) {
-							if (present.IndexOf(ss) < 0) {
+						if (ss->type == TypedValue::S_CLIP) {
+							if (find(present.begin(), present.end(), ss) == present.end()) {
 								GetTreeCtrl().DeleteItem(hTakeChild);
 							}
 						}
@@ -1000,7 +1006,7 @@ MFCClipListView::RemoveClipsNotIn(BList &present)
 }
 
 bool
-MFCClipListView::RemoveTakesNotIn(BList &present)
+MFCClipListView::RemoveTakesNotIn(vector<StabEnt*> &present)
 {
 	HTREEITEM hTake=NULL, hNextTake=NULL;
 	hTake = GetTreeCtrl().GetNextItem(TVI_ROOT, TVGN_CHILD);
@@ -1013,7 +1019,7 @@ MFCClipListView::RemoveTakesNotIn(BList &present)
 		BOOL bWorked = GetTreeCtrl().GetItem(&item);
 		if (item.lParam >= QCI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
-			if (s->type == S_TAKE && present.IndexOf(s) < 0) {
+			if (s->type == TypedValue::S_TAKE && find(present.begin(), present.end(), s) == present.end()) {
 				GetTreeCtrl().DeleteItem(hTake);
 			}
 		}

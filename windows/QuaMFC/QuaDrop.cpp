@@ -1,12 +1,13 @@
-#include "qua_version.h"
 
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
 #include "afxole.h"
 
-#include "DaPath.h"
 #include "QuaDrop.h"
-#include "inx/Sym.h"
-
+#include "Sym.h"
 
 // registered format codes for pointers to qua internal structures
 UINT		QuaDrop::clipFormat;
@@ -165,13 +166,13 @@ QuaDrop::Clear()
 		case DropType::NOTHING:
 			break;
 		case DropType::FILES:
-			delete [] data.filePathList;
+			delete data.filePathList;
 			break;
 		case DropType::AUDIOFILES:
-			delete [] data.filePathList;
+			delete data.filePathList;
 			break;
 		case DropType::MIDIFILES:
-			delete [] data.filePathList;
+			delete data.filePathList;
 			break;
 		case DropType::APPLICATION:
 			break;
@@ -194,7 +195,7 @@ QuaDrop::Clear()
 bool
 QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 {
-	char	namebuf[MAX_DROP_FILE_NAME_LEN];
+	string	name;
 	FORMATETC	dataFormat;
 	STGMEDIUM	medium;
 
@@ -208,16 +209,14 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 	if (object->GetData(CF_HDROP, &medium) && medium.tymed == TYMED_HGLOBAL) { 
 		int cnt = DragQueryFile((HDROP)medium.hGlobal, 0xFFFFFFFF, 0, 0);
 		type = DropType::FILES;
-		data.filePathList = new BPath[cnt];
+		data.filePathList = new vector<string>();
 		count = 0;
 		for (short i=0; i<cnt; i++) {
-			if (DragQueryFile((HDROP)medium.hGlobal, i, NULL, 0) > MAX_DROP_FILE_NAME_LEN) {
-//				fprintf(stderr, "dragon filename %d too big for buffer\n");
-			} else {
-				DragQueryFile((HDROP)medium.hGlobal, i, namebuf, MAX_DROP_FILE_NAME_LEN);
-//				fprintf(stderr, "%s\n", namebuf);
-				data.filePathList[count++] = namebuf;
-			}
+			int n = DragQueryFile((HDROP)medium.hGlobal, i, NULL, 0);
+			char *buffer = new char[n];
+			DragQueryFile((HDROP)medium.hGlobal, i, buffer, n);
+			data.filePathList->push_back(buffer);
+			delete buffer;
 		}
 		return true;
 	} else if (object->IsDataAvailable(clipFormat)) {

@@ -7,8 +7,8 @@
 // MFCObjectMountView.h : header file
 //
 
-#include "inx/QuaDisplay.h"
-#include "DaList.h"
+#include "QuaDisplay.h"
+
 
 class Channel;
 class MFCObjectView;
@@ -45,7 +45,7 @@ public:
 	virtual bool				CanShow(StabEnt *c);
 	virtual bool				AddObjectRepresentation(StabEnt *c);
 	virtual void				RemoveObjectRepresentation(StabEnt *c);
-	virtual void				DisplayArrangementTitle(const char *);
+	virtual void				displayArrangementTitle(const char *);
 
 	bool						DeleteObjectRepresentation(QuaObjectRepresentation *or);
 

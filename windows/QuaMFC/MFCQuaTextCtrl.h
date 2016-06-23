@@ -3,8 +3,10 @@
 // base class for specialised text display controls
 // MFCQuaTextCtrl
 
-#include "DString.h"
-#include "DaBasicTypes.h"
+#include "StdDefs.h"
+
+#include <string>
+using namespace std;
 
 #undef QUA_V_TE1
 #ifdef QUA_V_TE1
@@ -26,8 +28,8 @@ public:
 	COLORREF			textColor;
 	bool				fillBg;
 
-	DString				label;
-	CFont				*labelFont;
+	string label;
+	CFont *labelFont;
 
 	bool				CreateTextCtrl(CRect &r, CWnd *w, UINT id, CFont *cf=NULL, CRect *tr=NULL, COLORREF *bgc=NULL, COLORREF *tbgc=NULL, COLORREF *tc=NULL);
 	void				SetLabel(char *, CFont *lf=NULL);
@@ -100,8 +102,8 @@ public:
 	COLORREF			textColor;
 	bool				fillBg;
 
-	DString				label;
-	CFont				*labelFont;
+	string label;
+	CFont *labelFont;
 
 	bool				CreateTextCtrl(CRect &r, CWnd *w, UINT id, CFont *cf=NULL, CRect *tr=NULL, COLORREF *bgc=NULL, COLORREF *tbgc=NULL, COLORREF *tc=NULL);
 	void				SetLabel(char *, CFont *lf=NULL);

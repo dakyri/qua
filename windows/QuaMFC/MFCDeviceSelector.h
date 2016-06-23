@@ -4,7 +4,7 @@ class MFCDestinationView;
 
 // DeviceSelector
 
-#include "DaBitmap.h"
+#include "BBitmap.h"
 
 class MFCDeviceSelector : public CStatic
 {

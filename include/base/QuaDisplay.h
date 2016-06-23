@@ -328,10 +328,10 @@ public:
 };
 
 
-class QuaContextDisplay {
+class QuaEnvironmentDisplay {
 public:
-	QuaContextDisplay();
-	virtual ~QuaContextDisplay();
+	QuaEnvironmentDisplay();
+	virtual ~QuaEnvironmentDisplay();
 
 	bool			SpawnGlobalDisplay();
 	bool			CleanupGlobalDisplay();
@@ -564,9 +564,9 @@ public:
 	void						UpdateGlobalTime(Time &t); // global time changed by user event
 	void						UpdateTempo(float);
 
-	virtual void				DisplayCurrentTime(Time &t, bool async)=0;	// ie update time cursor
-	virtual void				DisplayTempo(float t, bool async)=0;
-	virtual void				DisplayMetric(Metric *m, bool async)=0;	// ie update time cursor
+	virtual void				displayCurrentTime(Time &t, bool async)=0;	// ie update time cursor
+	virtual void				displayTempo(float t, bool async)=0;
+	virtual void				displayMetric(Metric *m, bool async)=0;	// ie update time cursor
 
 	void						DisplayMetric();
 	void						SetDisplayMetric();

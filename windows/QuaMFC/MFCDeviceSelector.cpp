@@ -1,11 +1,14 @@
-#include "qua_version.h"
+
 // E:\source\Qua\QuaMFC\MFCDeviceSelector.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
 
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
+#include "qua_version.h"
+
+#include "StdDefs.h"
 
 #include "Colors.h"
 
@@ -14,9 +17,9 @@
 #include "MFCDestinationView.h"
 #include "MFCChannelView.h"
 
-#include "inx/Qua.h"
-#include "inx/Destination.h"
-#include "inx/QuaPort.h"
+#include "Qua.h"
+#include "Destination.h"
+#include "QuaPort.h"
 
 CFont	MFCDeviceSelector::displayFont;
 BBitmap	MFCDeviceSelector::midiImg;

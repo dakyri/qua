@@ -250,40 +250,6 @@ int						stringToNote();
 #include "VstPlugin.h"
 #endif
 
-class QuaGlobalContext {
-public:
-							QuaGlobalContext();
-							~QuaGlobalContext();
-
-	int						Setup();
-	int						SetupDevices(Qua &q);
-
-	bool					SetVstPluginDir(char *path, bool add, bool reload);
-
-	char					*version;
-	std::string				appPath;
-	std::string				homePath;
-	std::string				configDirectory;
-#ifdef QUA_V_VST_HOST
-	VstPluginList			vstPlugins;
-#endif
-
-
-#ifdef QUA_V_POOLPLAYER
-	PoolPlayer				*poolPlayer;
-#endif
-
-#ifdef QUA_V_AUDIO
-	QuaAudioManager			*quaAudio;
-#endif
-#ifdef QUA_V_JOYSTICK
-	QuaJoystickManager		*quaJoystick;
-#endif
-	QuaMidiManager			*quaMidi;
-	QuaParallelManager		*quaParallel;
-	QuaContextDisplay		display;
-};
-
 class QuaCommandLine
 {
 public:
@@ -324,7 +290,9 @@ public:
   
 };
 
-extern QuaGlobalContext	context;
+class QuaEnvironment;
+
+extern QuaEnvironment	environment;
 
 
 

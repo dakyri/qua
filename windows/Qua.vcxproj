@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>D:\src\cpp\Qua\windows;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\util;D:\src\cpp\Qua\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\windows;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\util;D:\src\cpp\Qua\include;D:\src\cpp\library\VST\asiosdk2\host\pc;D:\src\cpp\library\VST\asiosdk2\host;D:\src\cpp\library\VST\asiosdk2\common;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\library\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -78,6 +78,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\AEffect.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\aeffectx.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\aeffguieditor.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\audioeffectx.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstcontrols.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstfxstore.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstgui.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugscarbon.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugsmac.h" />
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugsmacho.h" />
     <ClInclude Include="..\include\audio\Oscilator.h" />
     <ClInclude Include="..\include\audio\QuaAsio.h" />
     <ClInclude Include="..\include\audio\SampleFile.h" />
@@ -100,6 +110,7 @@
     <ClInclude Include="..\include\base\Properties.h" />
     <ClInclude Include="..\include\base\Qua.h" />
     <ClInclude Include="..\include\base\QuaDisplay.h" />
+    <ClInclude Include="..\include\base\QuaEnvironment.h" />
     <ClInclude Include="..\include\base\QuaInsert.h" />
     <ClInclude Include="..\include\base\QuasiStack.h" />
     <ClInclude Include="..\include\base\QuaTypes.h" />
@@ -135,6 +146,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\include\devices\QuaMidi.h" />
+    <ClInclude Include="..\include\devices\QuaOSC.h" />
     <ClInclude Include="..\include\devices\QuaParallel.h" />
     <ClInclude Include="..\include\devices\QuaPort.h" />
     <ClInclude Include="..\include\qua_version.h" />
@@ -142,7 +154,6 @@
     <ClInclude Include="..\util\Base64.h" />
     <ClInclude Include="..\util\tinyxml2.h" />
     <ClInclude Include="..\util\Url.h" />
-    <ClInclude Include="QuaOSC.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
@@ -192,7 +203,9 @@
     <ClCompile Include="..\core\ControllerBridge.cpp" />
     <ClCompile Include="..\core\Qua.cpp" />
     <ClCompile Include="..\core\QuaBridge.cpp" />
+    <ClCompile Include="..\core\QuaCommandLine.cpp" />
     <ClCompile Include="..\core\QuaDisplay.cpp" />
+    <ClCompile Include="..\core\QuaEnvironment.cpp" />
     <ClCompile Include="..\core\QuaQuaQua.cpp" />
     <ClCompile Include="..\devices\Midi.cpp" />
     <ClCompile Include="..\devices\PoolPlayer.cpp" />
@@ -200,6 +213,7 @@
     <ClCompile Include="..\devices\QuaAudio.cpp" />
     <ClCompile Include="..\devices\QuaDirect.cpp" />
     <ClCompile Include="..\devices\QuaJoystick.cpp" />
+    <ClCompile Include="..\devices\QuaOSC.cpp" />
     <ClCompile Include="..\devices\QuaParallel.cpp" />
     <ClCompile Include="..\globals\Buflist.cpp" />
     <ClCompile Include="..\globals\SampleFile.cpp" />
@@ -208,7 +222,6 @@
     <ClCompile Include="..\util\StdDefs.cpp" />
     <ClCompile Include="..\util\tinyxml2.cpp" />
     <ClCompile Include="..\util\Url.cpp" />
-    <ClCompile Include="QuaOSC.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

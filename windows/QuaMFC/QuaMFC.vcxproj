@@ -9,625 +9,172 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <SccProjectName />
-    <SccLocalPath />
-    <Keyword>MFCProj</Keyword>
-    <ProjectGuid>{FC469608-8633-4A13-B2D2-5E93A63EFD01}</ProjectGuid>
+    <ProjectGuid>{937AF668-93D6-4C50-A6E4-BD5B6E73D7B0}</ProjectGuid>
+    <RootNamespace>QuaMFC</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
-    <_ProjectFileVersion>12.0.21005.1</_ProjectFileVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>.\Release\</OutDir>
-    <IntDir>.\Release\</IntDir>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>.\Debug\</OutDir>
-    <IntDir>.\Debug\</IntDir>
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>C:\src\Qua\QuaMFC\Release;C:\src\Qua\QuaMFC;C:\src\Qua\Source;C:\src\Gloubals;C:\src\VST\vstsdk2.3\source\common;C:\src\VST\asiosdk2\host\pc;C:\src\VST\asiosdk2\common;C:\src\VST\asiosdk2\host;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader />
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Release/QuaMFC.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-    </ClCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;c:\src\Gloubals\Gloubal\Release\Gloubal.lib;dinput8.lib;dxguid.lib;gdiplus.lib;imagehlp.lib;msxml2.lib;comsupp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Release/QuaMFC.exe</OutputFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>.\Release/QuaMFC.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-    </Link>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Release/QuaMFC.tlb</TypeLibraryName>
-    </Midl>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_AFXDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0c09</Culture>
-    </ResourceCompile>
-  </ItemDefinitionGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\src\cpp\Qua\QuaMFC\Debug;c:\src\cpp\Qua\\QuaMFC;c:\src\cpp\Qua\include;c:\src\cpp\gloubals;c:\src\cpp\library\VST\asiosdk2\host\pc;c:\src\cpp\library\VST\asiosdk2\host;c:\src\cpp\library\VST\asiosdk2\common;c:\src\cpp\library\VST\vst-2.3-common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader />
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Debug/QuaMFC.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>winmm.lib;c:\src\Gloubals\Gloubal\Debug\Gloubal.lib;dinput8.lib;dxguid.lib;gdiplus.lib;imagehlp.lib;msxml2.lib;comsupp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Debug/Qua.exe</OutputFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Debug/QuaMFC.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <Midl>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Debug/QuaMFC.tlb</TypeLibraryName>
-    </Midl>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_AFXDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0c09</Culture>
-    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Qua.cpp" />
-    <ClCompile Include="..\Source\QuaQua.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaQuaQua.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Block.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Esrap.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Expression.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Markov.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Parse.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaFX.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Roll.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\UpdateActive.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\BaseVal.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Clip.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Clock.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Envelope.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\LValue.cpp" />
-    <ClCompile Include="..\Source\Log.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Metric.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Note.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Properties.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaInsert.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuasiStack.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Stacker.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\State.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Stream.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\StreamItem.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sym.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Time.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\ValList.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Channel.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Destination.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Executable.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Instance.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Method.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Nofifiable.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Pool.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaPort.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sample.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Schedulable.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Template.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Voice.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\VstPlugin.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Midi.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\PoolPlayer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaAsio.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaAudio.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaDirect.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaJoystick.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaParallel.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaBridge.cpp" />
-    <ClCompile Include="..\Source\QuaDisplay.cpp" />
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\AudioEffect.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\aeffguieditor.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\audioeffectx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\vstcontrols.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\vstgui.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\ASIOConvertSamples.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\asio.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\asiodrivers.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\pc\asiolist.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\debugmessage.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\register.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Controllable.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\ControllerBridge.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="QuaMFCView.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="QuaMainTransportView.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="TransportControl.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\AQuarium.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\RosterView.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SequencerWindow.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\TimeArrange.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\ArrangerObject.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaObject.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\SymObject.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaMedia.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaPP.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sampler.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="..\globals\BBitmap.cpp" />
+    <ClCompile Include="..\globals\Colors.cpp" />
+    <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="ErrDialog.cpp" />
+    <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MFCArrangerToolBar.cpp" />
+    <ClCompile Include="MFCArrangeView.cpp" />
     <ClCompile Include="MFCBlockEdit.cpp" />
+    <ClCompile Include="MFCChannelMountView.cpp" />
+    <ClCompile Include="MFCChannelView.cpp" />
     <ClCompile Include="MFCClipListView.cpp" />
+    <ClCompile Include="MFCContextView.cpp" />
+    <ClCompile Include="MFCDataEditor.cpp" />
+    <ClCompile Include="MFCDestinationView.cpp" />
     <ClCompile Include="MFCDeviceSelector.cpp" />
+    <ClCompile Include="MFCObjectMountView.cpp" />
+    <ClCompile Include="MFCObjectView.cpp" />
+    <ClCompile Include="MFCPropertyPages.cpp" />
     <ClCompile Include="MFCQuaButton.cpp" />
-    <ClCompile Include="MFCQuaChannelController.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="MFCQuaChannelController.cpp" />
+    <ClCompile Include="MFCQuaContextIndexView.cpp" />
     <ClCompile Include="MFCQuaFloatCtrl.cpp" />
     <ClCompile Include="MFCQuaIntCtrl.cpp" />
     <ClCompile Include="MFCQuaListBox.cpp" />
     <ClCompile Include="MFCQuaRotor.cpp" />
     <ClCompile Include="MFCQuaStateDisplay.cpp" />
+    <ClCompile Include="MFCQuaSymbolIndexView.cpp" />
     <ClCompile Include="MFCQuaTextCtrl.cpp" />
     <ClCompile Include="MFCQuaTimeCtrl.cpp" />
+    <ClCompile Include="MFCQuaTransportBar.cpp" />
     <ClCompile Include="MFCSampleDataEditor.cpp" />
     <ClCompile Include="MFCSimpleTypeView.cpp" />
     <ClCompile Include="MFCStreamDataEditor.cpp" />
     <ClCompile Include="MFCTakeListView.cpp" />
-    <ClCompile Include="QuaDrop.cpp" />
-    <ClCompile Include="QuaMFCCCDialog.cpp" />
-    <ClCompile Include="XBrowseForFolder.cpp" />
-    <ClCompile Include="ChildFrm.cpp" />
-    <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="QuaContextMFCDoc.cpp" />
-    <ClCompile Include="QuaContextMFCFrame.cpp" />
-    <ClCompile Include="QuaMFC.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="QuaMFCDoc.cpp" />
-    <ClCompile Include="Splash.cpp" />
-    <ClCompile Include="StdAfx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="MFCArrangeView.cpp" />
-    <ClCompile Include="MFCArrangerToolBar.cpp" />
-    <ClCompile Include="MFCChannelMountView.cpp" />
-    <ClCompile Include="MFCChannelView.cpp" />
-    <ClCompile Include="MFCContextView.cpp" />
-    <ClCompile Include="MFCDataEditor.cpp" />
-    <ClCompile Include="MFCDestinationView.cpp" />
-    <ClCompile Include="MFCObjectMountView.cpp" />
-    <ClCompile Include="MFCObjectView.cpp" />
-    <ClCompile Include="MFCPropertyPages.cpp" />
-    <ClCompile Include="MFCQuaContextIndexView.cpp" />
-    <ClCompile Include="MFCQuaSymbolIndexView.cpp" />
-    <ClCompile Include="MFCQuaTransportBar.cpp" />
     <ClCompile Include="PreferencesPropertySheet.cpp" />
     <ClCompile Include="PreviewWnd.cpp" />
     <ClCompile Include="PropertyFrame.cpp" />
+    <ClCompile Include="QuaContextMFCDoc.cpp" />
+    <ClCompile Include="QuaContextMFCFrame.cpp" />
+    <ClCompile Include="QuaDrop.cpp" />
+    <ClCompile Include="QuaMFC.cpp" />
+    <ClCompile Include="QuaMFCCCDialog.cpp" />
+    <ClCompile Include="QuaMFCDoc.cpp" />
+    <ClCompile Include="Splash.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="XBrowseForFolder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="QuaMFC.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ErrDialog.h" />
-    <ClInclude Include="QuaMFCCCDialog.h" />
-    <ClInclude Include="ChildFrm.h" />
-    <ClInclude Include="MFCQuaMessageId.h" />
-    <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="QuaContextMFCDoc.h" />
-    <ClInclude Include="QuaContextMFCFrame.h" />
-    <ClInclude Include="QuaMFC.h" />
-    <ClInclude Include="QuaMFCDoc.h" />
-    <ClInclude Include="QuaMFCView.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="..\..\..\Gloubals\BaseTypes.h" />
-    <ClInclude Include="..\..\..\Portals\DaBasicTypes.h" />
-    <ClInclude Include="..\..\..\Portals\DaErrorCodes.h" />
-    <ClInclude Include="..\..\..\Portals\DaFile.h" />
-    <ClInclude Include="..\..\..\Portals\DaKernel.h" />
-    <ClInclude Include="..\..\..\Portals\DaList.h" />
-    <ClInclude Include="..\..\..\Portals\DaMimeType.h" />
-    <ClInclude Include="..\..\..\Portals\DaPath.h" />
-    <ClInclude Include="..\..\Portals\DaRect.h" />
-    <ClInclude Include="..\..\Gloubals\KeyVal.h" />
-    <ClInclude Include="..\..\..\GLOUBALS\SampleFile.h" />
-    <ClInclude Include="..\..\..\GLOUBALS\StdDefs.h" />
-    <ClInclude Include="MFCArrangeView.h" />
-    <ClInclude Include="MFCArrangerToolBar.h" />
-    <ClInclude Include="MFCBlockEdit.h" />
-    <ClInclude Include="MFCChannelView.h" />
-    <ClInclude Include="MFCClipListView.h" />
-    <ClInclude Include="MFCDestinationView.h" />
-    <ClInclude Include="MFCDeviceSelector.h" />
-    <ClInclude Include="MFCObjectMountView.h" />
-    <ClInclude Include="MFCObjectView.h" />
-    <ClInclude Include="MFCPropertyPages.h" />
-    <ClInclude Include="MFCQuaButton.h" />
-    <ClInclude Include="MFCQuaChannelController.h" />
-    <ClInclude Include="MFCQuaContextIndexView.h" />
-    <ClInclude Include="MFCQuaFloatCtrl.h" />
-    <ClInclude Include="MFCQuaIntCtrl.h" />
-    <ClInclude Include="MFCQuaListBox.h" />
-    <ClInclude Include="MFCQuaRotor.h" />
-    <ClInclude Include="MFCQuaStateDisplay.h" />
-    <ClInclude Include="MFCQuaSymbolIndexView.h" />
-    <ClInclude Include="MFCQuaTextCtrl.h" />
-    <ClInclude Include="MFCQuaTimeCtrl.h" />
-    <ClInclude Include="MFCQuaTransportBar.h" />
-    <ClInclude Include="MFCSampleDataEditor.h" />
-    <ClInclude Include="MFCSimpleTypeView.h" />
-    <ClInclude Include="MFCStreamDataEditor.h" />
-    <ClInclude Include="MFCTakeListView.h" />
-    <ClInclude Include="PreferencesPropertySheet.h" />
-    <ClInclude Include="PreviewWnd.h" />
-    <ClInclude Include="PropertyFrame.h" />
-    <ClInclude Include="QuaDrop.h" />
-    <ClInclude Include="QuaMainTransportView.h" />
-    <ClInclude Include="Splash.h" />
-    <ClInclude Include="..\Source\inx\BaseVal.h" />
-    <ClInclude Include="..\Source\inx\Channel.h" />
-    <ClInclude Include="..\Source\inx\Clip.h" />
-    <ClInclude Include="..\Source\inx\Clock.h" />
-    <ClInclude Include="..\Source\inx\Destination.h" />
-    <ClInclude Include="..\Source\inx\Envelope.h" />
-    <ClInclude Include="..\Source\inx\FloatQueue.h" />
-    <ClInclude Include="..\Source\inx\Note.h" />
-    <ClInclude Include="..\Source\inx\Pool.h" />
-    <ClInclude Include="..\Source\inx\Properties.h" />
-    <ClInclude Include="..\Source\inx\Qua.h" />
-    <ClInclude Include="..\Source\inx\QuaDisplay.h" />
-    <ClInclude Include="..\Source\inx\QuaJoy.h" />
-    <ClInclude Include="..\Source\inx\QuaTypes.h" />
-    <ClInclude Include="..\Source\inx\QuasiStack.h" />
-    <ClInclude Include="..\Source\inx\Stackable.h" />
-    <ClInclude Include="..\Source\inx\Stacker.h" />
-    <ClInclude Include="..\Source\inx\Stream.h" />
-    <ClInclude Include="..\Source\inx\Sym.h" />
-    <ClInclude Include="..\Source\inx\Time.h" />
-    <ClInclude Include="..\Source\inx\TimeKeeper.h" />
-    <ClInclude Include="..\Source\inx\Block.h" />
-    <ClInclude Include="..\Source\inx\Expression.h" />
-    <ClInclude Include="..\Source\inx\Markov.h" />
-    <ClInclude Include="..\Source\inx\Parse.h" />
-    <ClInclude Include="..\Source\inx\QuaAudio.h" />
-    <ClInclude Include="..\Source\inx\QuaDirect.h" />
-    <ClInclude Include="..\Source\inx\QuaJoystick.h" />
-    <ClInclude Include="..\Source\inx\QuaMidi.h" />
-    <ClInclude Include="..\Source\inx\QuaParallel.h" />
-    <ClInclude Include="..\Source\inx\QuaPort.h" />
-    <ClInclude Include="..\Source\inx\Application.h" />
-    <ClInclude Include="..\Source\inx\Controllable.h" />
-    <ClInclude Include="..\Source\inx\Executable.h" />
-    <ClInclude Include="..\Source\inx\Instance.h" />
-    <ClInclude Include="..\Source\inx\Method.h" />
-    <ClInclude Include="..\Source\inx\Notifiable.h" />
-    <ClInclude Include="..\Source\inx\Sample.h" />
-    <ClInclude Include="..\Source\inx\Schedulable.h" />
-    <ClInclude Include="..\Source\inx\Voice.h" />
-    <ClInclude Include="..\Source\inx\QuaAsio.h" />
-    <ClInclude Include="..\Source\inx\VstPlugin.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\AEffect.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\aeffectx.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\aeffguieditor.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\audioeffectx.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstcontrols.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstfxstore.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstgui.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugscarbon.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugsmac.h" />
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugsmacho.h" />
+    <None Include="res\artool_d.cur" />
+    <None Include="res\ar_draw.cur" />
+    <None Include="res\ar_point.cur" />
+    <None Include="res\ar_point_ctl.cur" />
+    <None Include="res\ar_region.cur" />
+    <None Include="res\ar_slice.cur" />
+    <None Include="res\a_draw_ctl.cur" />
+    <None Include="res\QuaMFC.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\QuaMFC.ico" />
-    <Image Include="res\QuaMFCDoc.ico" />
-    <Image Include="Splsh16.bmp" />
-    <Image Include="res\Toolbar.bmp" />
     <Image Include="res\arranger_tool.bmp" />
     <Image Include="res\arrow_l_.bmp" />
     <Image Include="res\arrow_r_sm.bmp" />
-    <Image Include="background.BMP" />
-    <Image Include="background256.bmp" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\bmp00001.bmp" />
     <Image Include="res\bmp_min_sm_d.bmp" />
@@ -666,35 +213,70 @@
     <Image Include="res\ico_sm_non.bmp" />
     <Image Include="res\idr_quam.ico" />
     <Image Include="res\mdi_ico_sm.bmp" />
+    <Image Include="res\QuaMFC.ico" />
+    <Image Include="res\QuaMFCDoc.ico" />
+    <Image Include="res\quamfcty.bmp" />
     <Image Include="res\q_parse_state_defer.bmp" />
     <Image Include="res\q_parse_state_err.bmp" />
     <Image Include="res\q_parse_state_ok.bmp" />
-    <Image Include="res\quamfcty.bmp" />
     <Image Include="res\rot_sm_k.bmp" />
     <Image Include="res\sym_idx_.bmp" />
     <Image Include="res\sym_idx_img.bmp" />
     <Image Include="res\take_idx.bmp" />
+    <Image Include="res\Toolbar.bmp" />
     <Image Include="res\toolbar1.bmp" />
     <Image Include="res\transporter256.bmp" />
     <Image Include="res\var_idx.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-    <None Include="res\QuaMFC.rc2" />
-    <None Include="res\a_draw_ctl.cur" />
-    <None Include="res\ar_draw.cur" />
-    <None Include="res\ar_point.cur" />
-    <None Include="res\ar_point_ctl.cur" />
-    <None Include="res\ar_region.cur" />
-    <None Include="res\ar_slice.cur" />
-    <None Include="res\artool_d.cur" />
-    <None Include="res\poo.cur" />
-    <None Include="test.htm">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="..\globals\BBitmap.h" />
+    <ClInclude Include="..\globals\BRect.h" />
+    <ClInclude Include="..\globals\Colors.h" />
+    <ClInclude Include="..\globals\MemDC.h" />
+    <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="ErrDialog.h" />
+    <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MFCArrangerToolBar.h" />
+    <ClInclude Include="MFCArrangeView.h" />
+    <ClInclude Include="MFCBlockEdit.h" />
+    <ClInclude Include="MFCChannelMountView.h" />
+    <ClInclude Include="MFCClipListView.h" />
+    <ClInclude Include="MFCDestinationView.h" />
+    <ClInclude Include="MFCDeviceSelector.h" />
+    <ClInclude Include="MFCObjectMountView.h" />
+    <ClInclude Include="MFCObjectView.h" />
+    <ClInclude Include="MFCPropertyPages.h" />
+    <ClInclude Include="MFCQuaButton.h" />
+    <ClInclude Include="MFCQuaChannelController.h" />
+    <ClInclude Include="MFCQuaContextIndexView.h" />
+    <ClInclude Include="MFCQuaFloatCtrl.h" />
+    <ClInclude Include="MFCQuaIntCtrl.h" />
+    <ClInclude Include="MFCQuaListBox.h" />
+    <ClInclude Include="MFCQuaMessageId.h" />
+    <ClInclude Include="MFCQuaRotor.h" />
+    <ClInclude Include="MFCQuaStateDisplay.h" />
+    <ClInclude Include="MFCQuaSymbolIndexView.h" />
+    <ClInclude Include="MFCQuaTextCtrl.h" />
+    <ClInclude Include="MFCQuaTimeCtrl.h" />
+    <ClInclude Include="MFCQuaTransportBar.h" />
+    <ClInclude Include="MFCSampleDataEditor.h" />
+    <ClInclude Include="MFCSimpleTypeView.h" />
+    <ClInclude Include="MFCStreamDataEditor.h" />
+    <ClInclude Include="MFCTakeListView.h" />
+    <ClInclude Include="PreferencesPropertySheet.h" />
+    <ClInclude Include="PreviewWnd.h" />
+    <ClInclude Include="PropertyFrame.h" />
+    <ClInclude Include="QuaContextMFCDoc.h" />
+    <ClInclude Include="QuaContextMFCFrame.h" />
+    <ClInclude Include="QuaDrop.h" />
+    <ClInclude Include="QuaMainTransportView.h" />
+    <ClInclude Include="QuaMFC.h" />
+    <ClInclude Include="QuaMFCCCDialog.h" />
+    <ClInclude Include="QuaMFCDoc.h" />
+    <ClInclude Include="QuaMFCView.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Splash.h" />
+    <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

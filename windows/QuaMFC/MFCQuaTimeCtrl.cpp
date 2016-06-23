@@ -1,14 +1,15 @@
-#include "qua_version.h"
 
 // MFCQuaTimeCtrl.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
+
 #include "QuaMFC.h"
 #include "MFCQuaTimeCtrl.h"
-#include "DaBasicTypes.h"
-#include "Colors.h"
 #include "StdDefs.h"
+#include "Colors.h"
+
 
 // MFCQuaTimeCtrl
 

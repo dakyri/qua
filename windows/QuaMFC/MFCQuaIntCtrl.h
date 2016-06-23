@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DaBasicTypes.h"
+#include "StdDefs.h"
 #include "MFCQuaTextCtrl.h"
 // MFCQuaTimeCtrl
 

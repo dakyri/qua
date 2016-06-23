@@ -7,8 +7,7 @@
 // MFCChannelMountView.h : header file
 //
 
-#include "inx/QuaDisplay.h"
-#include "DaList.h"
+#include "QuaDisplay.h"
 
 class Channel;
 class MFCChannelView;
@@ -44,7 +43,7 @@ public:
 
 	virtual void			OnInitialUpdate();
 
-	virtual void			DisplayArrangementTitle(const char *);
+	virtual void			displayArrangementTitle(const char *);
 
 	// Overrides
 	// ClassWizard generated virtual function overrides

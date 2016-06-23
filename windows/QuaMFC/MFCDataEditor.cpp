@@ -1,24 +1,25 @@
-#include "qua_version.h"
 
 // MFCDataEditor.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
+#include "qua_version.h"
+
+
 #include "ShlObj.h"
 
 #include "StdDefs.h"
-#include "DaKernel.h"
-#include "DaMimeType.h"
+#include "Colors.h"
 
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
 #include "MFCDataEditor.h"
 #include "MFCObjectView.h"
 
-
-#include "inx/Qua.h"
-#include "inx/Time.h"
-#include "inx/Clip.h"
+#include "Qua.h"
+#include "Time.h"
+#include "Clip.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,7 +55,7 @@ MFCSequenceEditor::MFCSequenceEditor()
 
 MFCSequenceEditor::~MFCSequenceEditor()
 {
-	fprintf(stderr, "deleting data editor %x\n", this);
+	fprintf(stderr, "deleting data editor %x\n", ((unsigned)this));
 }
 
 void
@@ -160,9 +161,9 @@ MFCSequenceEditor::DrawGridGraphics(Graphics *pdc, CRect *cbp)
 {
 	Metric *dm = (displayMetric?displayMetric:NULL);
 //	pdc->SetBkColor(rgb_red);
-	Pen	ltGrayPen(AlphaColor(255, rgb_ltGray), 1);
-	Pen	mdGrayPen(AlphaColor(255, rgb_mdGray), 1);
-	Pen	dkGrayPen(AlphaColor(255, rgb_dkGray), 1);
+	Pen	ltGrayPen(Color(255, 200, 200, 200), 1);
+	Pen	mdGrayPen(Color(255, 140, 140, 140), 1);
+	Pen	dkGrayPen(Color(255, 80, 80, 80), 1);
 
 	long startTick = cbp->left/pixPerNotch;
 	long endTick = cbp->right/pixPerNotch;
@@ -270,7 +271,7 @@ MFCSequenceEditor::OnDraw(CDC* pdc)
 	DrawCursor(&graphics, &clipBox);
 #else
 	DrawGrid(pdc, &clipBox);
-	DrawCursor(pdc);
+	DrawCursor(pdc, &clipBox);
 #endif
 //	fprintf(stderr, "OnDraw() finito\n");
 }
@@ -420,18 +421,18 @@ MFCSequenceEditor::OnDrop(
 			bool	drop_midi_file=false;
 			bool	drop_qua_file=false;
 			for (i=0; i<dragon.count; i++) {
-				BMimeType	mime_t;
-				if (Qua::IdentifyFile(&dragon.data.filePathList[i], &mime_t) == B_OK) {
-					fprintf(stderr, "%s (%s)\n", dragon.data.filePathList[i].Path(), mime_t.Type());
-					if (strcmp(mime_t.Type(), "audio/x-midi") == 0) {
+				string	mime_t = Qua::identifyFile(dragon.data.filePathList->at(i));
+				if (mime_t.size() > 0) {
+					fprintf(stderr, "%s (%s)\n", dragon.data.filePathList->at(i), mime_t.c_str());
+					if (mime_t == "audio/x-midi") {
 						drop_midi_file = true;
 						break;
-					} else if (	strcmp(mime_t.Type(), "audio/x-wav") == 0 ||
-								strcmp(mime_t.Type(), "audio/x-raw") == 0 ||
-								strcmp(mime_t.Type(), "audio/x-aiff") == 0) {
+					} else if (mime_t == "audio/x-wav" ||
+								mime_t == "audio/x-raw" ||
+								mime_t == "audio/x-aiff") {
 						drop_sample_file = true;
 						break;
-					} else if (	strcmp(mime_t.Type(), "audio/x-quascript") == 0) {
+					} else if (mime_t == "audio/x-quascript") {
 						drop_qua_file = true;
 						break;
 					}
@@ -1022,9 +1023,9 @@ MFCSequenceEditor::RemoveItemView(MFCEditorItemView *iv)
 	delete iv;
 	return true;
 }
-
+#include <algorithm>
 bool
-MFCSequenceEditor::RemoveClipsNotIn(BList &list)
+MFCSequenceEditor::RemoveClipsNotIn(vector<StabEnt*> &list)
 {
 	long	i=0;
 	while (i<NItemR()) {
@@ -1032,7 +1033,8 @@ MFCSequenceEditor::RemoveClipsNotIn(BList &list)
 		bool	del = false;
 		if (iv->type == MFCEditorItemView::CLIP) {
 			Clip	*c = ((MFCClipItemView*)iv)->item;
-			if (!list.HasItem(c->sym)) {
+			auto it = find(list.begin(), list.end(), c->sym);
+			if (it != list.end()) {
 				del = true;
 			}
 		}
@@ -1131,10 +1133,10 @@ void
 MFCEditorItemView::Draw(Graphics *dc, CRect *clipBox)
 {
 // !!!??? need to clip properly for short instances with long names
-	Pen			blackPen(AlphaColor(250, rgb_black), 1);
-	Pen			redPen(AlphaColor(250, rgb_red), 1);
-	SolidBrush	blueBrush(AlphaColor(100, rgb_blue));
-	SolidBrush	blackBrush(AlphaColor(100, rgb_black));
+	Pen			blackPen(Color(250, 0,0,0), 1);
+	Pen			redPen(Color(250, 160, 10, 10), 1);
+	SolidBrush	blueBrush(Color(100, 10, 10, 160));
+	SolidBrush	blackBrush(Color(100, 0,0,0));
 
 //	fprintf(stderr, "drawing instance view %d\n", bounds.right-bounds.left);
 	dc->FillRectangle(&blueBrush, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
@@ -1231,12 +1233,12 @@ void
 MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 {
 // !!!??? need to clip properly for short instances with long names
-	Pen			blackPen(AlphaColor(250, rgb_black), 1);
-	Pen			redPen(AlphaColor(250, rgb_red), 1);
-	Pen			orangePen(AlphaColor(200, rgb_orange), 1);
-	SolidBrush	blueBrush(AlphaColor(100, rgb_blue));
-	SolidBrush	blackBrush(AlphaColor(200, rgb_black));
-	SolidBrush	orangeBrush(AlphaColor(190, rgb_orange));
+	Pen			blackPen(Color(250, 0, 0, 0), 1);
+	Pen			redPen(Color(250, 238, 100, 100), 1);
+	Pen			orangePen(Color(200, 250, 150, 10), 1);
+	SolidBrush	blueBrush(Color(100, 100, 100, 238));
+	SolidBrush	blackBrush(Color(200, 0, 0, 0));
+	SolidBrush	orangeBrush(Color(190, 250, 150, 10));
 	dc->DrawLine(
 		&orangePen,
 		bounds.left, 0,
@@ -1255,8 +1257,11 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 	PointF	tri[3];
 
 	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
-	wchar_t	nm[MAX_QUA_NAME_LENGTH];
-	wstrncpy(nm, item->sym->UniqueName(), MAX_QUA_NAME_LENGTH);
+	wstring nm;
+	char *cp = item->sym->UniqueName();
+	while (*cp) {
+		nm.push_back(*cp++);
+	}
 	PointF	p;
 	UINT py = 0;
 	do {
@@ -1272,8 +1277,8 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 		p.Y = py+5;
 		RectF	box;
 		StringFormat	sff = StringFormatFlagsDirectionVertical;
-		dc->MeasureString(nm, -1, &labelFont, p, &sff, &box);
-		dc->DrawString(nm, -1, &labelFont, box,	&sff, &blackBrush);
+		dc->MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
+		dc->DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
 
 		if (!isMarker) {
 			// a nother triangle bit
@@ -1284,8 +1289,8 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 
 			p.X = bounds.right-10;
 			p.Y = py+5;
-			dc->MeasureString(nm, -1, &labelFont, p, &sff, &box);
-			dc->DrawString(nm, -1, &labelFont, box,	&sff, &blackBrush);
+			dc->MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
+			dc->DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
 		}
 		py += editor->bounds.bottom;
 	} while (py < bounds.bottom);

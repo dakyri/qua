@@ -1,18 +1,19 @@
-#include "qua_version.h"
+
 // MFCChannelMountView.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
 #include "MFCObjectMountView.h"
 #include "MFCObjectView.h"
 #include "MFCQuaMessageId.h"
 
-#include "DaKernel.h"
-#include "DaBasicTypes.h"
-#include "inx/Qua.h"
+
 #include "StdDefs.h"
+
+#include "Qua.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -60,7 +61,7 @@ void MFCObjectMountView::OnDraw(CDC* pdc)
 
 
 void
-MFCObjectMountView::DisplayArrangementTitle(const char *nm)
+MFCObjectMountView::displayArrangementTitle(const char *nm)
 {
 	;
 }
@@ -232,8 +233,8 @@ MFCObjectMountView::OnInitialUpdate()
 			StabEnt	*sibp = pars->children;
 			while (sibp != NULL) {
 				switch (sibp->type) {
-					case S_SAMPLE:
-					case S_VOICE: {
+				case TypedValue::S_SAMPLE:
+					case TypedValue::S_VOICE: {
 		//				Clip	*c = sibp->ClipValue(NULL);
 		//				StabEnt		*ts = c->media->sym;
 						quaLink->ShowObjectRepresentation(sibp);
@@ -242,7 +243,7 @@ MFCObjectMountView::OnInitialUpdate()
 						StabEnt	*childp = sibp->children;
 						while (childp != NULL) {
 							switch (childp->type) {
-								case S_INSTANCE: {
+								case TypedValue::S_INSTANCE: {
 									quaLink->ShowObjectRepresentation(childp);
 									break;
 								}
@@ -351,7 +352,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 	ctxt.m_pNewViewClass = NULL;
 
 	switch (s->type) {
-		case S_CHANNEL: {
+		case TypedValue::S_CHANNEL: {
 			MFCChannelObjectView *nv = new MFCChannelObjectView;
 			nv->SetSymbol(s);
 			nv->SetLinkage(quaLink);
@@ -361,7 +362,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 			AddOR(nv);
 			break;
 		}
-		case S_VOICE: {
+		case TypedValue::S_VOICE: {
 			MFCVoiceObjectView *nv = new MFCVoiceObjectView;
 			nv->SetSymbol(s);
 			nv->SetLinkage(quaLink);
@@ -371,7 +372,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 			AddOR(nv);
 			break;
 		}
-		case S_SAMPLE: {
+		case TypedValue::S_SAMPLE: {
 			MFCSampleObjectView *nv = new MFCSampleObjectView;
 			nv->SetSymbol(s);
 			nv->SetLinkage(quaLink);
@@ -381,7 +382,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 			AddOR(nv);
 			break;
 		}
-		case S_METHOD: {
+		case TypedValue::S_METHOD: {
 			MFCMethodObjectView *nv = new MFCMethodObjectView;
 			nv->SetSymbol(s);
 			nv->SetLinkage(quaLink);
@@ -391,7 +392,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 			AddOR(nv);
 			break;
 		}
-		case S_INSTANCE: {
+		case TypedValue::S_INSTANCE: {
 			StabEnt	*pars = s->context;
 			QuaObjectRepresentation *pr = RepresentationFor(pars);
 			if (pr != NULL) {
@@ -417,7 +418,7 @@ MFCObjectMountView::DeleteObjectRepresentation(QuaObjectRepresentation	*nv)
 			}
 		}
 		switch (nv->symbol->type) {
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				MFCSampleObjectView	*mv = (MFCSampleObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
@@ -425,28 +426,28 @@ MFCObjectMountView::DeleteObjectRepresentation(QuaObjectRepresentation	*nv)
 //				delete mv;
 				break;
 			}
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				MFCVoiceObjectView	*mv = (MFCVoiceObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
 //				delete mv;
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				MFCChannelObjectView	*mv = (MFCChannelObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
 //				delete mv;
 				break;
 			}
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				MFCInstanceObjectView	*mv = (MFCInstanceObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
 //				delete mv;
 				break;
 			}
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				MFCMethodObjectView	*mv = (MFCMethodObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
@@ -489,23 +490,23 @@ MFCObjectMountView::MFCOV(long i)
 	QuaObjectRepresentation	*nv = OR(i);
 	if (nv) {
 		switch (nv->symbol->type) {
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				MFCSampleObjectView	*mv = (MFCSampleObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				MFCVoiceObjectView	*mv = (MFCVoiceObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				MFCChannelObjectView	*mv = (MFCChannelObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				MFCInstanceObjectView	*mv = (MFCInstanceObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				MFCMethodObjectView	*mv = (MFCMethodObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}

@@ -121,7 +121,7 @@ class QuaAudioManager
 	: public QuaPortManager<QuaAudioPort>
 {
 public:
-	QuaAudioManager(Qua &q);
+	QuaAudioManager();
 	~QuaAudioManager();
 	
 	virtual status_t connect(Input *);

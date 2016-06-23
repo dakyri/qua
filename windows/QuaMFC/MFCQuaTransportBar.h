@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
 #include "MFCQuaTimeCtrl.h"
 #include "MFCQuaFloatCtrl.h"
 // MFCQuaTransportBar
@@ -20,14 +20,14 @@ public:
 	CStatic					tempoLabel;
 	MFCQuaFloatCtrl			tempeh;
 
-	virtual void			DisplayArrangementTitle(const char *);
+	virtual void			displayArrangementTitle(const char *);
 
 	afx_msg int				OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT			OnQuaCtlChanged(WPARAM wparam, LPARAM lparam);
 
-	virtual void			DisplayCurrentTime(Time &t, bool async);	// ie update time cursor
-	virtual void			DisplayTempo(float t, bool async);
-	virtual void			DisplayMetric(Metric *m, bool async);	// ie update time cursor
+	virtual void			displayCurrentTime(Time &t, bool async);	// ie update time cursor
+	virtual void			displayTempo(float t, bool async);
+	virtual void			displayMetric(Metric *m, bool async);	// ie update time cursor
 protected:
 	DECLARE_MESSAGE_MAP()
 };

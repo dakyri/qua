@@ -1,30 +1,20 @@
-#include "qua_version.h"
-
 ////////////////////////////////////////////////////////////////////////
 // QuaMFCDoc.cpp : implementation of the CQuaMFCDoc class
 //  This contains the interface to the core functionality
 // of a running project/sequence/sequencer
 ////////////////////////////////////////////////////////////////////////
 
-#include "qua_version.h"	// file of basic versioning definitions
+#define _AFXDLL
 
 #include "stdafx.h"			// all the bog standard windows bits
 
-// the Portal headers ... basic functionalities with a Be flavour
-#include "DaBasicTypes.h"
-#include "DaList.h"
-#include "DaErrorCodes.h"
-#include "DaKernel.h"
-#include "DaPath.h"
-#include "DaFile.h"
-#include "DaMimeType.h"
-#include "DaRect.h"
+#include "qua_version.h"	// file of basic versioning definitions
 
 // the Gloubal headers ... all the useful bits I've got in libraries
 #include "StdDefs.h"
 
 // and the Qua headers ....
-#include "inx/Qua.h"
+#include "Qua.h"
 
 // and all the MFC headers for the Qua MFC app ...
 #include "QuaMFC.h"

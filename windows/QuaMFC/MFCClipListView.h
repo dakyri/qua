@@ -10,7 +10,8 @@ class MFCDataEditor;
 class StabEnt;
 class QuaObjectRepresentation;
 
-#include "DaList.h"
+#include <vector>
+using namespace std;
 
 class MFCClipListView : public CTreeView
 {
@@ -61,8 +62,8 @@ public:
 	bool					RemoveItem(StabEnt *s);
 	bool					SelectClip(StabEnt *s, bool);
 
-	bool					RemoveClipsNotIn(BList &);
-	bool					RemoveTakesNotIn(BList &);
+	bool					RemoveClipsNotIn(vector<StabEnt*> &present);
+	bool					RemoveTakesNotIn(vector<StabEnt*> &present);
 
 	CImageList				images;
 

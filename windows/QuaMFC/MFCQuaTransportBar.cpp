@@ -1,7 +1,7 @@
 #include "qua_version.h"
 // MFCQuaTransportBar.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
 
 #include "StdDefs.h"
@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 
 
 void
-MFCQuaTransportBar::DisplayArrangementTitle(const char *nm)
+MFCQuaTransportBar::displayArrangementTitle(const char *nm)
 {
 	SetWindowText(nm);
 }
@@ -113,7 +113,7 @@ MFCQuaTransportBar::OnQuaCtlChanged(WPARAM wparam, LPARAM lparam)
 }
 
 void
-MFCQuaTransportBar::DisplayCurrentTime(Time &t, bool async)
+MFCQuaTransportBar::displayCurrentTime(Time &t, bool async)
 {
 	pleitym.SetTime(t);
 	if (async) {
@@ -123,7 +123,7 @@ MFCQuaTransportBar::DisplayCurrentTime(Time &t, bool async)
 }
 
 void
-MFCQuaTransportBar::DisplayTempo(float t, bool async)
+MFCQuaTransportBar::displayTempo(float t, bool async)
 {
 	tempeh.SetValue(t);
 	if (async) {
@@ -132,6 +132,6 @@ MFCQuaTransportBar::DisplayTempo(float t, bool async)
 }
 
 void
-MFCQuaTransportBar::DisplayMetric(Metric *m, bool async)
+MFCQuaTransportBar::displayMetric(Metric *m, bool async)
 {
 }

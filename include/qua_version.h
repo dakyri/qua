@@ -21,6 +21,7 @@
 #undef QUA_V_VST_HOST
 #undef QUA_V_VST_HOST_GUI
 #undef QUA_V_RAM_LOCKED_BUFFERS
+#define QUA_V_GDI_PLUS
 
 // different structural versions ...
 #define QUA_V_BETTER_SCHEDULER
@@ -32,7 +33,7 @@
 
 // !! ?? probably not the most logical place for all these, but
 // this is the first loaded file ... too many pointless changes else ...
-#define MAX_QUA_NAME_LENGTH	255
+#define MAX_QUA_NAME_LENGTH 256
 #define MAX_QUA_AUDIO_OUTPUT	32
 #define MAX_QUA_AUDIO_INPUT	16
 #define MAX_QUA_CHANNEL_INPUT	16

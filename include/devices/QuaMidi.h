@@ -113,7 +113,7 @@ class QuaMidiManager: public QuaPortManager<QuaMidiPort>
 {
 public:
 
-	 QuaMidiManager(Qua &q);
+	 QuaMidiManager();
 	 ~QuaMidiManager();
 	QuaMidiPort	 *dfltInput;
 	QuaMidiPort	 *dfltOutput;

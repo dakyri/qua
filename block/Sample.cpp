@@ -10,6 +10,7 @@
 #include "Sample.h"
 #include "QuaAudio.h"
 #include "Qua.h"
+#include "QuaEnvironment.h"
 #include "Block.h"
 #include "QuaFX.h"
 #include "Envelope.h"
@@ -119,7 +120,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	}
 	SynchronizeBuffers();
 #ifdef QUA_V_AUDIO
-	context.quaAudio->addSample(this);
+	environment.quaAudio->addSample(this);
 #endif
 }
 
@@ -150,7 +151,7 @@ Sample::RemoveClip(Clip *c, bool disp)
 Sample::~Sample()
 {
 #ifdef QUA_V_AUDIO
-	context.quaAudio->removeSample(this);
+	environment.quaAudio->removeSample(this);
 #endif
 	delete fileBuffer;
 //	for (short i=0; i<CountTakes(); i++) {
@@ -360,7 +361,7 @@ Sample::RemoveInstance(Instance *i, bool display)
 	SampleInstance	*s = (SampleInstance *)i;
 	if (s->status == STATUS_RUNNING) {
 #ifdef QUA_V_AUDIO
-		context.quaAudio->stopInstance(s);
+		environment.quaAudio->stopInstance(s);
 #endif
 	}
 	instanceLock.lock();
@@ -412,7 +413,7 @@ Sample::Wake(Instance *i)
 #endif
 		
 #ifdef QUA_V_AUDIO
-		context.quaAudio->startInstance(i);
+		environment.quaAudio->startInstance(i);
 #endif
 		return Schedulable::Wake(i);
 	}
@@ -428,7 +429,7 @@ Sample::Sleep(Instance *i)
 	if (i && i->status != STATUS_SLEEPING) {
 		SampleInstance	*inst = (SampleInstance *)i;
 #ifdef QUA_V_AUDIO
-		context.quaAudio->stopInstance(inst);
+		environment.quaAudio->stopInstance(inst);
 #endif
 //		fprintf(stderr, "to sleep...\n");
 #ifdef LOTSALOX

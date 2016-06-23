@@ -2,9 +2,10 @@
 
 
 // MFCQuaTimeCtrl
-#include "DaBasicTypes.h"
+#include "StdDefs.h"
+
 #include "MFCQuaTextCtrl.h"
-#include "inx/Time.h"
+#include "QuaTime.h"
 
 #ifdef QUA_V_TE1
 

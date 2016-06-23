@@ -111,7 +111,7 @@ class RWLock;
 class QuaJoystickManager: public QuaPortManager<QuaJoystickPort>
 {
 public:
-	 QuaJoystickManager(Qua &q);
+	 QuaJoystickManager();
 	 ~QuaJoystickManager();
 					
 	virtual status_t Connect(Input *);

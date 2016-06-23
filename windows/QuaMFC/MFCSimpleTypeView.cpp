@@ -1,18 +1,20 @@
 // MFCClipListView.cpp : implementation file
 //
 
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
 
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
-#include "KeyVal.h"
+#include "StdDefs.h"
+#include "Colors.h"
 
 #include "QuaMFC.h"
 #include "MFCSimpleTypeView.h"
 #include "MFCObjectView.h"
 
-#include "inx/Sym.h"
-#include "inx/Parse.h"
+#include "Sym.h"
+#include "Parse.h"
 
 // MFCClipListView
 
@@ -241,11 +243,10 @@ MFCSimpleTypeView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		rcLabel.left += OFFSET_OTHER;
 		rcLabel.right -= OFFSET_OTHER;
 
-		char	*tnm = typeIndex.KeyOf(itemSym->type);
-		if (tnm != NULL) {
+		string tnm = qut::unfind(typeIndex, (int)itemSym->type);
+		if (tnm.size()) {
 			pDC->SetTextColor(rgb_blue);
-			long h = pDC->DrawText(tnm, -1, rcLabel,
-				DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_VCENTER);
+			long h = pDC->DrawText(tnm.c_str() , -1, rcLabel, DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_VCENTER);
 		}
 // length
 		listCtrl.GetColumn(2, &lvc); 
@@ -811,7 +812,7 @@ MFCSimpleTypeView::SymForItem(long item)
 }
 
 bool
-MFCSimpleTypeView::RemoveSymbolsNotIn(BList &present)
+MFCSimpleTypeView::RemoveSymbolsNotIn(vector<StabEnt*> &present)
 {
 	int hVar=-1, hNextVar=-1;
 	hVar = GetListCtrl().GetNextItem(-1, LVNI_ALL);
@@ -821,7 +822,8 @@ MFCSimpleTypeView::RemoveSymbolsNotIn(BList &present)
 		hNextVar = -1;
 		if (lparam != 0) {
 			StabEnt	*s = (StabEnt *)lparam;
-			if (present.IndexOf(s) < 0) {
+			auto it = find(present.begin(), present.end(), s);
+			if (it != present.end()) {
 				hNextVar = hVar;
 				GetListCtrl().DeleteItem(hVar);
 			}
@@ -858,27 +860,27 @@ MFCSimpleTypeView::AddSym(StabEnt *s)
 // these will be internal datum that we don't want people to fuck with
 
 	switch (s->type) {
-		case S_TIME:
-		case S_CHANNEL:
+	case TypedValue:: S_TIME:
+		case TypedValue::S_CHANNEL:
 
-		case S_BYTE:
-		case S_SHORT:
-		case S_INT:
-		case S_LONG:
-		case S_FLOAT:
-		case S_BOOL:
-			if (s->refType == REF_POINTER) {
+		case TypedValue::S_BYTE:
+		case TypedValue::S_SHORT:
+		case TypedValue::S_INT:
+		case TypedValue::S_LONG:
+		case TypedValue::S_FLOAT:
+		case TypedValue::S_BOOL:
+			if (s->refType == TypedValue::REF_POINTER) {
 				return -1;
 			}
-			if (s->refType == REF_INSTANCE) {
+			if (s->refType == TypedValue::REF_INSTANCE) {
 				return -1;
 			}
-			if (s->refType == REF_VALUE) {
+			if (s->refType == TypedValue::REF_VALUE) {
 				return -1;
 			}
 			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
 			break;
-		case S_METHOD:
+		case TypedValue::S_METHOD:
 			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
 			break;
 		default:
@@ -909,13 +911,13 @@ void
 MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 {
 	long	caty[] = {
-//				S_DOUBLE,
-//				S_METHOD,
-				S_FLOAT,
-				S_INT,
-				S_SHORT,
-				S_BYTE,
-				S_BOOL
+//				TypedValue::S_DOUBLE,
+//				TypedValue::S_METHOD,
+		TypedValue::S_FLOAT,
+		TypedValue::S_INT,
+		TypedValue::S_SHORT,
+		TypedValue::S_BYTE,
+		TypedValue::S_BOOL
 			};
 	CPoint		popPt = point;
 	ClientToScreen(&popPt);
@@ -931,9 +933,12 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 		if (ID_VARIABLECONTEXT_ADD_VAR + caty[i] > ID_VARIABLECONTEXT_ADD_VAR_TYPE_RANGE) {
 			ReportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 					caty[i], ID_VARIABLECONTEXT_ADD_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_ADD_VAR);
-		} else if (typeIndex.KeyOf(caty[i]) != NULL) {
-			sprintf(buf, "%s", typeIndex.KeyOf(caty[i]));
-			addVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_ADD_VAR+caty[i], buf);
+		} else {
+			string tnm = qut::unfind(typeIndex, (int)caty[i]);
+			if (tnm.size()) {
+				sprintf(buf, "%s", tnm.c_str());
+				addVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_ADD_VAR + caty[i], buf);
+			}
 		}
 	}
 
@@ -954,9 +959,12 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 				if (ID_VARIABLECONTEXT_SET_VAR_TYPE + caty[i] > ID_VARIABLECONTEXT_SET_VAR_TYPE_RANGE) {
 					ReportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 							caty[i], ID_VARIABLECONTEXT_SET_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_SET_VAR_TYPE);
-				} else if (typeIndex.KeyOf(caty[i]) != NULL && itemSym->type != caty[i]) {
-					sprintf(buf, "%s", typeIndex.KeyOf(caty[i]));
-					setVarTypeMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_SET_VAR_TYPE+caty[i], buf);
+				} else {
+					string tnm = qut::unfind(typeIndex, (int)caty[i]);
+					if (tnm.size() && itemSym->type != caty[i]) {
+						sprintf(buf, "%s", tnm.c_str());
+						setVarTypeMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_SET_VAR_TYPE + caty[i], buf);
+					}
 				}
 			}
 
@@ -995,15 +1003,14 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			if (stkbl) {
 				char	*vnm = "variable%d";
 				switch(typ) {
-					case S_BYTE: vnm = "bytevar"; break;
-					case S_SHORT: vnm = "wordvar"; break;
-					case S_INT: vnm = "intvar"; break;
-					case S_LONG: vnm = "longvar"; break;
-					case S_FLOAT: vnm = "floatvar"; break;
+				case TypedValue::S_BYTE: vnm = "bytevar"; break;
+					case TypedValue::S_SHORT: vnm = "wordvar"; break;
+					case TypedValue::S_INT: vnm = "intvar"; break;
+					case TypedValue::S_LONG: vnm = "longvar"; break;
+					case TypedValue::S_FLOAT: vnm = "floatvar"; break;
 				}
-				char	nmbuf[120];
-				glob.MakeUniqueName(pSym, vnm, nmbuf, 120, 1);
-				StabEnt	*nsym=DefineSymbol(nmbuf, typ, 0, 0, pSym, REF_STACK, false, false, StabEnt::DISPLAY_NOT);
+				string	nmbuf = glob.MakeUniqueName(pSym, vnm, 1);
+				StabEnt	*nsym=DefineSymbol(nmbuf, typ, 0, 0, pSym, TypedValue::REF_STACK, false, false, StabEnt::DISPLAY_NOT);
 				stkbl->ReAllocateChildren();
 				AddSym(nsym);
 			}
@@ -1011,8 +1018,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 	} else if (ret == ID_VARIABLECONTEXT_ADD_METHOD) {
 		if (parent && parent->Symbol()) {
 			StabEnt	*pSym = parent->Symbol();
-			char	nmbuf[120];
-			glob.MakeUniqueName(pSym, "action", nmbuf, 120, 1);
+			string nmbuf = glob.MakeUniqueName(pSym, "action", 1);
 			QuaPerceptualSet	*quaLink=parent->QuaLink();
 			if (quaLink) {
                 StabEnt *mSym = quaLink->CreateMethod(nmbuf, pSym);
@@ -1030,11 +1036,11 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			if (stkbl) {
 				bool	validChange = false;
 				switch(typ) {
-					case S_BYTE: validChange = true; break;
-					case S_SHORT: validChange = true; break;
-					case S_INT: validChange = true; break;
-					case S_LONG: validChange = true; break;
-					case S_FLOAT: validChange = true; break;
+				case TypedValue::S_BYTE: validChange = true; break;
+					case TypedValue::S_SHORT: validChange = true; break;
+					case TypedValue::S_INT: validChange = true; break;
+					case TypedValue::S_LONG: validChange = true; break;
+					case TypedValue::S_FLOAT: validChange = true; break;
 				}
 				if (validChange) {
 					itemSym->type = typ;

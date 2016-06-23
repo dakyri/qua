@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
 
 class MFCDataEditor;
 class MFCStreamDataEditor;
@@ -21,8 +21,7 @@ class MFCSmallQuaMinBut;
 
 struct frame_map_hdr;
 
-#include "DString.h"
-#include "DaRect.h"
+#include "BRect.h"
 
 #include "MFCQuaIntCtrl.h"
 #include "MFCQuaFloatCtrl.h"
@@ -36,7 +35,9 @@ class MFCStackFrameView;
 class MFCObjectView;
 class MFCBlockEditCtrlStrip;
 
-#include "inx/BaseVal.h"
+#include "BaseVal.h"
+#include <vector>
+#include <string>
 
 class QuaPopupWnd : public CWnd
 {
@@ -231,13 +232,13 @@ public:
 	virtual void				RefreshFrame(QuasiStack *, bool);
 	virtual void				PopFrame(QuasiStack *, bool);
 #endif
-	virtual void				UpdateClipIndexDisplay();
+	virtual void				updateClipIndexDisplay();
 	virtual void				UpdateChannelIndexDisplay(StabEnt *ds);
 
-	CRect						wbounds;
-	CRect						wframe;
-	static CFont				displayFont;
-	DString						label;
+	CRect wbounds;
+	CRect wframe;
+	static CFont displayFont;
+	string label;
 
 	MFCQuaChkButton				*eButton;
 	QuaPopupWnd					*popupEdit;
@@ -439,14 +440,21 @@ protected:
 public:
 	virtual void				OnDraw(CDC* pDC);      // overridden to draw this view
 
-	inline bool					RemIOV(MFCInstanceObjectView *iov)
-			{ return instOViews.RemoveItem(iov); }
-	inline long					AddIOV(MFCInstanceObjectView *iov)
-			{ return instOViews.AddItem(iov); }
-	inline MFCInstanceObjectView *IOV(long i)
-			{ return (MFCInstanceObjectView *) instOViews.ItemAt(i); }
-	inline long					CountIOV() { return instOViews.CountItems(); }
-	BList						instOViews;
+	inline bool	 RemIOV(MFCInstanceObjectView *iov) {
+		for (auto it = instOViews.begin(); it != instOViews.end(); ++it) {
+			if (*it == iov) {
+				instOViews.erase(it);
+				return true;
+			}
+		}
+		return false; 
+	}
+	inline void AddIOV(MFCInstanceObjectView *iov) { instOViews.push_back(iov); }
+	inline MFCInstanceObjectView *IOV(long i) {
+		return i >= 0 && ((unsigned)i) < instOViews.size() ? instOViews[i] : nullptr; 
+	}
+	inline long	 CountIOV() { return instOViews.size(); }
+	vector<MFCInstanceObjectView *> instOViews;
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -509,7 +517,7 @@ public:
 	virtual void				ChildNameChanged(StabEnt *);
 
 	virtual void				UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *);
-	virtual void				UpdateClipIndexDisplay();
+	virtual void				updateClipIndexDisplay();
 	virtual void				UpdateTakeIndexDisplay();
 	virtual void				UpdateVariableIndexDisplay();
 public:
@@ -566,7 +574,7 @@ public:
 
 	virtual void				UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *);
 	virtual void				UpdateVariableIndexDisplay();
-	virtual void				UpdateClipIndexDisplay();
+	virtual void				updateClipIndexDisplay();
 	virtual void				UpdateTakeIndexDisplay();
 public:
 	afx_msg int					OnCreate(LPCREATESTRUCT lpCreateStruct );
@@ -583,14 +591,25 @@ protected:
 public:
 	virtual void				OnDraw(CDC* pDC);      // overridden to draw this view
 
-	inline bool					RemIOV(MFCInstanceObjectView *iov)
-			{ return instOViews.RemoveItem(iov); }
-	inline long					AddIOV(MFCInstanceObjectView *iov)
-			{ return instOViews.AddItem(iov); }
-	inline MFCInstanceObjectView *IOV(long i)
-			{ return (MFCInstanceObjectView *) instOViews.ItemAt(i); }
-	inline long					CountIOV() { return instOViews.CountItems(); }
-	BList						instOViews;
+	inline bool	 RemIOV(MFCInstanceObjectView *iov) {
+		for (auto it = instOViews.begin(); it != instOViews.end(); ++it) {
+			if (*it == iov) {
+				instOViews.erase(it);
+				return true;
+			}
+		}
+		return false;
+	}
+	inline void AddIOV(MFCInstanceObjectView *iov) {
+		instOViews.push_back(iov);
+	}
+	inline MFCInstanceObjectView *IOV(long i) {
+		return i >= 0 && ((unsigned)i) < instOViews.size() ? instOViews[i] : nullptr;
+	}
+	inline long	 CountIOV() { return instOViews.size(); }
+
+	vector<MFCInstanceObjectView *> instOViews;
+
 
 protected:
 	DECLARE_MESSAGE_MAP()

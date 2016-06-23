@@ -4,6 +4,7 @@
 #include "StdDefs.h"
 
 #include "QuaMidi.h"
+#include "QuaOSC.h"
 #include "Expression.h"
 #include "Block.h"
 #include "Qua.h"

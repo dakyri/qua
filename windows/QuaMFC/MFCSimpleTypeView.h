@@ -2,12 +2,14 @@
 
 
 // MFCSimpleTypeView view
-#include "DaList.h"
 
 #include "afxole.h"
 
 class MFCObjectView;
 class StabEnt;
+
+#include <vector>
+using namespace std;
 
 class MFCSimpleTypeView : public CListView
 {
@@ -55,7 +57,7 @@ public:
 	long					AddSym(StabEnt *s);
 	bool					RemoveSym(StabEnt *s);
 	bool					SelectSym(StabEnt *s, bool);
-	bool					RemoveSymbolsNotIn(BList &);
+	bool					RemoveSymbolsNotIn(vector<StabEnt*> &list);
 
 	void					ContextMenu(UINT nFlags, CPoint point);
 

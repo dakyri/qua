@@ -4,34 +4,26 @@
 // of a running project/sequence/sequencer
 ////////////////////////////////////////////////////////////////////////
 
-#include "qua_version.h"	// file of basic versioning definitions
-
+#define _AFXDLL
 #include "stdafx.h"			// all the bog standard windows bits
 
-// the Portal headers ... basic functionalities with a Be flavour
-#include "DaBasicTypes.h"
-#include "DaList.h"
-#include "DaErrorCodes.h"
-#include "DaKernel.h"
-#include "DaPath.h"
-#include "DaFile.h"
-#include "DaMimeType.h"
-#include "DaRect.h"
+#include "qua_version.h"	// file of basic versioning definitions
 
 // the Gloubal headers ... all the useful bits I've got in libraries
 #include "StdDefs.h"
 
 // and the Qua headers ....
-#include "inx/QuasiStack.h"
-#include "inx/BaseVal.h"
-#include "inx/QuaDisplay.h"
-#include "inx/Qua.h"
+#include "QuasiStack.h"
+#include "BaseVal.h"
+#include "QuaDisplay.h"
+#include "Qua.h"
 
 // and all the MFC headers for the Qua MFC app ...
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
 #include "QuaMFCCCDialog.h"
 
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -128,14 +120,14 @@ CQuaMFCDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		return false;
 	}
 
-	BPath	docPath(lpszPathName);
-	const char	*docext = docPath.Extension();
-	if (strcmp(docext, "qs") == 0 || strcmp(docext, "qua") == 0) {
-		qua = Qua::LoadScriptFile(docPath.Path());
+	string docPath(lpszPathName);
+	string docext = getExt(docPath);
+	if (docext == "qs" || docext == "qua") {
+		qua = Qua::LoadScriptFile(docPath.c_str());
 		if (qua) {
-			BPath	snapshotPath(lpszPathName);
-			snapshotPath.SetExtension("qx");
-			qua->LoadSnapshotFile(snapshotPath.Path());
+			string s(lpszPathName);
+			string snapshotPath = getParent(s)+"/"+getBase(s)+"."+"qx";
+			qua->LoadSnapshotFile(snapshotPath.c_str());
 		}
 	}
 
@@ -200,14 +192,16 @@ CQuaMFCDoc::Serialize(CArchive& ar)
 void CQuaMFCDoc::OnAddSample()
 {
 	if (qua && qua->bridge.display) {
-		qua->bridge.display->CreateSample();
+//		qua->bridge.display->CreateSample();
+		cerr << "unimplemented OnAddSample()" << endl;
 	}
 }
 
 void CQuaMFCDoc::OnAddVoice()
 {
 	if (qua && qua->bridge.display) {
-		qua->bridge.display->CreateVoice();
+//		qua->bridge.display->CreateVoice();
+		cerr << "unimplemented OnAddVoice()" << endl;
 	}
 }
 

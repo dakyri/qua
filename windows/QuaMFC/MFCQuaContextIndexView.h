@@ -8,7 +8,7 @@
 //
 
 #include "afxcview.h"
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // MFCQuaSymbolIndexView
@@ -18,10 +18,10 @@ class MFCQuaContextIndexView : public CTreeView, QuaGlobalIndexPerspective
 public:
 	MFCQuaContextIndexView();           // protected constructor used by dynamic creation
 
-	virtual void				AddToSymbolIndex(StabEnt *s);
-	virtual void				RemoveFromSymbolIndex(StabEnt *s);
-	virtual void				SymbolNameChanged(StabEnt *s);
-	virtual void				DisplayArrangementTitle(const char *);
+	virtual void				addToSymbolIndex(StabEnt *s);
+	virtual void				removeFromSymbolIndex(StabEnt *s);
+	virtual void				symbolNameChanged(StabEnt *s);
+	virtual void				displayArrangementTitle(const char *);
 
 	virtual void				OnInitialUpdate();
 

@@ -51,7 +51,7 @@ QuaPerceptualSet::DisplayGlobalTime(Time &t, bool async)
 	}
 	for (short j=0; j<NTransporter(); j++) {
 		if (Transporter(j) != nullptr) {
-			Transporter(j)->DisplayCurrentTime(t, async);
+			Transporter(j)->displayCurrentTime(t, async);
 		}
 	}
 }
@@ -66,7 +66,7 @@ QuaPerceptualSet::DisplayTempo(float t, bool async)
 	}
 	for (short j=0; j<NTransporter(); j++) {
 		if (Transporter(j) != nullptr) {
-			Transporter(j)->DisplayTempo(t, async);
+			Transporter(j)->displayTempo(t, async);
 		}
 	}
 }
@@ -1364,67 +1364,67 @@ QuaDisplay::optionWin(int, char *str, ...) {
 // QuaContextDisplay
 //////////////////////////////////////////////
 
-QuaContextDisplay::QuaContextDisplay()
+QuaEnvironmentDisplay::QuaEnvironmentDisplay()
 {
 	;
 }
 
-QuaContextDisplay::~QuaContextDisplay()
-{
-	;
-}
-
-void
-QuaContextDisplay::RefreshVstPluginList()
+QuaEnvironmentDisplay::~QuaEnvironmentDisplay()
 {
 	;
 }
 
 void
-QuaContextDisplay::CreateMethodBridge(Method *)
+QuaEnvironmentDisplay::RefreshVstPluginList()
 {
 	;
 }
 
 void
-QuaContextDisplay::CreatePortBridge(QuaPort *)
+QuaEnvironmentDisplay::CreateMethodBridge(Method *)
 {
 	;
 }
 
 void
-QuaContextDisplay::CreateTemplateBridge(Template *)
+QuaEnvironmentDisplay::CreatePortBridge(QuaPort *)
+{
+	;
+}
+
+void
+QuaEnvironmentDisplay::CreateTemplateBridge(Template *)
 {
 	;
 }
 
 
 void
-QuaContextDisplay::CreateVstPluginBridge(VstPlugin *)
+QuaEnvironmentDisplay::CreateVstPluginBridge(VstPlugin *)
 {
 	;
 }
 
 void
-QuaContextDisplay::RemoveMethodBridge(Method *)
+QuaEnvironmentDisplay::RemoveMethodBridge(Method *)
 {
 	;
 }
 
 void
-QuaContextDisplay::RemovePortBridge(QuaPort *)
+QuaEnvironmentDisplay::RemovePortBridge(QuaPort *)
 {
 	;
 }
 
 void
-QuaContextDisplay::RemoveTemplateBridge(Template *)
+QuaEnvironmentDisplay::RemoveTemplateBridge(Template *)
 {
 	;
 }
 
 void
-QuaContextDisplay::RemoveVstPluginBridge(VstPlugin *)
+QuaEnvironmentDisplay::RemoveVstPluginBridge(VstPlugin *)
 {
 	;
 }

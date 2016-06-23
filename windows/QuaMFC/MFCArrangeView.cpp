@@ -1,12 +1,13 @@
-#include "qua_version.h"
 
 // MFCArrangeView.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 
+#include "qua_version.h"
+
 #include "StdDefs.h"
-#include "DaMimeType.h"
 
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
@@ -16,13 +17,17 @@
 #include "ChildFrm.h"
 
 #include "ShlObj.h"
-#include "DaKernel.h"
 
-#include "inx/Qua.h"
-#include "inx/Time.h"
-#include "inx/Instance.h"
-#include "inx/Schedulable.h"
-#include "inx/Envelope.h"
+#include "Qua.h"
+#include "Time.h"
+#include "Instance.h"
+#include "Schedulable.h"
+#include "Envelope.h"
+#include "BaseVal.h"
+
+#include "Colors.h"
+
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -30,8 +35,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#ifdef QUA_V_GDI_PLUS
-#endif
 /////////////////////////////////////////////////////////////////////////////
 // MFCArrangeView
 
@@ -91,7 +94,7 @@ END_MESSAGE_MAP()
 
 
 void
-MFCArrangeView::DisplayArrangementTitle(const char *nm)
+MFCArrangeView::displayArrangementTitle(const char *nm)
 {
 	SetWindowText(nm);
 }
@@ -414,7 +417,7 @@ MFCArrangeView::OnDraw(CDC* pdc)
 	// draw envelopes
 
 	// draw cursor (erase old one?)
-	DrawCursor(pdc);
+	DrawCursor(pdc, &clipBox);
 #endif
 //	fprintf(stderr, "OnDraw() finito\n");
 }
@@ -463,7 +466,7 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 	long				nEnvelope=0;
 	bool				add_dflt_items = true;
 	bool				added_items = false;
-	BList				envelopes;
+	vector<Envelope *> envelopes;
 	if ((instv= InstanceViewAtPoint(itPt))!=NULL) {
 		add_dflt_items = true;
 		added_items = true;
@@ -472,8 +475,8 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 			CMenu		*envMenu = new CMenu;
 			envMenu->CreatePopupMenu();
 
-			quaLink->ListEnvelopesFor(inst->sym, envelopes);
-			nEnvelope = envelopes.CountItems();
+			envelopes = quaLink->ListEnvelopesFor(inst->sym);
+			nEnvelope = envelopes.size();
 			char	buf[256];
 			sprintf(buf, "Envelopes for '%s'", inst->sym->name);
 			ctxtMenu->AppendMenu(MF_POPUP, (UINT) envMenu->m_hMenu, buf);
@@ -527,15 +530,15 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 		StabEnt	*qSym = qdoc->qua->sym;
 		if (qSym) {
 			Time	dur_time;
-			char	nmbuf[120];
+			string nm;
 			if (ret == ID_EDIT_ADD_CLIP) {
 				dur_time.Set(1,0,0,at_time.metric);
-				glob.MakeUniqueName(qSym, "region", nmbuf, 120, 1);
+				nm = glob.MakeUniqueName(qSym, "region", 1);
 			} else {
 				dur_time.ticks = 0;
-				glob.MakeUniqueName(qSym, "marker", nmbuf, 120, 1);
+				nm = glob.MakeUniqueName(qSym, "marker", 1);
 			}
-			Clip	*c = qdoc->qua->AddClip(nmbuf, at_time, dur_time, true);
+			Clip	*c = qdoc->qua->addClip(nm, at_time, dur_time, true);
 //			MFCEditorItemView	*added_item = AddClipItemView(c);
 		}
 	} else if (ret == ID_EDITORCONTEXT_DEL_CLIP || ret == ID_EDITORCONTEXT_DEL_MARKER) {
@@ -547,13 +550,13 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 				Clip	*c = civ->item;
 				fprintf(stderr, "remove clip %x\n", c);
 //				DelClipItemView(iv);
-				qdoc->qua->RemoveClip(c, true);
+				qdoc->qua->removeClip(c, true);
 			}
 		}
 	} else if (ret >= ID_EDIT_SHOW_ENVELOPE && ret < ID_EDIT_SHOW_ENVELOPE+nEnvelope) {
 		if (inst != NULL) {
 			long		ind = ret-ID_EDIT_SHOW_ENVELOPE;
-			StabEnt		*envSym = (StabEnt *)envelopes.ItemAt(ind);
+			StabEnt		*envSym = envelopes[ind]->sym;
 			if (envSym) {
 				long  nSegs = qdoc->qua->CountEnvelopeSegments(
 													inst->sym, envSym);
@@ -610,7 +613,7 @@ MFCArrangeView::OnInitialUpdate()
 
 		StreamItem	*p = qdoc->qua->schedule.head;
 		while (p != NULL) {
-			if (p->type == S_VALUE) {
+			if (p->type == TypedValue::S_VALUE) {
 				StreamValue	*isp = (StreamValue *)p;
 				Instance	*inst = isp->value.InstanceValue();
 				if (inst) {
@@ -649,7 +652,7 @@ MFCArrangeView::AddAllItemViews(bool redraw)
 	if (pars) {
 		StabEnt	*sibp = pars->children;
 		while (sibp != NULL) {
-			if (sibp->type == S_CLIP) {
+			if (sibp->type == TypedValue::S_CLIP) {
 				Clip	*c = sibp->ClipValue(NULL);
 //				StabEnt		*ts = c->media->sym;
 				AddClipItemView(c);
@@ -716,7 +719,7 @@ MFCArrangeView::OnDrop(
 			CPoint point 
 		)
 {
-	fprintf(stderr, "MFCArrangeView::on drop\n");
+	cerr << "MFCArrangeView::on drop\n";
 	point += GetScrollPosition();
 	switch (dragon.type) {
 		case QuaDrop::FILES:
@@ -733,19 +736,19 @@ MFCArrangeView::OnDrop(
 			bool	drop_sample_file=false;
 			bool	drop_midi_file=false;
 			bool	drop_qua_file=false;
-			for (i=0; i<dragon.count; i++) {
-				BMimeType	mime_t;
-				if (Qua::IdentifyFile(&dragon.data.filePathList[i], &mime_t) == B_OK) {
-					fprintf(stderr, "%s (%s)\n", dragon.data.filePathList[i].Path(), mime_t.Type());
-					if (strcmp(mime_t.Type(), "audio/x-midi") == 0) {
+			for (i=0; ((unsigned)i)<dragon.data.filePathList->size(); i++) {
+				string	mime_t = Qua::identifyFile(dragon.data.filePathList->at(i));
+				if (mime_t.size() > 0) {
+					cerr << "drop " << dragon.data.filePathList->at(i) << ", " << mime_t << endl;
+					if (mime_t == "audio/x-midi") {
 						drop_midi_file = true;
 						break;
-					} else if (	strcmp(mime_t.Type(), "audio/x-wav") == 0 ||
-								strcmp(mime_t.Type(), "audio/x-raw") == 0 ||
-								strcmp(mime_t.Type(), "audio/x-aiff") == 0) {
+					} else if (mime_t == "audio/x-wav" ||
+								mime_t == "audio/x-raw" ||
+								mime_t == "audio/x-aiff") {
 						drop_sample_file = true;
 						break;
-					} else if (	strcmp(mime_t.Type(), "audio/x-quascript") == 0) {
+					} else if (mime_t == "audio/x-quascript") {
 						drop_qua_file = true;
 						break;
 					}
@@ -757,7 +760,7 @@ MFCArrangeView::OnDrop(
 				return FALSE;
 			}
 			if (drop_sample_file) {
-				quaLink->CreateSample(NULL, &dragon.data.filePathList[i], dragon.count-i, at_channel, &at_time, NULL);
+				quaLink->CreateSample("", *dragon.data.filePathList, at_channel, &at_time, NULL);
 			} else if (drop_midi_file) {
 				;
 			} else if (drop_qua_file) {
@@ -1383,9 +1386,9 @@ MFCArrangeView::RemoveInstanceRepresentation(Instance *i)
 }
 
 void
-MFCArrangeView::UpdateClipIndexDisplay()
+MFCArrangeView::updateClipIndexDisplay()
 {
-	BList		presentClips;
+	vector<StabEnt*> presentClips;
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
 		fprintf(stderr, "menu item track finds null doc");
@@ -1394,11 +1397,11 @@ MFCArrangeView::UpdateClipIndexDisplay()
 		fprintf(stderr, "menu item track finds null sequencer");
 		return;
 	}
-	for (short i=0; i<qdoc->qua->NClip(); i++) {
-		Clip	*c = qdoc->qua->RegionClip(i);
+	for (short i=0; i<qdoc->qua->nClip(); i++) {
+		Clip	*c = qdoc->qua->regionClip(i);
 		if (c) {
 //			clipsView->AddItem(c->sym);
-			presentClips.AddItem(c->sym);
+			presentClips.push_back(c->sym);
 			AddClipItemView(c);
 		}
 	}
@@ -1445,8 +1448,9 @@ MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
 			bounds.left, bounds.top,
 			clipBounds.right-bounds.left, bounds.bottom-bounds.top);
 	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
-	wchar_t	nm[MAX_QUA_NAME_LENGTH];
-	wstrncpy(nm, instance->sym->UniqueName(), MAX_QUA_NAME_LENGTH);
+	wstring nm;
+	char *cp = instance->sym->UniqueName();
+	while (*cp) { nm.push_back(*cp++); }
 	float lbx = bounds.left+2;
 #define LBLSEP 200
 	if (clipBox->left > lbx) {
@@ -1456,7 +1460,7 @@ MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
 	}
 	PointF	p(lbx, clipBounds.top);
 	do {
-		dc->DrawString(nm, -1, &labelFont, p, &blackBrush);
+		dc->DrawString(nm.c_str(), -1, &labelFont, p, &blackBrush);
 		p.X += LBLSEP;
 	} while (p.X < clipBounds.right);
 }

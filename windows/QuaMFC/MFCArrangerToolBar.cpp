@@ -1,8 +1,10 @@
-#include "qua_version.h"
+
 // MFCArrangerToolBar.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
+
 #include "QuaMFC.h"
 #include "MFCArrangerToolBar.h"
 

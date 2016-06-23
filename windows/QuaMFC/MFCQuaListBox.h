@@ -1,11 +1,10 @@
 #pragma once
 
-#include "DaBasicTypes.h"
+#include "StdDefs.h"
 
 // MFCQuaListBox
 
 class StabEnt;
-#include "DaList.h"
 
 class MFCQuaListBox : public CListBox
 {

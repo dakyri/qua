@@ -13,6 +13,7 @@
 #include "StdDefs.h"
 
 #include "Qua.h"
+#include "QuaEnvironment.h"
 #include "Sym.h"
 #include "Voice.h"
 #include "Block.h"
@@ -252,7 +253,7 @@ Voice::Wake(Instance *i)
 #endif
 #ifdef QUA_V_AUDIO
 		if (i->mainStack->hasAudio != AUDIO_NONE) {
-			context.quaAudio->startInstance(i);
+			environment.quaAudio->startInstance(i);
 		}
 #endif
 		return Schedulable::Wake(i);

@@ -21,6 +21,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // if you don't want to use MFC, comment out the following line:
+
+
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
 
 #ifndef __AFX_H__

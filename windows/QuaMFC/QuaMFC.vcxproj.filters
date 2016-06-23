@@ -2,811 +2,217 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{c19c6d43-4f5e-4d55-bc1d-cd7e9b4dab5e}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
-    <Filter Include="Source Files\Qua">
-      <UniqueIdentifier>{58522125-55e8-4b37-9dde-558bb577dc33}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Main">
-      <UniqueIdentifier>{d9f17262-8be7-4960-8d78-0ea9f97d2192}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Block">
-      <UniqueIdentifier>{8f84e091-67f0-4a08-b4a3-785edf6ee54b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Base Types">
-      <UniqueIdentifier>{e05af7e4-8253-4baf-a83a-c4b5595f3ad7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Executable">
-      <UniqueIdentifier>{9a8c93c0-5a59-4733-a56f-45b468bada96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\QuaVST">
-      <UniqueIdentifier>{afb7a11d-a8ee-4d7b-9f2a-733404d74213}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Devices">
-      <UniqueIdentifier>{8d9d5a2f-b882-43bd-a1bf-d41cf7e5106e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Qua\Display">
-      <UniqueIdentifier>{4cc340f5-becd-444f-a14b-82b84a761623}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Vst">
-      <UniqueIdentifier>{08c0eb02-76e8-4939-89e1-4f6f6d8e8a6e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Asio">
-      <UniqueIdentifier>{66f55408-62b1-49f9-a652-cd4bc339e0da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\defunkt classes">
-      <UniqueIdentifier>{0bbc69ce-9f27-4178-9b36-c53c22f5b74c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\defunkt classes\Interface">
-      <UniqueIdentifier>{ea65766b-06b4-4514-b583-916ba62f23e4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\defunkt classes\Object View">
-      <UniqueIdentifier>{4c320aa8-dbb5-42c2-bb2d-0a3fa53b3be5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\defunkt classes\BeSpecific">
-      <UniqueIdentifier>{e2a2db21-fa5e-46b6-bc00-d8ae7171f456}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MFC">
-      <UniqueIdentifier>{5c37f644-c4f6-49e6-b75a-8032e78b7c17}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MFC\MFC widget">
-      <UniqueIdentifier>{b7c440df-e8d1-4f7e-902c-b587a3eb9c8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MFC\MFC Main">
-      <UniqueIdentifier>{05438741-a8fe-45bc-9e01-8cd2506d3082}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MFC\MFC View">
-      <UniqueIdentifier>{6b2b2a8b-4ecc-4499-896f-e96f14ed1450}</UniqueIdentifier>
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{d3655568-2bb4-4009-a8cc-435c7c0a6c4f}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
-    <Filter Include="Header Files\MFC Main Headers">
-      <UniqueIdentifier>{e3f2fb58-5afc-4ec7-a265-79deddbe4730}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Gloubal Headers">
-      <UniqueIdentifier>{3931a080-e041-41da-85aa-124dc886a39b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\MFC Widget Headers">
-      <UniqueIdentifier>{f6c5e2e6-6dd2-45cb-863c-4b4f6ad5ab7b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers">
-      <UniqueIdentifier>{6b36ba3f-ce6b-499f-9a68-d2466f5d2473}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers\Base">
-      <UniqueIdentifier>{0ed5a98b-bc7b-4f02-b910-e5878bc6b429}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers\Block">
-      <UniqueIdentifier>{af280a62-873b-4c53-8e08-76738593078b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers\Devices">
-      <UniqueIdentifier>{7e4087bf-b585-40c6-a376-d4d3b8bb43f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers\Executable">
-      <UniqueIdentifier>{c43692fa-d440-4e1c-8770-e3c8a5ec505a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Qua Headers\QuaVST headers">
-      <UniqueIdentifier>{67931516-b625-4c66-ad1d-4edd27035436}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Vst Headers">
-      <UniqueIdentifier>{539732e7-e3a0-46b6-a5f1-7705e56a97c3}</UniqueIdentifier>
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{a14aa110-737f-4ddf-9c09-9ea15adeadb3}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\MFC">
+      <UniqueIdentifier>{b8aeba40-d5b0-400f-919f-a9617d2614e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFC\Main">
+      <UniqueIdentifier>{18ad8f60-abbb-4d6e-8acd-33b04657301d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFC\View">
+      <UniqueIdentifier>{f5f45ae7-3243-493e-9236-902b87a0cf38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MFC\Widget">
+      <UniqueIdentifier>{a8f7cbb6-4220-4fb1-ad89-94ee29a07356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFC">
+      <UniqueIdentifier>{42411838-93d4-445c-bd52-8d767b581900}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFC\Main">
+      <UniqueIdentifier>{01f28b32-b3cc-4a90-b324-f2c9b2402247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MFC\Widget">
+      <UniqueIdentifier>{bb5404ad-96f9-4894-892f-b27b8c6961fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{cc13fa23-fc79-4f00-b589-f399bb03d987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{b90d0b0b-ede4-4ce3-8bbb-c641a97adec9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Source\Qua.cpp">
-      <Filter>Source Files\Qua\Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaQua.cpp">
-      <Filter>Source Files\Qua\Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaQuaQua.cpp">
-      <Filter>Source Files\Qua\Main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Block.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Esrap.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Expression.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Markov.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Parse.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaFX.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Roll.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\UpdateActive.cpp">
-      <Filter>Source Files\Qua\Block</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\BaseVal.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Clip.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Clock.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Envelope.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\LValue.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Log.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Metric.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Note.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Properties.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaInsert.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuasiStack.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Stacker.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\State.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Stream.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\StreamItem.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sym.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Time.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\ValList.cpp">
-      <Filter>Source Files\Qua\Base Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Channel.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Destination.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Executable.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Instance.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Method.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Nofifiable.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Pool.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaPort.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sample.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Schedulable.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Template.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Voice.cpp">
-      <Filter>Source Files\Qua\Executable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\VstPlugin.cpp">
-      <Filter>Source Files\Qua\QuaVST</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Midi.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\PoolPlayer.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaAsio.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaAudio.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaDirect.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaJoystick.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaParallel.cpp">
-      <Filter>Source Files\Qua\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaBridge.cpp">
-      <Filter>Source Files\Qua\Display</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaDisplay.cpp">
-      <Filter>Source Files\Qua\Display</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\AudioEffect.cpp">
-      <Filter>Source Files\Vst</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\aeffguieditor.cpp">
-      <Filter>Source Files\Vst</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\audioeffectx.cpp">
-      <Filter>Source Files\Vst</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\vstcontrols.cpp">
-      <Filter>Source Files\Vst</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\vstsdk2.3\source\common\vstgui.cpp">
-      <Filter>Source Files\Vst</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\ASIOConvertSamples.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\asio.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\asiodrivers.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\host\pc\asiolist.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\debugmessage.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\VST\asiosdk2\common\register.cpp">
-      <Filter>Source Files\Asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Controllable.cpp">
-      <Filter>Source Files\defunkt classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\ControllerBridge.cpp">
-      <Filter>Source Files\defunkt classes</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaMFCView.cpp">
-      <Filter>Source Files\defunkt classes</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaMainTransportView.cpp">
-      <Filter>Source Files\defunkt classes</Filter>
-    </ClCompile>
-    <ClCompile Include="TransportControl.cpp">
-      <Filter>Source Files\defunkt classes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\AQuarium.cpp">
-      <Filter>Source Files\defunkt classes\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\RosterView.cpp">
-      <Filter>Source Files\defunkt classes\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SequencerWindow.cpp">
-      <Filter>Source Files\defunkt classes\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\TimeArrange.cpp">
-      <Filter>Source Files\defunkt classes\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\ArrangerObject.cpp">
-      <Filter>Source Files\defunkt classes\Object View</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaObject.cpp">
-      <Filter>Source Files\defunkt classes\Object View</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\SymObject.cpp">
-      <Filter>Source Files\defunkt classes\Object View</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaMedia.cpp">
-      <Filter>Source Files\defunkt classes\BeSpecific</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\QuaPP.cpp">
-      <Filter>Source Files\defunkt classes\BeSpecific</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Sampler.cpp">
-      <Filter>Source Files\defunkt classes\BeSpecific</Filter>
-    </ClCompile>
     <ClCompile Include="ErrDialog.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCBlockEdit.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCClipListView.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCDeviceSelector.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaButton.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaChannelController.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaFloatCtrl.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaIntCtrl.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaListBox.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaRotor.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaStateDisplay.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaTextCtrl.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaTimeCtrl.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCSampleDataEditor.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCSimpleTypeView.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCStreamDataEditor.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCTakeListView.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="QuaDrop.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="QuaMFCCCDialog.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="XBrowseForFolder.cpp">
-      <Filter>Source Files\MFC\MFC widget</Filter>
-    </ClCompile>
-    <ClCompile Include="ChildFrm.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="MainFrm.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaContextMFCDoc.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaContextMFCFrame.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaMFC.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="QuaMFCDoc.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Splash.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files\MFC\MFC Main</Filter>
-    </ClCompile>
-    <ClCompile Include="MFCArrangeView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\Widget</Filter>
     </ClCompile>
     <ClCompile Include="MFCArrangerToolBar.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
+    </ClCompile>
+    <ClCompile Include="MFCArrangeView.cpp">
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCChannelMountView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCChannelView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCContextView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCDataEditor.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCDestinationView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCObjectMountView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCObjectView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCPropertyPages.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaContextIndexView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaSymbolIndexView.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="MFCQuaTransportBar.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="PreferencesPropertySheet.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="PreviewWnd.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
     </ClCompile>
     <ClCompile Include="PropertyFrame.cpp">
-      <Filter>Source Files\MFC\MFC View</Filter>
+      <Filter>Source Files\MFC\View</Filter>
+    </ClCompile>
+    <ClCompile Include="ChildFrm.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrm.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="QuaContextMFCDoc.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="QuaContextMFCFrame.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="QuaMFC.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="QuaMFCDoc.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Splash.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\globals\Colors.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\globals\BBitmap.cpp">
+      <Filter>Source Files\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="QuaMFC.rc">
-      <Filter>Source Files\MFC\MFC Main</Filter>
+      <Filter>Source Files\MFC\Main</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ErrDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaMFCCCDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChildFrm.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaMessageId.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MainFrm.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaContextMFCDoc.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaContextMFCFrame.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaMFC.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaMFCDoc.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaMFCView.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="StdAfx.h">
-      <Filter>Header Files\MFC Main Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Gloubals\BaseTypes.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaBasicTypes.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaErrorCodes.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaFile.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaKernel.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaList.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaMimeType.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Portals\DaPath.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Portals\DaRect.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Gloubals\KeyVal.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\GLOUBALS\SampleFile.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\GLOUBALS\StdDefs.h">
-      <Filter>Header Files\Gloubal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCArrangeView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCArrangerToolBar.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCBlockEdit.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCChannelView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCClipListView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCDestinationView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCDeviceSelector.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCObjectMountView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCObjectView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCPropertyPages.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaButton.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaChannelController.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaContextIndexView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaFloatCtrl.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaIntCtrl.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaListBox.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaRotor.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaStateDisplay.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaSymbolIndexView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaTextCtrl.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaTimeCtrl.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCQuaTransportBar.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCSampleDataEditor.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCSimpleTypeView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCStreamDataEditor.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="MFCTakeListView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="PreferencesPropertySheet.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="PreviewWnd.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertyFrame.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaDrop.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="QuaMainTransportView.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Splash.h">
-      <Filter>Header Files\MFC Widget Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\BaseVal.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Channel.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Clip.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Clock.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Destination.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Envelope.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\FloatQueue.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Note.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Pool.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Properties.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Qua.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaDisplay.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaJoy.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaTypes.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuasiStack.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Stackable.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Stacker.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Stream.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Sym.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Time.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\TimeKeeper.h">
-      <Filter>Header Files\Qua Headers\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Block.h">
-      <Filter>Header Files\Qua Headers\Block</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Expression.h">
-      <Filter>Header Files\Qua Headers\Block</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Markov.h">
-      <Filter>Header Files\Qua Headers\Block</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Parse.h">
-      <Filter>Header Files\Qua Headers\Block</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaAudio.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaDirect.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaJoystick.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaMidi.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaParallel.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaPort.h">
-      <Filter>Header Files\Qua Headers\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Application.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Controllable.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Executable.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Instance.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Method.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Notifiable.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Sample.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Schedulable.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\Voice.h">
-      <Filter>Header Files\Qua Headers\Executable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\QuaAsio.h">
-      <Filter>Header Files\Qua Headers\QuaVST headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\inx\VstPlugin.h">
-      <Filter>Header Files\Qua Headers\QuaVST headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\AEffect.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\aeffectx.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\aeffguieditor.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\audioeffectx.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstcontrols.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstfxstore.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstgui.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugscarbon.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugsmac.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\VST\vstsdk2.3\source\common\vstplugsmacho.h">
-      <Filter>Header Files\Vst Headers</Filter>
-    </ClInclude>
+    <None Include="res\a_draw_ctl.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ar_draw.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ar_point.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ar_point_ctl.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ar_region.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ar_slice.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\artool_d.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\QuaMFC.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\QuaMFC.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\QuaMFCDoc.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Splsh16.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\Toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\arranger_tool.bmp">
       <Filter>Resource Files</Filter>
     </Image>
@@ -816,22 +222,16 @@
     <Image Include="res\arrow_r_sm.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="background.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="background256.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\bitmap1.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\bmp00001.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\bmp_min_sm_d.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\bmp_min_sm_oe.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bmp00001.bmp">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\but_blank_sm_d.bmp">
@@ -945,6 +345,12 @@
     <Image Include="res\q_parse_state_ok.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\QuaMFC.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\QuaMFCDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="res\quamfcty.bmp">
       <Filter>Resource Files</Filter>
     </Image>
@@ -960,6 +366,9 @@
     <Image Include="res\take_idx.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="res\toolbar1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
@@ -971,37 +380,149 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\QuaMFC.rc2">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\a_draw_ctl.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\ar_draw.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\ar_point.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\ar_point_ctl.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\ar_region.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\ar_slice.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\artool_d.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\poo.cur">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="test.htm" />
-    <None Include="ClassDiagram.cd" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="ChildFrm.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrm.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaMessageId.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaContextMFCDoc.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaContextMFCFrame.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaMFC.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaMFCDoc.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaMFCView.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files\MFC\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCArrangerToolBar.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCArrangeView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCBlockEdit.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCChannelMountView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCClipListView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCDestinationView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCDeviceSelector.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCObjectMountView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCObjectView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCPropertyPages.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaButton.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaChannelController.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaContextIndexView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaFloatCtrl.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaIntCtrl.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaListBox.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaRotor.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaStateDisplay.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaSymbolIndexView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaTextCtrl.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaTimeCtrl.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCQuaTransportBar.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCSampleDataEditor.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCSimpleTypeView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCStreamDataEditor.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="MFCTakeListView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesPropertySheet.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="PreviewWnd.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyFrame.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaDrop.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaMainTransportView.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="Splash.h">
+      <Filter>Header Files\MFC\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QuaMFCCCDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\globals\BRect.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\globals\Colors.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\globals\MemDC.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\globals\BBitmap.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

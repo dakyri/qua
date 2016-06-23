@@ -1,15 +1,17 @@
-#include "qua_version.h"
+
 
 // MFCQuaTextCtrl.cpp : implementation file
 // base class for controls that are shown with text indented in a background with a label
 //
-
+#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
+
 #include "QuaMFC.h"
 #include "MFCQuaTextCtrl.h"
-#include "DaBasicTypes.h"
-#include "Colors.h"
 #include "StdDefs.h"
+#include "Colors.h"
+
 
 // MFCQuaTimeCtrl
 
@@ -396,7 +398,7 @@ MFCQuaTextCtrl::CtlColor(CDC* pDC, UINT nCtlColor)
 	return CreateSolidBrush(bgColor);
 }
 
-//int
+int
 MFCQuaTextCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct )
 {
 	CEdit::OnCreate(lpCreateStruct);

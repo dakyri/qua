@@ -1,21 +1,23 @@
-#include "qua_version.h"
 
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
 #include "ShlObj.h"
 
 #include "StdDefs.h"
-#include "DaKernel.h"
-#include "DaMimeType.h"
+#include "Colors.h"
 
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
 #include "MFCSampleDataEditor.h"
 #include "MFCObjectView.h"
 
-#include "inx/Qua.h"
-#include "inx/Time.h"
-#include "inx/Sample.h"
-#include "inx/Parse.h"
+#include "Qua.h"
+#include "Time.h"
+#include "Sample.h"
+#include "Parse.h"
 
 IMPLEMENT_DYNCREATE(MFCSampleDataEditor, MFCDataEditor)
 
@@ -161,7 +163,7 @@ MFCSampleDataEditor::AddAllItemViews(bool redraw)
 	if (pars) {
 		StabEnt	*sibp = pars->children;
 		while (sibp != NULL) {
-			if (sibp->type == S_CLIP) {
+			if (sibp->type == TypedValue::S_CLIP) {
 				Clip	*c = sibp->ClipValue(NULL);
 				if (c->media != NULL) {
 					StabEnt		*ts = c->media->sym;
@@ -390,15 +392,15 @@ MFCSampleDataEditor::PeakData(long idx, short channel, float &sample_hi, float &
 void
 MFCSampleDataEditor::OnDraw(CDC* pdc)
 {
-	Pen			blackPen(AlphaColor(250, rgb_black), 1);
-	Pen			redPen(AlphaColor(250, rgb_red), 1);
-	Pen			bluePen(AlphaColor(250, rgb_blue), 1);
-	Pen			greenPen(AlphaColor(250, RGB(10,100,10)), 1);
-	SolidBrush	blueBrush(AlphaColor(100, rgb_blue));
-	SolidBrush	greenBrush(AlphaColor(200, RGB(10,100,10)));
-	SolidBrush	softgreenBrush(AlphaColor(50, RGB(60,160,60)));
-	SolidBrush	blackBrush(AlphaColor(200, rgb_black));
-	SolidBrush	hardblackBrush(AlphaColor(250, rgb_black));
+	Pen			blackPen(Color(250, 0, 0, 0), 1);
+	Pen			redPen(Color(250, 160, 10, 10), 1);
+	Pen			bluePen(Color(250, 10, 10, 160), 1);
+	Pen			greenPen(Color(250, 10,100,10), 1);
+	SolidBrush	blueBrush(Color(100, 10, 10, 160));
+	SolidBrush	greenBrush(Color(200, 10,100,10));
+	SolidBrush	softgreenBrush(Color(50, 60,160,60));
+	SolidBrush	blackBrush(Color(200, 0, 0, 0));
+	SolidBrush	hardblackBrush(Color(250, 0, 0, 0));
 
 	CRect	clipBox;
 	int		cbType;
@@ -882,8 +884,7 @@ MFCSampleDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 				if ((v = chSym->SampleValue()) != NULL) {
 					Time	dur_time;
 					dur_time.Set(1,0,0,at_time.metric);
-					char	nmbuf[120];
-					glob.MakeUniqueName(chSym, "clip", nmbuf, 120, 1);
+					string	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
 					Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //					MFCEditorItemView	*added_item = AddClipItemView(c);
 				}

@@ -1,11 +1,14 @@
-#include "qua_version.h"
-
 // MainFrm.cpp : implementation of the QuaMainFrame class
 //
 //  For a bog standard MDI implementation of Qua, this is the main window frame in
 // which the open Qua document frames will appear ...
 
+#define _AFXDLL
+
 #include "stdafx.h"
+
+#include "qua_version.h"
+
 #include "QuaMFC.h"
 #include "StdDefs.h"
 
@@ -13,10 +16,9 @@
 #include "Splash.h"
 
 #include "QuaMFCCCDialog.h"
-
-#include "DaKernel.h"
 #include "QuaMFCDoc.h"
-#include "inx/Qua.h"
+
+#include "Qua.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

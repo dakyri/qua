@@ -14,12 +14,16 @@
 using namespace Gdiplus;
 #endif
 
-#include "DaBasicTypes.h"
-#include "DaRect.h"
-#include "inx/QuaDisplay.h"
-#include "inx/Time.h"
+#include "StdDefs.h"
+#include "BRect.h"
+#include "QuaDisplay.h"
+#include "Time.h"
 
 #include "QuaDrop.h"
+
+#include <vector>
+
+using namespace std;
 
 class MFCObjectView;
 class MFCDataEditor;
@@ -150,15 +154,22 @@ public:
 	CPoint						mouse_move_item_offset;
 
 // children with a visual representation
-	BList						itemRepresentations;
+	vector<MFCEditorItemView *> itemRepresentations;
 	inline long NItemR()
-		{ return itemRepresentations.CountItems(); }
+		{ return itemRepresentations.size(); }
 	inline MFCEditorItemView *ItemR(long i)
-		{ return (MFCEditorItemView *) itemRepresentations.ItemAt(i); }
-	inline bool	AddItemR(MFCEditorItemView *i)
-		{ return itemRepresentations.AddItem(i); }
-	inline bool	RemItemR(MFCEditorItemView *i)
-		{ return itemRepresentations.RemoveItem(i); }
+		{ return i >= 0 && ((unsigned)i)<itemRepresentations.size()? itemRepresentations[i]:nullptr; }
+	inline void AddItemR(MFCEditorItemView *i)
+		{ itemRepresentations.push_back(i); }
+	inline bool	RemItemR(MFCEditorItemView *i) {
+		for (auto it = itemRepresentations.begin(); it != itemRepresentations.end(); ++it) {
+			if (*it == i) {
+				itemRepresentations.erase(it);
+				return true;
+			}
+		}
+		return false;
+	}
 
 	MFCEditorItemView			*ItemViewFor(void *i);
 	MFCEditorItemView			*ItemViewAtPoint(CPoint &p, UINT flags, short &hitType, void *&clkit);
@@ -168,7 +179,7 @@ public:
 	bool						RemoveItemView(MFCEditorItemView *itemview);
 	bool						ClearAllItemViews(bool rdw);
 
-	bool						RemoveClipsNotIn(BList &);
+	bool						RemoveClipsNotIn(vector<StabEnt*> &);
 
 // Operations
 public:

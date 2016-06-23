@@ -46,6 +46,9 @@
     <Filter Include="Source Files\global">
       <UniqueIdentifier>{f7e08da3-56ea-462f-93a8-21970fa349dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\VST">
+      <UniqueIdentifier>{210ae75c-d5b6-4647-a894-6d93408e4788}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stdafx.h">
@@ -234,8 +237,41 @@
     <ClInclude Include="..\include\base\QuaTime.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="QuaOSC.h">
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\AEffect.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\aeffectx.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\aeffguieditor.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\audioeffectx.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstcontrols.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstfxstore.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstgui.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugscarbon.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugsmac.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\VST\vst-2.3-common\vstplugsmacho.h">
+      <Filter>Header Files\VST</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\devices\QuaOSC.h">
       <Filter>Header Files\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\QuaEnvironment.h">
+      <Filter>Header Files\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -416,11 +452,17 @@
     <ClCompile Include="..\util\Url.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="QuaOSC.cpp">
-      <Filter>Source Files\devices</Filter>
-    </ClCompile>
     <ClCompile Include="..\util\StdDefs.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\QuaCommandLine.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\QuaEnvironment.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\devices\QuaOSC.cpp">
+      <Filter>Source Files\devices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -57,6 +57,7 @@ class Block;
 class QuaPort;
 class FloatQueue;
 struct IXMLDOMElement;
+class QuaOSCManager;
 
 enum {
 	CBUT_INENABLE=0,
@@ -65,21 +66,20 @@ enum {
 	CBUT_RECORDENABLE=3
 };
 
+class QuaAudioManager;
+class QuaMidiManager;
+class QuaJoystickManager;
+class QuaParallelManager;
+class QuaOSCManager;
+
 	
 class Channel:	public Stackable,
 				public Edittable,
 				public Stacker
 {
 public:
-						Channel(std::string nm,
-								short id,
-								bool authru,
-								bool midithru,
-								short nic,
-								short noc,
-								Qua *q);
-						~Channel();
-
+	Channel(std::string nm, short id, bool authru, bool midithru, short nic, short noc, Qua *q);
+	virtual ~Channel();
 
 	void				OutputStream(Stream *S);
 	void				InputStream(Stream *S);
@@ -184,6 +184,11 @@ public:
 	short				recordState;
 	bool				reRecord;
 
+	QuaAudioManager *getAudioManager();
+	QuaMidiManager *getMidiManager();
+	QuaJoystickManager *getJoyManager();
+	QuaParallelManager *getParallelManager();
+	QuaOSCManager *getOSCManager();
 };
 
 Channel	*LoadChannel(FILE *fp, Qua *u);

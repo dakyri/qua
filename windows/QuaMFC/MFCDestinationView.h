@@ -8,7 +8,7 @@
 #include "MFCDeviceSelector.h"
 #include "MFCQuaButton.h"
 #include "MFCQuaRotor.h"
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
 
 class Output;
 class Input;

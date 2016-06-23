@@ -1,9 +1,8 @@
 #pragma once
 
-#include "DaBasicTypes.h"
-#include "DaBitmap.h"
-#include "DaRect.h"
-
+#include "StdDefs.h"
+#include "BRect.h"
+#include "BBitmap.h"
 
 // MFCQuaStateDisplay
 

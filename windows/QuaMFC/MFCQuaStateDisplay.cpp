@@ -1,17 +1,18 @@
-#include "qua_version.h"
+
 
 // MFCQuaStateDisplay.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
 
-#include "DaBasicTypes.h"
-#include "DaBitmap.h"
+#include "StdDefs.h"
+#include "BBitmap.h"
 
 #include "QuaMFC.h"
 #include "MFCQuaStateDisplay.h"
 
-#include "inx/Parse.h"
+#include "Parse.h"
 
 
 CFont	MFCQuaStateDisplay::displayFont;

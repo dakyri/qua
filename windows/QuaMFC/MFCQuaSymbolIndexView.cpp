@@ -1,17 +1,15 @@
 #include "qua_version.h"
 // MFCArrangeView.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <afxole.h>
-
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
-#include "DaFile.h"
 
 #include "StdDefs.h"
 
@@ -20,11 +18,11 @@
 #include "MFCQuaSymbolIndexView.h"
 #include "QuaDrop.h"
 
-#include "inx/Qua.h"
-#include "inx/Channel.h"
-#include "inx/Sample.h"
-#include "inx/Voice.h"
-#include "inx/Method.h"
+#include "Qua.h"
+#include "Channel.h"
+#include "Sample.h"
+#include "Voice.h"
+#include "Method.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -75,7 +73,18 @@ BEGIN_MESSAGE_MAP(MFCQuaSymbolIndexView, CTreeView)
 	ON_COMMAND(ID_EDITORCONTEXT_SELECT_CLIP,OnPopupSelectClip)
 	ON_COMMAND(ID_EDITORCONTEXT_GOTOSTART_CLIP,OnPopupGotoStartClip)
 	ON_COMMAND(ID_EDITORCONTEXT_GOTOEND_CLIP,OnPopupGotoEndClip)
-	ON_NOTIFY_REFLECT(TVN_KEYDOWN,OnKeyDown)
+
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_KEYDOWN, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnKeyDown)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_SELCHANGED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeSelect)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINDRAG, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginDrag)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ITEMEXPANDED, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnNodeExpand)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_BEGINLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnBeginLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)TVN_ENDLABELEDIT, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnEndLabelEdit)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)NM_RCLICK, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnRightClick)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)NM_DBLCLK, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnDoubleClick)) },
+{ WM_NOTIFY + WM_REFLECT_BASE, (WORD)(int)NM_DBLCLK, 0, 0, AfxSigNotify_v, (AFX_PMSG)(static_cast<void (AFX_MSG_CALL CCmdTarget::*)(NMHDR*, LRESULT*) > (OnRightDoubleClick)) },
+
+	/*ON_NOTIFY_REFLECT(TVN_KEYDOWN,OnKeyDown)
 	ON_NOTIFY_REFLECT(TVN_SELCHANGED,OnNodeSelect)
 	ON_NOTIFY_REFLECT(TVN_BEGINDRAG,OnBeginDrag)
 	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED,OnNodeExpand)
@@ -83,7 +92,7 @@ BEGIN_MESSAGE_MAP(MFCQuaSymbolIndexView, CTreeView)
 	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT ,OnEndLabelEdit)
 	ON_NOTIFY_REFLECT(NM_RCLICK,OnRightClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK,OnDoubleClick) 
-	ON_NOTIFY_REFLECT(NM_RDBLCLK,OnRightDoubleClick) 
+	ON_NOTIFY_REFLECT(NM_RDBLCLK,OnRightDoubleClick) */
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -91,7 +100,7 @@ END_MESSAGE_MAP()
 // MFCArrangeView drawing
 
 void
-MFCQuaSymbolIndexView::DisplayArrangementTitle(const char *nm)
+MFCQuaSymbolIndexView::displayArrangementTitle(const char *nm)
 {
 	;
 }
@@ -126,11 +135,11 @@ MFCQuaSymbolIndexView::OnInitialUpdate()
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddIndexer(this);
 //		top = AddTopLevelClass(qdoc->qua->sym->name, S_QUA, TVI_ROOT);
-		channels = AddTopLevelClass("Channels", S_CHANNEL, TVI_ROOT, 0);
-		samples = AddTopLevelClass("Samples", S_SAMPLE, TVI_ROOT, 0);
-		voices = AddTopLevelClass("Voices", S_VOICE, TVI_ROOT, 0);
-		methods = AddTopLevelClass("Methods", S_METHOD, TVI_ROOT, 0);
-		regions = AddTopLevelClass("Regions and Markers", S_CLIP, TVI_ROOT, 0);
+		channels = AddTopLevelClass("Channels", TypedValue::S_CHANNEL, TVI_ROOT, 0);
+		samples = AddTopLevelClass("Samples", TypedValue::S_SAMPLE, TVI_ROOT, 0);
+		voices = AddTopLevelClass("Voices", TypedValue::S_VOICE, TVI_ROOT, 0);
+		methods = AddTopLevelClass("Methods", TypedValue::S_METHOD, TVI_ROOT, 0);
+		regions = AddTopLevelClass("Regions and Markers", TypedValue::S_CLIP, TVI_ROOT, 0);
 
 		AddAllIndexItems();
 	}
@@ -146,7 +155,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 	HTREEITEM	it = NULL;
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
 					Clip	*c = s->ClipValue(NULL);
@@ -160,39 +169,39 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 				}
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 2);
 				}
 				break;
 			}
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 6);
 				}
 				break;
 			  }
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 8);
 				}
 				break;
 			 }
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				it = IndexItemFor(s);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 5);
 				}
 				break;
 			  }
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
 				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
 				switch (p->type) {
-					case S_VOICE: {
+				case TypedValue::S_VOICE: {
 						if (iti != NULL) {
 							it = IndexItemFor(s, iti);
 							if (it == NULL) {
@@ -201,7 +210,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 						}
 						break;
 					}
-					case S_SAMPLE: {
+					case TypedValue::S_SAMPLE: {
 						if (iti != NULL) {
 							it = IndexItemFor(s, iti);
 							if (it == NULL) {
@@ -224,11 +233,11 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 }
 
 void
-MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s)
+MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 {
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				HTREEITEM	it = IndexItemFor(s, regions);
 				if (it == NULL) {
 					Clip	*c = s->ClipValue(NULL);
@@ -242,32 +251,32 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s)
 				}
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				HTREEITEM	it = IndexItemFor(s, channels);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, channels, 2);
 				}
 				break;
 			}
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				HTREEITEM	it = IndexItemFor(s, samples);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, samples, 6);
 				}
 				break;
 			  }
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				HTREEITEM	it = IndexItemFor(s, voices);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, voices, 8);
 				}
 				break;
 			 }
-			case S_METHOD: {
+			case TypedValue::S_METHOD: {
 				HTREEITEM	it = IndexItemFor(s);
 				if (it == NULL) {
 					HTREEITEM	pit = NULL;
-					if (s->context == NULL || s->context->type == S_QUA) {
+					if (s->context == NULL || s->context->type == TypedValue::S_QUA) {
 						it = AddIndexItem(s->UniqueName(), (LPARAM)s, methods, 5);
 					} else {
 						pit = IndexItemFor(s->context);
@@ -279,11 +288,11 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s)
 				}
 				break;
 			  }
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
 				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
 				switch (p->type) {
-					case S_VOICE: {
+					case  TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
 						if (ipt != NULL) {
 							HTREEITEM	it = IndexItemFor(s, ipt);
@@ -293,7 +302,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s)
 						}
 						break;
 					}
-					case S_SAMPLE: {
+					case  TypedValue::S_SAMPLE: {
 						HTREEITEM	ipt = IndexItemFor(p, samples);
 						if (ipt != NULL) {
 							HTREEITEM	it = IndexItemFor(s, ipt);
@@ -316,35 +325,35 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s)
 }
 
 void
-MFCQuaSymbolIndexView::RemoveFromSymbolIndex(StabEnt *s)
+MFCQuaSymbolIndexView::removeFromSymbolIndex(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
 		GetTreeCtrl().DeleteItem(ht);
 	}
 }
+#include <algorithm>
 
-bool
-MFCQuaSymbolIndexView::UpdateClipIndexDisplay()
+void
+MFCQuaSymbolIndexView::updateClipIndexDisplay()
 {
 	StabEnt	*sym = quaLink->QuaSym();
-		StabEnt	*cs = sym->children;
-		BList	clips;
-		while (cs != NULL) {
-			if (cs->type == S_CLIP) {
-				clips.AddItem(cs);
-			}
-			cs = cs->sibling;
+	StabEnt	*cs = sym->children;
+	vector<StabEnt*> clips;
+	while (cs != NULL) {
+		if (cs->type == TypedValue::S_CLIP) {
+			clips.push_back(cs);
 		}
-	BList present;
-	bool	worked = quaLink->ClipSyms(present, 0);
+		cs = cs->sibling;
+	}
+	vector<StabEnt*> present = quaLink->ClipSyms(0);
 
 	long	i;
-	for (i=0; i<present.CountItems(); i++) {
-		StabEnt	*s = (StabEnt*)present.ItemAt(i);
-		if (s && s->type == S_CLIP) {
+	for (i=0; i<present.size(); i++) {
+		StabEnt	*s =present[i];
+		if (s && s->type == TypedValue::S_CLIP) {
 			fprintf(stderr, "\tadd %x %s\n", s, s->name);
-			AddToSymbolIndex(s);
+			addToSymbolIndex(s);
 		}
 	}
 	fprintf(stderr, "update master clip index display\n");
@@ -358,20 +367,19 @@ MFCQuaSymbolIndexView::UpdateClipIndexDisplay()
 		BOOL bWorked = GetTreeCtrl().GetItem(&item);
 		if (item.lParam >= QSI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
-			if (s->type == S_CLIP) {
+			if (s->type == TypedValue::S_CLIP) {
 				fprintf(stderr, "\tfound %x %s\n", s, s->name);
-				if (present.IndexOf(s) < 0) {
+				if (find(present.begin(), present.end(), s) != present.end()) {
 					GetTreeCtrl().DeleteItem(hItem);
 				}
 			}
 		}
 		hItem = GetTreeCtrl().GetNextItem(hItem, TVGN_NEXT);
 	}
-	return true;
 }
 
 void
-MFCQuaSymbolIndexView::SymbolNameChanged(StabEnt *s)
+MFCQuaSymbolIndexView::symbolNameChanged(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
@@ -442,42 +450,42 @@ MFCQuaSymbolIndexView::IndexItemFor(StabEnt *s)
 {
 	if (s!= NULL) {
 		switch (s->type) {
-			case S_CLIP: {
+		case TypedValue::S_CLIP: {
 				return IndexItemFor(s, regions);
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				return IndexItemFor(s, channels);
 				break;
 			}
-			case S_SAMPLE: {
+			case TypedValue::S_SAMPLE: {
 				return IndexItemFor(s, samples);
 				break;
 			  }
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				return IndexItemFor(s, voices);
 				break;
 			 }
-			case S_METHOD: {
-				if (s->context == NULL || s->context->type == S_QUA) {
+			case TypedValue::S_METHOD: {
+				if (s->context == NULL || s->context->type == TypedValue::S_QUA) {
 					return IndexItemFor(s, methods);
 				} else {
 					return IndexItemFor(s, IndexItemFor(s->context));
 				}
 				break;
 			  }
-			case S_INSTANCE: {
+			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
 				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
 				switch (p->type) {
-					case S_VOICE: {
+					case TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
 						if (ipt != NULL) {
 							return IndexItemFor(s, ipt);
 						}
 						break;
 					}
-					case S_SAMPLE: {
+					case TypedValue::S_SAMPLE: {
 						HTREEITEM	ipt = IndexItemFor(p, samples);
 						if (ipt != NULL) {
 							return IndexItemFor(s, ipt);
@@ -495,32 +503,30 @@ MFCQuaSymbolIndexView::IndexItemFor(StabEnt *s)
 	return NULL;
 }
 
+#include <vector>
+using namespace std;
 void
 MFCQuaSymbolIndexView::AddAllIndexItems()
 {
-	for (short i=0; i<quaLink->NChannel(); i++) {
-		AddToSymbolIndex(quaLink->ChannelSym(i));
+	for (unsigned i=0; i<quaLink->NChannel(); i++) {
+		addToSymbolIndex(quaLink->ChannelSym(i));
 	}
-	BList	scheds;
-	if (quaLink->SchedulableSyms(scheds)) {
-		for(short i=0; i<scheds.CountItems(); i++) {
-			if (scheds.ItemAt(i)) {
-				StabEnt	*sym = (StabEnt *)scheds.ItemAt(i);
-				AddToSymbolIndex(sym);
-				HTREEITEM	mit = IndexItemFor(sym);
-				AddMethodIndexItems(sym, mit);
-				AddInstanceIndexItems(sym, mit);
-			}
+	vector<StabEnt*> scheds = quaLink->SchedulableSyms();
+	for (unsigned i = 0; i<scheds.size(); i++) {
+		StabEnt	*sym = scheds[i];
+		if (sym) {
+			addToSymbolIndex(sym);
+			HTREEITEM	mit = IndexItemFor(sym);
+			AddMethodIndexItems(sym, mit);
+			AddInstanceIndexItems(sym, mit);
 		}
 	}
 	AddMethodIndexItems(quaLink->QuaSym(), methods);
-	BList	clips;
-	if (quaLink->ClipSyms(clips, 0)) {
-		for(short i=0; i<clips.CountItems(); i++) {
-			if (clips.ItemAt(i)) {
-				StabEnt	*sym = (StabEnt *)clips.ItemAt(i);
-				AddToSymbolIndex(sym);
-			}
+	vector<StabEnt*> clips = quaLink->ClipSyms(0);
+	for (short i = 0; i<clips.size(); i++) {
+		StabEnt	*sym = clips[i];
+		if (sym != nullptr) {
+			addToSymbolIndex(sym);
 		}
 	}
 }
@@ -528,14 +534,12 @@ MFCQuaSymbolIndexView::AddAllIndexItems()
 void
 MFCQuaSymbolIndexView::AddMethodIndexItems(StabEnt *sym, HTREEITEM it)
 {
-	BList	meths;
-	if (quaLink->MethodSyms(sym, meths)) {
-		for(short i=0; i<meths.CountItems(); i++) {
-			if (meths.ItemAt(i)) {
-				StabEnt	*sym = (StabEnt *)meths.ItemAt(i);
-				HTREEITEM	mit = AddToSymbolIndex(sym, it);
-				AddMethodIndexItems(sym, mit);
-			}
+	vector<StabEnt*> meths = quaLink->MethodSyms(sym);
+	for (unsigned i=0; i<meths.size(); i++) {
+		StabEnt	*sym = meths[i];
+		if (sym) {
+			HTREEITEM	mit = AddToSymbolIndex(sym, it);
+			AddMethodIndexItems(sym, mit);
 		}
 	}
 }
@@ -543,13 +547,11 @@ MFCQuaSymbolIndexView::AddMethodIndexItems(StabEnt *sym, HTREEITEM it)
 void
 MFCQuaSymbolIndexView::AddInstanceIndexItems(StabEnt *sym, HTREEITEM it)
 {
-	BList	insts;
-	if (quaLink->InstanceSyms(sym, insts)) {
-		for(short i=0; i<insts.CountItems(); i++) {
-			if (insts.ItemAt(i)) {
-				StabEnt	*sym = (StabEnt *)insts.ItemAt(i);
-				HTREEITEM	mit = AddToSymbolIndex(sym, it);
-			}
+	vector<StabEnt*> insts = quaLink->InstanceSyms(sym);
+	for (unsigned i = 0; i<insts.size(); i++) {
+		StabEnt	*sym = (StabEnt *)insts[i];
+		if (sym != nullptr) {
+			HTREEITEM	mit = AddToSymbolIndex(sym, it);
 		}
 	}
 }
@@ -566,19 +568,19 @@ MFCQuaSymbolIndexView::OnBeginDrag(NMHDR *pnmh, LRESULT* bHandled)
 			bool	draggable = false;
 			UINT	dragFormat = 0;
 			switch (s->type) {
-				case S_CLIP:	// move an instance
+			case TypedValue::S_CLIP:	// move an instance
 					draggable = true;
 					dragFormat = QuaDrop::clipFormat;
 					break;
-				case S_INSTANCE:	// move an instance
+				case TypedValue::S_INSTANCE:	// move an instance
 					draggable = true;
 					dragFormat = QuaDrop::instanceFormat;
 					break;
-				case S_SAMPLE:	// create a sample instance
+				case TypedValue::S_SAMPLE:	// create a sample instance
 					draggable = true;
 					dragFormat = QuaDrop::sampleFormat;
 					break;
-				case S_VOICE:	// create a voice instance
+				case TypedValue::S_VOICE:	// create a voice instance
 					draggable = true;
 					dragFormat = QuaDrop::voiceFormat;
 					break;
@@ -777,7 +779,7 @@ MFCQuaSymbolIndexView::OnNodeExpand(NMHDR *pNotifyStruct,LRESULT *result)
 	if (tvp->itemNew.lParam > QSI_SYMBOL_LPARAM) {
 		StabEnt *s = (StabEnt *)tvp->itemNew.lParam;
 		switch (s->type) {
-			case S_SAMPLE: {
+		case TypedValue::S_SAMPLE: {
 				if (tvp->itemNew.state & TVIS_EXPANDED) {
 					GetTreeCtrl().SetItemImage(tvp->itemNew.hItem, 7, 7);
 				} else {
@@ -785,7 +787,7 @@ MFCQuaSymbolIndexView::OnNodeExpand(NMHDR *pNotifyStruct,LRESULT *result)
 				}
 				break;
 			}
-			case S_VOICE: {
+			case TypedValue::S_VOICE: {
 				if (tvp->itemNew.state & TVIS_EXPANDED) {
 					GetTreeCtrl().SetItemImage(tvp->itemNew.hItem, 9, 9);
 				} else {
@@ -819,22 +821,22 @@ MFCQuaSymbolIndexView::OnBeginLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_SAMPLE:
+			case  TypedValue::S_SAMPLE:
 				*result = 0;
 				break;
-			case S_METHOD:
+			case  TypedValue::S_METHOD:
 				*result = 0;
 				break;
-			case S_VOICE:
+			case  TypedValue::S_VOICE:
 				*result = 0;
 				break;
-			case S_INSTANCE:
+			case TypedValue::S_INSTANCE:
 				*result = 0;
 				break;
-			case S_CHANNEL:
+			case  TypedValue::S_CHANNEL:
 				*result = 0;
 				break;
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				*result = 0;
 				break;
 			default:
@@ -860,27 +862,27 @@ MFCQuaSymbolIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QSI_SYMBOL_LPARAM && SymTab::MakeValidSymbolName(tvp->item.pszText, name)) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case S_METHOD:
+			case  TypedValue::S_METHOD:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
-			case S_SAMPLE:
+			case  TypedValue::S_SAMPLE:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
-			case S_VOICE:
+			case  TypedValue::S_VOICE:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
-			case S_INSTANCE:
+			case  TypedValue::S_INSTANCE:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
-			case S_CHANNEL:
+			case TypedValue::S_CHANNEL:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
@@ -921,22 +923,22 @@ MFCQuaSymbolIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 		if (selectedData > QSI_SYMBOL_LPARAM) {
 			StabEnt	*sym = (StabEnt *) selectedData;
 			switch (sym->type) {
-				case S_METHOD:
+				case TypedValue::S_METHOD:
 					DoPopupMenu(IDR_METHOD_RCLICK);
 					break;
-				case S_SAMPLE:
+				case TypedValue::S_SAMPLE:
 					DoPopupMenu(IDR_SCHEDULABLE_RCLICK);
 					break;
-				case S_VOICE:
+				case TypedValue::S_VOICE:
 					DoPopupMenu(IDR_SCHEDULABLE_RCLICK);
 					break;
-				case S_INSTANCE:
+				case TypedValue::S_INSTANCE:
 					DoPopupMenu(IDR_INSTANCE_RCLICK);
 					break;
-				case S_CHANNEL:
+				case  TypedValue::S_CHANNEL:
 					DoPopupMenu(IDR_CHANNEL_RCLICK);
 					break;
-				case S_CLIP: {
+				case  TypedValue::S_CLIP: {
 					Clip	*c = sym->ClipValue(NULL);
 					if (c->duration.ticks <= 0) {
 						DoPopupMenu(IDR_MAINMARK_RCLICK);
@@ -975,7 +977,7 @@ MFCQuaSymbolIndexView::OnDoubleClick(NMHDR *pNotifyStruct,LRESULT *result)
 		if (selectedData > QSI_SYMBOL_LPARAM) {
 			StabEnt	*sym = (StabEnt *) selectedData;
 			switch (sym->type) {
-				case S_CLIP: {
+				case TypedValue::S_CLIP: {
 					quaLink->GotoStartOfClip(sym);
 					break;
 				}
@@ -1042,21 +1044,20 @@ MFCQuaSymbolIndexView::OnPopupAddMethod()
 		StabEnt	*pSym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup add child method %s\n", pSym->UniqueName());
 		switch (pSym->type) {
-			case S_METHOD:
-			case S_CHANNEL:
-			case S_VOICE:
-			case S_SAMPLE: {
-				char	nmbuf[120];
-				glob.MakeUniqueName(pSym, "action", nmbuf, 120, 1);
+			case TypedValue::S_METHOD:
+			case TypedValue::S_CHANNEL:
+			case TypedValue::S_VOICE:
+			case TypedValue::S_SAMPLE: {
+				string nmbuf = glob.MakeUniqueName(pSym, "action", 1);
 				if (quaLink) {
-					StabEnt *mSym = quaLink->CreateMethod(nmbuf, pSym);
+					StabEnt *mSym = quaLink->CreateMethod(nmbuf.c_str(), pSym);
 					if (mSym) {
 //						AddSym(mSym);
 					}
 				}
 				break;
 			}
-			case S_INSTANCE:
+			case TypedValue::S_INSTANCE:
 // doesn't do this
 				break;
 		}
@@ -1071,22 +1072,22 @@ MFCQuaSymbolIndexView::OnPopupDelete()
 		StabEnt	*sym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
 		switch (sym->type) {
-			case S_METHOD:
+			case TypedValue::S_METHOD:
 				quaLink->DeleteObject(sym);
 				break;
-			case S_CHANNEL:
+			case TypedValue::S_CHANNEL:
 				quaLink->DeleteObject(sym);
 				break;
-			case S_VOICE:
+			case TypedValue::S_VOICE:
 				quaLink->DeleteObject(sym);
 				break;
-			case S_SAMPLE:
+			case TypedValue::S_SAMPLE:
 				quaLink->DeleteObject(sym);
 				break;
-			case S_CLIP:
+			case TypedValue::S_CLIP:
 				quaLink->DeleteObject(sym);
 				break;
-			case S_INSTANCE:
+			case  TypedValue::S_INSTANCE:
 				quaLink->DeleteObject(sym);
 				break;
 		}
@@ -1100,10 +1101,10 @@ MFCQuaSymbolIndexView::OnPopupControl()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_INSTANCE:
+			case  TypedValue::S_INSTANCE:
 				quaLink->ShowObjectRepresentation(sym);
 				break;
-			case S_CHANNEL:
+			case  TypedValue::S_CHANNEL:
 				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}
@@ -1117,7 +1118,7 @@ MFCQuaSymbolIndexView::OnPopupSelectClip()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				quaLink->SelectRegion(sym);
 				break;
 			}
@@ -1132,7 +1133,7 @@ MFCQuaSymbolIndexView::OnPopupGotoStartClip()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				quaLink->GotoStartOfClip(sym);
 				break;
 			}
@@ -1147,7 +1148,7 @@ MFCQuaSymbolIndexView::OnPopupGotoEndClip()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_CLIP: {
+			case  TypedValue::S_CLIP: {
 				quaLink->GotoEndOfClip(sym);
 				break;
 			}
@@ -1162,20 +1163,20 @@ MFCQuaSymbolIndexView::OnPopupEdit()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case S_METHOD:
-				if (sym->context == NULL || sym->context->type == S_QUA) {
+			case TypedValue::S_METHOD:
+				if (sym->context == NULL || sym->context->type == TypedValue::S_QUA) {
 					quaLink->ShowObjectRepresentation(sym);
 				} else { // show parent and scroll to right bit
 					;
 				}
 				break;
-			case S_SAMPLE:
+			case TypedValue::S_SAMPLE:
 				quaLink->ShowObjectRepresentation(sym);
 				break;
-			case S_VOICE:
+			case TypedValue::S_VOICE:
 				quaLink->ShowObjectRepresentation(sym);
 				break;
-			case S_CHANNEL:
+			case TypedValue::S_CHANNEL:
 				quaLink->ShowObjectRepresentation(sym);
 				break;
 		}

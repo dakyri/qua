@@ -1,9 +1,11 @@
 // MFCBlockEdit.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
-
 #include "StdDefs.h"
+#include "Colors.h"
 
 #include "QuaMFC.h"
 #include "MFCBlockEdit.h"
@@ -11,9 +13,9 @@
 #include "MFCObjectView.h"
 #include "MFCQuaMessageId.h"
 
-#include "inx/Parse.h"
-#include "inx/Block.h"
-#include "inx/Sym.h"
+#include "Parse.h"
+#include "Block.h"
+#include "Sym.h"
 
 
 //////////////////////////////////
@@ -487,22 +489,15 @@ MFCErrorViewer::~MFCErrorViewer()
 void
 MFCErrorViewer::Clear()
 {
-	long	ni = err_lines.CountItems();
-	while (ni > 0) {
-		delete (char *)err_lines.RemoveItemAt((int32)0);
-		ni--;
-	}
+	err_lines.clear();
 	err_chars = 0;
 }
 
 void
-MFCErrorViewer::AddLine(char *line)
+MFCErrorViewer::AddLine(string line)
 {
-	long	nc = strlen(line);
-	char	*buf = new char[nc+1];
-	strcpy(buf, line);
-	err_lines.AddItem(buf);
-	err_chars += nc;
+	err_lines.push_back(line);
+	err_chars += line.size();
 }
 
 void
@@ -515,23 +510,16 @@ MFCErrorViewer::Show()
 	txtv->SetWindowText("");
 
 
-	if (err_lines.CountItems() > 0) {
-		char	*buf = new char[err_chars+2*err_lines.CountItems()+1];
-		char	*p = buf;
-		for (short i=0; i<err_lines.CountItems(); i++) {
-			char	*si = (char *)err_lines.ItemAt(i);
-			int		n = strlen(si);
-			strcpy(p, si);
-			p+=n;
-			*p++='\r';
-			*p++='\n';
+	if (err_lines.size() > 0) {
+		string buf;
+		for (auto it: err_lines) {
+			buf += it;
+			buf.push_back('\r');
+			buf.push_back('\n');
 		}
-		*p++ = '\0';
-		fprintf(stderr, "%s\n", buf);
 		ReportError(buf);
 //		txtv->SetWindowText(buf);
 //		errd.ShowWindow(TRUE);
-		delete buf;
 	}
 }
 
@@ -562,8 +550,7 @@ MFCBlockEditCtrlStrip::~MFCBlockEditCtrlStrip()
 }
 
 int
-MFCBlockEditCtrlStrip::CreateCtrlStrip(
-		char *label, CRect &r, CWnd *w, long id)
+MFCBlockEditCtrlStrip::CreateCtrlStrip(char *label, CRect &r, CWnd *w, long id)
 {
 	int ret = Create(NULL, label, WS_CHILD | WS_VISIBLE |WS_CLIPCHILDREN,
        r, w, id, NULL);

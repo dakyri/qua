@@ -7,7 +7,7 @@
 // MFCArrangeView.h : header file
 //
 
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // MFCArrangeView view

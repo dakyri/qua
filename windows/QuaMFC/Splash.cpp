@@ -1,7 +1,7 @@
 // CG: This file was added by the Splash Screen component.
 // Splash.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"  // e. g. stdafx.h
 #include "resource.h"  // e.g. resource.h
 

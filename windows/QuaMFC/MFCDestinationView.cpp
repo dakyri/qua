@@ -1,20 +1,19 @@
 #include "qua_version.h"
 // MFCChannelView.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
 
-#include "BaseTypes.h"
-#include "DaKernel.h"
-#include "Colors.h"
 #include "StdDefs.h"
+#include "Colors.h"
+
 
 #include "QuaMFC.h"
 #include "MFCDestinationView.h"
 #include "MFCQuaMessageId.h"
 
-#include "inx/Destination.h"
-#include "inx/QuaPort.h"
+#include "Destination.h"
+#include "QuaPort.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

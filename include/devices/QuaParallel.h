@@ -36,7 +36,7 @@ public:
 class QuaParallelManager: public QuaPortManager<QuaParallelPort>
 {
 public:
-	 QuaParallelManager(Qua &q);
+	 QuaParallelManager();
 	 ~QuaParallelManager();
 					
 	virtual status_t connect(Input *);

@@ -1,18 +1,16 @@
 #include "qua_version.h"
 // MyPropertyPage1.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
 #include "resource.h"
 
 #include "StdDefs.h"
-#include "DaList.h"
-#include "DaKernel.h"
 
 #ifdef QUA_V_AUDIO_ASIO
-#include "inx/QuaAsio.h"
+#include "QuaAsio.h"
 
-#include "inx/QuaAudio.h"
+#include "QuaAudio.h"
 #endif
 #include "MFCPropertyPages.h"
 
@@ -171,7 +169,9 @@ END_MESSAGE_MAP()
 
 void MFCaudioPropertyPage::OnBnClickedAsioControl()
 {
+#ifdef QUA_V_AUDIO_ASIO
 	ASIOControlPanel();
+#endif
 }
 
 BOOL

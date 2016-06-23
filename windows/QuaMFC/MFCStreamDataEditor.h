@@ -1,10 +1,7 @@
 #pragma once
 
 #include "MFCDataEditor.h"
-#include "DaRect.h"
-#include "DaList.h"
-
-#include "inx/Note.h"
+#include "Note.h"
 
 class MFCStreamDataEditor;
 class Stream;

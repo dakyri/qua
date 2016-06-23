@@ -1,16 +1,16 @@
-#include "qua_version.h"
+
 // MFCQuaObjectView.cpp : implementation file
 //
 // a lot of the fixed bits could/should be changed from being being dynamically allocated.
 // however this has caused problems with 
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
 
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
-#include "DaErrorCodes.h"
-#include "Colors.h"
 #include "StdDefs.h"
+#include "Colors.h"
 
 #include "QuaMFC.h"
 #include "MFCObjectView.h"
@@ -27,15 +27,15 @@
 //#include "MFCQuaClipController.h"
 //#include "MFCQuaChannelController.h"
 
-#include "inx/Sym.h"
-#include "inx/Clip.h"
-#include "inx/Voice.h"
-#include "inx/Sample.h"
-#include "inx/Method.h"
-#include "inx/Channel.h"
-#include "inx/VstPlugin.h"
-#include "inx/Block.h"
-#include "inx/Parse.h"
+#include "Sym.h"
+#include "Clip.h"
+#include "Voice.h"
+#include "Sample.h"
+#include "Method.h"
+#include "Channel.h"
+#include "VstPlugin.h"
+#include "Block.h"
+#include "Parse.h"
 
 CFont	MFCObjectView::displayFont;
 CFont	MFCStackFrameView::displayFont;
@@ -138,11 +138,11 @@ MFCObjectView::ToObjectView(QuaObjectRepresentation *or)
 		return NULL;
 	}
 	switch (or->symbol->type) {
-		case S_VOICE: return (MFCVoiceObjectView *)or;
-		case S_SAMPLE: return (MFCSampleObjectView *)or;
-		case S_CHANNEL: return (MFCChannelObjectView *)or;
-		case S_METHOD: return (MFCMethodObjectView *)or;
-		case S_INSTANCE: return (MFCInstanceObjectView *)or;
+		case TypedValue::S_VOICE: return (MFCVoiceObjectView *)or;
+		case TypedValue::S_SAMPLE: return (MFCSampleObjectView *)or;
+		case TypedValue::S_CHANNEL: return (MFCChannelObjectView *)or;
+		case TypedValue::S_METHOD: return (MFCMethodObjectView *)or;
+		case TypedValue::S_INSTANCE: return (MFCInstanceObjectView *)or;
 	}
 	return NULL;
 }
@@ -505,13 +505,13 @@ MFCChannelObjectView::ChildPopulate(StabEnt *sym)
 		return;
 	}
 	switch (sym->type) {
-		case S_CLIP:
+		case TypedValue::S_CLIP:
 //			clipsView->AddItem(sym);
 			break;
-		case S_TAKE:
+		case TypedValue::S_TAKE:
 //			clipsView->AddItem(sym);
 			break;
-		case S_EVENT: {
+		case TypedValue::S_EVENT: {
 	// set main block for event handler
 			if (strcmp(sym->name, "Wake") == 0) {
 			} else if (strcmp(sym->name, "Sleep") == 0) {
@@ -525,7 +525,7 @@ MFCChannelObjectView::ChildPopulate(StabEnt *sym)
 			}
 			break;
 		}
-		case S_METHOD:
+		case TypedValue::S_METHOD:
 		default:
 			variableView->AddSym(sym);
 			break;
@@ -590,7 +590,7 @@ MFCChannelObjectView::ChildNameChanged(StabEnt *sym)
 QuaObjectRepresentation *
 MFCChannelObjectView::AddChildRepresentation(StabEnt *s)
 {
-	if (s->type == S_METHOD) {
+	if (s->type == TypedValue::S_METHOD) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -656,17 +656,17 @@ MFCChannelObjectView::UpdateVariableIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
 		switch (p->type) {
-			case S_EVENT:
-			case S_METHOD:
-			case S_TAKE:
-			case S_CLIP:
+			case TypedValue::S_EVENT:
+			case TypedValue::S_METHOD:
+			case TypedValue::S_TAKE:
+			case TypedValue::S_CLIP:
 				break;
 			default:{
 				variableView->AddSym(p);
-				presentTakes.AddItem(p);
+				presentTakes.push_back(p);
 			}
 		}
 		p = p->sibling;
@@ -768,7 +768,7 @@ MFCQCR::~MFCQCR()
 }
 
 QuaControllerRepresentation *
-MFCQCR::CreateControllerRepresentation(BRect &r, MFCStackFrameView *parv, StabEnt *sym, uint32 id)
+MFCQCR::CreateControllerRepresentation(BRect &r, MFCStackFrameView *parv, StabEnt *sym, ulong id)
 {
 	return NULL;
 }
@@ -903,7 +903,7 @@ MFCQuaRealController::UpdateDisplay(TypedValue &)
 TypedValue
 MFCQuaRealController::Value()
 {
-	if (symbol->type == S_DOUBLE) {
+	if (symbol->type == TypedValue::S_DOUBLE) {
 		return TypedValue::Double(0);
 	}
 	return TypedValue::Float(0);
@@ -976,13 +976,13 @@ MFCQuaIntController::UpdateDisplay(TypedValue &)
 TypedValue
 MFCQuaIntController::Value()
 {
-	if (symbol->type == S_BYTE) {
+	if (symbol->type == TypedValue::S_BYTE) {
 		return TypedValue::Byte(value);
 	}
-	if (symbol->type == S_SHORT) {
+	if (symbol->type == TypedValue::S_SHORT) {
 		return TypedValue::Short(value);
 	}
-	if (symbol->type == S_LONG) {
+	if (symbol->type == TypedValue::S_LONG) {
 		return TypedValue::Long(value);
 	}
 	return TypedValue::Int(value);
@@ -1083,7 +1083,7 @@ MFCQuaClipController::SetSelectorValues()
 	StabEnt	*schedulableSym = parent->root->symbol->context;
 	StabEnt	*p = schedulableSym->children;
 	while (p != NULL) {
-		if (p->type == S_CLIP) {
+		if (p->type == TypedValue::S_CLIP) {
 			AddValue(p, p->name);
 		}
 		p = p->sibling;
@@ -1139,9 +1139,9 @@ MFCQuaClipController::Value()
 	int sel = GetCurSel();
 	if (sel >= 0 && sel <GetCount()) {
 		StabEnt *s = (StabEnt *)GetItemData(sel);
-		return TypedValue::Pointer(S_CLIP, s->ClipValue(NULL));
+		return TypedValue::Pointer(TypedValue::S_CLIP, s->ClipValue(NULL));
 	}
-	return TypedValue::Pointer(S_STRANGE_POINTER, NULL);
+	return TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, NULL);
 }
 
 BEGIN_MESSAGE_MAP(MFCQuaClipController, MFCQuaListBox)
@@ -1187,7 +1187,7 @@ MFCQuaChannelController::SetSelectorValues(StabEnt *ds)
 	StabEnt	*qSym = schSym->context;
 	StabEnt	*p = qSym->children;
 	while (p != NULL) {
-		if (p->type == S_CHANNEL && (ds == NULL || ds != p)) {
+		if (p->type == TypedValue::S_CHANNEL && (ds == NULL || ds != p)) {
 			AddValue(p, p->name);
 		}
 		p = p->sibling;
@@ -1244,9 +1244,9 @@ MFCQuaChannelController::Value()
 	int sel = GetCurSel();
 	if (sel >= 0 && sel <GetCount()) {
 		StabEnt *s = (StabEnt *)GetItemData(sel);
-		return TypedValue::Pointer(S_CHANNEL, s->ChannelValue());
+		return TypedValue::Pointer(TypedValue::S_CHANNEL, s->ChannelValue());
 	}
-	return TypedValue::Pointer(S_STRANGE_POINTER, NULL);
+	return TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, NULL);
 }
 
 BEGIN_MESSAGE_MAP(MFCQuaChannelController, MFCQuaListBox)
@@ -1285,6 +1285,7 @@ MFCQuaVstProgramController::SetSelectorValues()
 		return false;
 	}
 	VstPlugin	*vst = b->crap.call.crap.vstplugin;
+#ifdef QUA_V_VST_HOST
 	if (vst) {
 		if (vst->status != VST_PLUG_LOADED) {
 			return false;
@@ -1295,7 +1296,7 @@ MFCQuaVstProgramController::SetSelectorValues()
 			AddValue((void *)i, nm);
 		}
 	}
-
+#endif
 	return true;
 }
 
@@ -1328,6 +1329,7 @@ MFCQuaVstProgramController::SetSymValue()
 			return;
 		}
 		VstPlugin	*vst = b->crap.call.crap.vstplugin;
+#ifdef QUA_V_VST_HOST
 		if (vst) {
 			if (vst->status != VST_PLUG_LOADED) {
 				return;
@@ -1337,25 +1339,31 @@ MFCQuaVstProgramController::SetSymValue()
 			TypedValue	r = TypedValue::VstProgram(prog);
 			UpdateDisplay(r);
 		}
+#endif
 	}
 }
 
 void
 MFCQuaVstProgramController::UpdateDisplay(TypedValue &v)
 {
-	if (v.type == S_VST_PROGRAM) {
+#ifdef QUA_V_VST_HOST
+	if (v.type == TypedValue::S_VST_PROGRAM) {
 		SetCurSel(v.VstProgramValue());
 	}
+#endif
 }
 
 TypedValue
 MFCQuaVstProgramController::Value()
 {
 	int sel = GetCurSel();
+#ifdef QUA_V_VST_HOST
 	if (sel >= 0 && sel <GetCount()) {
 		return TypedValue::VstProgram(GetItemData(sel));
 	}
-	return TypedValue::Pointer(S_STRANGE_POINTER, NULL);
+
+#endif
+	return TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, NULL);
 }
 
 BEGIN_MESSAGE_MAP(MFCQuaVstProgramController, MFCQuaListBox)
@@ -1394,7 +1402,7 @@ MFCStackFrameView::OnQuaCtlChanged(WPARAM wparam, LPARAM lparam)
 	TypedValue val;
 	if (symchanged) {
 		switch(symchanged->type) {
-			case S_VST_PROGRAM: {
+			case TypedValue::S_VST_PROGRAM: {
 				qcr = (MFCQuaVstProgramController*)lparam;
 				val = qcr->Value();
 				if (popupEdit) {
@@ -1402,7 +1410,7 @@ MFCStackFrameView::OnQuaCtlChanged(WPARAM wparam, LPARAM lparam)
 				}
 				break;
 			}
-			case S_VST_PARAM: {
+			case TypedValue::S_VST_PARAM: {
 //				qcr = (MFCQuaVstProgramController*)lparam;
 				if (popupEdit) {
 					popupEdit->Invalidate(FALSE);
@@ -1410,42 +1418,42 @@ MFCStackFrameView::OnQuaCtlChanged(WPARAM wparam, LPARAM lparam)
 				break;
 			}
 
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				qcr = (MFCQuaClipController*)lparam;
 				val = qcr->Value();
 				break;
 			}
 
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				break;
 			}
 
-			case S_BOOL: {
+			case TypedValue::S_BOOL: {
 				qcr = (MFCQuaBoolController*)lparam;
 				val = qcr->Value();
 				break;
 			}
 
-			case S_BYTE:
-			case S_SHORT:
-			case S_LONG:
-			case S_INT: {
+			case TypedValue::S_BYTE:
+			case TypedValue::S_SHORT:
+			case TypedValue::S_LONG:
+			case TypedValue::S_INT: {
 				qcr = (MFCQuaIntController*)lparam;
 				val = qcr->Value();
 				break;
 			}
-			case S_DOUBLE:
-			case S_FLOAT: {
+			case TypedValue::S_DOUBLE:
+			case TypedValue::S_FLOAT: {
 				qcr = (MFCQuaRealController*)lparam;
 				val = qcr->Value();
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				qcr = (MFCQuaChannelController*)lparam;
 				val = qcr->Value();
 				break;
 			}
-			case S_TIME: {
+			case TypedValue::S_TIME: {
 				qcr = (MFCQuaTimeController*)lparam;
 				val = qcr->Value();
 				break;
@@ -1474,6 +1482,7 @@ MFCStackFrameView::OnQuaCtlEndMove(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCStackFrameView::OnQuaExtEd(WPARAM wparam, LPARAM lparam)
 {
+#ifdef QUA_V_VST_HOST
 	VstPlugin	*vst = (VstPlugin *)wparam;
 	if (vst != NULL && frame != NULL) {
 		AEffect	*afx = frame->stk.afx;
@@ -1507,6 +1516,7 @@ MFCStackFrameView::OnQuaExtEd(WPARAM wparam, LPARAM lparam)
 		}
 #endif
 	}
+#endif
 	return true;
 }
 
@@ -1682,7 +1692,7 @@ MFCStackFrameView::CreateFrameView(
 	frame = fr;
 	fprintf(stderr, "MFCStackFrameView::CreateFrameView() for %x -> %x inst rep %x parent %x\n", fr, this, pv, rv);
 	if (fr != NULL && fr->stackable != NULL) {
-		Set(rv, pv, fr, fr->CountFrames()>0);
+		Set(rv, pv, fr, fr->countFrames() > 0);
 		CWnd	*wpv = wnd;
 		if (pv) {
 			wpv = pv;
@@ -1698,7 +1708,7 @@ MFCStackFrameView::CreateFrameView(
 				root->AddFR(this);
 			}
 			fprintf(stderr, "frame cb %x %d", frame->callingBlock, frame->callingBlock?frame->callingBlock->type:-1);
-			if (frame->callingBlock != NULL && frame->callingBlock->type == C_VST) {
+			if (frame->callingBlock != NULL && frame->callingBlock->type == Block::C_VST) {
 				VstPlugin	*vst = frame->callingBlock->crap.call.crap.vstplugin;
 				if (vst->hasEditor) {
 					eButton = new MFCSmallQuaLetterBut('E');
@@ -1707,12 +1717,12 @@ MFCStackFrameView::CreateFrameView(
 				}
 			}
 			short i;
-			for (i=0; i<fr->stackable->CountControllers(); i++) {
-				AddController(fr->stackable->Controller(i));
+			for (i=0; i<fr->stackable->countControllers(); i++) {
+				AddController(fr->stackable->controller(i));
 			}
 			if (add_children) {
-				for (i=0; i<fr->CountFrames(); i++) {
-					AddChildFrame(fr->FrameAt(i));
+				for (i=0; i<fr->countFrames(); i++) {
+					AddChildFrame(fr->frameAt(i));
 				}
 			}
 			ArrangeChildren();
@@ -1772,11 +1782,11 @@ MFCStackFrameView::AddController(StabEnt *c)
 		BRect	r(0,0, 100, 20);
 		fprintf(stderr, "Add controller for %x %s\n", c, c->UniqueName(), c->type);
 		switch (c->type) {
-			case S_VST_PARAM: {
+			case TypedValue::S_VST_PARAM: {
 				break;
 			}
 				
-			case S_VST_PROGRAM: {
+			case TypedValue::S_VST_PROGRAM: {
 				MFCQuaVstProgramController	*qcv = new MFCQuaVstProgramController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
 				qcv->SetSymValue();
@@ -1784,19 +1794,19 @@ MFCStackFrameView::AddController(StabEnt *c)
 				break;
 			}
 				
-			case S_CLIP: {
+			case TypedValue::S_CLIP: {
 				MFCQuaClipController	*qcv = new MFCQuaClipController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
 				AddCR(qcv);
 				break;
 			}
 
-			case S_TAKE: {
+			case TypedValue::S_TAKE: {
 				r.Set(0,0, 100, 20);
 				break;
 			}
 
-			case S_BOOL: {
+			case TypedValue::S_BOOL: {
 				r.Set(0,0, 100, 20);
 				MFCQuaBoolController	*qcv = new MFCQuaBoolController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
@@ -1805,10 +1815,10 @@ MFCStackFrameView::AddController(StabEnt *c)
 				break;
 			}
 
-			case S_BYTE:
-			case S_SHORT:
-			case S_LONG:
-			case S_INT: {
+			case TypedValue::S_BYTE:
+			case TypedValue::S_SHORT:
+			case TypedValue::S_LONG:
+			case TypedValue::S_INT: {
 				r.Set(0, 0, INT_DISPLAY_WIDTH, INT_DISPLAY_HEIGHT);
 				MFCQuaIntController	*qcv = new MFCQuaIntController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
@@ -1816,13 +1826,13 @@ MFCStackFrameView::AddController(StabEnt *c)
 				AddCR(qcv);
 				break;
 			}
-			case S_DOUBLE:
-			case S_FLOAT: {
+			case TypedValue::S_DOUBLE:
+			case TypedValue::S_FLOAT: {
 				MFCQuaRealController	*qcv = new MFCQuaRealController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
 				if (root) {
 					MFCObjectView *ov;
-					if (root->symbol->type == S_CHANNEL) {
+					if (root->symbol->type == TypedValue::S_CHANNEL) {
 						ov = (MFCChannelObjectView *)root;
 					} else {
 						ov = (MFCInstanceObjectView *)root;
@@ -1833,13 +1843,13 @@ MFCStackFrameView::AddController(StabEnt *c)
 				AddCR(qcv);
 				break;
 			}
-			case S_CHANNEL: {
+			case TypedValue::S_CHANNEL: {
 				MFCQuaChannelController	*qcv = new MFCQuaChannelController;
 				qcv->CreateControllerRepresentation(r, this, c, 6969);
 				AddCR(qcv);
 				break;
 			}
-			case S_TIME: {
+			case TypedValue::S_TIME: {
 				MFCQuaTimeController	*tcv = new MFCQuaTimeController;
 				r.Set(0, 0, TIME_DISPLAY_WIDTH, TIME_DISPLAY_HEIGHT);
 				fprintf(stderr, "\t added time controller %x\n", tcv);
@@ -1858,7 +1868,7 @@ MFCStackFrameView::UpdateChannelIndexDisplay(StabEnt *ds)
 	for (short i=0; i<NCR(); i++) {
 		QuaControllerRepresentation	*cr = CR(i);
 		if (cr && cr->symbol) {
-			if (cr->symbol->type == S_CHANNEL) {
+			if (cr->symbol->type == TypedValue::S_CHANNEL) {
 				MFCQuaChannelController	*qcv = (MFCQuaChannelController *)cr;
 				qcv->SetSelectorValues(ds);
 }
@@ -1867,12 +1877,12 @@ MFCStackFrameView::UpdateChannelIndexDisplay(StabEnt *ds)
 }
 
 void
-MFCStackFrameView::UpdateClipIndexDisplay()
+MFCStackFrameView::updateClipIndexDisplay()
 {
 	for (short i=0; i<NCR(); i++) {
 		QuaControllerRepresentation	*cr = CR(i);
 		if (cr && cr->symbol) {
-			if (cr->symbol->type == S_CLIP) {
+			if (cr->symbol->type == TypedValue::S_CLIP) {
 				MFCQuaClipController	*qcv = (MFCQuaClipController *)cr;
 				qcv->SetSelectorValues();
 			}
@@ -1886,7 +1896,7 @@ MFCStackFrameView::ArrangeChildren()
 {
 	long	sx=0;
 	long	sy;
-	StringExtent(label(), &displayFont, this, sx, sy);
+	StringExtent(((char *)label.c_str()), &displayFont, this, sx, sy);
 	long	atX = sx+10;
 	long	atY = 0;
 	if (eButton != NULL) {
@@ -1898,7 +1908,7 @@ MFCStackFrameView::ArrangeChildren()
 		if (cr && cr->symbol) {
 			StringExtent(cr->symbol->UniqueName(), &displayFont, this, sx, sy);
 			switch (cr->symbol->type) {
-				case S_CLIP: {
+				case TypedValue::S_CLIP: {
 					MFCQuaClipController	*qcv = (MFCQuaClipController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -1909,11 +1919,11 @@ MFCStackFrameView::ArrangeChildren()
 					break;
 				}
 
-				case S_TAKE: {
+				case TypedValue::S_TAKE: {
 					break;
 				}
 
-				case S_BOOL: {
+				case TypedValue::S_BOOL: {
 					MFCQuaBoolController	*qcv = (MFCQuaBoolController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -1922,10 +1932,10 @@ MFCStackFrameView::ArrangeChildren()
 					break;
 				}
 
-				case S_BYTE:
-				case S_SHORT:
-				case S_LONG:
-				case S_INT: {
+				case TypedValue::S_BYTE:
+				case TypedValue::S_SHORT:
+				case TypedValue::S_LONG:
+				case TypedValue::S_INT: {
 					MFCQuaIntController	*qcv = (MFCQuaIntController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -1934,8 +1944,8 @@ MFCStackFrameView::ArrangeChildren()
 					atX += qcv->bounds.right+CTL_X_GAP;
 					break;
 				}
-				case S_DOUBLE:
-				case S_FLOAT: {
+				case TypedValue::S_DOUBLE:
+				case TypedValue::S_FLOAT: {
 					MFCQuaRealController	*qcv = (MFCQuaRealController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -1944,7 +1954,7 @@ MFCStackFrameView::ArrangeChildren()
 					atX += qcv->bounds.right+CTL_X_GAP;
 					break;
 				}
-				case S_CHANNEL: {
+				case TypedValue::S_CHANNEL: {
 					MFCQuaChannelController	*qcv = (MFCQuaChannelController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -1952,7 +1962,7 @@ MFCStackFrameView::ArrangeChildren()
 					atX += qcv->bounds.right+CTL_X_GAP;
 					break;
 				}
-				case S_VST_PROGRAM: {
+				case TypedValue::S_VST_PROGRAM: {
 					MFCQuaVstProgramController	*qcv = (MFCQuaVstProgramController *)cr;
 					qcv->labelFrame.Set(0,0,0,0);
 //					atX += sx+2;
@@ -1960,7 +1970,7 @@ MFCStackFrameView::ArrangeChildren()
 					atX += qcv->bounds.right+CTL_X_GAP;
 					break;
 				}
-				case S_TIME: {
+				case TypedValue::S_TIME: {
 					MFCQuaTimeController	*qcv = (MFCQuaTimeController *)cr;
 					qcv->labelFrame.Set(atX, atY, atX+sx, atY+sy);
 					atX += sx+2;
@@ -2000,50 +2010,50 @@ MFCStackFrameView::OnPaint()
 //	BRect	r(0,0,10,wbounds.bottom);
 //	RaisedBox(&dc, &r, rgb_purple, true);
 	dc.SetBkMode(TRANSPARENT);
-	if (label()) {
+	if (label.size() > 0) {
 		dc.SelectObject(&displayFont);
-		CSize	s = dc.GetTextExtent(label());
+		CSize	s = dc.GetTextExtent(label.c_str());
 		CRect	tr(0,0, s.cx, wbounds.bottom);
-		dc.DrawText(label(), -1, &tr, DT_LEFT|DT_VCENTER);
+		dc.DrawText(label.c_str(), -1, &tr, DT_LEFT|DT_VCENTER);
 	}
 	for (short i=0; i<NCR(); i++) {
 		QuaControllerRepresentation	*cr = CR(i);
 		if (cr && cr->symbol) {
 			switch (cr->symbol->type) {
-				case S_CLIP: {
+				case TypedValue::S_CLIP: {
 					MFCQuaClipController	*qcv = (MFCQuaClipController *)cr;
 					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 
-				case S_TAKE: {
+				case TypedValue::S_TAKE: {
 					break;
 				}
 
-				case S_BOOL: {
+				case TypedValue::S_BOOL: {
 					break;
 				}
 
-				case S_BYTE:
-				case S_SHORT:
-				case S_LONG:
-				case S_INT: {
+				case TypedValue::S_BYTE:
+				case TypedValue::S_SHORT:
+				case TypedValue::S_LONG:
+				case TypedValue::S_INT: {
 					MFCQuaIntController	*qcv = (MFCQuaIntController *)cr;
 					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
-				case S_DOUBLE:
-				case S_FLOAT: {
+				case TypedValue::S_DOUBLE:
+				case TypedValue::S_FLOAT: {
 					MFCQuaRealController	*qcv = (MFCQuaRealController *)cr;
 					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
-				case S_CHANNEL: {
+				case TypedValue::S_CHANNEL: {
 					MFCQuaChannelController	*qcv = (MFCQuaChannelController *)cr;
 					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
-				case S_TIME: {
+				case TypedValue::S_TIME: {
 					MFCQuaTimeController	*qcv = (MFCQuaTimeController *)cr;
 					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
@@ -2450,9 +2460,9 @@ MFCSampleObjectView::OnDestroy()
 }
 
 void
-MFCSampleObjectView::UpdateClipIndexDisplay()
+MFCSampleObjectView::updateClipIndexDisplay()
 {
-	BList	presentClips;
+	vector<StabEnt *> presentClips;
 	if (Symbol() == NULL) {
 		fprintf(stderr, "Update null sample\n");
 		return;
@@ -2474,11 +2484,11 @@ MFCSampleObjectView::UpdateClipIndexDisplay()
 	}*/
 	Sample	*v = symbol->SampleValue();
 	if (v) {
-		for (short i=0; i<v->NClip(); i++) {
-			Clip	*c = v->SampleClip(i);
+		for (short i=0; i<v->nClip(); i++) {
+			Clip	*c = v->sampleClip(i);
 			if (c) {
 				clipsView->AddItem(c->sym);
-				presentClips.AddItem(c->sym);
+				presentClips.push_back(c->sym);
 				StabEnt		*ts = c->media->sym;
 				Take		*tk = ts->TakeValue();
 				if (dataEditor->take == tk) {
@@ -2500,11 +2510,11 @@ MFCSampleObjectView::UpdateTakeIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
-		if (p->type == S_TAKE) {
+		if (p->type == TypedValue::S_TAKE) {
 			clipsView->AddItem(p);
-			presentTakes.AddItem(p);
+			presentTakes.push_back(p);
 		}
 		p = p->sibling;
 	}
@@ -2520,17 +2530,17 @@ MFCSampleObjectView::UpdateVariableIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
 		switch (p->type) {
-			case S_EVENT:
-			case S_METHOD:
-			case S_TAKE:
-			case S_CLIP:
+			case TypedValue::S_EVENT:
+			case TypedValue::S_METHOD:
+			case TypedValue::S_TAKE:
+			case TypedValue::S_CLIP:
 				break;
 			default:{
 				variableView->AddSym(p);
-				presentTakes.AddItem(p);
+				presentTakes.push_back(p);
 			}
 		}
 		p = p->sibling;
@@ -2546,14 +2556,14 @@ MFCSampleObjectView::ChildPopulate(StabEnt *sym)
 		return;
 	}
 	switch (sym->type) {
-		case S_CLIP:
+		case TypedValue::S_CLIP:
 			clipsView->AddItem(sym);
 			break;
-		case S_TAKE:
+		case TypedValue::S_TAKE:
 //			takesView->AddTake(sym);
 			clipsView->AddItem(sym);
 			break;
-		case S_EVENT: {
+		case TypedValue::S_EVENT: {
 	// set main block for event handler
 			if (strcmp(sym->name, "Wake") == 0) {
 				;
@@ -2575,7 +2585,7 @@ MFCSampleObjectView::ChildPopulate(StabEnt *sym)
 			break;
 		}
 
-		case S_METHOD:
+		case TypedValue::S_METHOD:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -2647,7 +2657,7 @@ MFCSampleObjectView::AddChildRepresentation(StabEnt *s)
 	ctxt.m_pLastView = NULL;
 	ctxt.m_pNewDocTemplate = NULL;
 	ctxt.m_pNewViewClass = NULL;
-	if (s->type == S_METHOD) {
+	if (s->type == TypedValue::S_METHOD) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -2662,7 +2672,7 @@ MFCSampleObjectView::AddChildRepresentation(StabEnt *s)
 			orac->ArrangeChildren();
 		}
 		return nv;
-	} else if (s->type == S_INSTANCE) {
+	} else if (s->type == TypedValue::S_INSTANCE) {
 		MFCInstanceObjectView *nv = new MFCInstanceObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -2698,7 +2708,7 @@ MFCSampleObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCSampleObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_SAMPLE_ED, (LPARAM)this);
@@ -2713,7 +2723,7 @@ MFCSampleObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCSampleObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_SAMPLE_ED, (LPARAM)this);
@@ -3040,14 +3050,14 @@ MFCVoiceObjectView::ChildPopulate(StabEnt *sym)
 		return;
 	}
 	switch (sym->type) {
-		case S_CLIP:
+		case TypedValue::S_CLIP:
 			clipsView->AddItem(sym);
 			break;
-		case S_TAKE:
+		case TypedValue::S_TAKE:
 //			takesView->AddTake(sym);
 			clipsView->AddItem(sym);
 			break;
-		case S_EVENT: {
+		case TypedValue::S_EVENT: {
 	// set main block for event handler
 			if (strcmp(sym->name, "Wake") == 0) {
 				;
@@ -3068,7 +3078,7 @@ MFCVoiceObjectView::ChildPopulate(StabEnt *sym)
 			}
 			break;
 		}
-		case S_METHOD:
+		case TypedValue::S_METHOD:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -3139,7 +3149,7 @@ MFCVoiceObjectView::AddChildRepresentation(StabEnt *s)
 	ctxt.m_pLastView = NULL;
 	ctxt.m_pNewDocTemplate = NULL;
 	ctxt.m_pNewViewClass = NULL;
-	if (s->type == S_METHOD) {
+	if (s->type == TypedValue::S_METHOD) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -3154,7 +3164,7 @@ MFCVoiceObjectView::AddChildRepresentation(StabEnt *s)
 			orac->ArrangeChildren();
 		}
 		return nv;
-	} else if (s->type == S_INSTANCE) {
+	} else if (s->type == TypedValue::S_INSTANCE) {
 		MFCInstanceObjectView *nv = new MFCInstanceObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -3190,7 +3200,7 @@ MFCVoiceObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCVoiceObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_VOICE_ED, (LPARAM)this);
@@ -3205,7 +3215,7 @@ MFCVoiceObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCVoiceObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_VOICE_ED, (LPARAM)this);
@@ -3260,13 +3270,13 @@ MFCVoiceObjectView::OnQuaBlockParse(WPARAM wparam, LPARAM lparam)
 }
 
 void
-MFCVoiceObjectView::UpdateClipIndexDisplay()
+MFCVoiceObjectView::updateClipIndexDisplay()
 {
 	if (Symbol() == NULL) {
 		fprintf(stderr, "Populate null voice\n");
 		return;
 	}
-	BList	presentClips;
+	vector<StabEnt*> presentClips;
 	StabEnt	*p = symbol->children;
 
 /*
@@ -3285,11 +3295,11 @@ MFCVoiceObjectView::UpdateClipIndexDisplay()
 	}*/
 	Voice	*v = symbol->VoiceValue();
 	if (v) {
-		for (short i=0; i<v->NClip(); i++) {
-			Clip	*c = v->StreamClip(i);
+		for (short i=0; i<v->nClip(); i++) {
+			Clip	*c = v->streamClip(i);
 			if (c) {
 				clipsView->AddItem(c->sym);
-				presentClips.AddItem(c->sym);
+				presentClips.push_back(c->sym);
 				StabEnt		*ts = c->media->sym;
 				Take		*tk = ts->TakeValue();
 				if (dataEditor->take == tk) {
@@ -3311,11 +3321,11 @@ MFCVoiceObjectView::UpdateTakeIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
-		if (p->type == S_TAKE) {
+		if (p->type == TypedValue::S_TAKE) {
 			clipsView->AddItem(p);
-			presentTakes.AddItem(p);
+			presentTakes.push_back(p);
 		}
 		p = p->sibling;
 	}
@@ -3331,17 +3341,17 @@ MFCVoiceObjectView::UpdateVariableIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
 		switch (p->type) {
-			case S_EVENT:
-			case S_METHOD:
-			case S_TAKE:
-			case S_CLIP:
+			case TypedValue::S_EVENT:
+			case TypedValue::S_METHOD:
+			case TypedValue::S_TAKE:
+			case TypedValue::S_CLIP:
 				break;
 			default:{
 				variableView->AddSym(p);
-				presentTakes.AddItem(p);
+				presentTakes.push_back(p);
 			}
 		}
 		p = p->sibling;
@@ -3552,17 +3562,17 @@ MFCMethodObjectView::ChildPopulate(StabEnt *sym)
 		return;
 	}
 	switch (sym->type) {
-		case S_CLIP:
+		case TypedValue::S_CLIP:
 //			clipsView->AddItem(sym);
 			break;
-		case S_TAKE:
+		case TypedValue::S_TAKE:
 //			clipsView->AddItem(sym);
 			break;
-		case S_EVENT: {
+		case TypedValue::S_EVENT: {
 	// set main block for event handler
 			break;
 		}
-		case S_METHOD:
+		case TypedValue::S_METHOD:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -3618,7 +3628,7 @@ MFCMethodObjectView::ChildNameChanged(StabEnt *sym)
 QuaObjectRepresentation *
 MFCMethodObjectView::AddChildRepresentation(StabEnt *s)
 {
-	if (s->type == S_METHOD) {
+	if (s->type == TypedValue::S_METHOD) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -3651,17 +3661,17 @@ MFCMethodObjectView::UpdateVariableIndexDisplay()
 	}
 	StabEnt	*p = symbol->children;
 
-	BList	presentTakes;
+	vector<StabEnt*> presentTakes;
 	while (p != NULL) {
 		switch (p->type) {
-			case S_EVENT:
-			case S_METHOD:
-			case S_TAKE:
-			case S_CLIP:
+			case TypedValue::S_EVENT:
+			case TypedValue::S_METHOD:
+			case TypedValue::S_TAKE:
+			case TypedValue::S_CLIP:
 				break;
 			default:{
 				variableView->AddSym(p);
-				presentTakes.AddItem(p);
+				presentTakes.push_back(p);
 			}
 		}
 		p = p->sibling;
@@ -3673,7 +3683,7 @@ MFCMethodObjectView::UpdateVariableIndexDisplay()
 afx_msg LRESULT
 MFCMethodObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_CLOSE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);
@@ -3688,7 +3698,7 @@ MFCMethodObjectView::OnQuaCloseView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCMethodObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MINIMIZE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);
@@ -3703,7 +3713,7 @@ MFCMethodObjectView::OnQuaMinView(WPARAM wparam, LPARAM lparam)
 afx_msg LRESULT
 MFCMethodObjectView::OnQuaMaxView(WPARAM wparam, LPARAM lparam)
 {
-	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == S_QUA)) {
+	if (Symbol() && (Symbol()->context == NULL || Symbol()->context->type == TypedValue::S_QUA)) {
 		MFCObjectMountView *orac = ObjectMountView();
 		if (orac) {
 			orac->PostMessage(QM_MAXIMIZE_VIEW, QCID_OV_METHOD_ED, (LPARAM)this);

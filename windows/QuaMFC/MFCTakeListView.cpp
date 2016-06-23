@@ -1,18 +1,17 @@
 // MFCTakeListView.cpp : implementation file
 //
-
+#define _AFXDLL
 #include "stdafx.h"
 
-#include "DaBasicTypes.h"
-#include "DaKernel.h"
+#include "StdDefs.h"
 
 #include "QuaMFC.h"
 #include "MFCTakeListView.h"
 #include "MFCObjectView.h"
 #include "MFCDataEditor.h"
 
-#include "inx/Sym.h"
-#include "inx/Clip.h"
+#include "Sym.h"
+#include "Clip.h"
 
 
 // MFCTakeListView
@@ -405,7 +404,7 @@ MFCTakeListView::AddTakeItem(char * nm, LPARAM lp, int im)
 long
 MFCTakeListView::AddTake(StabEnt *s)
 {
-	if (s->type != S_TAKE) {
+	if (s->type != TypedValue::S_TAKE) {
 		return -1;
 	}
 	Take	*c = s->TakeValue();

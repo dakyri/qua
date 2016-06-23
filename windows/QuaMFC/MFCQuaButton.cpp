@@ -1,8 +1,12 @@
-#include "qua_version.h"
+
 // MFCQuaButton.cpp : implementation file
 //
-
+#define _AFXDLL
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
+
 #include "QuaMFC.h"
 #include "MFCQuaButton.h"
 #include "StdDefs.h"
@@ -246,8 +250,8 @@ MFCQuaButton::OnToolTipNotify(NMHDR *pNMHDR, LRESULT *pResult)
 	int iID = GetDlgCtrlID();
 
 	char buf[256];
-	if (tooltipText()) {
-		sprintf(buf, "%s", tooltipText());
+	if (tooltipText.size()) {
+		sprintf(buf, "%s", tooltipText.c_str());
 	} else {
 		sprintf(buf, "Button");
 	}

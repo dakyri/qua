@@ -2,9 +2,8 @@
 #define _MFCQUAROTOR
 
 
-#include "DaBitmap.h"
-#include "DaRect.h"
-#include "DString.h"
+#include "BBitmap.h"
+#include "BRect.h"
 
 class MFCQuaRotor : public CSliderCtrl
 {
@@ -36,8 +35,8 @@ public:
 						MFCQuaRotor();
 	virtual				~MFCQuaRotor();
 
-	BRect				bounds;
-	DString				label;
+	BRect bounds;
+	string label;
 
 	void				SetFloatRange(float, float, float);
 	bool				SetFloatValue(float);
@@ -120,16 +119,16 @@ class MFCSmallQuaRotor: public MFCQuaRotor
 {
 	DECLARE_DYNCREATE(MFCSmallQuaRotor)
 public:
-						MFCSmallQuaRotor();
-	virtual				~MFCSmallQuaRotor();
+	MFCSmallQuaRotor();
+	virtual	 ~MFCSmallQuaRotor();
 
-	bool				CreateRotor(char *label, CRect &r, CWnd *w,
+	bool CreateRotor(char *label, CRect &r, CWnd *w,
 							UINT id, char *shortlabel, float ini=1, float min=0, float mid=0.5, float max=1, int ami=30, int amx=330, int lWidth=-1);
 
-	DString				shortLabel;
-	afx_msg	void		OnPaint();
+	string shortLabel;
+	afx_msg	void OnPaint();
 
-	static CFont		displayFont;
+	static CFont displayFont;
 protected:
 	DECLARE_MESSAGE_MAP()
 };

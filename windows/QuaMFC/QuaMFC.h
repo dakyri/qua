@@ -1,6 +1,8 @@
 // QuaMFC.h : main header file for the QUAMFC application
 //
 
+
+
 #if !defined(AFX_QUAMFC_H__8524E1C5_0286_4D77_B895_3FEF72594F85__INCLUDED_)
 #define AFX_QUAMFC_H__8524E1C5_0286_4D77_B895_3FEF72594F85__INCLUDED_
 
@@ -53,15 +55,25 @@ public:
 
 extern CQuaMFCApp theApp;
 
-extern HCURSOR	pointCursor;
-extern HCURSOR	drawCursor;
-extern HCURSOR	pointCtlCursor;
-extern HCURSOR	drawCtlCursor;
-extern HCURSOR	regionCursor;
-extern HCURSOR	sliceCursor;
-extern long		currentTool;
-extern LPCTSTR	quaPopupClassName;
+extern HCURSOR pointCursor;
+extern HCURSOR drawCursor;
+extern HCURSOR pointCtlCursor;
+extern HCURSOR drawCtlCursor;
+extern HCURSOR regionCursor;
+extern HCURSOR sliceCursor;
+extern long currentTool;
+extern LPCTSTR quaPopupClassName;
 
+
+#ifdef WIN32
+extern HINSTANCE quaAppInstance;
+extern HMODULE quaAppModule;
+#endif
+
+#include <string>
+using namespace std;
+
+extern void ReportError(string fmt, ...);
 
 /////////////////////////////////////////////////////////////////////////////
 

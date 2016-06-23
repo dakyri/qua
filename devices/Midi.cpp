@@ -363,9 +363,7 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 					t.program = MMMSG_PARAM1(dwParam1);
 					t.cmd = MMMSG_STATUS(dwParam1);
 					if (debug_midi) {
-						fprintf(stderr, "Midi in: prog %d %d %d chan %d\n",
-								t.program, t.bank, t.subbank,
-								MMMSG_CHANNEL(dwParam1), t.program);
+						fprintf(stderr, "Midi in: prog %d %d %d chan %d\n", t.program, t.bank, t.subbank, MMMSG_CHANNEL(dwParam1));
 					}
 					rexMutex.lock();
 					received.AddToStream(&t, &uberQua->theTime);
@@ -1026,8 +1024,7 @@ QuaMidiIn::Close()
 
 #endif
 
-QuaMidiManager::QuaMidiManager(Qua &q)
-	: QuaPortManager(q)
+QuaMidiManager::QuaMidiManager()
 {
 	dfltInput = nullptr;
 	dfltOutput = nullptr;

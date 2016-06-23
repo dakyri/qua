@@ -244,8 +244,7 @@ QuasiStack::SetAudio(uchar v)
 ///////////////////////////////////////////////////////////
 // AudioManager
 ///////////////////////////////////////////////////////////
-QuaAudioManager::QuaAudioManager(Qua &q):
-	QuaPortManager(q)
+QuaAudioManager::QuaAudioManager()
 {
 	sampleRate = 44100.0;
 	bufferSize = 512;
@@ -406,7 +405,7 @@ QuaAudioManager::buffaerator()
 				sam->uberQua->objectsBlockStack.lock() /*read*/;
 				status_t	err = sam->SynchronizeBuffers();
 				if (err != B_NO_ERROR) {
-					uberQua.bridge.reportError("sample reader: file error on %s: %s", sam->sym->name, errorStr(err));
+					sam->uberQua->bridge.reportError("sample reader: file error on %s: %s", sam->sym->name, errorStr(err));
 				}
 				sam->uberQua->objectsBlockStack.unlock() /*read*/;
 			}
@@ -757,7 +756,7 @@ QuaAudioManager::startRecording(SampleInstance *ri)
 						ri->channel->nAudioIns,
 						4, 44100.0);
 		if (recdTake == nullptr) {
-			uberQua.bridge.reportError("Output file not initialised: %s", errorStr(err));
+			sam->uberQua->bridge.reportError("Output file not initialised: %s", errorStr(err));
 		} else {
 			sam->recordTake->file->SeekToFrame(0);
 			ri->QSample()->status = STATUS_RECORDING;

@@ -116,8 +116,7 @@ QuaParallelPort::HasStreamItems()
 }
 
 
-QuaParallelManager::QuaParallelManager(Qua &q)
-	: QuaPortManager(q)
+QuaParallelManager::QuaParallelManager()
 {
 }
 

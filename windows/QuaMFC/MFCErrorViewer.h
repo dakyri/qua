@@ -1,9 +1,11 @@
 #ifndef _MFC_ERR_VIEWR
 #define _MFC_ERR_VIEWR
 
-#include "DaList.h"
-
 #define ERRV_ALLOC_INC	256
+
+#include <string>
+#include <vector>
+using namespace std;
 
 class MFCErrorViewer
 {
@@ -11,11 +13,11 @@ public:
 	MFCErrorViewer();
 	~MFCErrorViewer();
 
-	void		AddLine(char *line);
+	void		AddLine(string line);
 	void		Clear();
 	void		Show();
 
-	BList		err_lines;
+	vector<string> err_lines;
 	long		err_chars;
 };
 

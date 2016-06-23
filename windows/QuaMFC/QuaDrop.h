@@ -2,11 +2,6 @@
 
 #include "afxole.h"
 
-#include "DString.h"
-#include "DaPath.h"
-
-#define MAX_DROP_FILE_NAME_LEN 1028
-
 class Schedulable;
 class Voice;
 class Sample;
@@ -14,9 +9,13 @@ class Instance;
 class StabEnt;
 class Clip;
 
+#include <vector>
+#include <string>
+using namespace std;
+
 union u_quadrop_info
 {
-	BPath		*filePathList;
+	vector<string> *filePathList;
 	Voice		*voice;
 	Clip		*clip;
 	Sample		*sample;

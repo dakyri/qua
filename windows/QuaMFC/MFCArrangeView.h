@@ -14,12 +14,13 @@
 using namespace Gdiplus;
 #endif
 
-#include "DaBasicTypes.h"
-#include "DaRect.h"
-#include "inx/QuaDisplay.h"
-#include "inx/Time.h"
+#include "StdDefs.h"
+#include "QuaDisplay.h"
+#include "Time.h"
 
 #include "QuaDrop.h"
+
+#include "BRect.h"
 
 class Channel;
 class MFCArrangeView;
@@ -151,14 +152,14 @@ public:
 	virtual void				MoveInstanceRepresentation(Instance *i);
 	virtual void				RemoveInstanceRepresentation(Instance *i);
 
-	virtual void				DisplayArrangementTitle(const char *);
+	virtual void				displayArrangementTitle(const char *);
 	virtual void				DisplayChannelMetric(Channel *c, Metric *m, bool async);
 
 	virtual void				DisplayCurrentTime(Time &t, bool async);	// ie update time cursor
 	virtual void				DisplayTempo(float t, bool async);
 	virtual void				DisplayMetric(Metric *m, bool async);	// ie update time cursor
 
-	virtual void				UpdateClipIndexDisplay();
+	virtual void				updateClipIndexDisplay();
 
 	virtual void				UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *);
 

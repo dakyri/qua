@@ -12,10 +12,10 @@ class Input;
 class Output;
 class Channel;
 
-#include "DaList.h"
-#include "DaBitmap.h"
-
-#include "inx/QuaDisplay.h"
+#include "QuaDisplay.h"
+#include "BBitmap.h"
+#include <vector>
+using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////
 // MFCChannelView view
@@ -103,7 +103,7 @@ public:
 						PortPopup();
 						~PortPopup();
 
-	BList				menuIdx;
+	vector<menu_idx_item*> menuIdx;
 
 	void				ClearMenuIndex();
 	long				MenuIndexItem(QuaPort *, long, short);

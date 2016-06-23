@@ -56,10 +56,9 @@ class QuaPortBridge;
 template <class P> class QuaPortManager
 {
 public:
-	QuaPortManager(Qua &q) : uberQua(q) {
+	QuaPortManager() {
 
 	}
-	Qua &uberQua;
 
 	qua_status status;
 

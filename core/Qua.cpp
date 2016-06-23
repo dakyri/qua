@@ -23,6 +23,7 @@
 #include "StdDefs.h"
 
 #include "Qua.h"
+#include "QuaEnvironment.h"
 #include "Executable.h"
 #include "Schedulable.h"
 #include "Channel.h"
@@ -30,6 +31,7 @@
 #include "Sym.h"
 #include "QuaMidi.h"
 #include "QuaAudio.h"
+#include "QuaOSC.h"
 #include "Block.h"
 #include "Method.h"
 #include "QuasiStack.h"
@@ -57,7 +59,8 @@
 #endif
 
 
-QuaGlobalContext	context;
+QuaEnvironmentDisplay environmentDisplay;
+QuaEnvironment	environment(environmentDisplay);
 
 
 // operation flags ....
@@ -350,9 +353,9 @@ Qua::PostCreationInit()
 
 #endif
 #ifdef QUA_V_AUDIO
-	status_t err=context.quaAudio->StartAudio();
+	status_t err=environment.quaAudio->StartAudio();
 	if (err != B_OK) {
-		bridge.reportError("Can't start audio: %s\n", context.quaAudio->ErrorString(err));
+		bridge.reportError("Can't start audio: %s\n", environment.quaAudio->ErrorString(err));
 	}
 #endif
 	return B_OK;
@@ -378,27 +381,25 @@ Qua::AddChannel(std::string nm, short ch_id,
 	}
  	Channel *c = new Channel(nm, ch_id, au_thru, midi_thru, nAudioIns, nAudioOuts, this);
  	if (add_dflt_str_in) {
-		if (context.quaMidi && context.quaMidi->dfltInput) {
-			Input *s = c->AddInput("midin", context.quaMidi->dfltInput, midi_ch, true);
+		if (environment.quaMidi && environment.quaMidi->dfltInput) {
+			Input *s = c->AddInput("midin", environment.quaMidi->dfltInput, midi_ch, true);
 		}
 	}
 	if (add_dflt_str_out) {
-		if (context.quaMidi && context.quaMidi->dfltOutput) {
-			Output *d = c->AddOutput("midout", context.quaMidi->dfltOutput, midi_ch, true);
+		if (environment.quaMidi && environment.quaMidi->dfltOutput) {
+			Output *d = c->AddOutput("midout", environment.quaMidi->dfltOutput, midi_ch, true);
 		}
 	}
 #ifdef QUA_V_AUDIO
  	if (add_dflt_au_in) {
 
-		if (context.quaAudio && context.quaAudio->dfltInput) {
-			Input *s = c->AddInput("audin", context.quaAudio->dfltInput,
-								0, true
-								);
+		if (environment.quaAudio && environment.quaAudio->dfltInput) {
+			Input *s = c->AddInput("audin", environment.quaAudio->dfltInput, 0, true);
 			// try and make a stereo pair
 			if (nAudioIns == 2) {
-				if (context.quaAudio->dfltInput->NInputChannels(0) == 1) {
-					s->setPortInfo(context.quaAudio->dfltInput, 1, 1);
-				} else if (context.quaAudio->dfltInput->NInputChannels(0) == 2) {
+				if (environment.quaAudio->dfltInput->NInputChannels(0) == 1) {
+					s->setPortInfo(environment.quaAudio->dfltInput, 1, 1);
+				} else if (environment.quaAudio->dfltInput->NInputChannels(0) == 2) {
 					;
 				} else {
 					;
@@ -408,14 +409,13 @@ Qua::AddChannel(std::string nm, short ch_id,
 		}
 	}
 	if (add_dflt_au_out) {
-		if (context.quaAudio && context.quaAudio->dfltOutput) {
-			Output *d = c->AddOutput("audout", context.quaAudio->dfltOutput,
-						0, true);
+		if (environment.quaAudio && environment.quaAudio->dfltOutput) {
+			Output *d = c->AddOutput("audout", environment.quaAudio->dfltOutput,0, true);
 			// try and make a stereo pair
 			if (nAudioOuts == 2) {
-				if (context.quaAudio->dfltOutput->NOutputChannels(0) == 1) {
-					d->setPortInfo(context.quaAudio->dfltOutput, 1, 1);
-				} else if (context.quaAudio->dfltOutput->NOutputChannels(0) == 2) {
+				if (environment.quaAudio->dfltOutput->NOutputChannels(0) == 1) {
+					d->setPortInfo(environment.quaAudio->dfltOutput, 1, 1);
+				} else if (environment.quaAudio->dfltOutput->NOutputChannels(0) == 2) {
 					;
 				} else {
 					;
@@ -481,7 +481,7 @@ Qua::~Qua()
 {
 	fprintf(stderr, "Qua: about to delete %s\n", sym->name);
 #ifdef QUA_V_AUDIO
-	context.quaAudio->StopAudio();
+	environment.quaAudio->StopAudio();
 	fprintf(stderr, "Qua: stopped audio\n");
 #endif
 	
@@ -708,7 +708,7 @@ Qua::Stop()
     		p->QuaStop();
     		fprintf(stderr, "done\n");
     	}
-//		context.quaAudio->StopAudio();
+//		environment.quaAudio->StopAudio();
 		bool	wasRec = status == STATUS_RECORDING;
     	status = STATUS_SLEEPING; // stops main thread
 #ifdef QUA_V_MULTIMEDIA_TIMER

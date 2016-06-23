@@ -5,6 +5,7 @@
 #include "QuaAudio.h"
 #include "Block.h"
 #include "Qua.h"
+#include "QuaEnvironment.h"
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
@@ -22,7 +23,7 @@ QuaPort::QuaPort(
 	mode = md;
 //	interfaceBridge.SetSymbol(sym);
 //	insertableBridge.SetSymbol(sym);
-	context.display.CreatePortBridge(this);
+	environment.display.CreatePortBridge(this);
 }
 
 char *
