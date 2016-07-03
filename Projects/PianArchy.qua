@@ -1,0 +1,75 @@
+pool qua6_1 {
+	function Init [
+		note("f#5",	6, 80, "cell start")
+		note("e5",	6, 80)
+		note("bb5",	6, 80, "cell start")
+		note("c6",	3, 80)
+		note("ab5",	6, 80, "cell start")
+		note("f#5",	6, 80)
+		note("e5",	6, 80)
+		note("bb5",	12, 80, "cell start")
+	
+		note("f#5",	6, 80, "cell start")
+		note("e5",	6, 80)
+		note("bb5",	3, 80, "cell start")
+		note("b5",	6, 80)
+		note("bb5",	3, 80)
+		note("c6",	3, 80) 
+		note("f#5",	24, 80, "cell start") 
+	
+		note("e5",	6, 80, "cell start")
+		note("bb5",	6, 80) 
+		note("c6",	6, 80, "cell start")
+		note("b5",	3, 80)
+		note("bb5",	6, 80)
+		note("c6",	6, 80, "cell start")
+		note("ab5",	6, 80)
+		note("f#5",	3, 80) 
+		note("e5",	12, 80, "cell start")
+	
+		note("f#5",	6, 80, "cell start")
+		note("e5",	6, 80)
+		note("f#5",	3, 80)
+		note("e5",	3, 80)
+		note("bb5",	6, 80, "cell start")
+		note("c6",	9, 80)
+		note("f#5",	24, 80, "cell start")
+	]
+}
+
+voice PianArchy
+{
+
+	function \node \modal piano_7_4
+	{
+		<- note (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 7
+		<- note (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 4	
+	}
+	
+	
+	function \node \modal piano_3_2
+	{
+		<- note (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 2
+		<- note (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 3
+	}
+	
+	function \node \modal piano_1
+	{
+		<- markov(qua6_1)
+	}
+	
+	function \node \modal piano_2_3
+	{
+		<- note ([36 40 42], 12, [80 60 60]) : 3
+		<- note ([48 50], 12, [80 60]) : 2
+	}
+	
+	{
+		piano_2_3
+		piano_3_2
+		piano_7_4
+		piano_1
+	}
+}
+
+

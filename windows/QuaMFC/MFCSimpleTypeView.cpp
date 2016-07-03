@@ -880,7 +880,7 @@ MFCSimpleTypeView::AddSym(StabEnt *s)
 			}
 			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
 			break;
-		case TypedValue::S_METHOD:
+		case TypedValue::S_LAMBDA:
 			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
 			break;
 		default:
@@ -912,7 +912,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 {
 	long	caty[] = {
 //				TypedValue::S_DOUBLE,
-//				TypedValue::S_METHOD,
+//				TypedValue::S_LAMBDA,
 		TypedValue::S_FLOAT,
 		TypedValue::S_INT,
 		TypedValue::S_SHORT,

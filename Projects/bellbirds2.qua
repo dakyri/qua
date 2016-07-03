@@ -1,0 +1,40 @@
+qua bellbirds2
+{
+	channel 0 channel1 {
+		input {midi1:1 AudioIn}{}
+		output {midi1:1 Mixer} {}
+	}
+	channel 1 channel2 {
+		input {midi1:2 AudioIn}{}
+		output {midi1:2 Mixer} {}
+	}
+	channel 2 channel3 {
+		input {midi1:3 AudioIn}{}
+		output {midi1:3 Mixer} {}
+	}
+	channel 3 channel4 {
+		input {midi1:4 AudioIn}{}
+		output {midi1:4 Mixer} {}
+	}
+	channel 4 channel5 {
+		input {midi1:5 AudioIn}{}
+		output {midi1:5 Mixer} {}
+	}
+	sample
+	   takes {
+		{"/Obscenity/sound/bellbirds2" "Original"}
+		}
+	    display {0xeeee6400, {0 0}} bellbirds2() {
+	}
+
+	tempo = 120
+	bellbirds2(0, 0:1.0, 24:1.8, {
+		bellbirds2(
+			false,
+			{0, {0:0.0, 0.5, 1}},
+			{0, {0:0.0, 0, 1}},
+			0:0.0'msf,
+			0:48.37696'msf,
+			true)}, {})
+
+}

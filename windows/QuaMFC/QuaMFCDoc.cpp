@@ -122,12 +122,13 @@ CQuaMFCDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	string docPath(lpszPathName);
 	string docext = getExt(docPath);
+	cerr << "got doc " << docPath << ", docExt" << docext << endl;
 	if (docext == "qs" || docext == "qua") {
-		qua = Qua::LoadScriptFile(docPath.c_str());
+		qua = Qua::loadScriptFile(docPath.c_str());
 		if (qua) {
 			string s(lpszPathName);
 			string snapshotPath = getParent(s)+"/"+getBase(s)+"."+"qx";
-			qua->LoadSnapshotFile(snapshotPath.c_str());
+			qua->loadSnapshotFile(snapshotPath.c_str()); // which may or may not do anything depending on if it exists
 		}
 	}
 
@@ -238,80 +239,80 @@ void CQuaMFCDoc::OnAddMarker()
 void CQuaMFCDoc::OnPlayClick()
 {
 	if (qua) {
-		fprintf(stderr, "Playing ...\n");
+		cerr << "Playing ...\n";
 		qua->Start();
 	} else {
-		fprintf(stderr, "Play pressed but sequencer is blank ...\n");
+		cerr << "Play pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnStopClick()
 {
 	if (qua) {
-		fprintf(stderr, "Stopping ...\n");
+		cerr <<  "Stopping ...\n";
 		qua->Stop();
 	} else {
-		fprintf(stderr, "Stop pressed but sequencer is blank ...\n");
+		cerr <<  "Stop pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnPauseClick()
 {
 	if (qua) {
-		fprintf(stderr, "Pausing ...\n");
+		cerr <<  "Pausing ...\n";
 		qua->Stop();
 	} else {
-		fprintf(stderr, "Pause pressed but sequencer is blank ...\n");
+		cerr <<  "Pause pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnFFClick()
 {
 	if (qua) {
-		fprintf(stderr, "Fast forwarding ...\n");
+		cerr <<  "Fast forwarding ...\n";
 		qua->FastForward();
 	} else {
-		fprintf(stderr, "Fast forward pressed but sequencer is blank ...\n");
+		cerr <<  "Fast forward pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnRewClick()
 {
 	if (qua) {
-		fprintf(stderr, "Rewinding ...\n");
+		cerr <<  "Rewinding ...\n";
 		qua->Rewind();
 	} else {
-		fprintf(stderr, "Rewind pressed but sequencer is blank ...\n");
+		cerr <<  "Rewind pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnRecordClick()
 {
 	if (qua) {
-		fprintf(stderr, "Recording ...\n");
+		cerr <<  "Recording ...\n";
 		qua->StartRecording();
 	} else {
-		fprintf(stderr, "Record pressed but sequencer is blank ...\n");
+		cerr <<  "Record pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnJumpBackClick()
 {
 	if (qua) {
-		fprintf(stderr, "Jump back ...\n");
+		cerr <<  "Jump back ...\n";
 		qua->ToPreviousMarker();
 	} else {
-		fprintf(stderr, "Full Rewind pressed but sequencer is blank ...\n");
+		cerr <<  "Full Rewind pressed but sequencer is blank ...\n";
 	}
 }
 
 void CQuaMFCDoc::OnJumpForwardClick()
 {
 	if (qua) {
-		fprintf(stderr, "Jump forward ...\n");
+		cerr <<  "Jump forward ...\n";
 		qua->ToNextMarker();
 	} else {
-		fprintf(stderr, "Full Forward pressed but sequencer is blank ...\n");
+		cerr <<  "Full Forward pressed but sequencer is blank ...\n";
 	}
 }
 

@@ -178,9 +178,9 @@ MFCChannelMountView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of channel mount finds a null sequencer document");
+		reportError("ChannelMountView: initial update of channel mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		reportError("initial update finds a null sequencer");
+		reportError("ChannelMountView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddChannelRack(this);

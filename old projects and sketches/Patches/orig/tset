@@ -1,0 +1,39 @@
+define #pool qua6_1 {
+	define Init [
+//		ctrl(0,100)
+		note("f#5",	6, 100, "CellStart")
+		note("e5",	6, 80)
+		note("bb5",	6, 100, "CellStart")
+		note("c6",	3, 80)
+		note("ab5",	6, 80, "CellStart")
+		note("f#5",	6, 80)
+		note("e5",	6, 80)
+		note("bb5",	12, 80, "CellStart")
+	
+		note("f#5",	6, 100, "CellStart")
+		note("e5",	6, 80)
+		note("bb5",	3, 100, "CellStart")
+		note("b5",	6, 80)
+		note("bb5",	3, 80)
+		note("c6",	3, 80) 
+		note("f#5",	24, 80, "CellStart") 
+	
+		note("e5",	6, 100, "CellStart")
+		note("bb5",	6, 80) 
+		note("c6",	6, 100, "CellStart")
+		note("b5",	3, 80)
+		note("bb5",	6, 80)
+		note("c6",	6, 80, "CellStart")
+		note("ab5",	6, 80)
+		note("f#5",	3, 80) 
+		note("e5",	12, 80, "CellStart")
+	
+		note("f#5",	6, 100, "CellStart")
+		note("e5",	6, 80)
+		note("f#5",	3, 60)
+		note("e5",	3, 40)
+		note("bb5",	6, 30, "CellStart")
+		note("c6",	9, 20)
+		note("f#5",	24, 10, "CellStart")
+	]
+}

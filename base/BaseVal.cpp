@@ -3,8 +3,20 @@
 #include "StdDefs.h"
 #include "BaseVal.h"
 #include "Sym.h"
+#include "Pool.h"
+#include "Voice.h"
+#include "Sample.h"
+#include "Lambda.h"
+#include "QuaPort.h"
+#include "Qua.h"
+#include "Template.h"
+#include "Channel.h"
 
-
+/*
+TODO XXXX todo xxxx possibly need to add proper constructor and destructor
+most things are sage. i think strings will leak. or keep it as is, but look really closely
+at strings. and perhaps sysx. I think other types are ok.
+*/
 int32
 TypedValue::IntValue(QuasiStack *stack)
 {
@@ -662,6 +674,90 @@ TypedValue::SetStateValue(State *s, int32 state)
 }
 
 
+class Schedulable *
+	TypedValue::SchedulableValue()
+{
+	switch (type) {
+	case S_SAMPLE:	return val.sample;
+	case S_VOICE: 	return val.voice;
+	case S_POOL: 	return val.pool;
+		//	case S_PORT: 	return val.port;
+#ifdef QUA_V_APP_HANDLER
+	case S_APPLICATION: return val.application;
+#endif
+	}
+	return nullptr;
+}
+
+Executable *
+TypedValue::ExecutableValue()
+{
+	switch (type) {
+	case S_SAMPLE:	return val.sample;
+	case S_VOICE: 	return val.voice;
+	case S_POOL: 	return val.pool;
+		//	case S_PORT: 	return val.port;
+#ifdef QUA_V_APP_HANDLER
+	case S_APPLICATION: return val.application;
+#endif
+	case S_LAMBDA:	return val.lambda;
+	case S_TEMPLATE: return val.qTemplate;
+	}
+	return nullptr;
+}
+
+
+Stackable *
+TypedValue::StackableValue()
+{
+	switch (type) {
+	case S_SAMPLE:	return val.sample;
+	case S_VOICE: 	return val.voice;
+	case S_POOL: 	return val.pool;
+	case S_PORT: 	return val.port;
+	case S_LAMBDA:	return val.lambda;
+	case S_TEMPLATE: return val.qTemplate;
+	case S_BUILTIN:	return val.builtin.stackable;
+	case S_QUA: 	return val.qua;
+	case S_EVENT:	return val.event;
+	case S_CHANNEL: return val.channel;
+#ifdef QUA_V_APP_HANDLER
+	case S_APPLICATION: return val.application;
+#endif
+#ifdef QUA_V_VST_HOST
+	case S_VST_PLUGIN: return val.vst;
+#endif
+	}
+	return nullptr;
+}
+
+
+/*
+* SetValue(*)
+*   set the value of a BaseValueType according to its type
+*/
+void
+TypedValue::SetValue(char *strval)
+{
+	if (*strval) {
+		switch (type) {
+		case S_BOOL:		val.Bool = (atoi(strval) != 0); break;
+		case S_BYTE:		val.byte = atoi(strval); break;
+		case S_INT:			val.Int = atoi(strval); break;
+		case S_SHORT:		val.Short = atoi(strval); break;
+		case S_LONG:		val.Long = atoi(strval); break;
+		case S_FLOAT:		val.Float = atof(strval); break;
+		case S_POOL:		val.pool = findPool(strval); break;
+		case S_SAMPLE:		val.sample = findSample(strval); break;
+		case S_STRING:		val.string = strval; break;
+		default:
+			internalError("can't set value to string, type = %d", type);
+		}
+		//		fprintf(stderr, "SetVal: %s %d %d\n", strval, type, val.Int);
+	}
+}
+
+
 /*
  * Set(*)
  *   set the value and type of a BaseValueType
@@ -763,7 +859,7 @@ TypedValue::Set(Instance *d)
 //    case S_APPLICATION:	val.Application = (Application *) val; break;
 //    case S_CHANNEL:		val.Channel = (Channel *) val; break;
 //    case S_OUTPUT:	val.Output = (Output *) val; break;
-//    case S_METHOD:		val.Method = (Method *) val; break;
+//    case S_LAMBDA:		val.Lambda = (Lambda *) val; break;
 //    case S_STREAM_ITEM:val.StreamItemList = (StreamItem *) val; break;
 //    case S_STREAM:		val.Stream = (Stream *) val; break;
 //    case S_STRING:

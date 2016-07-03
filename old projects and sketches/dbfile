@@ -1,0 +1,11 @@
+qua mfc 0.93 debug listing
+InitInstance()
+QuaCommandLineInfo::ParseParam(0)
+InitInstance() done basics
+InitInstance() created fonts
+InitInstance() loaded bitmaps
+InitInstance() setup registry
+InitInstance() created templates
+InitInstance() frame is loaded ... 
+InitInstance() almost done
+InitInstance() totally done

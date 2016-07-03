@@ -11,7 +11,7 @@
 #include "Parse.h"
 #include "QuaFX.h"
 #include "Channel.h"
-#include "Method.h"
+#include "Lambda.h"
 
 
 int32	nlpos = 0;
@@ -184,8 +184,8 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 			break;
 	
 		case Block::C_CALL:
-		    if (block->crap.call.crap.method) {
-				if (!AddToBuf(block->crap.call.crap.method->sym->name, buf, pos, len)) return false;
+		    if (block->crap.call.crap.lambda) {
+				if (!AddToBuf(block->crap.call.crap.lambda->sym->name, buf, pos, len)) return false;
 			    if (block->crap.call.parameters) {
 			    	if (!AddToBuf("(", buf, pos, len)) return false;
 			    	if (!Esrap(block->crap.call.parameters, buf,pos,len, false, indent, crlf)) return false;

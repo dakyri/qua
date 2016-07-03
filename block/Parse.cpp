@@ -11,7 +11,7 @@
 #include "Voice.h"
 #include "Sample.h"
 #include "Pool.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Sym.h"
 #include "Block.h"
 #include "Template.h"
@@ -32,7 +32,7 @@
 #include "Application.h"
 #endif
 
-int				debug_parse=0;
+int				debug_parse=1;
 
 
 std::unordered_map<std::string, int> builtinCommandIndex = {
@@ -359,7 +359,7 @@ std::unordered_map<std::string, int> typeIndex= {
 	{"long",		TypedValue::S_LONG},
 	{"float",		TypedValue::S_FLOAT},
 	{"struct",		TypedValue::S_STRUCT},
-	{"method",		TypedValue::S_METHOD},
+	{"lambda",		TypedValue::S_LAMBDA},
 	{"file",		TypedValue::S_FILE},
 	{"time",		TypedValue::S_TIME},
 	{"port",		TypedValue::S_PORT},
@@ -452,45 +452,21 @@ int32 FindTypeQualifier(char *s)
 
 }
 
-char *extension(char *name)
-{
-	if (name == nullptr) {
-		return nullptr;
-	}
-	char *p;
-	p = strrchr(name, '.');
-	if (p == nullptr) {
-		return nullptr;
-	}
-	return p+1;
-}
-
 // routine used to convert external to internal names
-void quascript_name(char *nm, char *buf, long buflen)
+string quascript_name(const string &nm)
 {
-	if (buf == nullptr) {
-		return;
+	string s;
+	auto it = nm.begin();
+	while (it != nm.end() && !isalpha(*it) && !(*it == '_')) {
+		++it;
 	}
-	if (nm == nullptr || *nm == '\0') {
-		*buf = 0;
-	}
-	int	len = 0;
-	char *q = buf;
-	char *p = nm;
-	while (*p && !isalpha(*p) && *p != '_') p++;
-	*q = *p++;
-	if (*q) {
-		q++;
-		len++;
-		while (*p) {
-			if ((isalnum(*p) || *p == '_')&& len < buflen-1) {
-				*q++ = *p;
-				len++;
-			}
-			p++;
+	while (it != nm.end()) {
+		if (isalnum(*it) || *it == '_') {
+			s.push_back(*it);
 		}
-		*q = 0;
+		++it;
 	}
+	return s;
 }
 
 
@@ -507,14 +483,14 @@ void quascript_name(char *nm, char *buf, long buflen)
 // class QSParser....
 
 Parser::Parser(FILE *fp, std::string fnm, Qua *q):
-	QSParser(q, fnm)
+	QSParser(q, getBase(fnm))
 {
 	fseek(fp, 0, SEEK_END);
 	size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	text_buf = nullptr;
 	if (size > 0) {
-		text_buf = new char[size];
+		text_buf = new char[size+1];
 		text_buf_ind = 0;
 		long nr = 0;
 		if (((off_t)(nr=fread(text_buf, 1, size, fp))) != size) {
@@ -522,6 +498,7 @@ Parser::Parser(FILE *fp, std::string fnm, Qua *q):
 //			AbortError("can't read the shite in %s. got %d trying to read %d", fnm, nr, size);
 //			err_cnt = 1;
 		}
+		text_buf[size] = 0;
 	}
 }
 
@@ -643,7 +620,7 @@ TxtParser::seek(off_t ind)
 
 QSParser::QSParser(Qua *q, const std::string srcnm)
 {
-	uberQua = q;
+	uberQua = (q != nullptr ? q : new Qua(quascript_name(srcnm), false));
 	methods = nullptr;
 	templates = nullptr;
 	schedulees = nullptr;
@@ -1783,9 +1760,9 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		   		case Block::C_SYM: {
 		   			StabEnt	*sym = varp->crap.sym;
 		   			switch (sym->type) {
-		   			case TypedValue::S_METHOD:
+		   			case TypedValue::S_LAMBDA:
 			   			varp->type = Block::C_CALL;
-			   			varp->crap.call.crap.method = sym->MethodValue();
+			   			varp->crap.call.crap.lambda = sym->LambdaValue();
 			   			break;
 			   		case TypedValue::S_VOICE:
 			   		case TypedValue::S_POOL:
@@ -2460,7 +2437,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 void
 QSParser::ParseSchedulable(Schedulable *S)
 {
-	Method	*So;
+	Lambda	*So;
 	
 	if (debug_parse)
 		fprintf(stderr, "reading schedulable %x %x\n", (unsigned)S, (unsigned)S->sym);
@@ -2509,7 +2486,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	mime = dataPath = nullptr;
     if (currentTokenType == TOK_TYPE) {
 		if (currentToken[0] == '\\') { // a type qualifier
-			type = TypedValue::S_METHOD;
+			type = TypedValue::S_LAMBDA;
 		} else {
 			type=FindType(currentToken);
 			if (type == TypedValue::S_UNKNOWN) {
@@ -2574,7 +2551,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			case TypedValue::S_POOL:
 				GetToken();
 				break;
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 				GetToken();
 				break;
 				
@@ -2601,7 +2578,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    	GetToken();
 	    }
     } else {
-    	type = TypedValue::S_METHOD;
+    	type = TypedValue::S_LAMBDA;
 	}
 	int	ndimensions=0;
 	int	dimensions[50];
@@ -3494,26 +3471,26 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    break;
 	}
 	
-	case TypedValue::S_METHOD: {
+	case TypedValue::S_LAMBDA: {
 		if (ndimensions != 0) {
-			ParseError("method should be undimensioned");
+			ParseError("lambda should be undimensioned");
 		}
-	    Method	*method;
-	    method = new Method(currentToken, context,
+	    Lambda	*lambda;
+	    lambda = new Lambda(currentToken, context,
 	    			uberQua, isLocus, isModal, isOncer,
 	    			isFixed, isHeld, isInit);
-		method->resetVal = resetVal;
-	    method->next = methods;
-	    methods = method;
+		lambda->resetVal = resetVal;
+	    lambda->next = methods;
+	    methods = lambda;
 
-		fprintf(stderr, "method %s\n", currentToken);
+		fprintf(stderr, "lambda %s\n", currentToken);
 	    GetToken();
-	    ParseFormalsList(method->sym, schedSym, true);
-	    glob.PushContext(method->sym);
-	    method->mainBlock = ParseBlockInfo(method->sym, schedSym);
-		fprintf(stderr, "method block %x\n", (unsigned) method->mainBlock);
-	    sym = method->sym;
-	    glob.PopContext(method->sym);
+	    ParseFormalsList(lambda->sym, schedSym, true);
+	    glob.PushContext(lambda->sym);
+	    lambda->mainBlock = ParseBlockInfo(lambda->sym, schedSym);
+		fprintf(stderr, "lambda block %x\n", (unsigned) lambda->mainBlock);
+	    sym = lambda->sym;
+	    glob.PopContext(lambda->sym);
 	    
 	    break;
 	}
@@ -3639,8 +3616,6 @@ QSParser::ParseProgFile()
 Qua *
 QSParser::ParseQua()
 {
-	Qua		*q=nullptr;
-	
     GetToken();
     err_cnt = 0;
     if (!atEof()) {
@@ -3650,13 +3625,13 @@ QSParser::ParseQua()
 			int type = FindType(currentToken);
 			if (type == TypedValue::S_QUA) {
 				GetToken();
-				q = new Qua(currentToken, false);
+				glob.Rename(uberQua->sym, currentToken);
 //				q->sequencerWindow->Hide();
 //				q->mixerWindow->Hide();
 				GetToken();
-				uberQua = q;
+
 				fprintf(stderr, "doin it\n");
-				q->mainBlock = ParseBlockInfo(q->sym, nullptr);
+				uberQua->mainBlock = ParseBlockInfo(uberQua->sym, nullptr);
 			} else {
 				ParseError("Expected qua definition near '%s'", currentToken);
 			}
@@ -3664,7 +3639,7 @@ QSParser::ParseQua()
 			ParseError("Expected definition near '%s'", currentToken);
 		}
     }
-    if (err_cnt != 0 && q != nullptr) {
+    if (err_cnt != 0 && uberQua != nullptr) {
 //    	BMessage	bomsg(B_QUIT_REQUESTED);
 //    	bomsg.AddInt32("le bombe", 666);
 ////    	q->sequencerWindow->PostMessage(&bomsg);
@@ -3672,7 +3647,7 @@ QSParser::ParseQua()
 //    	q = nullptr;
     }
 
-    return q;
+    return uberQua;
 }
 
 void
@@ -3755,88 +3730,4 @@ QSParser::ParseBlockSequenceToList(StabEnt *ctxt)
 	}
 	fprintf(stderr, "return ing %x\n", (unsigned)b);
 	return b;
-}
-
-
-class Schedulable *
-TypedValue::SchedulableValue()
-{
-	switch (type) {
-	case S_SAMPLE:	return val.sample;
-	case S_VOICE: 	return val.voice;
-	case S_POOL: 	return val.pool;
-//	case S_PORT: 	return val.port;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
-	}
-	return nullptr;
-}
-
-Executable *
-TypedValue::ExecutableValue()
-{
-	switch (type) {
-	case S_SAMPLE:	return val.sample;
-	case S_VOICE: 	return val.voice;
-	case S_POOL: 	return val.pool;
-//	case S_PORT: 	return val.port;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
-	case S_METHOD:	return val.method;
-	case S_TEMPLATE: return val.qTemplate;
-	}
-	return nullptr;
-}
-
-
-Stackable *
-TypedValue::StackableValue()
-{
-	switch (type) {
-	case S_SAMPLE:	return val.sample;
-	case S_VOICE: 	return val.voice;
-	case S_POOL: 	return val.pool;
-	case S_PORT: 	return val.port;
-	case S_METHOD:	return val.method;
-	case S_TEMPLATE: return val.qTemplate;
-	case S_BUILTIN:	return val.builtin.stackable;
-	case S_QUA: 	return val.qua;
-	case S_EVENT:	return val.event;
-	case S_CHANNEL: return val.channel;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
-#ifdef QUA_V_VST_HOST
-	case S_VST_PLUGIN: return val.vst;
-#endif
-	}
-	return nullptr;
-}
-
-
-/*
- * SetValue(*)
- *   set the value of a BaseValueType according to its type
- */
-void
-TypedValue::SetValue(char *strval)
-{
-	if (*strval) {
-		switch (type) {
-		case S_BOOL:		val.Bool = (atoi(strval)!=0); break;
-		case S_BYTE:		val.byte = atoi(strval); break;
-		case S_INT:			val.Int = atoi(strval); break;
-		case S_SHORT:		val.Short = atoi(strval); break;
-		case S_LONG:		val.Long = atoi(strval); break;
-	    case S_FLOAT:		val.Float = atof(strval); break;
-	    case S_POOL:		val.pool = findPool(strval); break;
-	    case S_SAMPLE:		val.sample = findSample(strval); break;
-	    case S_STRING:		val.string = strval; break;
-	    default:
-	    	internalError("can't set value to string, type = %d", type);
-		}
-//		fprintf(stderr, "SetVal: %s %d %d\n", strval, type, val.Int);
-	}
 }

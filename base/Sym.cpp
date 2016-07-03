@@ -25,7 +25,7 @@
 #include "Voice.h"
 #include "Sample.h"
 #include "Clip.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Envelope.h"
 #ifdef QUA_V_VST_HOST
 #include "VstPlugin.h"
@@ -144,7 +144,7 @@ findApplication(std::string nm, short dc)
 }
 
 
-Method *
+Lambda *
 findMethod(const string nm, short dc)
 {
     StabEnt	*sym;
@@ -152,10 +152,10 @@ findMethod(const string nm, short dc)
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
-    if (sym->type != TypedValue::S_METHOD) {
+    if (sym->type != TypedValue::S_LAMBDA) {
 		return nullptr;
     }
-    return sym->MethodValue();
+    return sym->LambdaValue();
 }
 
 
@@ -181,11 +181,11 @@ findMethodMain(const string nm, short dc)
     if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
-    if (sym->type != TypedValue::S_METHOD) {
+    if (sym->type != TypedValue::S_LAMBDA) {
 		return nullptr;
     }
 
-    return sym->MethodValue()->mainBlock;
+    return sym->LambdaValue()->mainBlock;
 }
 
 bool
@@ -582,7 +582,7 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 	case TypedValue::S_APPLICATION:		delete sym->ApplicationValue(); break;
 #endif
 	case TypedValue::S_VOICE:			delete sym->VoiceValue(); break;
-	case TypedValue::S_METHOD:			delete sym->MethodValue(); break;
+	case TypedValue::S_LAMBDA:			delete sym->LambdaValue(); break;
 	case TypedValue::S_TEMPLATE:		delete sym->TemplateValue(); break;
 	case TypedValue::S_POOL:			delete sym->PoolValue(); break;
 	case TypedValue::S_SAMPLE:			delete sym->SampleValue(); break;
@@ -837,7 +837,7 @@ StabEnt::RefersToStream()
 			return true;
 		case S_VOICE:
 		case S_POOL:
-		case S_METHOD:
+		case S_LAMBDA:
 		case S_APPLICATION:
 		case S_SAMPLE:
 		case S_QUA:
@@ -888,7 +888,7 @@ StabEnt::SetVisualParameters(Block *b)
 	switch (type) {
 		case S_VOICE:	return val.voice->interfaceBridge.SetDisplayInfo(b);
 		case S_POOL:	return val.pool->interfaceBridge.SetDisplayInfo(b);
-		case S_METHOD:	return val.method->interfaceBridge.SetDisplayInfo(b);
+		case S_LAMBDA:	return val.lambda->interfaceBridge.SetDisplayInfo(b);
 		case S_TEMPLATE:	return val.qTemplate->interfaceBridge.SetDisplayInfo(b);
 		case S_SAMPLE:	return val.sample->interfaceBridge.SetDisplayInfo(b);
 #ifdef Q_APP_HANDLER
@@ -1151,7 +1151,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			case S_PORT:
 				break;
 				
-			case S_METHOD:
+			case S_LAMBDA:
 				break;
 
 			case S_INPUT: {
@@ -1381,8 +1381,8 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				}
 				break;
 				
-			case S_METHOD:
-				if ((err=MethodValue()->Save(fp, indent)) != B_NO_ERROR) {
+			case S_LAMBDA:
+				if ((err=LambdaValue()->Save(fp, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
@@ -1539,8 +1539,8 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		return val.application->sym->name;
 #endif
 
-	case S_METHOD:
-		return val.method->sym->name;
+	case S_LAMBDA:
+		return val.lambda->sym->name;
 	case S_INSTANCE:
 		return val.instance->sym->name;
 	case S_EXPRESSION:
@@ -1599,7 +1599,7 @@ StabEnt::SaveSimpleBits(FILE *fp, short indent)
 {
 	fprintf(fp, "%s", qut::unfind(typeIndex, (int)type).c_str());
 	if (hasBounds) {
-		fprintf(fp, " range %s", minVal.StringValue());
+		fprintf(fp, " \\range %s", minVal.StringValue());
 		fprintf(fp, " %s",  maxVal.StringValue());
 	}
 	fprintf(fp, " %s", PrintableName());
@@ -1664,7 +1664,7 @@ StabEnt::TypeSymbol()
 	case S_POOL:
 	case S_SAMPLE:
 	case S_APPLICATION:
-	case S_METHOD:
+	case S_LAMBDA:
 	case S_INSTANCE:
 	case S_STREAM:
 	case S_CHANNEL:
@@ -1809,8 +1809,8 @@ StabEnt *
 DupSymbol(StabEnt *model, StabEnt *context)
 {
 	StabEnt *sym;
-	if (model->type == TypedValue::S_METHOD) {
-		Method *so =new Method(model->MethodValue(), context);
+	if (model->type == TypedValue::S_LAMBDA) {
+		Lambda *so =new Lambda(model->LambdaValue(), context);
 		sym = so->sym;
 	} else {
 		sym = DefineSymbol(model->name,

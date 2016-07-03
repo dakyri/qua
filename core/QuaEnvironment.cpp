@@ -42,7 +42,7 @@ bool
 QuaEnvironment::SetVstPluginDir(char *path, bool add, bool reload)
 {
 #ifdef QUA_V_VST_HOST
-	std::string	cfgPath = configDirectory + "/" + "vstplugins.qs";
+	std::string	cfgPath = configDirectory + "/" + "vstplugins.qua";
 	FILE	*fp = fopen(cfgPath.c_str(), add ? "w+" : "w");
 	if (fp == NULL) {
 		return false;
@@ -161,7 +161,7 @@ QuaEnvironment::Setup()
 						fprintf(stderr, "parsed...\n");
 						//				toolboxWindow->Lock();
 						vstPlugins.AddList(&p->vstplugins);
-						Method		*nextm, *m;
+						Lambda		*nextm, *m;
 						for (m = p->methods; m != NULL; m = nextm) {
 							nextm = m->next;
 							if (m->sym->context == NULL) {

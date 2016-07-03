@@ -17,7 +17,7 @@
 #include "Sym.h"
 #include "Voice.h"
 #include "Block.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Instance.h"
 #include "QuasiStack.h"
 #include "Channel.h"

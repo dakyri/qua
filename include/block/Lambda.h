@@ -13,19 +13,19 @@ class QuaMethodBridge;
 #include "BaseVal.h"
 #include "Executable.h"
 
-class Method: public Executable
+class Lambda: public Executable
 {
 public:					
 	status_t Save(FILE *fp, short indent);
 
-	Method(std::string nm, StabEnt *S, Qua* q, bool f1=false,
+	Lambda(std::string nm, StabEnt *S, Qua* q, bool f1=false,
 		bool f2 = false,
 		bool f3 = false,
 		bool f4 = false,
 		bool f6 = false,
 		bool f7 = false);
-	Method(Method *S, StabEnt *Sy);
-	virtual ~Method();
+	Lambda(Lambda *S, StabEnt *Sy);
+	virtual ~Lambda();
 	bool Init();
 	
 	bool isLocus;
@@ -37,9 +37,9 @@ public:
 	
 	TypedValue resetVal;
 	
-    Method *next;
+    Lambda *next;
 };
 
-Method *LoadMethod(FILE *fp, char *nm, StabEnt *S, Qua *q);
+Lambda *LoadMethod(FILE *fp, char *nm, StabEnt *S, Qua *q);
 
 #endif

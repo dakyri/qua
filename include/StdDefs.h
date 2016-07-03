@@ -60,11 +60,11 @@ void memfill(void *, long, uchar);
 void memswab(void *, long);
 
 void beep();
-std::string getLeaf(std::string path);
-std::string getParent(std::string path);
-std::string getBase(std::string path);
-std::string getExt(std::string path);
-std::string getSupertype(std::string path);  // of a mime type
+std::string getLeaf(const std::string &path);
+std::string getParent(const std::string &path);
+std::string getBase(const std::string &path);
+std::string getExt(const std::string &path);
+std::string getSupertype(const std::string &path);  // of a mime type
 
 namespace qut {
 	template<typename T> typename std::vector<T>::iterator find(std::vector<T> a, T i) {

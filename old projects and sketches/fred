@@ -1,0 +1,266 @@
+#qua fred
+{
+	#channel 0 channel1 {
+		#input {midi1:1 AudioIn}{}
+		#output {midi1:1 Mixer} {}
+	}
+	#channel 1 channel2 {
+		#input {midi1:2 AudioIn}{}
+		#output {midi1:2 Mixer} {}
+	}
+	#channel 2 channel3 {
+		#input {midi1:3 AudioIn}{}
+		#output {midi1:3 Mixer} {}
+	}
+	#channel 3 channel4 {
+		#input {midi1:4 AudioIn}{}
+		#output {midi1:4 Mixer} {}
+	}
+	#channel 4 channel5 {
+		#input {midi1:5 AudioIn}{}
+		#output {midi1:5 Mixer} {}
+	}
+	#channel 5 channel6 {
+		#input {midi1:6 AudioIn}{}
+		#output {midi1:6 Mixer} {}
+	}
+	#channel 6 channel7 {
+		#input {midi1:7 AudioIn}{}
+		#output {midi1:7 Mixer} {}
+	}
+	#channel 7 channel8 {
+		#input {midi1:8 AudioIn}{}
+		#output {midi1:8 Mixer} {}
+	}
+	#channel 8 channel9 {
+		#input {midi1:9 AudioIn}{}
+		#output {midi1:9 Mixer} {}
+	}
+	#channel 9 channel10 {
+		#input {midi1:10 AudioIn}{}
+		#output {midi1:10 Mixer} {}
+	}
+	#channel 10 channel11 {
+		#input {midi1:11 AudioIn}{}
+		#output {midi1:11 Mixer} {}
+	}
+	#channel 11 channel12 {
+		#input {midi1:12 AudioIn}{}
+		#output {midi1:12 Mixer} {}
+	}
+	#channel 12 channel13 {
+		#input {midi1:13 AudioIn}{}
+		#output {midi1:13 Mixer} {}
+	}
+	#channel 13 channel14 {
+		#input {midi1:14 AudioIn}{}
+		#output {midi1:14 Mixer} {}
+	}
+	#channel 14 channel15 {
+		#input {midi1:15 AudioIn}{}
+		#output {midi1:15 Mixer} {}
+	}
+	#channel 15 channel16 {
+		#input {midi1:16 AudioIn}{}
+		#output {midi1:16 Mixer} {}
+	}
+	#channel 16 system {
+		#input {midi1:SY AudioIn}{}
+		#output {midi1:SY Mixer} {}
+	}
+	#sample #takes {
+		{"/boot/home/sound/pleiade/good afternoon" "Original"}} #display {0xeeee6400, {5 6}} good\ afternoon()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/this one" "Original"}} #display {0xeeee6400, {90 7}} this\ one()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/we would like to share" "Original"}} #display {0xeeee6400, {6 56}} we\ would\ like\ to\ share() {
+	}
+	#sample #takes {
+		{"/boot/home/sound/pleiade/crack in time" "Original"}} #display {0xeeee6400, {3 107}} crack\ in\ time()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/restructuring" "Original"}} #display {0xeeee6400, {78 106}} restructuring()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/in actuality" "Original"}} #display {0xeeee6400, {4 157}} in\ actuality()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/who are these gods" "Original"}} #display {0xeeee6400, {69 157}} who\ are\ these\ gods()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/for eons the gods came" "Original"}} #display {0xeeee6400, {4 210}} for\ eons\ the\ gods\ came()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/surrounded" "Original"}} #display {0xeeee6400, {3 311}} surrounded()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/you must move" "Original"}} #display {0xeeee6400, {73 311}} you\ must\ move()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/now ideas are beginning" "Original"}} #display {0xeeee6400, {1 261}} now\ ideas\ are\ beginning()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/many of you" "Original"}} #display {0xeeee6400, {4 361}} many\ of\ you()
+		{ 
+		delay }
+	#sample #takes {
+		{"/boot/home/sound/pleiade/the child" "Original"}} #display {0xeeee6400, {78 363}} the\ child()
+		{ 
+		delay }
+	define Init()
+	{
+		tempo = 120
+		good\ afternoon(8, 4:0.0, 11:2.8, {
+			good\ afternoon(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:23.15751'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		this\ one(8, 20:0.0, 8:2.0, {
+			this\ one(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:17.5671'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		we\ would\ like\ to\ share(8, 32:0.0, 3:3.6, {
+			we\ would\ like\ to\ share(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:7.34651'msf,
+				1)}, {})
+		crack\ in\ time(8, 44:0.0, 12:0.0, {
+			crack\ in\ time(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:23.15751'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		restructuring(8, 60:0.0, 14:1.6, {
+			restructuring(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:20.901'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		in\ actuality(8, 80:0.0, 7:0.0, {
+			in\ actuality(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:14.631'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		who\ are\ these\ gods(8, 92:0.0, 4:1.9, {
+			who\ are\ these\ gods(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:8.39981'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		for\ eons\ the\ gods\ came(8, 100:0.0, 11:2.8, {
+			for\ eons\ the\ gods\ came(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:23.15751'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		surrounded(8, 140:0.0, 11:3.6, {
+			surrounded(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:17.5671'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		you\ must\ move(8, 160:0.0, 10:2.0, {
+			you\ must\ move(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:21.946'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		now\ ideas\ are\ beginning(8, 120:0.0, 12:3.4, {
+			now\ ideas\ are\ beginning(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:25.30556'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		many\ of\ you(8, 176:0.0, 7:1.2, {
+			many\ of\ you(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:14.27014'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+	}
+}

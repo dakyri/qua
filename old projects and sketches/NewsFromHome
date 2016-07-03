@@ -1,0 +1,185 @@
+#qua NewsFromHome
+{
+	#channel 0 channel1 {
+		#input {midi1:1 AudioIn}{}
+		#output {midi1:1 Mixer} {}
+	}
+	#channel 1 channel2 {
+		#input {midi1:2 AudioIn}{}
+		#output {midi1:2 Mixer} {}
+	}
+	#channel 2 channel3 {
+		#input {midi1:3 AudioIn}{}
+		#output {midi1:3 Mixer} {}
+	}
+	#channel 3 channel4 {
+		#input {midi1:4 AudioIn}{}
+		#output {midi1:4 Mixer} {}
+	}
+	#channel 4 channel5 {
+		#input {midi1:5 AudioIn}{}
+		#output {midi1:5 Mixer} {}
+	}
+	#channel 5 channel6 {
+		#input {midi1:6 AudioIn}{}
+		#output {midi1:6 Mixer} {}
+	}
+	#channel 6 channel7 {
+		#input {midi1:7 AudioIn}{}
+		#output {midi1:7 Mixer} {}
+	}
+	#channel 7 channel8 {
+		#input {midi1:8 AudioIn}{}
+		#output {midi1:8 Mixer} {}
+	}
+	#channel 8 channel9 {
+		#input {midi1:9 AudioIn}{}
+		#output {midi1:9 Mixer} {}
+	}
+	#channel 9 channel10 {
+		#input {midi1:10 AudioIn}{}
+		#output {midi1:10 Mixer} {}
+	}
+	#channel 10 channel11 {
+		#input {midi1:11 AudioIn}{}
+		#output {midi1:11 Mixer} {}
+	}
+	#channel 11 channel12 {
+		#input {midi1:12 AudioIn}{}
+		#output {midi1:12 Mixer} {}
+	}
+	#channel 12 channel13 {
+		#input {midi1:13 AudioIn}{}
+		#output {midi1:13 Mixer} {}
+	}
+	#channel 13 channel14 {
+		#input {midi1:14 AudioIn}{}
+		#output {midi1:14 Mixer} {}
+	}
+	#channel 14 channel15 {
+		#input {midi1:15 AudioIn}{}
+		#output {midi1:15 Mixer} {}
+	}
+	#channel 15 channel16 {
+		#input {midi1:16 AudioIn}{}
+		#output {midi1:16 Mixer} {}
+	}
+	#channel 16 system {
+		#input {midi1:SY AudioIn}{}
+		#output {midi1:SY Mixer} {}
+	}
+	#sample #takes {
+		{"/boot/home/sound/pleiade/pliade.aif" "Original"}} #display {0xeeee6400, {47 53}} pliade\.aif()
+		{ 
+		delay }
+	#application
+	#path "/boot/home/source/Rack747/Sources-Om-1.11/Rack747"
+	#mime "application/x-vnd.Dak-Rack747" #display {0xb400b400, {42 110}} Rack747(#float #range 0 2 synthLevel = 0.7,
+			#float #range 0 2 kitLevel = 0.7,
+			#float #range 0 1 cutoff = 0.7,
+			#float #range 0 1 envmod = 0.2,
+			#float #range 0 1 resonance = 0.3)
+		{ 
+		define #float lastCutoff
+		define #float lastEnvmod
+		define #float lastResonance
+		define #float lastSynLevel
+		define #float lastKitLevel
+		define syncSG(#int which)	msg(1718382446, { "sync", (#int 0) }, { "whichSG", which })
+		define muteSG(#int which)	msg(1836414053, { "whichSG", which })
+		define startSG(#int which)	msg(1718382446, { "whichSG", which })
+		define stopSG(#int which)	msg(1718383974, { "whichSG", which })
+		define pauseSG(#int which)	msg(1718382438, { "whichSG", which })
+		define tempoSG(#int which,
+				#int tempo)	msg(1952804208, { "control value", (#float tempo) }, { "whichSG", which })
+		define ampSG(#int which,
+				#float amp)	msg(1634562156, { "control value", amp }, { "whichSG", which })
+		define kitlSG(#int which,
+				#float amp)	msg(1802073196, { "control value", amp }, { "whichSG", which })
+		define synlSG(#int which,
+				#float amp)	msg(1937337964, { "control value", amp }, { "whichSG", which })
+		define adecaySG(#int which,
+				#float adec)	msg(1684366177, { "control value", adec }, { "whichSG", which })
+		define resSG(#int which,
+				#float res)	msg(1919251311, { "control value", res }, { "whichSG", which })
+		define cutoffSG(#int which,
+				#float cut)	msg(1668641894, { "control value", cut }, { "whichSG", which })
+		define envmodSG(#int which,
+				#float env)	msg(1701738093, { "control value", env }, { "whichSG", which })
+		define fdecaySG(#int which,
+				#float fdec)	msg(1684366182, { "control value", fdec }, { "whichSG", which })
+		define panSG(#int which,
+				#float pan)	msg(1936744814, { "control value", pan }, { "whichSG", which })
+		define glideSG(#int which,
+				#float glide)	msg(1735158116, { "control value", glide }, { "whichSG", which })
+		define randnoteSG(#int which)	msg(1852798053, { "whichSG", which })
+		define randbeatSG(#int which)	msg(1651078259, { "whichSG", which })
+		define noteonSG	msg(1920495470, { "note", (#int pitch) }, { "vel", (#int dynamic) })
+		define noteofSG	msg(1920495462, { "note", (#int pitch) }, { "vel", (#int dynamic) })
+
+		#wake {
+			lastKitLevel = kitLevel, 
+			lastSynLevel = synthLevel,
+			synlSG(Channel, synthLevel)
+			kitlSG(Channel, kitLevel)
+			startSG(Channel) }
+
+		#sleep stopSG(Channel)
+
+		#receive { cutoff = (x+1)/2, 
+			resonance = (y+1)/2 }
+		if (cutoff!=lastCutoff)
+			{ lastCutoff = cutoff, cutoffSG(Channel, cutoff) } 
+		if (envmod!=lastEnvmod)
+			{ lastEnvmod = envmod, envmodSG(Channel, envmod) } 
+		if (resonance!=lastResonance)
+			{ lastResonance = resonance, resSG(Channel, resonance) } 
+		if (synthLevel!=lastSynLevel)
+			{ lastSynLevel = synthLevel, synlSG(Channel, synthLevel) } 
+		if (kitLevel!=lastKitLevel)
+			{ lastKitLevel = kitLevel, kitlSG(Channel, kitLevel) } }
+	define Init()
+	{
+		tempo = 120
+		pliade\.aif(8, 4:0.0, 105:1.10, {
+			pliade\.aif(
+				false,
+				{0, {89478485:0.10, 0.98, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				3:30.40739'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		Rack747(2, 7:0.0, 49:0.0, {
+			Rack747(
+				{0, {0:0.6, 0, 1}, {9:0.0, 2, 1}},
+				{0, {0:0.0, 0.7, 1}},
+				{0, {0:0.0, 0.7, 1}, {9:0.0, 0.68, 1}, {9:0.6, 0.08, 1}, {16:3.6, 1, 1}, {17:1.0, 0.02, 1}, {25:0.0, 0.98, 1}, {25:1.0, 0.02, 1}, {33:0.6, 0.98, 1}, {94:3.0, 0.7, 1}, {97:3.0, 0.98, 1}},
+				{0, {0:0.0, 0.2, 1}},
+				{0, {0:0.0, 0.3, 1}})}, {})
+		Rack747(1, 23:3.0, 7:0.0, {
+			Rack747(
+				{0, {0:0.6, 0.04, 1}, {6:3.6, 0.68, 1}},
+				{0, {89478485:0.10, 0.04, 1}},
+				{0, {0:0.6, 0.02, 1}, {6:2.6, 0.86, 1}},
+				{0, {0:0.0, 0.2, 1}},
+				{0, {0:0.0, 0.3, 1}})}, {})
+		Rack747(4, 72:0.0, 18:0.0, {
+			Rack747(
+				{0, {89478485:0.10, 0.04, 1}, {17:2.0, 1.96, 1}},
+				{0, {0:0.0, 0, 1}},
+				{0, {0:2.0, 0.06, 1}, {16:0.0, 0.96, 1}},
+				{0, {0:0.0, 0.2, 1}},
+				{0, {0:0.0, 0.3, 1}})}, {})
+		Rack747(5, 40:0.0, 15:3.6, {
+			Rack747(
+				{0, {0:1.0, 1.32, 1}},
+				{0, {0:0.0, 0, 1}},
+				{0, {0:0.0, 0.7, 1}},
+				{0, {0:0.0, 0.2, 1}},
+				{0, {0:0.0, 0.3, 1}})}, {})
+	}
+}

@@ -5,7 +5,7 @@
 #include "Block.h"
 #include "Pool.h"
 #include "Sym.h"
-#include "Method.h"
+#include "Lambda.h"
 //#include "include/QuaMidi.h"
 #include "Channel.h"
 #include "Executable.h"
@@ -68,9 +68,9 @@ Block::Block(StabEnt *sym)
 	labelSym = nullptr;
 	if (sym) {
     	switch (sym->type) {
-    	case TypedValue::S_METHOD: {
+    	case TypedValue::S_LAMBDA: {
 	    	type = C_CALL;
-	    	crap.call.crap.method = sym->MethodValue();
+	    	crap.call.crap.lambda = sym->LambdaValue();
 	    	break;
     	}
     	
@@ -283,7 +283,7 @@ Block::Block(Block *model, StabEnt *newContext, bool unwind)
 		break;
 		
 	case C_CALL	: {
-		crap.call.crap.method =	model->crap.call.crap.method;
+		crap.call.crap.lambda =	model->crap.call.crap.lambda;
 		if (model->crap.call.parameters) crap.call.parameters = new Block(model->crap.call.parameters, newContext, unwind);
 		break;
 	}
@@ -548,11 +548,11 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	    }
 	    QDBMSG_BLK("found symbol %s in %s\n", S->name, S->context?S->context->name:"<glbl>");
 	    delete [] crap.name;
-		if (S->type == TypedValue::S_METHOD) {
+		if (S->type == TypedValue::S_LAMBDA) {
 			type = C_CALL;
 			crap.call.parameters = nullptr;
-	    	crap.call.crap.method = S->MethodValue();
-			glob.PushContext(crap.call.crap.method->sym);
+	    	crap.call.crap.lambda = S->LambdaValue();
+			glob.PushContext(crap.call.crap.lambda->sym);
 		} else {
 		    type = C_SYM;
 		    crap.sym = S;
@@ -594,10 +594,10 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 			glob.PushContext(crap.call.crap.sym);
 			type = C_CALL;
 			break;
-	    case TypedValue::S_METHOD:
+	    case TypedValue::S_LAMBDA:
 			delete [] crap.call.crap.name;
-	    	crap.call.crap.method = S->MethodValue();
-			glob.PushContext(crap.call.crap.method->sym);
+	    	crap.call.crap.lambda = S->LambdaValue();
+			glob.PushContext(crap.call.crap.lambda->sym);
 	    	type = C_CALL;
 	    	break;
 
@@ -613,8 +613,8 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	case C_CALL:
 	    QDBMSG_BLK("DoInitPre: call element:\n",0,0);
     
-		if (crap.call.crap.method && crap.call.crap.method->sym)
-			glob.PushContext(crap.call.crap.method->sym);
+		if (crap.call.crap.lambda && crap.call.crap.lambda->sym)
+			glob.PushContext(crap.call.crap.lambda->sym);
 		else {
 			internalError("Strange call...");
 			type = C_UNLINKED_CALL;
@@ -860,12 +860,12 @@ Block::DoReset(void *V, void *B, int x)
 	
 	case C_CALL: {
 	    QDBMSG_BLK("Reset call element: %s\n",
-	    			crap.call.crap.method->sym->name,0);
+	    			crap.call.crap.lambda->sym->name,0);
 	    			
 		QuasiStack	*higherFrame = stack->frameAt(crap.call.frameIndex);
-//		if (crap.call.crap.method->isInit) {
+//		if (crap.call.crap.lambda->isInit) {
 		    if (higherFrame) {
-   	 			crap.call.crap.method->mainBlock->Reset(higherFrame);
+   	 			crap.call.crap.lambda->mainBlock->Reset(higherFrame);
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
 				higherFrame->stacker->uberQua->bridge.DisplayStatus(higherFrame);
@@ -874,8 +874,8 @@ Block::DoReset(void *V, void *B, int x)
 		    }
 //		}
 
-		if (crap.call.crap.method->resetVal.type != TypedValue::S_UNKNOWN) {
-			higherFrame->locusStatus = (short)crap.call.crap.method->resetVal.IntValue(nullptr);
+		if (crap.call.crap.lambda->resetVal.type != TypedValue::S_UNKNOWN) {
+			higherFrame->locusStatus = (short)crap.call.crap.lambda->resetVal.IntValue(nullptr);
 		}
 	    break;
 	}
@@ -1251,8 +1251,7 @@ bool
 Block::StackOMatic(QuasiStack *V, short preDepth)
 {
 	QDBMSG_BLK("StackOMatic(%x,%d)\n", V, preDepth);
-	return Traverse((BlockFnPtr)nullptr, (void *)V,
-				&Block::DoStack, nullptr, preDepth);
+	return Traverse((BlockFnPtr)nullptr, (void *)V, &Block::DoStack, nullptr, preDepth);
 }
 
 void *
@@ -1287,8 +1286,8 @@ Block::DoStack(void *V, void *B, int y, long&status)
 	case C_GENERIC_PLAYER:
     	StabEnt		*S = nullptr;
     	if (type == C_CALL) {
-    		if (crap.call.crap.method) 
-    			S = crap.call.crap.method->sym;
+    		if (crap.call.crap.lambda) 
+    			S = crap.call.crap.lambda->sym;
 #if defined(QUA_V_VST_HOST)
     	} else if (type == C_VST) {
 			if (crap.call.crap.vstplugin) {
@@ -1369,7 +1368,7 @@ Block::DoStack(void *V, void *B, int y, long&status)
 			    
 				default: {
 		    		if (y>0) {
-		    			((Method *)qs->stackable)->mainBlock->StackOMatic(qs,y-1);
+		    			((Lambda *)qs->stackable)->mainBlock->StackOMatic(qs,y-1);
 		    			if (qs->countFrames() == 0)	// no context to build, try again
 		    				qs->isLeaf = true;
 		    		}
@@ -1904,8 +1903,8 @@ Block::Dump(FILE *fp, short indent)
 		break;
 
 	case C_CALL:
-	    if (crap.call.crap.method) {
-			fprintf(fp, crap.call.crap.method->sym->name);
+	    if (crap.call.crap.lambda) {
+			fprintf(fp, crap.call.crap.lambda->sym->name);
 		    if (crap.call.parameters) {
 		    	fprintf(fp, "(");
 	    		crap.call.parameters->Dump(fp, 0);

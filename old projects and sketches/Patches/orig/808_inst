@@ -1,0 +1,84 @@
+define #pool localpool {}
+
+define #voice r08_inst(#pool thepool, #int instr, #int instrvel)
+{
+	
+	define #int checkdisplay
+	define #int lastinstr
+	define #node #fixed mkbeat(#int pos, #int vel)
+	{
+		define #node #oncer addbeat(#int roll)
+		{
+			if (streamcount == 0) {
+				insert(thepool,pos,tone(instr, 3, instrvel))
+				vel = instrvel
+			} else {
+				delete(thepool)
+				vel = 0
+			}
+	
+		}
+		
+		define #node #oncer clrbeat
+		{
+			delete(thepool)	
+			vel = 0
+		}
+		
+// find this note in the given stream
+		find(thepool, tickat>=pos &&
+						tickat<pos+3 &&
+						pitch == instr)
+
+		if (checkdisplay) {	// sets displayed velocity
+			if (streamcount == 0)
+				vel = 0
+			else
+				vel = dynamic
+		}
+				
+		addbeat #label "Bang"
+		clrbeat #label "Clear"
+		flush()
+	}
+	
+	<< 2
+	if (command == 0x90) {	// note on
+		instr = pitch
+		instrvel = dynamic
+	}
+	if (lastinstr != instr) {
+		lastinstr = instr
+		checkdisplay = 1
+	} else {
+		checkdisplay = 0
+	}
+	flush()
+	
+	mkbeat(0)	#label "beat1/0"
+	mkbeat(3)	#label "beat1/1"
+	mkbeat(6)	#label "beat1/2"
+	mkbeat(9)	#label "beat1/3"
+	mkbeat(12)	#label "beat2/0"
+	mkbeat(15)	#label "beat2/1"
+	mkbeat(18)	#label "beat2/2"
+	mkbeat(21)	#label "beat2/3"
+	mkbeat(24)	#label "beat3/0"
+	mkbeat(27)	#label "beat3/1"
+	mkbeat(30)	#label "beat3/2"
+	mkbeat(33)	#label "beat3/3"
+	mkbeat(36)	#label "beat4/0"
+	mkbeat(39)	#label "beat4/1"
+	mkbeat(42)	#label "beat4/2"
+	mkbeat(45)	#label "beat4/3"
+	
+	checkdisplay = 0
+
+
+	play(thepool,tick,0,48)
+// how about
+//	for each note in stream
+//		swiitch (pitch)
+//			reset appropriate sample ...
+	>> 1
+}

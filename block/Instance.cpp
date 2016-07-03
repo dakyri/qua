@@ -6,7 +6,7 @@
 #include "QuaTime.h"
 #include "Sym.h"
 #include "Block.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "QuasiStack.h"
 #include "Sample.h"
 #include "Pool.h"
@@ -104,8 +104,8 @@ Instance::Init()
 	glob.PushContext(sym);
 	fprintf(stderr, "instance: initting children\n");
 	for (StabEnt *p=sym->children; p!=nullptr; p=p->sibling) {
-		if (p->type == TypedValue::S_METHOD) {
-			if (!p->MethodValue()->Init())
+		if (p->type == TypedValue::S_LAMBDA) {
+			if (!p->LambdaValue()->Init())
 				goto err_ex;
 		}
 	}

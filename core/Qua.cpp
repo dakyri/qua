@@ -33,7 +33,7 @@
 #include "QuaAudio.h"
 #include "QuaOSC.h"
 #include "Block.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "QuasiStack.h"
 #include "Pool.h"
 #include "Voice.h"
@@ -62,15 +62,12 @@
 QuaEnvironmentDisplay environmentDisplay;
 QuaEnvironment	environment(environmentDisplay);
 
-
-// operation flags ....
-bool				listGlobals=false;
-
 flag debug_schedule = 0;
 
 /*
  * Qua.
  */
+/*
 Qua::Qua(std::string path, bool chan_add):
 	Executable(
 		DefineSymbol(
@@ -83,11 +80,12 @@ Qua::Qua(std::string path, bool chan_add):
 	OnCreationInit(chan_add);
 	StabEnt *newObj = loadFile(path);
 }
+*/
 
-Qua::Qua(char *nm, bool chan_add):
+Qua::Qua(string nm, bool chan_add):
 	Executable(
 		DefineSymbol(
-			((char *)(nm?nm:"New")), TypedValue::S_QUA, 0,
+			(nm.size()?nm: string("New")), TypedValue::S_QUA, 0,
 			this, nullptr,	TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT)),
 	Stacker(this),
 	TimeKeeper(&Metric::std),
@@ -256,9 +254,9 @@ Qua::PostCreationInit()
 #define INIT_BY_METHOD
 #ifdef INIT_BY_METHOD
 	StabEnt	*is = glob.FindContextSymbol("Init", sym, -1);
-	Method	*initMethod = nullptr;
-	if (is && is->type == TypedValue::S_METHOD) {
-		initMethod = is->MethodValue();
+	Lambda	*initMethod = nullptr;
+	if (is && is->type == TypedValue::S_LAMBDA) {
+		initMethod = is->LambdaValue();
 	}
 	Block	*initBlock = nullptr;
 	if (initMethod) {
@@ -622,15 +620,15 @@ Qua::CreateVoice(std::string nm, bool andD)
 	return S;
 }
 
-Method *
+Lambda *
 Qua::CreateMethod(std::string nm, StabEnt *ctxt, bool andD)
 {
 	static int		new_method_id = 0;
 	if (nm.size() == 0) {
-		nm = string("method") + std::to_string(new_method_id++);
+		nm = string("lambda") + std::to_string(new_method_id++);
 	}
 
-	Method *S = new Method(nm, ctxt, this);
+	Lambda *S = new Lambda(nm, ctxt, this);
 	S->next = methods;
 	methods = S;
 
@@ -939,7 +937,7 @@ Qua::loadFile(std::string path)
 
 
 Qua *
-Qua::LoadScriptFile(const char *path)
+Qua::loadScriptFile(const char *path)
 {
 	std::string	thePath = path;
 	FILE		*theFile = fopen(path, "r");
@@ -953,37 +951,38 @@ Qua::LoadScriptFile(const char *path)
 //			fclose(theFile);
 //			return false;
 //		}
-		fseek(theFile, 0L, SEEK_SET);
-		if (1) { // strncmp(buf, magic, strlen(magic)) == 0) {
-			Parser		*p = new Parser(theFile, getBase(thePath), nullptr);
-			q=p->ParseQua();
-			p->ShowErrors();
-			if (q != nullptr && p->err_cnt == 0) {
-				fprintf(stderr, "parsed a qua, proceeding with initialization %x\n", (unsigned)q->mainBlock);
-//		    	BPoint		where(0,0);
-		    	q->ParsePass2(p, nullptr);	
-				fprintf(stderr, "initialised a qua, proceeding post initialization %x\n", (unsigned)q->mainBlock);
-				q->PostCreationInit();
-			    fprintf(stderr, "fully initialized qua!\n");
-			}
+		Parser		*p = new Parser(theFile, getBase(thePath), nullptr);
+		q = p->ParseQua();
+		p->ShowErrors();
+		if (q != nullptr && p->err_cnt == 0) {
+			fprintf(stderr, "parsed a qua, proceeding with initialization %x\n", (unsigned)q->mainBlock);
+			//		    	BPoint		where(0,0);
+			q->ParsePass2(p, nullptr);
+			fprintf(stderr, "initialised a qua, proceeding post initialization %x\n", (unsigned)q->mainBlock);
+			q->PostCreationInit();
+			fprintf(stderr, "fully initialized qua!\n");
 		}
+		fclose(theFile);
 	}
-	fclose(theFile);
+
 	return q;
 }
 
 status_t
-Qua::LoadSnapshotFile(const char *path)
+Qua::loadSnapshotFile(const char *path)
 {
 	tinyxml2::XMLDocument doc;
 	FILE *xml = fopen(path, "r");
+	if (xml == nullptr) {
+		return B_OK;
+	}
 	tinyxml2::XMLError err = doc.LoadFile(xml);
 	if (err != tinyxml2::XML_NO_ERROR) {
 		fclose(xml);
 		return B_ERROR;
 	}
 	tinyxml2::XMLElement* root = doc.RootElement();
-	if (LoadSnapshotElement(root) != B_OK) {
+	if (loadSnapshotElement(root) != B_OK) {
 		fclose(xml);
 		return B_ERROR;
 	}
@@ -992,7 +991,7 @@ Qua::LoadSnapshotFile(const char *path)
 }
 
 status_t
-Qua::LoadSnapshotElement(tinyxml2::XMLElement* element)
+Qua::loadSnapshotElement(tinyxml2::XMLElement* element)
 {
 	std::string	nameAttr;
 	std::string scriptAttr;
@@ -1011,9 +1010,9 @@ Qua::LoadSnapshotElement(tinyxml2::XMLElement* element)
 	std::string namestr = element->Value();
 
 	if (namestr == "snapshot") {
-		LoadSnapshotChildren(element);
+		loadSnapshotChildren(element);
 	} else if (namestr == "qua") {
-		LoadSnapshotChildren(element);
+		loadSnapshotChildren(element);
 	} else if (namestr == "voice") {
 		if (hasNameAttr) {
 			Voice	*v = findVoice(nameAttr.c_str(), -1);
@@ -1052,7 +1051,7 @@ Qua::LoadSnapshotElement(tinyxml2::XMLElement* element)
 		}
 	} else if (namestr == "instance") {
 	} else if (namestr == "stack") {
-		LoadSnapshotChildren(element);
+		loadSnapshotChildren(element);
 	} else if ((namestr == "fixed") || namestr == "envelope") {
 		if (hasNameAttr) {
 #ifdef QUA_V_SAVE_INITASXML
@@ -1071,11 +1070,11 @@ Qua::LoadSnapshotElement(tinyxml2::XMLElement* element)
 }
 
 status_t
-Qua::LoadSnapshotChildren(tinyxml2::XMLElement *element)
+Qua::loadSnapshotChildren(tinyxml2::XMLElement *element)
 {
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
-		if (LoadSnapshotElement(childElement) == B_ERROR) {
+		if (loadSnapshotElement(childElement) == B_ERROR) {
 			return B_ERROR;
 		}
 	}
@@ -1086,20 +1085,20 @@ Qua::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 bool
 Qua::ParsePass2(Parser *prog, StabEnt **likelyLoad)
 {
-	Method 			*method;
+	Lambda 			*lambda;
 	Schedulable 	*schedulable;
 	
-	fprintf(stderr, "Pass2: Initing method list...\n");
+	fprintf(stderr, "Pass2: Initing lambda list...\n");
 
 // reclaim dodgy entries .......
-	Method		*SON;
-    for(method=prog->methods; method!=nullptr; method=SON) {
-    	SON = method->next;
-		if (method->sym->context == sym) {
- 			if (method->Init()) {
+	Lambda		*SON;
+    for(lambda=prog->methods; lambda!=nullptr; lambda=SON) {
+    	SON = lambda->next;
+		if (lambda->sym->context == sym) {
+ 			if (lambda->Init()) {
 //		    	QO=display.CreateMethodBridge(S);
-		    	method->next = methods;
-		    	methods = method;
+		    	lambda->next = methods;
+		    	methods = lambda;
 		    }
 		}
     }
@@ -1423,9 +1422,9 @@ Qua::Main()
 
 
 void
-Qua::RemoveMethod(Method *p, bool andD, bool updateDisplay)
+Qua::RemoveMethod(Lambda *p, bool andD, bool updateDisplay)
 {
-	Method		*q, **qp;
+	Lambda		*q, **qp;
 	
 	if (p == nullptr) {
 		return;
@@ -1444,7 +1443,7 @@ Qua::RemoveMethod(Method *p, bool andD, bool updateDisplay)
 		bridge.RemoveMethodRepresentations(p->sym);
 	}
 	if (andD) {
-		fprintf(stderr, "removed method %s\n", p->sym->name);
+		fprintf(stderr, "removed lambda %s\n", p->sym->name);
 		glob.DeleteSymbol(p->sym, true);
 	}
 }
@@ -1531,7 +1530,7 @@ NameStr(short s)
 status_t
 Qua::DoSave(const char *fileName)
 {
-	projectScriptPath = getParent(fileName) + getBase(fileName) + ".qs";
+	projectScriptPath = getParent(fileName) + getBase(fileName) + ".qua";
 #ifdef  QUA_V_SAVE_INITASXML
 	projectSnapshotPath = getParent(fileName) + getBase(fileName) + ".qx";
 #endif
@@ -1918,9 +1917,9 @@ TypedValue::StringValue()
 		return (val.application != nullptr && val.application->sym != nullptr)?
 			val.application->sym->name:"null_application";
 #endif
-	case S_METHOD:
-		return (val.method != nullptr && val.method->sym != nullptr)?
-			val.method->sym->name:"_null_method";
+	case S_LAMBDA:
+		return (val.lambda != nullptr && val.lambda->sym != nullptr)?
+			val.lambda->sym->name:"_null_method";
 	case S_INSTANCE:
 		return (val.instance != nullptr && val.instance->sym != nullptr)?
 			val.instance->sym->name:"_null_instance";

@@ -189,9 +189,9 @@ MFCSampleDataEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-//		reportError("initial update of channel mount finds a null sequencer document");
+//		reportError("SampleDataEditor: initial update of channel mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-//		reportError("initial update finds a null sequencer");
+//		reportError("SampleDataEditor: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 	}
 	SetHVScroll();

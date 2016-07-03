@@ -1,0 +1,87 @@
+// Qua template for Rack747
+
+define #application 
+		#path "/boot/home/source/Rack747/Sources/Rack747"
+		#mime "application/x-vnd.Dak-Rack747"
+	Rack747(	#float #range 0 1 cutoff=0.7,
+			#float #range 0 1 envmod=0.2,
+			#float #range 0 1 resonance=0.3)
+{
+
+	define	#float	lastCutoff
+	define	#float	lastEnvmod
+	define	#float	lastResonance
+
+// these routines describe (part of) the message protocol to the rack
+	define	syncSG(#int which)		msg('flon', {"sync", (#int 0)}, {"whichSG", which})
+	define	muteSG(#int which)		msg('mute', {"whichSG", which})
+	define	startSG(#int which)		msg('flon', {"whichSG", which})
+	define	stopSG(#int which)		msg('fluf', {"whichSG", which})
+	define	pauseSG(#int which)		msg('flof', {"whichSG", which})
+	define	tempoSG(#int which, #int tempo)
+								msg('temp', {"control value", (#float tempo)}, {"whichSG", which})
+	define	ampSG(#int which, #float amp)		msg('ampl', {"control value", amp}, {"whichSG", which})
+	define	adecaySG(#int which, #float adec)	msg('deca', {"control value", adec}, {"whichSG", which})
+	define	resSG(#int which, #float res)		msg('reso', {"control value", res}, {"whichSG", which})
+	define	cutoffSG(#int which, #float cut)		msg('cutf', {"control value", cut}, {"whichSG", which})
+	define	envmodSG(#int which, #float env)		msg('envm', {"control value", env}, {"whichSG", which})
+	define	fdecaySG(#int which,  #float fdec)	msg('decf', {"control value", fdec}, {"whichSG", which})
+	define	panSG(#int which, #float pan)		msg('span', {"control value", pan}, {"whichSG", which})
+	define	glideSG(#int which, #float glide)		msg('glid', {"control value", glide}, {"whichSG", which})
+	define	randnoteSG(#int which)			msg('note', {"whichSG", which})
+	define	randbeatSG(#int which)			msg('bits', {"whichSG", which})
+
+	define	noteonSG				msg('rxon', {"note", (#int pitch)}, 
+										{"vel", (#int dynamic)})
+	define	noteofSG				msg('rxof', {"note", (#int pitch)},
+										{"vel", (#int dynamic)})
+
+// the Wake and Sleep definitions correspond to starting and stopping the beast
+	#wake startSG(Channel)
+	#sleep stopSG(Channel)
+
+//	#start startSG(Channel)
+//	#stop stopSG(Channel)
+//// called at initialization!
+//	#init
+//	{
+//		tempoSG(tempo)
+//	}
+
+// the Receive routine handles internal data sent to this object. "x" and "y" are standardized
+// joystick parameters. Evaluation is slack, as is scoping. Streamed control information that
+// is sent through a patch is passed through it linearly, but applied only to actions that are
+// relevant. Midi data going through this routine would be ignored, dropped out the other end,
+// then deleted. Data could be streamed from several input channels, which may correspond to
+// either midi channels or joystick ports.
+	#receive {
+		cutoff = (x+1.0)/2.0
+		resonance = (y+1.0)/2.0
+	}
+
+//	define LogFilter
+//	{
+//		if (what == '_RRC') {
+//			define #file		datafile
+//
+//			datafile = findref("refs")
+//			tempo = ((#float) datafile[1842])
+//		}
+//	}
+
+
+
+//  a typical main control patch for rack.
+	if (cutoff != lastCutoff) {
+		lastCutoff = cutoff
+		cutoffSG(Channel, cutoff)
+	}
+	if (envmod != lastEnvmod) {
+		lastEnvmod = envmod
+		envmodSG(Channel, envmod)
+	}	
+	if (resonance != lastResonance) {
+		lastResonance = resonance
+		resSG(Channel, resonance)
+	}
+}

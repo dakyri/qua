@@ -10,7 +10,7 @@
 #include "Qua.h"
 #include "Voice.h"
 #include "Pool.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "QuaFX.h"
 #include "Channel.h"
 #include "QuasiStack.h"
@@ -655,18 +655,18 @@ UpdateActiveBlock(Qua *uberQua,
 		if (debug_update)
 			fprintf(stderr, "UpdateActive: call %x of %s frame %x # %d stat %d\n",
 					B,
-			    	B->crap.call.crap.method->sym->name,
+			    	B->crap.call.crap.lambda->sym->name,
 			    	higherFrame,
 			    	B->crap.call.frameIndex,
 			    	higherFrame->locusStatus);
 #endif
 		if (higherFrame->locusStatus == STATUS_RUNNING) {
-// may also need to check method status
+// may also need to check lambda status
 			Block		*p;
-			Method		*method = B->crap.call.crap.method;
+			Lambda		*lambda = B->crap.call.crap.lambda;
 #ifdef LOTSALOX
-			if (method->stackableLock.Lockable()) {
-				method->stackableLock.Lock();
+			if (lambda->stackableLock.Lockable()) {
+				lambda->stackableLock.Lock();
 #endif
 	
 				ua_complete = BLOCK_COMPLETE;
@@ -684,7 +684,7 @@ UpdateActiveBlock(Qua *uberQua,
 						}
 						if (!the_val.Complete())
 							ua_complete = BLOCK_COMPLETE;
-						StabEnt		*ctlsym = method->controller(npar);
+						StabEnt		*ctlsym = lambda->controller(npar);
 						if (ctlsym) {
 							LValue		lval;
 							ctlsym->SetLValue(
@@ -701,7 +701,7 @@ UpdateActiveBlock(Qua *uberQua,
 							
 				ua_complete = UpdateActiveBlock(uberQua,
 								mainStream, 
-								B->crap.call.crap.method->mainBlock,
+								B->crap.call.crap.lambda->mainBlock,
 								updateTime, 
 								stacker, 
 								stackCtxt,
@@ -709,13 +709,13 @@ UpdateActiveBlock(Qua *uberQua,
 								updateRate, generate_on_the_fly)
 							&& ua_complete;
 #ifdef LOTSALOX
-				method->stackableLock.Unlock();
+				lambda->stackableLock.Unlock();
 			}
 #endif
 
 			if (ua_complete) {
 				higherFrame->isActive = false;
-				if (B->crap.call.crap.method->isOncer) {
+				if (B->crap.call.crap.lambda->isOncer) {
 					higherFrame->locusStatus = STATUS_SLEEPING;
 #if defined(QU_V_CONTROLLER_INTERFACE)
 					if (higherFrame->controlPanel) {

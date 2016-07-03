@@ -1,0 +1,20 @@
+// Qua patch to play VB1 steinberg bass plugin from keyboard
+
+qua Test2
+{
+	channel \outs 2 \midithru channel1
+	{
+//		input	in1	"In-A USB MidiSport 2x2":*
+		input	in1	"In USB Keystation":*
+		output	out1	"ASIO Echo WDM":0,1
+		tx {
+			VB1
+		}
+	}
+
+// main bit of sequencer
+	
+	region.start = 0:0.0
+	region.duration = 32:0.0
+	loop = false
+}

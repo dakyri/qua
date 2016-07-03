@@ -8,7 +8,7 @@
 #include "Executable.h"
 #include "Instance.h"
 #include "Block.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Qua.h"
 #include "ControllerBridge.h"
 #include "Envelope.h"
@@ -87,8 +87,8 @@ bool
 Schedulable::Init()
 {
 	for (StabEnt *p=sym->children; p!=nullptr; p=p->sibling) {
-		if (p->type == TypedValue::S_METHOD) {
-			p->MethodValue()->Init();
+		if (p->type == TypedValue::S_LAMBDA) {
+			p->LambdaValue()->Init();
 		}
 	}
 
@@ -107,7 +107,7 @@ but what about recalling stream data?
 otherwise once for each created instance ... ????????!!!!!!!!!!
 */
 /*
-	Method		*initMethod = FindMethod("Init", -1, false);
+	Lambda		*initMethod = FindMethod("Init", -1, false);
     Block	*initBlock = initMethod->mainBlock;
     if (initBlock) {
 		fprintf(stderr, "Found initializations...\n");
@@ -121,7 +121,7 @@ otherwise once for each created instance ... ????????!!!!!!!!!!
 			  initBlock->Reset(initStack)) {
 			initStack->lowerFrame = uberQua->theStack;
 			
-			fprintf(stderr, "Executing Init method of %s...\n", sym->name);
+			fprintf(stderr, "Executing Init lambda of %s...\n", sym->name);
 			
 			bool ua_complete = UpdateActiveBlock(
 		    					uberQua,

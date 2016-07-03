@@ -1,0 +1,49 @@
+// Qua patch to play samples
+
+qua bitethesamplethatfeeds
+{
+//	output	bus1	"ASIO Echo WDM":0,1
+//	output	bus2	"ASIO Echo WDM":2,3
+//	output	bus3	"ASIO Echo WDM":4,5
+//	output	mono1	"ASIO Echo WDM":6
+//	output	mono2	"ASIO Echo WDM":7
+
+	channel \outs 2 channel1
+	{
+//		input	in1	"In-A USB MidiSport 2x2":*
+		input	in1	"In USB Keystation":*
+//		output	out1	bus1
+		output	out1	"ASIO Echo WDM":0,1
+	}
+
+	sample bthtf
+	{
+		take bass	"g:/samples/loops/bitethehand/THTF bass verse loop 1.aif"
+		take virus	"g:/samples/loops/bitethehand/THTF Virus seq.aif"
+		take synth1	"g:/samples/loops/bitethehand/THTF synth riff 1.aif"
+		take synth2	"g:/samples/loops/bitethehand/THTF synth riff 2.aif"
+		take synth3	"g:/samples/loops/bitethehand/THTF synth riff 3.aif"
+		take ambient1	"g:/samples/loops/bitethehand/THTF ambient loop 1.aif"
+		take ambient2	"g:/samples/loops/bitethehand/THTF ambient loop 2.aif"
+		take gtr1	"g:/samples/loops/bitethehand/THTF gtr riff 1.aif"
+		take gtr2	"g:/samples/loops/bitethehand/THTF gtr riff 2.aif"
+		take gtr3	"g:/samples/loops/bitethehand/THTF gtr riff 3.aif"
+		take drum1	"g:/samples/loops/bitethehand/THTF drum loop 1.aif"
+		take drum2	"g:/samples/loops/bitethehand/THTF drum loop 2.aif"
+		take drum4	"g:/samples/loops/bitethehand/THTF drum loop 4.aif"
+		take drum5	"g:/samples/loops/bitethehand/THTF drum loop 5.aif"
+		take drum6	"g:/samples/loops/bitethehand/THTF drum loop 6.aif"
+		take drum7	"g:/samples/loops/bitethehand/THTF drum loop 7.aif"
+		take drum8	"g:/samples/loops/bitethehand/THTF drum loop 8.aif"
+
+		play(synth1, loop=true)
+		play(drum1, loop=true)
+	}
+
+// main bit of sequencer
+	
+	region.start = 0:0.0
+	region.duration = 32:0.0
+	loop = false
+	bthtf(channel1, 0, 32:0.0)
+}

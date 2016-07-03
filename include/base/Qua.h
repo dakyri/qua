@@ -13,7 +13,7 @@
 #include <vector>
 
 class Voice;
-class Method;
+class Lambda;
 class Pool;
 class Channel;
 class StabEnt;
@@ -75,8 +75,7 @@ class Qua:
 	public Executable, public Stacker, public TimeKeeper
 {
 public:
-							Qua(std::string path, bool chan_add=true);
-							Qua(char *nm, bool chan_add=true);							
+							Qua(string nm, bool chan_add=true);							
 							~Qua();
 
 	status_t				OnCreationInit(bool chan_add);
@@ -121,14 +120,14 @@ public:
 
 	void					AddSchedulable(Schedulable *p);
 	void					RemoveSchedulable(Schedulable *p, bool andD, bool andDisplay);
-	void					RemoveMethod(Method *p, bool andD, bool andDisplay);
+	void					RemoveMethod(Lambda *p, bool andD, bool andDisplay);
 
 	void					SetTempo(float tempo, bool display);
 
 	Pool					*NewPool(short);
 	Sample					*CreateSample(std::string, bool andD);
 	Voice					*CreateVoice(std::string, bool andD);
-	Method					*CreateMethod(std::string, StabEnt *ctxt, bool andD);
+	Lambda					*CreateMethod(std::string, StabEnt *ctxt, bool andD);
 	bool					ParsePass2(class Parser *p, StabEnt **loadable);
 	void setName(const char *nm, bool setTitle=true);
 	void 					UpdateRecordDisplay();
@@ -151,10 +150,10 @@ public:
 	static std::string		identifyFile(std::string);
 	static std::string		nameFromLeaf(std::string);
 
-	static Qua *			LoadScriptFile(const char *path);
-	status_t				LoadSnapshotFile(const char *path);
-	status_t				LoadSnapshotElement(tinyxml2::XMLElement *element);
-	status_t				LoadSnapshotChildren(tinyxml2::XMLElement *element);
+	static Qua *			loadScriptFile(const char *path);
+	status_t				loadSnapshotFile(const char *path);
+	status_t				loadSnapshotElement(tinyxml2::XMLElement *element);
+	status_t				loadSnapshotChildren(tinyxml2::XMLElement *element);
 
 	std::string				projectScriptPath;
 	std::string				projectSnapshotPath;
@@ -165,7 +164,7 @@ public:
 
 	QuaBridge bridge;
 
-	Method *methods;
+	Lambda *methods;
 	Schedulable *schedulees;
 	
 	Channel *channel[MAX_CHANNEL];

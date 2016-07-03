@@ -220,9 +220,9 @@ MFCObjectMountView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of object mount finds a null sequencer document");
+		reportError("ObjectMountView: initial update of object mount finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		reportError("initial update finds a null sequencer");
+		reportError("ObjectMountView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddObjectRack(this);
@@ -382,7 +382,7 @@ MFCObjectMountView::AddObjectRepresentation(StabEnt *s)
 			AddOR(nv);
 			break;
 		}
-		case TypedValue::S_METHOD: {
+		case TypedValue::S_LAMBDA: {
 			MFCMethodObjectView *nv = new MFCMethodObjectView;
 			nv->SetSymbol(s);
 			nv->SetLinkage(quaLink);
@@ -447,7 +447,7 @@ MFCObjectMountView::DeleteObjectRepresentation(QuaObjectRepresentation	*nv)
 //				delete mv;
 				break;
 			}
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				MFCMethodObjectView	*mv = (MFCMethodObjectView*)nv;
 				mv->DestroyWindow();
 				ArrangeChildren();
@@ -506,7 +506,7 @@ MFCObjectMountView::MFCOV(long i)
 				MFCInstanceObjectView	*mv = (MFCInstanceObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				MFCMethodObjectView	*mv = (MFCMethodObjectView*)nv;
 				return (MFCObjectView*)mv;
 			}

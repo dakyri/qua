@@ -93,9 +93,6 @@
     <ClInclude Include="..\include\block\Markov.h">
       <Filter>Header Files\block</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\block\Method.h">
-      <Filter>Header Files\block</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\block\Notifiable.h">
       <Filter>Header Files\block</Filter>
     </ClInclude>
@@ -273,6 +270,12 @@
     <ClInclude Include="..\include\base\QuaEnvironment.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\base\QuaCommandLine.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\block\Lambda.h">
+      <Filter>Header Files\block</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -371,9 +374,6 @@
     <ClCompile Include="..\block\Markov.cpp">
       <Filter>Source Files\block</Filter>
     </ClCompile>
-    <ClCompile Include="..\block\Method.cpp">
-      <Filter>Source Files\block</Filter>
-    </ClCompile>
     <ClCompile Include="..\block\Nofifiable.cpp">
       <Filter>Source Files\block</Filter>
     </ClCompile>
@@ -463,6 +463,9 @@
     </ClCompile>
     <ClCompile Include="..\devices\QuaOSC.cpp">
       <Filter>Source Files\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Lambda.cpp">
+      <Filter>Source Files\block</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

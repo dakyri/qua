@@ -145,7 +145,7 @@ struct CallInfo
     Block		*parameters;
     int			frameIndex;
     union {
-		Method				*method;
+		Lambda				*lambda;
 		char				*name;
 		StabEnt				*sym;
 		VstPlugin			*vstplugin;

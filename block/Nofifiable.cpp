@@ -7,7 +7,7 @@
 #include "Block.h"
 #include "Instance.h"
 #include "QuasiStack.h"
-#include "Method.h"
+#include "Lambda.h"
 
 #ifdef QUA_V_ARRANGER_INTERFACE
 #include "QuaDisplay.h"

@@ -2,7 +2,7 @@
 #define _EXECUTABLE
 
 class Block;
-class Method;
+class Lambda;
 
 #include "Stackable.h"
 #include "QuasiStack.h"
@@ -12,7 +12,6 @@ class Executable: public Stackable
 public:
 	Executable(StabEnt *S);
 	virtual ~Executable();
-
     Block 				*mainBlock;
 };
 

@@ -30,7 +30,7 @@ typedef int8	ref_type_t;
 
 class Voice;
 class Application;
-class Method;
+class Lambda;
 class StreamItem;
 class Stream;
 class Pool;
@@ -159,7 +159,7 @@ union base_val_t {
 	Pool				*pool;
 	Sample				*sample;
 	Voice				*voice;
-	Method				*method;
+	Lambda				*lambda;
 	Application			*application;
 	Qua					*qua;
 	Instance			*instance;
@@ -236,7 +236,7 @@ public:
 		S_POOL		= 3,
 		S_SAMPLE	= 4,
 		S_APPLICATION	= 5,
-		S_METHOD		= 6,
+		S_LAMBDA		= 6,
 
 		S_INSTANCE		= 8,
 		S_STREAM		= 9,
@@ -500,7 +500,7 @@ public:
 	SysC			*SysCValue();
 	Bend			*BendValue();
 	Prog			*ProgValue();
-	Method			*MethodValue();
+	Lambda			*LambdaValue();
 	Voice			*VoiceValue();
 	TypedValueList	*ListValue();
 	Channel			*ChannelValue();
@@ -730,10 +730,10 @@ TypedValue::CtrlValue()
 	return type == S_CTRL && (refType == REF_VALUE || refType == REF_POINTER)? val.ctrlP: nullptr;
 }
 
-inline Method *
-TypedValue::MethodValue()
+inline Lambda *
+TypedValue::LambdaValue()
 {
-	return type == S_METHOD && refType == REF_VALUE? val.method: nullptr;
+	return type == S_LAMBDA && refType == REF_VALUE? val.lambda: nullptr;
 }
 
 inline VstPlugin *

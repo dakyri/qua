@@ -9,7 +9,7 @@
 #include "Sym.h"
 #include "Block.h"
 #include "Schedulable.h"
-#include "Method.h"
+#include "Lambda.h"
 #ifdef QUA_V_VST_HOST
 #include "VstPlugin.h"
 #endif
@@ -142,8 +142,8 @@ Template::initialize()
 //		
 ////fprintf(stderr, "3 %s\n", name);
 //	for (StabEnt *p=sym->children; p!=nullptr; p=p->sibling) {
-//		if (p->type == S_METHOD) {
-//			if (!p->MethodValue()->Init())
+//		if (p->type == S_LAMBDA) {
+//			if (!p->LambdaValue()->Init())
 //				goto err_ex;
 //		}
 //	}
@@ -181,8 +181,8 @@ Template::instantiate(StabEnt *newContxt)
 	}
 
 	for (p=newContxt->children; p!=nullptr; p=p->sibling) {
-		if (p->type == TypedValue::S_METHOD) {
-			if (!p->MethodValue()->Init())
+		if (p->type == TypedValue::S_LAMBDA) {
+			if (!p->LambdaValue()->Init())
 				internalError("%s not instantiated", p->name);
 		}
 	}

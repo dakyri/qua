@@ -10,7 +10,7 @@
 #include "Sym.h"
 #include "Qua.h"
 #include "Executable.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Channel.h"
 #include "Schedulable.h"
 #include "QuaDisplay.h"
@@ -261,7 +261,7 @@ QuaBridge::AddSchedulableRepresentation(Schedulable *s)
 }
 
 void
-QuaBridge::AddMethodRepresentation(Method *m)
+QuaBridge::AddMethodRepresentation(Lambda *m)
 {
 	for (short i=0; i<display->NIndexer(); i++) {
 		QuaIndexPerspective	*crv = display->Indexer(i);

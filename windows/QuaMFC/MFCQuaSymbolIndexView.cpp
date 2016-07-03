@@ -22,7 +22,7 @@
 #include "Channel.h"
 #include "Sample.h"
 #include "Voice.h"
-#include "Method.h"
+#include "Lambda.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -128,9 +128,9 @@ MFCQuaSymbolIndexView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of symbol index finds a null sequencer document");
+		reportError("SymbolIndexView: initial update of symbol index finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		reportError("initial update finds a null sequencer");
+		reportError("SymbolIndexView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddIndexer(this);
@@ -138,7 +138,7 @@ MFCQuaSymbolIndexView::OnInitialUpdate()
 		channels = AddTopLevelClass("Channels", TypedValue::S_CHANNEL, TVI_ROOT, 0);
 		samples = AddTopLevelClass("Samples", TypedValue::S_SAMPLE, TVI_ROOT, 0);
 		voices = AddTopLevelClass("Voices", TypedValue::S_VOICE, TVI_ROOT, 0);
-		methods = AddTopLevelClass("Methods", TypedValue::S_METHOD, TVI_ROOT, 0);
+		methods = AddTopLevelClass("Methods", TypedValue::S_LAMBDA, TVI_ROOT, 0);
 		regions = AddTopLevelClass("Regions and Markers", TypedValue::S_CLIP, TVI_ROOT, 0);
 
 		AddAllIndexItems();
@@ -190,7 +190,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 				}
 				break;
 			 }
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				it = IndexItemFor(s);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 5);
@@ -272,7 +272,7 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 				}
 				break;
 			 }
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				HTREEITEM	it = IndexItemFor(s);
 				if (it == NULL) {
 					HTREEITEM	pit = NULL;
@@ -466,7 +466,7 @@ MFCQuaSymbolIndexView::IndexItemFor(StabEnt *s)
 				return IndexItemFor(s, voices);
 				break;
 			 }
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				if (s->context == NULL || s->context->type == TypedValue::S_QUA) {
 					return IndexItemFor(s, methods);
 				} else {
@@ -824,7 +824,7 @@ MFCQuaSymbolIndexView::OnBeginLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 			case  TypedValue::S_SAMPLE:
 				*result = 0;
 				break;
-			case  TypedValue::S_METHOD:
+			case  TypedValue::S_LAMBDA:
 				*result = 0;
 				break;
 			case  TypedValue::S_VOICE:
@@ -862,7 +862,7 @@ MFCQuaSymbolIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	if (selectedData > QSI_SYMBOL_LPARAM && SymTab::MakeValidSymbolName(tvp->item.pszText, name)) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
-			case  TypedValue::S_METHOD:
+			case  TypedValue::S_LAMBDA:
 				quaLink->Rename(sym, name);
 				*result = 1;
 				break;
@@ -923,7 +923,7 @@ MFCQuaSymbolIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 		if (selectedData > QSI_SYMBOL_LPARAM) {
 			StabEnt	*sym = (StabEnt *) selectedData;
 			switch (sym->type) {
-				case TypedValue::S_METHOD:
+				case TypedValue::S_LAMBDA:
 					DoPopupMenu(IDR_METHOD_RCLICK);
 					break;
 				case TypedValue::S_SAMPLE:
@@ -1044,7 +1044,7 @@ MFCQuaSymbolIndexView::OnPopupAddMethod()
 		StabEnt	*pSym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup add child method %s\n", pSym->UniqueName());
 		switch (pSym->type) {
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_CHANNEL:
 			case TypedValue::S_VOICE:
 			case TypedValue::S_SAMPLE: {
@@ -1072,7 +1072,7 @@ MFCQuaSymbolIndexView::OnPopupDelete()
 		StabEnt	*sym = (StabEnt *) selectedData;
 		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
 		switch (sym->type) {
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 				quaLink->DeleteObject(sym);
 				break;
 			case TypedValue::S_CHANNEL:
@@ -1163,7 +1163,7 @@ MFCQuaSymbolIndexView::OnPopupEdit()
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
 		switch (sym->type) {
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 				if (sym->context == NULL || sym->context->type == TypedValue::S_QUA) {
 					quaLink->ShowObjectRepresentation(sym);
 				} else { // show parent and scroll to right bit

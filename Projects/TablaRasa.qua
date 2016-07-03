@@ -1,0 +1,122 @@
+// Qua patch to play generatively to the EPS tabla instrument
+
+voice TablaRasa(
+		short \range 0 127 vel=80,
+		short \range -127 127 accent=25)
+{
+	
+	function Ta		note (36, 3, vel+accent)
+	function ta		note (36, 3, vel)
+	function keke		note (36, [1 1 1], [vel+accent vel vel])
+	function ki		note (36, 1, vel)
+	
+	function Do		note (39, 3, vel+accent)
+	function do		note (39, 3, vel)
+	
+	function Te		note (40, 3, vel+accent)
+	function te		note (40, 3, vel)
+	function tete		note (40, [1 1 1], [vel+accent vel vel])
+	
+	function da		note (42, 6, vel)
+	function daa		note (42, 36, vel)
+	function daaa	note (42, 48, vel)
+	
+	function dom		note (44, 6, vel)
+
+	int		tempoto
+
+	function \node \modal \toggle \reset bintal [
+		findbeat
+		if (roll(0.5)) [
+			{daa Ta} te ta te
+		] else [
+			Ta te ta te
+		]
+		Ta te if (roll(0.5)) keke else ta te
+		Te te te if (roll(0.5)) te else tete
+		if (roll(0.5)) Ta else Te te te ta if (roll(0.5)) te else tete
+	]
+	
+	function \node \modal \toggle \reset tintal [
+		findbeat
+		if (roll(0.5)) {daa Ta} else Ta ta te ta
+		Ta te ta tete
+		if (roll(0.5)) [
+			Te te Ta ta
+			Ta te tete te
+		] else if (roll(0.5)) [
+			Ta te keke
+			Ta te keke
+			Ta te keke
+			Ta keke keke
+			if (roll(0.5)) keke else te
+			note(0, 6, 0)
+			if (roll(0.5)) keke else te
+			note(0, 6, 0)
+			if (roll(0.5)) keke else te
+			note(0, 6, 0)
+			if (roll(0.5)) keke else te
+			note(0, 6, 0)
+			ta
+		] else [
+			Ta ta te ta
+			{da Ta} keke {da keke} keke
+		]
+	]
+	
+	function \node \modal \toggle \reset noxtal [
+		findbeat
+		{daa Ta} te te ta
+		Te keke ta te
+		if (roll(0.5)) [
+			{da Ta} te te te
+		]
+		if (roll(0.5)) [
+			keke keke keke keke
+		]
+		if (roll(0.5)) [
+			{daa Ta} te te keke te
+			Ta te te keke Ta
+			ta te
+		]
+		if (roll(0.5)) [
+			{daa ta} ta te
+			Ta ta te
+			Ta keke te
+			Ta keke ta
+			{daa Ta} keke keke keke
+		]
+	]
+	
+	function \node \modal \toggle \reset frenzied [
+		findbeat
+		{da Ta} te te ta
+		Te te ta te
+		if (roll(0.5)) [
+			{da ta} te keke te
+		] else if (roll(0.5)) [
+			ta te keke te
+		]
+	]
+
+	function \oncer \toggle \reset \resetto 1 findbeat [
+		(tick != 0) :: ki
+	]
+
+
+	function \node \toggle settempo(float \range 10 300 newTempo=80) {
+		tempo = newTempo
+	}
+
+//
+// begin main
+//
+//	settempo
+
+	<- [
+		bintal
+		tintal
+		noxtal
+		frenzied
+	]
+}

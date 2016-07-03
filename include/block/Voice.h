@@ -4,7 +4,7 @@
 class Qua;
 class StabEnt;
 class Block;
-class Method;
+class Lambda;
 class QuaControllerBridge;
 class StreamTake;
 class Channel;

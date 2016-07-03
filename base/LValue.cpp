@@ -35,7 +35,7 @@
 #include "Pool.h"
 #include "Sample.h"
 #include "Clip.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Envelope.h"
 #ifdef QUA_V_VST_HOST
 #include "VstPlugin.h"
@@ -196,7 +196,7 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 						
 					case S_TEMPLATE:
 					case S_VOICE:
-					case S_METHOD:
+					case S_LAMBDA:
 					case S_POOL:
 					case S_APPLICATION:
 					case S_QUA:
@@ -436,7 +436,7 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 								lval.sym = b->crap.structureRef.member;
 								return;
 							}
-							case TypedValue::S_METHOD:
+							case TypedValue::S_LAMBDA:
 							case TypedValue::S_BUILTIN: {
 								lval.stack = callFrame;
 								lval.addr = (char *)callFrame->stk.vars;
@@ -462,7 +462,7 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 //					return addr;
 				case TypedValue::S_TEMPLATE:
 				case TypedValue::S_VOICE:
-				case TypedValue::S_METHOD:
+				case TypedValue::S_LAMBDA:
 				case TypedValue::S_POOL:
 				case TypedValue::S_APPLICATION:
 				case TypedValue::S_QUA:
@@ -842,10 +842,10 @@ LValue::FindData(char**data, int *length)
 //		case TypedValue::S_INT:		*((int32 *)p) = val.Int;	p+=4; len += 4; break;
 //		case TypedValue::S_LONG:	*((int64 *)p) = val.Long;	p+=8; len += 8; break;
 //		case TypedValue::S_FLOAT:	*((float *)p) = val.Float;	p+=4; len += 4; break;
-//		case TypedValue::S_METHOD: {
+//		case TypedValue::S_LAMBDA: {
 //			char		*nested_data;
 //			int			nested_len;
-//			child->val.Method->sym->FindData(&nested_data, &nested_len);
+//			child->val.Lambda->sym->FindData(&nested_data, &nested_len);
 //			if (nested_len) {
 //				if (len + nested_len > MAX_SYSX_DATA) {
 //					reportError("sysx data overload");
@@ -1060,7 +1060,7 @@ LValue::CurrentValue()
 			
 	case TypedValue::S_UNKNOWN:
 		break;
-	case TypedValue::S_METHOD:
+	case TypedValue::S_LAMBDA:
 	case TypedValue::S_VOICE:
 	case TypedValue::S_POOL:
 	case TypedValue::S_SAMPLE:

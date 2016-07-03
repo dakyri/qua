@@ -1,0 +1,19 @@
+// Qua patch for fucking up samples
+
+//define Slicer(#time EnvTime)
+//{
+//	gain(EnvTime)
+//}
+	
+define #template <#sample> SampleController
+{
+	#receive { }
+
+//  a typical main control patch for a sample.
+	delay
+	sweepeq
+	bandpass
+	hipass
+	lopass
+	distortion
+}

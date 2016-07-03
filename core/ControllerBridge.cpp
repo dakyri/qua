@@ -17,7 +17,7 @@
 #include "Sym.h"
 #include "Block.h"
 #include "Pool.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Pool.h"
 #include "Sample.h"
 #include "Envelope.h"

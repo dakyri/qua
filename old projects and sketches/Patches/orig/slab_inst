@@ -1,0 +1,85 @@
+define #voice slab_inst(#int tempoto)
+{
+	
+	define ne		tone(0,3,0)
+	define nee		tone(0,48,0)
+	
+	define #node #toggle hats(#int vel, #int accent) [
+		define sh		tone(42,3,vel)
+		define ch		tone(46,3,vel)
+		define Sh		tone(42,3,vel+accent)
+		define Ch		tone(46,3,vel+accent)
+
+		if (roll(0.4)) [
+			Sh sh ch sh
+		] else [
+			Sh sh sh sh
+		]
+	]
+	
+	define #node #toggle snare(#int vel, #int accent) [
+		define Te		tone (38, 3, vel+accent)
+		define te		tone (38, 3, vel-10)
+		define tete		tone (38, [1 1 1], vel)
+		define Ti		tone(38, 1, vel+accent)
+
+		define #node #modal #toggle #reset straight [
+//			wait (tick == 0 && beat == 0)
+			(tick != 0 || beat != 0) :: Ti
+			ne ne ne ne
+			Te ne ne ne
+			ne ne ne ne
+			Te ne ne ne
+		]
+
+		define #node #modal #toggle #reset break1 [
+			Te  te te  te
+			Te ne Te te
+			te te Te tete
+			te te ne tete
+
+			Te  te te  te
+			Te ne ne Te
+			te te te Te
+			tete tete Te ne
+		]
+		
+		straight
+		break1
+	]
+	
+	define #node #toggle bass(#int vel, #int accent) [
+		define Doof		tone (36, 12, vel+accent)
+		define Dof		tone (36, 6, vel+accent)
+		define doof		tone (36, 12, vel)
+		define dof		tone (36, 6, vel)
+		define Df		tone (36, 1, vel)
+
+		define #node #modal #toggle #reset straight [
+//			wait (tick == 0 && beat == 0)
+			(tick != 0 || beat != 0) :: Df
+			Doof
+			Doof
+			Doof
+			if (roll(0.4)) [
+				Dof
+				Dof
+			] else
+				Doof
+		]
+		define #node #modal #toggle #reset heavy [
+//			wait (tick == 0 && beat == 0)
+			(tick != 0) :: Df
+			Dof Dof
+		]
+		straight
+		heavy
+	]
+	
+	tempo = tempoto
+	<- hats
+	<- bass
+	<- snare
+	
+	>> 4
+}

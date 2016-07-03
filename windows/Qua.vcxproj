@@ -19,7 +19,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
@@ -55,6 +55,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>D:\src\cpp\Qua\windows;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\util;D:\src\cpp\Qua\include;D:\src\cpp\library\VST\asiosdk2\host\pc;D:\src\cpp\library\VST\asiosdk2\host;D:\src\cpp\library\VST\asiosdk2\common;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\library\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -109,6 +110,7 @@
     <ClInclude Include="..\include\base\PoolPlayer.h" />
     <ClInclude Include="..\include\base\Properties.h" />
     <ClInclude Include="..\include\base\Qua.h" />
+    <ClInclude Include="..\include\base\QuaCommandLine.h" />
     <ClInclude Include="..\include\base\QuaDisplay.h" />
     <ClInclude Include="..\include\base\QuaEnvironment.h" />
     <ClInclude Include="..\include\base\QuaInsert.h" />
@@ -130,7 +132,7 @@
     <ClInclude Include="..\include\block\Insertable.h" />
     <ClInclude Include="..\include\block\Instance.h" />
     <ClInclude Include="..\include\block\Markov.h" />
-    <ClInclude Include="..\include\block\Method.h" />
+    <ClInclude Include="..\include\block\Lambda.h" />
     <ClInclude Include="..\include\block\Notifiable.h" />
     <ClInclude Include="..\include\block\Parse.h" />
     <ClInclude Include="..\include\block\Sample.h" />
@@ -184,7 +186,7 @@
     <ClCompile Include="..\block\Expression.cpp" />
     <ClCompile Include="..\block\Instance.cpp" />
     <ClCompile Include="..\block\Markov.cpp" />
-    <ClCompile Include="..\block\Method.cpp" />
+    <ClCompile Include="..\block\Lambda.cpp" />
     <ClCompile Include="..\block\Nofifiable.cpp" />
     <ClCompile Include="..\block\Parse.cpp" />
     <ClCompile Include="..\block\Pool.cpp" />

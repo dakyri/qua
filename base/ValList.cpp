@@ -99,7 +99,7 @@ TypedValueList::AddToMessage(BMessage *msg)
 //		case S_UNKNOWN: break;
 //		case S_VOICE: break;
 //		case S_POOL	: break;
-//		case S_METHOD: break;
+//		case S_LAMBDA: break;
 //		case S_STREAM:	break;
 //		case S_CHANNEL:	break;
 //		case S_QUA:	break;
@@ -173,7 +173,7 @@ TypedValueList::AddToMessage(BMessage *msg)
 //		case S_UNKNOWN: break;
 //		case S_VOICE: break;
 //		case S_POOL	: break;
-//		case S_METHOD: break;
+//		case S_LAMBDA: break;
 //		case S_STREAM:	break;
 //		case S_CHANNEL:	break;
 //		case S_QUA:	break;

@@ -1,0 +1,325 @@
+#qua ForTheBirds
+{
+	#channel 0 channel1 {
+		#input {midi1:1 AudioIn}{}
+		#output {midi1:1 Mixer} {}
+	}
+	#channel 1 channel2 {
+		#input {midi1:2 AudioIn}{}
+		#output {midi1:2 Mixer} {}
+	}
+	#channel 2 channel3 {
+		#input {midi1:3 AudioIn}{}
+		#output {midi1:3 Mixer} {}
+	}
+	#channel 3 channel4 {
+		#input {midi1:4 AudioIn}{}
+		#output {midi1:4 Mixer} {}
+	}
+	#channel 4 channel5 {
+		#input {midi1:5 AudioIn}{}
+		#output {midi1:5 Mixer} {}
+	}
+	#channel 5 channel6 {
+		#input {midi1:6 AudioIn}{}
+		#output {midi1:6 Mixer} {}
+	}
+	#channel 6 channel7 {
+		#input {midi1:7 AudioIn}{}
+		#output {midi1:7 Mixer} {}
+	}
+	#channel 7 channel8 {
+		#input {midi1:8 AudioIn}{}
+		#output {midi1:8 Mixer} {}
+	}
+	#channel 8 channel9 {
+		#input {midi1:9 AudioIn}{}
+		#output {midi1:9 Mixer} {}
+	}
+	#channel 9 channel10 {
+		#input {midi1:10 AudioIn}{}
+		#output {midi1:10 Mixer} {}
+	}
+	#channel 10 channel11 {
+		#input {midi1:11 AudioIn}{}
+		#output {midi1:11 Mixer} {}
+	}
+	#channel 11 channel12 {
+		#input {midi1:12 AudioIn}{}
+		#output {midi1:12 Mixer} {}
+	}
+	#channel 12 channel13 {
+		#input {midi1:13 AudioIn}{}
+		#output {midi1:13 Mixer} {}
+	}
+	#channel 13 channel14 {
+		#input {midi1:14 AudioIn}{}
+		#output {midi1:14 Mixer} {}
+	}
+	#channel 14 channel15 {
+		#input {midi1:15 AudioIn}{}
+		#output {midi1:15 Mixer} {}
+	}
+	#channel 15 channel16 {
+		#input {midi1:16 AudioIn}{}
+		#output {midi1:16 Mixer} {}
+	}
+	#channel 16 system {
+		#input {midi1:SY AudioIn}{}
+		#output {midi1:SY Mixer} {}
+	}
+	#sample #takes {
+		{"/Obscenity/sound/bellbirds1" "Original"}} #display {0xeeee6400, {1 51}} bellbirds1() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/bellbirds2" "Original"}} #display {0xeeee6400, {-1 98}} bellbirds2() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/bellbirds" "Original"}} #display {0xeeee6400, {2 192}} bellbirds() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/wilpck" "Original"}} #display {0xeeee6400, {49 240}} wilpck() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/wilpck2" "Original"}} #display {0xeeee6400, {49 191}} wilpck2() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/mckfalls" "Original"}} #display {0xeeee6400, {2 2}} mckfalls()
+		{ 
+		delay }
+	#sample #takes {
+		{"/Obscenity/sound/litmckfalls" "Original"}} #display {0xeeee6400, {50 2}} litmckfalls() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/badass birds" "Original"}} #display {0xeeee6400, {51 145}} badass\ birds()
+		{ 
+		delay }
+	#sample #takes {
+		{"/Obscenity/sound/lkeyrefly3" "Original"}} #display {0xeeee6400, {-1 145}} lkeyrefly3() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/roseabird" "Original"}} #display {0xeeee6400, {3 288}} roseabird() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/roseabird2" "Original"}} #display {0xeeee6400, {53 98}} roseabird2() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/lkeyrefly" "Original"}} #display {0xeeee6400, {2 239}} lkeyrefly() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/bucricket" "Original"}} #display {0xeeee6400, {97 192}} bucricket() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/brokenheadbird" "Original"}} #display {0xeeee6400, {53 51}} brokenheadbird() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/lkeyrefly2" "Original"}} #display {0xeeee6400, {97 239}} lkeyrefly2() {
+	}
+	#sample #takes {
+		{"/Obscenity/sound/wilpbell2" "Original"}} #display {0xeeee6400, {54 288}} wilpbell2() {
+	}
+	define Init()
+	{
+		tempo = 120
+		bellbirds1(1, 0:0.0, 12:3.3, {
+			bellbirds1(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:25.29020'msf,
+				1)}, {})
+		bellbirds1(1, 61:0.0, 15:0.0, {
+			bellbirds1(
+				false,
+				{0, {0:0.6, 0.42, 1}, {12:1.0, 0.48, 1}, {14:3.0, 0, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:25.29020'msf,
+				1)}, {})
+		bellbirds2(2, 7:3.0, 17:1.0, {
+			bellbirds2(
+				false,
+				{0, {0:0.6, 0, 1}, {1:2.0, 0.38, 1}, {14:1.0, 0.38, 1}, {17:0.0, 0.06, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:44.24656'msf,
+				1)}, {})
+		bellbirds(0, 11:2.0, 12:0.6, {
+			bellbirds(
+				false,
+				{0, {0:0.6, 0, 1}, {1:2.6, 0.52, 1}, {7:0.0, 0.54, 1}, {10:2.6, 0.24, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:11.12564'msf,
+				1)}, {})
+		wilpck(4, 20:2.0, 18:1.0, {
+			wilpck(
+				false,
+				{0, {0:1.0, 0.02, 1}, {2:3.6, 0.24, 1}, {16:0.0, 0.22, 1}, {16:2.6, 0.12, 1}},
+				{0, {89478485:0.10, 0.32, 1}, {8:1.6, 0.24, 1}, {15:0.6, -0.56, 1}},
+				0:0.0'msf,
+				0:31.7108'msf,
+				1)}, {})
+		wilpck(3, 60:2.0, 15:2.3, {
+			wilpck(
+				false,
+				{0, {0:0.0, 0.04, 1}, {2:1.6, 0.38, 1}, {13:1.0, 0.38, 1}, {15:1.0, 0.04, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:31.7108'msf,
+				1)}, {})
+		wilpck2(5, 7:3.0, 17:1.0, {
+			wilpck2(
+				false,
+				{0, {0:0.6, 0, 1}, {7:2.0, 0.26, 1}, {15:2.0, 0.32, 1}, {17:0.0, 0.04, 1}},
+				{0, {0:0.6, -0.64, 1}, {8:3.6, 0.32, 1}},
+				0:0.0'msf,
+				0:20.9904'msf,
+				1)}, {})
+		mckfalls(4, 39:1.0, 25:2.6, {
+			mckfalls(
+				false,
+				{0, {0:0.0, 0, 1}, {24:2.6, 0.46, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:34.27384'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		litmckfalls(5, 26:2.0, 38:1.6, {
+			litmckfalls(
+				false,
+				{0, {89478484:3.10, 0, 1}, {21:3.0, 0.34, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:19.1780'msf,
+				1)}, {})
+		badass\ birds(2, 51:3.0, 13:0.11, {
+			badass\ birds(
+				false,
+				{0, {0:1.0, 0.02, 1}, {8:0.6, 0.38, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:26.20756'msf,
+				1, {
+				delay(
+					{0, {0:0.0, 0.5, 1}},
+					{0, {0:0.0, 1, 1}},
+					{0, {0:0.0, 0, 1}})})}, {})
+		lkeyrefly3(6, 34:1.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 38:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 42:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 46:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 50:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 54:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		lkeyrefly3(6, 58:0.0, 1:0.9, {
+			lkeyrefly3(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:2.18296'msf,
+				1)}, {})
+		roseabird(2, 30:3.0, 13:2.6, {
+			roseabird(
+				false,
+				{0, {0:0.6, 0.04, 1}, {2:1.0, 0.36, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:25.9564'msf,
+				1)}, {})
+		roseabird2(0, 36:0.0, 22:1.0, {
+			roseabird2(
+				false,
+				{0, {0:0.0, 0, 1}, {2:2.6, 0.28, 1}, {19:2.0, 0.4, 1}, {22:0.0, 0.04, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:20.16048'msf,
+				1)}, {})
+		lkeyrefly(6, 23:0.0, 8:2.2, {
+			lkeyrefly(
+				false,
+				{0, {0:0.0, 0.4, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:17.3964'msf,
+				1)}, {})
+		bucricket(7, 50:0.0, 14:3.8, {
+			bucricket(
+				false,
+				{0, {0:0.0, 0, 1}, {14:3.0, 0.18, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:29.36940'msf,
+				1)}, {})
+		brokenheadbird(1, 43:0.0, 10:1.0, {
+			brokenheadbird(
+				false,
+				{0, {0:0.0, 0, 1}, {5:1.0, 0.3, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:18.27448'msf,
+				1)}, {})
+		lkeyrefly2(7, 27:3.0, 12:1.0, {
+			lkeyrefly2(
+				false,
+				{0, {0:0.6, 0, 1}, {2:2.6, 0.18, 1}, {10:0.6, 0.18, 1}, {12:0.6, 0.04, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:9.39108'msf,
+				1)}, {})
+		wilpbell2(3, 34:0.0, 15:2.6, {
+			wilpbell2(
+				false,
+				{0, {0:1.0, 0, 1}, {5:0.6, 0.22, 1}, {12:2.6, 0.22, 1}, {15:1.6, 0.04, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:10.37208'msf,
+				1)}, {})
+	}
+}

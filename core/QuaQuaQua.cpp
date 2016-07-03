@@ -24,7 +24,7 @@
 #include "Expression.h"
 #include "Note.h"
 #include "Pool.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "QuaJoystick.h"
 #include "Template.h"
 #include "MidiDefs.h"
@@ -249,8 +249,8 @@ CreateNewSysX(Block *P,
 	if (!val.Complete()) {
 		ret_val.flags |= ~ResultValue::COMPLETE;
 	}
-    if (val.type == TypedValue::S_METHOD) {
-   		Method *S = val.MethodValue();
+    if (val.type == TypedValue::S_LAMBDA) {
+   		Lambda *S = val.LambdaValue();
 //   		S->sym->FindData(&SysXTo.data, &SysXTo.length);
    	} else {
    		sysXTo.length = 0;

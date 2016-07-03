@@ -594,9 +594,9 @@ MFCArrangeView::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of arrange view finds a null sequencer document");
+		reportError("ArrangeView: initial update of arrange view finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		reportError("initial update finds a null sequencer");
+		reportError("ArrangeView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 		SetLinkage(qdoc->qua->bridge.display);
 		quaLink->AddArranger(this);

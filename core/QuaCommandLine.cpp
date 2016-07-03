@@ -117,7 +117,7 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 		// anything else will be a file to run, using any prior commandline options/settings
 		switch (last_command) {
 		case LINT_QUA: {
-			Qua * q = Qua::LoadScriptFile((char *)arg.c_str());
+			Qua * q = Qua::loadScriptFile((char *)arg.c_str());
 			if (q != nullptr) {
 				fprintf(stderr, "got a qua\n");
 				q->sym->Dump(stderr, 0);
@@ -127,14 +127,14 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 		}
 #ifdef QUA_V_VST_HOST
 		case SET_VST: {
-			FILE	*fp = fopen("vstplugins.qs", "w");
+			FILE	*fp = fopen("vstplugins.qua", "w");
 			setbuf(fp, NULL);
 			VstPlugin::ScanFile(arg, fp, NULL, true);
 			fclose(fp);
 			return true;
 		}
 		case ADD_VST: {
-			FILE	*fp = fopen("vstplugins.qs", "w+");
+			FILE	*fp = fopen("vstplugins.qua", "w+");
 			VstPlugin::ScanFile(arg, fp, NULL, true);
 			fclose(fp);
 			return true;

@@ -31,7 +31,7 @@
 #include "Clip.h"
 #include "Voice.h"
 #include "Sample.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Channel.h"
 #include "VstPlugin.h"
 #include "Block.h"
@@ -141,7 +141,7 @@ MFCObjectView::ToObjectView(QuaObjectRepresentation *or)
 		case TypedValue::S_VOICE: return (MFCVoiceObjectView *)or;
 		case TypedValue::S_SAMPLE: return (MFCSampleObjectView *)or;
 		case TypedValue::S_CHANNEL: return (MFCChannelObjectView *)or;
-		case TypedValue::S_METHOD: return (MFCMethodObjectView *)or;
+		case TypedValue::S_LAMBDA: return (MFCMethodObjectView *)or;
 		case TypedValue::S_INSTANCE: return (MFCInstanceObjectView *)or;
 	}
 	return NULL;
@@ -525,7 +525,7 @@ MFCChannelObjectView::ChildPopulate(StabEnt *sym)
 			}
 			break;
 		}
-		case TypedValue::S_METHOD:
+		case TypedValue::S_LAMBDA:
 		default:
 			variableView->AddSym(sym);
 			break;
@@ -590,7 +590,7 @@ MFCChannelObjectView::ChildNameChanged(StabEnt *sym)
 QuaObjectRepresentation *
 MFCChannelObjectView::AddChildRepresentation(StabEnt *s)
 {
-	if (s->type == TypedValue::S_METHOD) {
+	if (s->type == TypedValue::S_LAMBDA) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -660,7 +660,7 @@ MFCChannelObjectView::UpdateVariableIndexDisplay()
 	while (p != NULL) {
 		switch (p->type) {
 			case TypedValue::S_EVENT:
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_TAKE:
 			case TypedValue::S_CLIP:
 				break;
@@ -2534,7 +2534,7 @@ MFCSampleObjectView::UpdateVariableIndexDisplay()
 	while (p != NULL) {
 		switch (p->type) {
 			case TypedValue::S_EVENT:
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_TAKE:
 			case TypedValue::S_CLIP:
 				break;
@@ -2585,7 +2585,7 @@ MFCSampleObjectView::ChildPopulate(StabEnt *sym)
 			break;
 		}
 
-		case TypedValue::S_METHOD:
+		case TypedValue::S_LAMBDA:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -2657,11 +2657,11 @@ MFCSampleObjectView::AddChildRepresentation(StabEnt *s)
 	ctxt.m_pLastView = NULL;
 	ctxt.m_pNewDocTemplate = NULL;
 	ctxt.m_pNewViewClass = NULL;
-	if (s->type == TypedValue::S_METHOD) {
+	if (s->type == TypedValue::S_LAMBDA) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
-		nv->Create(_T("STATIC"), "Qua Child Method View", WS_CHILD | WS_VISIBLE,
+		nv->Create(_T("STATIC"), "Qua Child Lambda View", WS_CHILD | WS_VISIBLE,
 				CRect(CHILDVIEW_MARGIN, 0, bounds.right-CHILDVIEW_MARGIN, INI_CHILDVIEW_HEIGHT), this, 1234, &ctxt);
 		nv->Populate();
 		AddCOR(nv);
@@ -3078,7 +3078,7 @@ MFCVoiceObjectView::ChildPopulate(StabEnt *sym)
 			}
 			break;
 		}
-		case TypedValue::S_METHOD:
+		case TypedValue::S_LAMBDA:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -3149,11 +3149,11 @@ MFCVoiceObjectView::AddChildRepresentation(StabEnt *s)
 	ctxt.m_pLastView = NULL;
 	ctxt.m_pNewDocTemplate = NULL;
 	ctxt.m_pNewViewClass = NULL;
-	if (s->type == TypedValue::S_METHOD) {
+	if (s->type == TypedValue::S_LAMBDA) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
-		nv->Create(_T("STATIC"), "Qua Child Method View", WS_CHILD | WS_VISIBLE,
+		nv->Create(_T("STATIC"), "Qua Child Lambda View", WS_CHILD | WS_VISIBLE,
 				CRect(CHILDVIEW_MARGIN, 0, bounds.right-CHILDVIEW_MARGIN, INI_CHILDVIEW_HEIGHT), this, 1234, &ctxt);
 		nv->Populate();
 		AddCOR(nv);
@@ -3345,7 +3345,7 @@ MFCVoiceObjectView::UpdateVariableIndexDisplay()
 	while (p != NULL) {
 		switch (p->type) {
 			case TypedValue::S_EVENT:
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_TAKE:
 			case TypedValue::S_CLIP:
 				break;
@@ -3572,7 +3572,7 @@ MFCMethodObjectView::ChildPopulate(StabEnt *sym)
 	// set main block for event handler
 			break;
 		}
-		case TypedValue::S_METHOD:
+		case TypedValue::S_LAMBDA:
 			AddChildRepresentation(sym);
 			variableView->AddSym(sym);
 			break;
@@ -3590,8 +3590,8 @@ MFCMethodObjectView::AttributePopulate()
 		fprintf(stderr, "Populate null method\n");
 		return;
 	}
-	Method	*method = symbol->MethodValue();
-	if (method == NULL) {
+	Lambda	*lambda = symbol->LambdaValue();
+	if (lambda == NULL) {
 		fprintf(stderr, "Populate non method\n");
 		return;
 	}
@@ -3600,7 +3600,7 @@ MFCMethodObjectView::AttributePopulate()
 		fprintf(stderr, "set main block sym to %s\n", symbol->UniqueName());
 		mainBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
-		mainBlockEdit->SetValue(method->mainBlock);
+		mainBlockEdit->SetValue(lambda->mainBlock);
 	}
 }
 
@@ -3628,7 +3628,7 @@ MFCMethodObjectView::ChildNameChanged(StabEnt *sym)
 QuaObjectRepresentation *
 MFCMethodObjectView::AddChildRepresentation(StabEnt *s)
 {
-	if (s->type == TypedValue::S_METHOD) {
+	if (s->type == TypedValue::S_LAMBDA) {
 		MFCMethodObjectView *nv = new MFCMethodObjectView;
 		nv->SetSymbol(s);
 		nv->SetLinkage(quaLink);
@@ -3665,7 +3665,7 @@ MFCMethodObjectView::UpdateVariableIndexDisplay()
 	while (p != NULL) {
 		switch (p->type) {
 			case TypedValue::S_EVENT:
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_TAKE:
 			case TypedValue::S_CLIP:
 				break;

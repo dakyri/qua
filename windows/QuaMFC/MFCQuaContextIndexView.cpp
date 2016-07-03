@@ -23,7 +23,7 @@
 #include "Channel.h"
 #include "Sample.h"
 #include "Voice.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "QuaPort.h"
 #include "Sym.h"
 
@@ -115,9 +115,9 @@ MFCQuaContextIndexView::OnInitialUpdate()
 {
 	CQuaContextMFCDoc	*qdoc = (CQuaContextMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of context view mount finds a null context document");
+		reportError("QuaContextIndexView: initial update of context view mount finds a null context document");
 //	} else if (qdoc->qua == NULL) {
-//		reportError("initial update finds a null sequencer");
+//		reportError("QuaContextIndexView initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = &qdoc->qua->display;
 //		quaLink->AddIndexer(this);
@@ -125,7 +125,7 @@ MFCQuaContextIndexView::OnInitialUpdate()
 		quas = AddTopLevelClass("Arrangements", TypedValue::S_QUA, TVI_ROOT, 0);
 		vstplugins = AddTopLevelClass("VST Plugins", TypedValue::S_VST_PLUGIN, TVI_ROOT, 0);
 		builtins = AddTopLevelClass("Builtin", TypedValue::S_BUILTIN, TVI_ROOT, 0);
-		methods = AddTopLevelClass("Methods", TypedValue::S_METHOD, TVI_ROOT, 0);
+		methods = AddTopLevelClass("Methods", TypedValue::S_LAMBDA, TVI_ROOT, 0);
 		templates = AddTopLevelClass("Templates", TypedValue::S_TEMPLATE, TVI_ROOT, 0);
 		ports = AddTopLevelClass("Ports", TypedValue::S_PORT, TVI_ROOT, 0);
 
@@ -170,7 +170,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 				}
 				break;
 			}
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				HTREEITEM	it = IndexItemFor(s, methods);
 				if (it == NULL) {
 					it = AddIndexItem(s->UniqueName(), (LPARAM)s, methods, 6);
@@ -300,7 +300,7 @@ MFCQuaContextIndexView::IndexItemFor(StabEnt *s)
 				return IndexItemFor(s, vstplugins);
 				break;
 			}
-			case TypedValue::S_METHOD: {
+			case TypedValue::S_LAMBDA: {
 				return IndexItemFor(s, methods);
 				break;
 			}
@@ -374,7 +374,7 @@ MFCQuaContextIndexView::OnBeginDrag(NMHDR *pnmh, LRESULT* bHandled)
 					dragFormat = QuaDrop::vstpluginFormat;
 					break;
 				}
-				case TypedValue::S_METHOD: {	// move an instance
+				case TypedValue::S_LAMBDA: {	// move an instance
 					draggable = true;
 					dragFormat = QuaDrop::methodFormat;
 					break;
@@ -679,7 +679,7 @@ MFCQuaContextIndexView::OnBeginLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
 			case TypedValue::S_QUA:
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 			case TypedValue::S_TEMPLATE:
 			case TypedValue::S_VST_PLUGIN:
 				*result = 0;
@@ -711,7 +711,7 @@ MFCQuaContextIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 				sym->QuaValue()->setName(tvp->item.pszText);
 				*result = 1;
 				break;
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 				glob.Rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
@@ -763,7 +763,7 @@ MFCQuaContextIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 			case TypedValue::S_TEMPLATE:
 				DoPopupMenu(IDR_TEMPLATE_RCLICK);
 				break;
-			case TypedValue::S_METHOD:
+			case TypedValue::S_LAMBDA:
 				DoPopupMenu(IDR_METHOD_RCLICK);
 				break;
 			case TypedValue::S_PORT:

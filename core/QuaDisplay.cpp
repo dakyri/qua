@@ -15,7 +15,7 @@
 #include "Sym.h"
 #include "Qua.h"
 #include "Executable.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Channel.h"
 #include "Schedulable.h"
 #include "Instance.h"
@@ -176,14 +176,14 @@ void
 QuaDisplay::RemoveSchedulableBridge(Schedulable *Q)
 {
 #ifdef QUA_V_ARRANGER_INTERFACE
-	if (Q->sym->type == TypedValue::S_METHOD) {
-		RemoveMethod(Q->sym->MethodValue(), true);
+	if (Q->sym->type == TypedValue::S_LAMBDA) {
+		RemoveMethod(Q->sym->LambdaValue(), true);
 		return;
 	}
 #endif
 #ifdef QUA_V_ARRANGER_INTERFACE
 	Schedulable		*S;
-	Method			*M;
+	Lambda			*M;
 	if (S = Q->schedulable) {
 		sequencerWindow->arrange->RemoveArrangerObject(Q, true);
 #ifdef QUA_V_MIXER_INTERFACE
@@ -192,7 +192,7 @@ QuaDisplay::RemoveSchedulableBridge(Schedulable *Q)
 		}
 #endif
 		RemoveSchedulable(S, true);
-	} else if ((M=Q->sym->MethodValue()) != nullptr) {
+	} else if ((M=Q->sym->LambdaValue()) != nullptr) {
 		RemoveMethod(M, true);
 	}
 	Q->RemoveSelf();
@@ -281,7 +281,7 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 		break;
 	}
 
-	case TypedValue::S_METHOD: {
+	case TypedValue::S_LAMBDA: {
 #ifdef QUA_V_ARRANGER_INTERFACE
 		if (S->context == sym) {
    		 	QO = new QuaObject(S, Qrect, &sicon,  &bicon, sequencerWindow->aquarium, this, ltGray);
@@ -355,7 +355,7 @@ QuaDisplay::FindExecutableRepresentation(StabEnt *S)
 	if (p) {
 		return &p->interfaceBridge;
 	}
-	Method *q = S->MethodValue();
+	Lambda *q = S->LambdaValue();
 	if (q) {
 		return &q->interfaceBridge;
 	}
@@ -479,7 +479,7 @@ QuaDisplay::MethodSyms(StabEnt *parent)
 	}
 	StabEnt	*chlds = parent->children;
 	while (chlds != nullptr) {
-		if (chlds->type == TypedValue::S_METHOD) {
+		if (chlds->type == TypedValue::S_LAMBDA) {
 			ss.push_back(chlds);
 		}
 		chlds = chlds->sibling;
@@ -542,8 +542,8 @@ QuaDisplay::DeleteObject(StabEnt *sym)
 			}
 			break;
 		}
-		case TypedValue::S_METHOD: {
-			Method	*c = sym->MethodValue();
+		case TypedValue::S_LAMBDA: {
+			Lambda	*c = sym->LambdaValue();
 			if (c) {
 				qua->RemoveMethod(c, true, true);
 			}
@@ -874,12 +874,12 @@ QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
 
 	std::string nmbuf = glob.MakeUniqueName(parent, nm.size()>0?nm:"action", 0);
 
-	Method	*method = qua->CreateMethod(nmbuf, parent, false);
-	fprintf(stderr, "created method %s\n", method->sym->name);
-	if (method) {
+	Lambda	*lambda = qua->CreateMethod(nmbuf, parent, false);
+	fprintf(stderr, "created lambda %s\n", lambda->sym->name);
+	if (lambda) {
 		// update index displays
 		for (i=0; i<NIndexer(); i++) {
-			Indexer(i)->addToSymbolIndex(method->sym);
+			Indexer(i)->addToSymbolIndex(lambda->sym);
 		}
 		// update object view displays
 		if (parent != nullptr && parent->type != TypedValue::S_QUA) {
@@ -887,11 +887,11 @@ QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
 			for (i=0; i<NObjectRack(); i++) {
 				QuaObjectRepresentation	*OR = ObjectRack(i)->RepresentationFor(parent);
 				if (OR != nullptr) {
-					OR->AddChildRepresentation(method->sym);
+					OR->AddChildRepresentation(lambda->sym);
 				}
 			}
 		}
-		return method->sym;
+		return lambda->sym;
 	}
 	return nullptr;
 }
@@ -1381,7 +1381,7 @@ QuaEnvironmentDisplay::RefreshVstPluginList()
 }
 
 void
-QuaEnvironmentDisplay::CreateMethodBridge(Method *)
+QuaEnvironmentDisplay::CreateMethodBridge(Lambda *)
 {
 	;
 }
@@ -1406,7 +1406,7 @@ QuaEnvironmentDisplay::CreateVstPluginBridge(VstPlugin *)
 }
 
 void
-QuaEnvironmentDisplay::RemoveMethodBridge(Method *)
+QuaEnvironmentDisplay::RemoveMethodBridge(Lambda *)
 {
 	;
 }

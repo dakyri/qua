@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 
+#include <iostream>
+using namespace std;
+
 char	*glibReplies[] = {
 	"Yes, and?",
 	"And you want me to tell my mum?",
@@ -84,7 +87,7 @@ memswab(void *buf, long len)
 
 
 
-std::string errorStr(int no)
+string errorStr(int no)
 {
 	string err("no error");
 
@@ -269,17 +272,17 @@ void internalError(char *str, ...)
 
 
 #include <sstream>
-std::string wc2string(wchar_t  wa[]) {
+string wc2string(wchar_t  wa[]) {
 	wchar_t *wp = wa;
 
 	stringstream ss;
 	while (*wp != L'\0') {
-		ss << std::use_facet< std::ctype<wchar_t> >(std::locale()).narrow(*wp++, '_');
+		ss << use_facet< ctype<wchar_t> >(locale()).narrow(*wp++, '_');
 	}
 	return ss.str();
 }
 
-std::string uintstr(uint32 x) {
+string uintstr(uint32 x) {
 	char *p = (char*)&x;
 	string s;
 	s.push_back(p[0]);
@@ -289,26 +292,35 @@ std::string uintstr(uint32 x) {
 	return s;
 }
 
-std::string getLeaf(std::string path) {
+string normalizePath(const string &path) {
 	string s(path);
-	auto it = path.rfind('/');
-	if (it != string::npos) {
-		s.erase(s.begin(), s.begin()+it);
+	string::size_type i = 0;
+	while ((i = s.find('\\', i)) != string::npos) {
+		s[i] = '/';
 	}
 	return s;
 }
 
-std::string getParent(std::string path) {
+string getLeaf(const string &path) {
+	string s=normalizePath(path);
+	auto it = s.rfind('/');
+	if (it != string::npos) {
+		s.erase(s.begin(), s.begin()+it+1);
+	}
+	return s;
+}
+
+string getParent(const string &path) {
 	string s(path);
-	auto it = path.rfind('/');
+	auto it = s.rfind('/');
 	if (it != string::npos && it != 0) {
 		s.erase(s.begin()+it, s.end());
 	}
 	return s;
 }
-std::string getBase(std::string path) {
+string getBase(const string &path) {
 	string s = getLeaf(path);
-	auto it = path.rfind('.');
+	auto it = s.rfind('.');
 	if (it != string::npos) {
 		s.erase(s.begin()+it, s.end());
 	} else {
@@ -316,20 +328,22 @@ std::string getBase(std::string path) {
 	}
 	return s;
 }
-std::string getExt(std::string path) {
+
+string getExt(const string &path) {
 	string s = getLeaf(path);
-	auto it = path.rfind('.');
+	auto it = s.rfind('.');
+	cerr << s << " .. " << it << endl;
 	if (it != string::npos) {
-		s.erase(s.begin(), s.begin() + it);
+		s.erase(s.begin(), s.begin() + it + 1);
 	} else {
 		s = "";
 	}
 	return s;
 }
 
-std::string getSupertype(std::string path) {
+string getSupertype(const string &path) {
 	string s(path);
-	auto it = path.rfind('/');
+	auto it = s.rfind('/');
 	if (it != string::npos) {
 		s.erase(s.begin() + it, s.end());
 	}

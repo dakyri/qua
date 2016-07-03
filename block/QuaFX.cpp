@@ -9,7 +9,7 @@
 #include "QuaFX.h"
 #include "Qua.h"
 #include "Sample.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Clip.h"
 
 #ifdef QUA_V_VST_HOST
@@ -326,7 +326,7 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 		stack->Thunk();
 		QuasiStack	*higherFrame = stack->frameAt(fxBlock->crap.call.frameIndex);
 		if (higherFrame->locusStatus == STATUS_RUNNING) {
-			Method	*S = fxBlock->crap.call.crap.method;
+			Lambda	*S = fxBlock->crap.call.crap.lambda;
 #ifdef LOTSALOX
 			if (S->stackableLock.Lockable()) {
 				S->stackableLock.Lock();

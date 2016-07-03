@@ -1,0 +1,233 @@
+define #pool rv_people {
+	define Tone [
+		tone("",	12, 80, "CellStart")
+		tone("e3",	3, 80)
+		tone("e3",	3, 80)
+		tone("e4",	3, 80)
+		tone("e4",	3, 80)
+		tone("d3",	3, 80)
+		tone("d3",	3, 80)
+		tone("d4",	3, 80)
+		tone("d4",	3, 80)
+		tone("",	12, 80)
+	
+		tone("e3",	3, 80, "CellStart")
+		tone("e3",	3, 80)
+		tone("e4",	3, 80)
+		tone("e4",	3, 80)
+		tone("d3",	3, 80)
+		tone("d3",	3, 80)
+		tone("d4",	3, 80)
+		tone("d4",	3, 80)
+		tone("a2",	3, 80, "CellStart")
+		tone("a2",	3, 80)
+		tone("a3",	3, 80)
+		tone("a3",	3, 80)
+		tone("g2",	3, 80)
+		tone("g2",	3, 80)
+		tone("g3",	3, 80)
+		tone("g3",	3, 80)
+	
+		tone("",	12, 80, "CellStart")
+		tone("e3",	3, 80)
+		tone("e3",	3, 80)
+		tone("e4",	3, 80)
+		tone("e4",	3, 80)
+		tone("d3",	3, 80)
+		tone("d3",	3, 80)
+		tone("d4",	3, 80)
+		tone("d4",	3, 80)
+		tone("",	12, 80)
+	
+		tone("e3",	3, 80, "CellStart")
+		tone("e3",	3, 80)
+		tone("e4",	3, 80)
+		tone("e4",	3, 80)
+		tone("d3",	3, 80)
+		tone("d3",	3, 80)
+		tone("d4",	3, 80)
+		tone("d4",	3, 80)
+		tone("a2",	3, 80, "CellStart")
+		tone("a2",	3, 80)
+		tone("a3",	3, 80)
+		tone("a3",	3, 80)
+		tone("g2",	3, 80)
+		tone("g2",	3, 80)
+		tone("g3",	3, 80)
+		tone("g3",	3, 80)
+	]
+}
+
+define #voice the_unholey_debacle
+{
+	define #short last_note
+//	define #node #modal piano_7_4
+//	{
+//		<- tone (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 7
+//		<- tone (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 4	
+//	}
+	
+	
+//	define #node #modal piano_3_2
+//	{
+//		<- tone (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 2
+//		<- tone (markov(qua6_1).pitch, 12, markov(qua6_1).dynamic) : 3
+//	}
+	
+	
+	define #node #modal #toggle comp(#short root)
+	{
+		define major(#short root, #short dur)
+		{
+			if (roll(0.3)) tone(root, dur, 80),
+			tone (root+4,dur,80),
+			tone (root+7,dur,80),
+			tone (root+11,dur,80)
+		}
+		define dominant(#short root, #short dur)
+		{
+			if (roll(0.3)) tone(root, dur, 80),
+			tone (root+4,dur,80),
+			tone (root+7,dur,80),
+			tone (root+10,dur,80),
+			if (roll(0.3)) tone (root+13,dur,80)
+		}
+		define quartal(#short root, #short dur)
+		{
+			if (roll(0.3)) tone(root, dur, 80),
+			tone (root+5,dur,80),
+			tone (root+10,dur,80),
+			tone (root+15,dur,80),
+			if (roll(0.3)) tone (root+18,dur,80)
+		}
+		{
+			if (roll(0.1))	major(root,3) else
+			if (roll(0.1))	[dominant(root+1,3) major(root,6)] else
+			if (roll(0.1))	[quartal(root+1,3) quartal(root+3,3)] else
+					ne
+		}
+	}
+
+	define #node #modal #toggle rv_1
+	{
+		<- markov(rv_people, 80, 30,24, 56)
+	}
+	
+	define #node #modal #toggle rv_2_3
+	{
+		define #node  #toggle rv_3 [
+			<- [
+				(tick != 0 || beat != 0) :: ne
+				tone ([36 48 46 41  39], 48, [90 60 60]) 
+				if (roll(0.5)) [
+					tone ([36 39 42 43 46 48 46 43 39 34 41 39], 6, 80)
+					tone ([36 39 42 43 46 48 42 46 43 39 41 39], 6, 80)
+				] else if (roll(0.3)) [
+					tone ([36 48 51 46 44 42 38  39 51], 24, [90 60 60]) 
+				] else if (roll(0.5)) [
+					tone ([36 48 51 ], 96, [90 60 60]) 
+				]
+			] : 3
+		]
+		define #node #toggle rv_2 [
+			<- [
+				(tick != 0 || beat != 0) :: ne
+				tone ([43 34 ], 48, [90 60])
+			] : 2
+		]
+		rv_2
+		rv_3
+	}
+	
+	define #node #toggle kick(#int vel, #int accent) [
+		define Doof		tone (36, 12, vel+accent)
+		define Dof		tone (36, 6, vel+accent)
+		define Dif		tone (36, 3, vel+accent)
+		define doof		tone (36, 12, vel)
+		define dof		tone (36, 6, vel)
+		define Df		tone (36, 1, vel)
+
+		(tick == 0 && beat == 0) :: Doof,
+		(tick == 0 && beat == 2) ::Doof
+//			if (roll(0.3)) [
+//				Dof
+//				dof
+//			] else if (roll(0.3)) [
+//				Dof
+//				Dif
+//				Dif
+//			] else [
+//				Doof
+//			]
+	]
+	
+	define ne		tone(128, 3, 0)
+
+	define #node #toggle snare(#int vel, #int accent) [
+		define Te		tone (38, 3, vel+accent)
+		define te		tone (38, 3, vel-10)
+		define tete		tone (38, [1 1 1], vel)
+		define Ti		tone(38, 1, vel+accent)
+
+		(tick == 0 && beat == 1) :: Te,
+		(tick == 0 && beat == 3) :: 
+			if (roll(0.1)) [Ti tete ne Ti tete ne Ti tete ne] else
+			if (roll(0.1)) [Ti ne tete ne Ti ne tete ne Ti ne tete ne] else
+			if (roll(0.1)) [Te tete ne Te tete ne Te tete ne] else
+			if (roll(0.1)) [Ti tete ne Ti ne tete ne Te tete ne] else
+			if (roll(0.1)) [Ti Ti ne Ti Ti tete ne Ti Ti tete tete ne] else
+					Te
+	]
+
+	define #node #toggle hats(#int vel, #int accent) [
+		define sh		tone(42,3,vel)
+		define St		tone(42,1,vel+accent)
+		define ch		tone(46,3,vel)
+		define Sh		tone(42,3,vel+accent)
+		define Ch		tone(46,3,vel+accent)
+
+		define #node #modal #toggle ons [
+			(tick==0&&beat == 0 ) ::
+				if (roll(0.3))	[ch sh ne ne] else
+						[ ch ne ne ne]
+			(tick==0&&beat ==2) ::
+				if (roll(0.3))	[ch sh ne ne] else
+						[ ch ne ne ne]
+		]
+
+		define #node #modal #toggle offs [
+			(tick != 0)::St
+			if (roll(0.3))	[ne sh ch ne] else
+					[ne ne ch ne]
+		]
+		define #node #modal #toggle semis [
+			(tick != 0)::St
+			if (roll(0.4)) [	Sh Sh ch ne] else
+			if (roll(0.2)) [	Sh sh ch sh] else
+					[Sh ne sh ne]
+		]
+		offs
+		ons
+		semis
+	]
+
+	{
+		rv_2_3
+		rv_1
+	}
+	last_note = pitch
+	>> 1
+	flush()
+
+	{
+		<- hats
+		<- kick
+		<- snare
+	}
+	>> 2
+	flush()
+
+	>>3
+}
+
+

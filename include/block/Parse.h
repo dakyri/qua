@@ -4,7 +4,7 @@
 class Voice;
 class Note;
 class Pool;
-class Method;
+class Lambda;
 class Qua;
 class Block;
 class Sample;
@@ -85,7 +85,7 @@ public:
 	short			err_cnt;
 	
 	Schedulable		*schedulees;
-	Method			*methods;
+	Lambda			*methods;
 	Template		*templates;
 
 	VstPluginList	vstplugins;

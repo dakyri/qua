@@ -9,6 +9,7 @@
 #include "QuaEnvironment.h"
 #include "QuaCommandLine.h"
 
+#include <iostream>
 int main(char **argv, int argc)
 {
 	define_global_symbols();
@@ -21,15 +22,15 @@ int main(char **argv, int argc)
 	environment.SetupDevices();
 	QuaCommandLine cmd;
 	cmd.processCommandLine(argc, argv);
-	setup_application_globals();	// some app setup may rely on command line, but probably not these days
-
+//	setup_application_globals();	// some app setup may rely on command line, but probably not these days
+	string input;
 	for (string qnm: cmd.loadNames) {
 		Qua * q = Qua::loadScriptFile(qnm.c_str());
 		if (q != NULL) {
 			fprintf(stderr, "got a qua\n");
 			//			q->sym->Dump(stderr, 0);
 			q->Start(); // start up main thread
-			ReportError("Press ok to halt and delete");
+//			ReportError("Press ok to halt and delete");
 			//				q->Start();
 			//			if (wait_stop) {
 			//				q->WaitUntilStop();
@@ -37,6 +38,7 @@ int main(char **argv, int argc)
 			//				q->WaitUntil(end_time);
 			//				q->Stop();
 			//			}
+			cin >> input;
 			fprintf(stderr, "deleting a qua\n");
 			delete q;
 		}

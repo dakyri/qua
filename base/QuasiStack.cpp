@@ -9,7 +9,7 @@
 #include "Sym.h"
 #include "Qua.h"
 #include "ControllerBridge.h"
-#include "Method.h"
+#include "Lambda.h"
 #include "Block.h"
 #include "Pool.h"
 #include "Pool.h"
@@ -83,8 +83,8 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 		stackable->addStack(this);
 	}
 
-	Method	*So = (context->type == TypedValue::S_METHOD && stackable)?
-					((Method*)stackable):nullptr;
+	Lambda	*So = (context->type == TypedValue::S_LAMBDA && stackable)?
+					((Lambda*)stackable):nullptr;
 	isLocus =	So?	So->isLocus:false;
 	callingBlock = block;
 	enclosingList = list;
@@ -283,14 +283,14 @@ QuasiStack::~QuasiStack()
 bool
 QuasiStack::Trigger()
 {
-	Method		*method = context->MethodValue();
-	if (method && method->isInit) {
-		if (method->mainBlock)
-			method->mainBlock->Reset(this);
+	Lambda		*lambda = context->LambdaValue();
+	if (lambda && lambda->isInit) {
+		if (lambda->mainBlock)
+			lambda->mainBlock->Reset(this);
 	}
 	locusStatus = STATUS_RUNNING;
 
-	if (method && method->isModal) {	// turn off siblings
+	if (lambda && lambda->isModal) {	// turn off siblings
 		;
 		
 		for (QuasiStack *n: lowerFrame->higherFrame) {
@@ -338,8 +338,8 @@ QuasiStack::Thunk()
 	QDBMSG_STK("Thunk(%s%x, ", isLeaf?"leaf ":"",this)
 	QDBMSG_STK("%d higher frames, exec %x)\n", higherFrame.CountItems(),stackable);
 
-	if (countFrames() == 0 && !isLeaf && context->type == TypedValue::S_METHOD) {
-		Method	*executable = (Method *)stackable;
+	if (countFrames() == 0 && !isLeaf && context->type == TypedValue::S_LAMBDA) {
+		Lambda	*executable = (Lambda *)stackable;
 		if (executable && executable->mainBlock) {
 			if (!executable->mainBlock->StackOMatic(this, 0)) {
 				return true;
@@ -548,8 +548,8 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 			if (s->callingBlock) {
 				switch (s->callingBlock->type) {
 					case Block::C_CALL:
-						if (s->callingBlock->crap.call.crap.method) {
-							chlabel = s->callingBlock->crap.call.crap.method->sym->name;
+						if (s->callingBlock->crap.call.crap.lambda) {
+							chlabel = s->callingBlock->crap.call.crap.lambda->sym->name;
 						} else {
 							chlabel = "call";
 						}
@@ -683,7 +683,7 @@ QuasiStack::SetValue(Block *b)
 	if (!b)
 		return true;
 	if (b->type == Block::C_CALL) {
-		if (b->crap.call.crap.method->sym != stackable->sym) {
+		if (b->crap.call.crap.lambda->sym != stackable->sym) {
 			return false;
 		}
 	} else if (b->type == Block::C_WAKE) {

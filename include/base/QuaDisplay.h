@@ -13,7 +13,7 @@ struct qua_time;
 class Instance;
 class Schedulable;
 class QuasiStack;
-class Method;
+class Lambda;
 class Channel;
 class Metric;
 class Template;
@@ -359,8 +359,8 @@ public:
 	void			RemovePortBridge(QuaPort *);
 	void			CreateTemplateBridge(Template *);
 	void			RemoveTemplateBridge(Template *);
-	void			CreateMethodBridge(Method *);
-	void			RemoveMethodBridge(Method *);
+	void			CreateMethodBridge(Lambda *);
+	void			RemoveMethodBridge(Lambda *);
 	void			CreateVstPluginBridge(VstPlugin *);
 	void			RemoveVstPluginBridge(VstPlugin *);
 };
@@ -390,7 +390,7 @@ public:
 	void					RemoveDestinationRepresentation(Channel *, Output *);
 
 	void					AddSchedulableRepresentation(Schedulable *);
-	void					AddMethodRepresentation(Method *);
+	void					AddMethodRepresentation(Lambda *);
 
 	void					RemoveSchedulableRepresentations(StabEnt *);
 	void					RemoveMethodRepresentations(StabEnt *);

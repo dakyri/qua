@@ -213,7 +213,7 @@ BEGIN
         MENUITEM "Add Sample",                  ID_EDIT_ADD_SAMPLE
         MENUITEM "Add Voice",                   ID_EDIT_ADD_VOICE
         MENUITEM "Add Channel",                 4152
-        MENUITEM "Add Method",                  4161
+        MENUITEM "Add Lambda",                  4161
     END
     POPUP "&View"
     BEGIN
@@ -300,7 +300,7 @@ BEGIN
         MENUITEM "Editor",                      ID_CHANNEL_EDITOR
         MENUITEM "Controller",                  ID_CHANNEL_CONTROLLER
         MENUITEM "Delete",                      ID_CHANNEL_DELETE
-        MENUITEM "Add Method",                  4162
+        MENUITEM "Add Lambda",                  4162
     END
 END
 
@@ -319,7 +319,7 @@ BEGIN
     BEGIN
         MENUITEM "Editor",                      195
         MENUITEM "Delete",                      196
-        MENUITEM "Add Method",                  4162
+        MENUITEM "Add Lambda",                  4162
     END
 END
 
@@ -361,11 +361,11 @@ END
 
 IDR_METHOD_RCLICK MENU 
 BEGIN
-    POPUP "Method"
+    POPUP "Lambda"
     BEGIN
         MENUITEM "Editor",                      206
         MENUITEM "Delete",                      207
-        MENUITEM "Add Method",                  4162
+        MENUITEM "Add Lambda",                  4162
     END
 END
 
@@ -452,9 +452,9 @@ END
 
 IDR_METHOD_TOP_RCLICK MENU 
 BEGIN
-    POPUP "Method Top"
+    POPUP "Lambda Top"
     BEGIN
-        MENUITEM "Add Method",                  4161
+        MENUITEM "Add Lambda",                  4161
     END
 END
 

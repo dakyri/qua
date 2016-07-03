@@ -1,0 +1,94 @@
+#qua eviltest
+{
+	#channel 0 channel1 {
+		#input {midi1:1 AudioIn}{}
+		#output {midi1:1 Mixer} {}
+	}
+	#channel 1 channel2 {
+		#input {midi1:2 AudioIn}{}
+		#output {midi1:2 Mixer} {}
+	}
+	#channel 2 channel3 {
+		#input {midi1:3 AudioIn}{}
+		#output {midi1:3 Mixer} {}
+	}
+	#channel 3 channel4 {
+		#input {midi1:4 AudioIn}{}
+		#output {midi1:4 Mixer} {}
+	}
+	#channel 4 channel5 {
+		#input {midi1:5 AudioIn}{}
+		#output {midi1:5 Mixer} {}
+	}
+	#channel 5 channel6 {
+		#input {midi1:6 AudioIn}{}
+		#output {midi1:6 Mixer} {}
+	}
+	#channel 6 channel7 {
+		#input {midi1:7 AudioIn}{}
+		#output {midi1:7 Mixer} {}
+	}
+	#channel 7 channel8 {
+		#input {midi1:8 AudioIn}{}
+		#output {midi1:8 Mixer} {}
+	}
+	#channel 8 channel9 {
+		#input {midi1:9 AudioIn}{}
+		#output {midi1:9 Mixer} {}
+	}
+	#channel 9 channel10 {
+		#input {midi1:10 AudioIn}{}
+		#output {midi1:10 Mixer} {}
+	}
+	#channel 10 channel11 {
+		#input {midi1:11 AudioIn}{}
+		#output {midi1:11 Mixer} {}
+	}
+	#channel 11 channel12 {
+		#input {midi1:12 AudioIn}{}
+		#output {midi1:12 Mixer} {}
+	}
+	#channel 12 channel13 {
+		#input {midi1:13 AudioIn}{}
+		#output {midi1:13 Mixer} {}
+	}
+	#channel 13 channel14 {
+		#input {midi1:14 AudioIn}{}
+		#output {midi1:14 Mixer} {}
+	}
+	#channel 14 channel15 {
+		#input {midi1:15 AudioIn}{}
+		#output {midi1:15 Mixer} {}
+	}
+	#channel 15 channel16 {
+		#input {midi1:16 AudioIn}{}
+		#output {midi1:16 Mixer} {}
+	}
+	#channel 16 system {
+		#input {midi1:SY AudioIn}{}
+		#output {midi1:SY Mixer} {}
+	}
+	#sample #takes {
+		{"/Obscenity/sound/bellbirds2" "Original"}} #display {0xeeee6400, {51 59}} bellbirds2() {
+	}
+	define Init()
+	{
+		tempo = 120
+		bellbirds2(1, 0:0.0, 24:1.8, {
+			bellbirds2(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:48.37696'msf,
+				true)}, {})
+		bellbirds2(1, 25:0.0, 24:1.8, {
+			bellbirds2(
+				false,
+				{0, {0:0.0, 0.5, 1}},
+				{0, {0:0.0, 0, 1}},
+				0:0.0'msf,
+				0:48.37696'msf,
+				true)}, {})
+	}
+}

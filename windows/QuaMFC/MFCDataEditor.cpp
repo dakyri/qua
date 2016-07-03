@@ -347,9 +347,9 @@ MFCSequenceEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
 	if (qdoc == NULL) {
-		reportError("initial update of sequence editor finds a null sequencer document");
+		reportError("SequenceEditor: initial update of sequence editor finds a null sequencer document");
 	} else if (qdoc->qua == NULL) {
-		reportError("initial update finds a null sequencer");
+		reportError("SequenceEditor: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = qdoc->qua->bridge.display;
 //		quaLink->AddArranger(this);

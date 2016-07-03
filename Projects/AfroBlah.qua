@@ -1,0 +1,24 @@
+voice AfroBlah
+{
+	function \node afro12
+	{
+		function \node \toggle bell
+			tone([79 79 79 79 79 79 77], [8 8 4 8 8 8 4], 80)
+		function \node \toggle conga [
+			repeat(12)
+				tone([69 67 67], [4 4 4], 80)
+			repeat(6)
+				tone([69 67 67], [8 8 8], 80)
+			repeat(20)
+				tone([69 67 67 67 67], [4 2 2 2 2], 80)
+		]
+		function \node \toggle guir
+			tone([81 81 83], [4 4 40], 80)
+
+		<- bell
+		<- conga
+		<- guir
+	}
+
+	afro12
+}
