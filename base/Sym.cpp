@@ -813,9 +813,9 @@ StabEnt::SetDefaultBounds()
    	}
    	
     default:
-	    minVal.Set(S_UNKNOWN, REF_VALUE); minVal.SetValue((void *)0);
-	    maxVal.Set(S_UNKNOWN, REF_VALUE); maxVal.SetValue((void *)1);
-	    iniVal.Set(S_UNKNOWN, REF_VALUE); iniVal.SetValue((void *)0);
+	    minVal.Set(S_UNKNOWN, REF_VALUE); minVal.SetValue((int)0);
+	    maxVal.Set(S_UNKNOWN, REF_VALUE); maxVal.SetValue((int)1);
+	    iniVal.Set(S_UNKNOWN, REF_VALUE); iniVal.SetValue((int)0);
 	}
 }
 
@@ -1906,7 +1906,7 @@ DefineSymbol(std::string nm, base_type_t typ, int8 ndim,
 			sym->val.vstParam = (int)val;
 #endif
 		} else {
-			sym->SetValue(val);
+			sym->SetPointerValue(val);
 		}
 	}
 	sym->SetDefaultBounds();

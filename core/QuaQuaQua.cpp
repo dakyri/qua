@@ -61,7 +61,7 @@ CreateNewNote(int type, Block *P,
     noteTo.cmd = MIDI_NOTE_ON;
     
     ret_val.Set(TypedValue::S_NOTE, TypedValue::REF_POINTER);
-	ret_val.SetValue((void *)NULL);
+	ret_val.SetPointerValue((void *)NULL);
 	ret_val.flags  = ResultValue::COMPLETE;
 
     val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
@@ -151,7 +151,7 @@ CreateNewCtrl(Block *P,
 		fprintf(stderr, "creating %d: %d %d\n", ret_val.type,
 					ctrlTo.controller,
 					ctrlTo.amount);
-	ret_val.SetValue(&ctrlTo);
+	ret_val.SetPointerValue(&ctrlTo);
    
     return ret_val;
 }
@@ -169,7 +169,7 @@ CreateNewBend(Block *P,
     bool			comp = true;
     
 	ret_val.Set(TypedValue::S_BEND, TypedValue::REF_POINTER);
-	ret_val.SetValue((void*)NULL);
+	ret_val.SetPointerValue((void*)NULL);
 	ret_val.flags = ResultValue::COMPLETE;
 
     val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
@@ -185,7 +185,7 @@ CreateNewBend(Block *P,
 	if (debug_gen)
 		fprintf(stderr, "creating %d: %d\n", ret_val.type,
 					bendTo.bend);
-	ret_val.SetValue(&bendTo);
+	ret_val.SetPointerValue(&bendTo);
    
     return ret_val;
 }
@@ -203,7 +203,7 @@ CreateNewProg(Block *P,
     bool			comp = true;
     
 	ret_val.Set(TypedValue::S_PROG, TypedValue::REF_POINTER);
-	ret_val.SetValue((void*)NULL);
+	ret_val.SetPointerValue((void*)NULL);
 	ret_val.flags = ResultValue::COMPLETE;
 
     val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
@@ -220,7 +220,7 @@ CreateNewProg(Block *P,
 	if (debug_gen)
 		fprintf(stderr, "creating %d: %d\n", ret_val.type,
 					progTo.program);
-	ret_val.SetValue(&progTo);
+	ret_val.SetPointerValue(&progTo);
    
     return ret_val;
 }
@@ -238,7 +238,7 @@ CreateNewSysX(Block *P,
     bool			comp = true;
     
 	ret_val.Set(TypedValue::S_SYSX, TypedValue::REF_POINTER);
-	ret_val.SetValue((void*)NULL);
+	ret_val.SetPointerValue((void*)NULL);
 	ret_val.flags = ResultValue::COMPLETE;
 
     val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
@@ -278,7 +278,7 @@ CreateNewSysC(int which, Block *P,
     bool			comp = true;
     
 	ret_val.Set(TypedValue::S_SYSC, TypedValue::REF_POINTER);
-	ret_val.SetValue((void*)NULL);
+	ret_val.SetPointerValue((void*)NULL);
 	ret_val.flags = ResultValue::COMPLETE;
 
 	sysCTo.cmd = which;
@@ -306,7 +306,7 @@ CreateNewSysC(int which, Block *P,
 	if (debug_gen)
 		fprintf(stderr, "creating %d: %d\n", ret_val.type,
 					sysCTo.cmd);
-	ret_val.SetValue(&sysCTo);
+	ret_val.SetPointerValue(&sysCTo);
    
     return ret_val;
 }

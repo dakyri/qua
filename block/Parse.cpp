@@ -889,7 +889,8 @@ check_token:
 		    currentTokenType = TOK_VAL;
 		    char *buf = new char[strlen(currentToken)+1];
 		    strcpy(buf, currentToken);
-		    *currentToken = '\0';
+			currentTokenStringLiteral.assign(currentToken + 1, strlen(currentToken) - 2);
+			*currentToken = '\0';
 		    currentTokenVal.Set(TypedValue::S_STRING, TypedValue::REF_POINTER);
 		    currentTokenVal.SetValue(buf);
 			goto return_token;

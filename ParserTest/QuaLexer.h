@@ -6,11 +6,11 @@
 #endif
 
 #undef  YY_DECL
-#define YY_DECL int  Qua::QuaLexer::yylex()
+#define YY_DECL int  QSParse::QuaLexer::yylex()
 
 #include "QuaParser.hpp"
 
-namespace Qua {
+namespace QSParse {
 
 	class QuaLexer : public yyFlexLexer{
 	public:
@@ -18,7 +18,7 @@ namespace Qua {
 		QuaLexer(std::istream *in) : yyFlexLexer(in),
 								  yylval( nullptr ){};
 
-		int yylex(Qua::QuaParser::semantic_type *lval)
+		int yylex(QSParse::QuaParser::semantic_type *lval)
 		{
 			yylval = lval;
 			return( yylex() );
@@ -28,7 +28,7 @@ namespace Qua {
 	private:
 		int yylex();
 		// yyval ptr 
-		Qua::QuaParser::semantic_type *yylval;
+		QSParse::QuaParser::semantic_type *yylval;
 	};
 
 }

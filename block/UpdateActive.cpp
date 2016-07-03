@@ -1140,7 +1140,7 @@ UpdateActiveBlock(Qua *uberQua,
 					 stack,
 			    	 updateRate,
 					 generate_on_the_fly);
-			    B->crap.guard.doEvalVar.SetValue(stack);
+			    B->crap.guard.doEvalVar.SetValue((int32)ua_complete, stack);
 			    ua_complete = BLOCK_INCOMPLETE;
 			}
 		} while (!generate_on_the_fly && !ua_complete);

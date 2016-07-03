@@ -35,6 +35,9 @@
     <ClInclude Include="QuaLexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="QuaParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="QuaLexer.l">

@@ -2,34 +2,10 @@
 %require  "3.0"
 %debug 
 %defines 
-%define api.namespace {Qua}
+%define api.namespace {QSParse}
 %define parser_class_name {QuaParser}
 
-%code requires{
-	namespace Qua {
-		class ParserDriver;
- 		class QuaLexer;
-	}
-}
-
-%lex-param { QuaLexer &scanner }
-%parse-param { QuaLexer &scanner }
-
-%lex-param { ParserDriver &driver }
-%parse-param { ParserDriver &driver }
-
-%code{
-	#include <iostream>
-	#include <cstdlib>
-	#include <fstream>
-   
-   /* include for all driver functions */
-	#include "ParserDriver.h"
-  
-   /* this is silly, but I can't figure out a way around */
-	static int yylex(Qua::QuaParser::semantic_type *yylval,
-					Qua::QuaLexer &scanner,
-					Qua::ParserDriver &driver);
+%code requires {
 
 	#include "qua_version.h"
 	#include "StdDefs.h"
@@ -52,7 +28,36 @@
 	#include "Markov.h"
 	#include "BaseVal.h"
 	#include "VstPlugin.h"
+	#include "Parse.h"
 	#include "MidiDefs.h"
+	
+	namespace QSParse {
+		class ParserDriver;
+ 		class QuaLexer;
+	}
+}
+
+%lex-param { QuaLexer &scanner }
+%parse-param { QuaLexer &scanner }
+
+%lex-param { ParserDriver &driver }
+%parse-param { ParserDriver &driver }
+
+%code{
+	#include <iostream>
+	#include <cstdlib>
+	#include <fstream>
+	#include <string>
+
+	using namespace std;
+   /* include for all driver functions */
+	#include "ParserDriver.h"
+  
+   /* this is silly, but I can't figure out a way around */
+	static int yylex(QSParse::QuaParser::semantic_type *yylval,
+					QSParse::QuaLexer &scanner,
+					QSParse::ParserDriver &driver);
+
 }
 
 /* token types */
@@ -68,16 +73,24 @@
 
 %type <block> atom
 %type <block> expression
+/*
+%type <block> block
 %type <qua> qua_definition
- 
+%type <intval> qua_child_defn_list
+ */
 %token END 0 "end of file"
+
 %token <stringval> WORD
 %token <stringval> SYMBOL
+%token <stringval> IDENT
 %token <intval> INT
 %token <doubleval> FLOAT
 %token <typedval> TIME
 %token <stringval> STRING
 %token <intval> TYPE_ATTRIBUTE
+
+%token QUA
+
 %token ASSGN
 
 %token LSQB
@@ -86,7 +99,11 @@
 %token RBRA
 %token LB
 %token RB
+
+%token PLUS
 %token MINUS
+%token STAR
+%token SLASH
 
 %token NEWLINE
 
@@ -109,7 +126,7 @@ atom : LB expression RB { $$ = $2; }
 		}
 	| STRING{
 			Block *p = new Block( Block::C_VALUE);
-			p->crap.constant.value = TypedValue::Double($1);
+//			p->crap.constant.value = TypedValue::Double($1);
 			$$ = p;
 		}
 	| TIME {
@@ -121,10 +138,10 @@ atom : LB expression RB { $$ = $2; }
 	
 expression : atom { $$ = $1; }
 	;
-	
-qua_definition : QUA IDENT LBRA qua_object_definition_list block RBRA {
+	/*
+qua_definition : QUA IDENT LBRA qua_child_defn_list block RBRA {
 	}
-
+*/
 	
 /*
 list_option : END | command_list END;
@@ -152,7 +169,7 @@ expression	: WORD
  
 
 void 
-Qua::QuaParser::error( const std::string &err_message )
+QSParse::QuaParser::error( const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << "\n"; 
 }
@@ -161,9 +178,9 @@ Qua::QuaParser::error( const std::string &err_message )
 /* include for access to scanner.yylex */
 #include "QuaLexer.h"
 static int 
-yylex( Qua::QuaParser::semantic_type *yylval,
-	   Qua::QuaLexer  &scanner,
-	   Qua::ParserDriver   &driver )
+yylex( QSParse::QuaParser::semantic_type *yylval,
+	   QSParse::QuaLexer  &scanner,
+	   QSParse::ParserDriver   &driver )
 {
    return( scanner.yylex(yylval) );
 }

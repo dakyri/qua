@@ -556,7 +556,7 @@ TypedValue::SetDoubleValue(double v, class QuasiStack *stack)
 	}
 }
 void
-TypedValue::SetValue(Time *d, class QuasiStack *stack)
+TypedValue::SetValue(Time &d, class QuasiStack *stack)
 {
 	if (type != S_TIME) {
 		internalError("must be a valid time");
@@ -567,18 +567,18 @@ TypedValue::SetValue(Time *d, class QuasiStack *stack)
 			return;
 		uchar *addr = stack->stk.vars + val.stackAddress.offset;
 		switch (type) {
-		case S_TIME:		*((Time*)addr) = *d; return;
+		case S_TIME:		*((Time*)addr) = d; return;
 		default:			return;
 		}
 	} else if (refType == REF_VALUE) {
-		val.time = *d;
+		val.time = d;
 	} else if (refType == REF_POINTER) {
-		if (val.timeP) *val.timeP = *d;
+		if (val.timeP) *val.timeP = d;
 	}
 }
 
 void
-TypedValue::SetValue(void *d, class QuasiStack *stack)
+TypedValue::SetPointerValue(void *d, class QuasiStack *stack)
 {
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
@@ -737,18 +737,18 @@ TypedValue::StackableValue()
 *   set the value of a BaseValueType according to its type
 */
 void
-TypedValue::SetValue(char *strval)
+TypedValue::SetValue(const string &strval)
 {
 	if (*strval) {
 		switch (type) {
-		case S_BOOL:		val.Bool = (atoi(strval) != 0); break;
-		case S_BYTE:		val.byte = atoi(strval); break;
-		case S_INT:			val.Int = atoi(strval); break;
-		case S_SHORT:		val.Short = atoi(strval); break;
-		case S_LONG:		val.Long = atoi(strval); break;
-		case S_FLOAT:		val.Float = atof(strval); break;
-		case S_POOL:		val.pool = findPool(strval); break;
-		case S_SAMPLE:		val.sample = findSample(strval); break;
+		case S_BOOL:		val.Bool = (atoi(strval.c_str()) != 0); break;
+		case S_BYTE:		val.byte = atoi(strval.c_str()); break;
+		case S_INT:			val.Int = atoi(strval.c_str()); break;
+		case S_SHORT:		val.Short = atoi(strval.c_str()); break;
+		case S_LONG:		val.Long = atoi(strval.c_str()); break;
+		case S_FLOAT:		val.Float = atof(strval.c_str()); break;
+		case S_POOL:		val.pool = findPool(strval.c_str()); break;
+		case S_SAMPLE:		val.sample = findSample(strval.c_str()); break;
 		case S_STRING:		val.string = strval; break;
 		default:
 			internalError("can't set value to string, type = %d", type);
@@ -756,6 +756,7 @@ TypedValue::SetValue(char *strval)
 		//		fprintf(stderr, "SetVal: %s %d %d\n", strval, type, val.Int);
 	}
 }
+
 
 
 /*

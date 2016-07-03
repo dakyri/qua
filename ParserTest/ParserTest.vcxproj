@@ -30,6 +30,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -88,11 +89,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\src\cpp\Qua\ParserTest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\windows;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\util;D:\src\cpp\Qua\include;D:\src\cpp\library\VST\asiosdk2\host\pc;D:\src\cpp\library\VST\asiosdk2\host;D:\src\cpp\library\VST\asiosdk2\common;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\library\globals;D:\src\cpp\Qua\ParserTest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\src\cpp\Qua\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;Winmm.lib;Qua.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -102,7 +105,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\src\cpp\Qua\ParserTest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\windows;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\util;D:\src\cpp\Qua\include;D:\src\cpp\library\VST\asiosdk2\host\pc;D:\src\cpp\library\VST\asiosdk2\host;D:\src\cpp\library\VST\asiosdk2\common;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\library\globals;D:\src\cpp\Qua\ParserTest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -176,6 +179,7 @@
   <ItemGroup>
     <ClInclude Include="ParserDriver.h" />
     <ClInclude Include="QuaLexer.h" />
+    <ClInclude Include="QuaParser.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -27,7 +27,7 @@ TypedValueList::AddItem(void *I, short t)
 {
 	TypedValueListItem *ti = new TypedValueListItem();
 	ti->value.Set(t, TypedValue::REF_POINTER);
-	ti->value.SetValue(I);
+	ti->value.SetPointerValue(I);
 	if (head == nullptr || tail == nullptr) {
 		head = tail = ti;
 	} else {

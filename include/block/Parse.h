@@ -80,6 +80,7 @@ public:
 	char			currentToken[1024];
 	int				currentTokenType;
 	TypedValue		currentTokenVal;
+	std::string		currentTokenStringLiteral;
 	off_t			currentTokenPosition;
 
 	short			err_cnt;

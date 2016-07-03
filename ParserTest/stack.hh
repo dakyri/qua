@@ -32,7 +32,7 @@
 
 /**
  ** \file stack.hh
- ** Define the Qua::stack class.
+ ** Define the QSParse::stack class.
  */
 
 #ifndef YY_YY_STACK_HH_INCLUDED
@@ -41,7 +41,7 @@
 # include <vector>
 
 #line 5 "QuaParser.yy" // stack.hh:132
-namespace Qua {
+namespace QSParse {
 #line 46 "stack.hh" // stack.hh:132
   template <class T, class S = std::vector<T> >
   class stack
@@ -151,7 +151,7 @@ namespace Qua {
   };
 
 #line 5 "QuaParser.yy" // stack.hh:132
-} // Qua
+} // QSParse
 #line 156 "stack.hh" // stack.hh:132
 
 #endif // !YY_YY_STACK_HH_INCLUDED

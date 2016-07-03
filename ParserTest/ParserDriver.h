@@ -6,7 +6,7 @@
 #include "QuaParser.hpp"
 
 
-namespace Qua{
+namespace QSParse {
 
 class ParserDriver{
 public:
@@ -17,8 +17,8 @@ public:
 
 	std::ostream& print(std::ostream &stream);
 private:
-	Qua::QuaLexer scanner;
-	Qua::QuaParser parser;
+	QSParse::QuaLexer scanner;
+	QSParse::QuaParser parser;
 };
 
 }

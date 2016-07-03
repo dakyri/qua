@@ -532,9 +532,9 @@ public:
 	void			SetValue(float v, class QuasiStack*p=nullptr);
 	void			SetValue(int32 v, class QuasiStack*p=nullptr);
 	void			SetValue(int64 v, class QuasiStack*p=nullptr);
-	void			SetValue(Time *d, class QuasiStack*p=nullptr);
-	void			SetValue(void *d, class QuasiStack*p=nullptr);
-	void			SetValue(char *strval);
+	void			SetValue(Time &d, class QuasiStack*p=nullptr);
+	void			SetPointerValue(void *d, class QuasiStack*p=nullptr);
+	void			SetValue(const string &strval);
 	void			SetValue(TypedValue *val);			
 //	void			SetValue(Pool *d);
 //	void			SetValue(Sample *d);

@@ -6,16 +6,16 @@
 
 using namespace std;
 
-Qua::ParserDriver::ParserDriver()
+QSParse::ParserDriver::ParserDriver()
 	: scanner(&cin)
 	, parser(scanner, *this)  {
 }
 
-Qua::ParserDriver::~ParserDriver() {
+QSParse::ParserDriver::~ParserDriver() {
 }
 
 void 
-Qua::ParserDriver::parse(std::istream& inStream)
+QSParse::ParserDriver::parse(std::istream& inStream)
 {
 	scanner.yyrestart(&inStream);
 	const int accept( 0 );
@@ -58,7 +58,7 @@ Cmd::CmdDriver::add_word( const std::string &word )
 */
 
 std::ostream& 
-Qua::ParserDriver::print( std::ostream &stream )
+QSParse::ParserDriver::print( std::ostream &stream )
 {
 	return(stream);
 }

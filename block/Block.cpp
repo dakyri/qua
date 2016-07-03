@@ -917,8 +917,8 @@ Block::DoReset(void *V, void *B, int x)
 					inf->stateVar.SetValue((int32)0, higherFrame);
 				}
 			} 
-			inf->clipVar.SetValue(clip, higherFrame);
-			inf->mediaVar.SetValue(media, higherFrame);
+			inf->clipVar.SetPointerValue(clip, higherFrame);
+			inf->mediaVar.SetPointerValue(media, higherFrame);
 // processed by main loop... do parameters there
 		}
 		break;
@@ -948,8 +948,8 @@ Block::DoReset(void *V, void *B, int x)
 					inf->stateVar.SetValue((int32)0, higherFrame);
 				}
 			} 
-			inf->clipVar.SetValue(clip, higherFrame);
-			inf->mediaVar.SetValue(media, higherFrame);
+			inf->clipVar.SetPointerValue(clip, higherFrame);
+			inf->mediaVar.SetPointerValue(media, higherFrame);
 // processed by main loop... do parameters there
 // ..... but also recalculate markov stuff if we think it has changed
 		}
@@ -983,8 +983,8 @@ Block::DoReset(void *V, void *B, int x)
 					inf->stateVar.SetValue((int32)0, higherFrame);
 				}
 			} 
-			inf->clipVar.SetValue(clip, higherFrame);
-			inf->mediaVar.SetValue(media, higherFrame);
+			inf->clipVar.SetPointerValue(clip, higherFrame);
+			inf->mediaVar.SetPointerValue(media, higherFrame);
 			bp = bp->next;
 			Stackable *stackable = inf->playerSym->
 					BuiltinValue()->stackable;
@@ -1037,8 +1037,8 @@ Block::DoReset(void *V, void *B, int x)
 					inf->stateVar.SetValue((int32)0, higherFrame);
 				}
 			} 
-			inf->clipVar.SetValue(clip, higherFrame);
-			inf->mediaVar.SetValue(media, higherFrame);
+			inf->clipVar.SetPointerValue(clip, higherFrame);
+			inf->mediaVar.SetPointerValue(media, higherFrame);
 			bp = bp->next;
 			Stackable *stackable = inf->playerSym->
 					BuiltinValue()->stackable;
@@ -1090,8 +1090,8 @@ Block::DoReset(void *V, void *B, int x)
 					inf->stateVar.SetValue((int32)0, higherFrame);
 				}
 			} 
-			inf->clipVar.SetValue(clip, higherFrame);
-			inf->mediaVar.SetValue(media, higherFrame);
+			inf->clipVar.SetPointerValue(clip, higherFrame);
+			inf->mediaVar.SetPointerValue(media, higherFrame);
 			bp = bp->next;
 			Stackable *stackable = inf->playerSym->
 					BuiltinValue()->stackable;

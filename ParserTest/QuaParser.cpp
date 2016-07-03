@@ -49,21 +49,24 @@
 
 #line 51 "QuaParser.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 21 "QuaParser.yy" // lalr1.cc:413
+#line 46 "QuaParser.yy" // lalr1.cc:413
 
-   #include <iostream>
-   #include <cstdlib>
-   #include <fstream>
-   
+	#include <iostream>
+	#include <cstdlib>
+	#include <fstream>
+	#include <string>
+
+	using namespace std;
    /* include for all driver functions */
-   #include "ParserDriver.h"
+	#include "ParserDriver.h"
   
    /* this is silly, but I can't figure out a way around */
-	static int yylex(Qua::QuaParser::semantic_type *yylval,
-					Qua::QuaLexer &scanner,
-					Qua::ParserDriver &driver);
+	static int yylex(QSParse::QuaParser::semantic_type *yylval,
+					QSParse::QuaLexer &scanner,
+					QSParse::ParserDriver &driver);
 
-#line 67 "QuaParser.cpp" // lalr1.cc:413
+
+#line 70 "QuaParser.cpp" // lalr1.cc:413
 
 
 #ifndef YY_
@@ -129,8 +132,8 @@
 #define YYRECOVERING()  (!!yyerrstatus_)
 
 #line 5 "QuaParser.yy" // lalr1.cc:479
-namespace Qua {
-#line 134 "QuaParser.cpp" // lalr1.cc:479
+namespace QSParse {
+#line 137 "QuaParser.cpp" // lalr1.cc:479
 
   /// Build a parser object.
   QuaParser::QuaParser (QuaLexer &scanner_yyarg, ParserDriver &driver_yyarg)
@@ -338,16 +341,37 @@ namespace Qua {
     {
             case 3: // WORD
 
-#line 58 "QuaParser.yy" // lalr1.cc:614
-        { if ((yysym.value.sval))  { delete ((yysym.value.sval)); ((yysym.value.sval)) = nullptr; } }
-#line 344 "QuaParser.cpp" // lalr1.cc:614
+#line 111 "QuaParser.yy" // lalr1.cc:614
+        { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
+#line 347 "QuaParser.cpp" // lalr1.cc:614
         break;
 
       case 4: // SYMBOL
 
-#line 58 "QuaParser.yy" // lalr1.cc:614
-        { if ((yysym.value.sval))  { delete ((yysym.value.sval)); ((yysym.value.sval)) = nullptr; } }
-#line 351 "QuaParser.cpp" // lalr1.cc:614
+#line 111 "QuaParser.yy" // lalr1.cc:614
+        { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
+#line 354 "QuaParser.cpp" // lalr1.cc:614
+        break;
+
+      case 5: // IDENT
+
+#line 111 "QuaParser.yy" // lalr1.cc:614
+        { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
+#line 361 "QuaParser.cpp" // lalr1.cc:614
+        break;
+
+      case 8: // TIME
+
+#line 112 "QuaParser.yy" // lalr1.cc:614
+        { if ((yysym.value.typedval))  { delete ((yysym.value.typedval)); ((yysym.value.typedval)) = nullptr; } }
+#line 368 "QuaParser.cpp" // lalr1.cc:614
+        break;
+
+      case 9: // STRING
+
+#line 111 "QuaParser.yy" // lalr1.cc:614
+        { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
+#line 375 "QuaParser.cpp" // lalr1.cc:614
         break;
 
 
@@ -574,56 +598,60 @@ namespace Qua {
         {
           switch (yyn)
             {
-  case 6:
-#line 67 "QuaParser.yy" // lalr1.cc:859
-    { }
-#line 581 "QuaParser.cpp" // lalr1.cc:859
-    break;
-
-  case 7:
-#line 68 "QuaParser.yy" // lalr1.cc:859
-    { }
-#line 587 "QuaParser.cpp" // lalr1.cc:859
-    break;
-
-  case 8:
-#line 69 "QuaParser.yy" // lalr1.cc:859
-    { }
-#line 593 "QuaParser.cpp" // lalr1.cc:859
-    break;
-
-  case 9:
-#line 70 "QuaParser.yy" // lalr1.cc:859
-    { }
-#line 599 "QuaParser.cpp" // lalr1.cc:859
-    break;
-
-  case 10:
-#line 71 "QuaParser.yy" // lalr1.cc:859
-    { }
+  case 2:
+#line 116 "QuaParser.yy" // lalr1.cc:859
+    { (yylhs.value.block) = (yystack_[1].value.block); }
 #line 605 "QuaParser.cpp" // lalr1.cc:859
     break;
 
-  case 11:
-#line 74 "QuaParser.yy" // lalr1.cc:859
-    {}
-#line 611 "QuaParser.cpp" // lalr1.cc:859
+  case 3:
+#line 117 "QuaParser.yy" // lalr1.cc:859
+    {
+			Block *p = new Block( Block::C_VALUE);
+			p->crap.constant.value = TypedValue::Int((yystack_[0].value.intval));
+			(yylhs.value.block) = p;
+		}
+#line 615 "QuaParser.cpp" // lalr1.cc:859
     break;
 
-  case 12:
-#line 76 "QuaParser.yy" // lalr1.cc:859
-    {}
-#line 617 "QuaParser.cpp" // lalr1.cc:859
+  case 4:
+#line 122 "QuaParser.yy" // lalr1.cc:859
+    {
+			Block *p = new Block( Block::C_VALUE);
+			p->crap.constant.value = TypedValue::Double((yystack_[0].value.doubleval));
+			(yylhs.value.block) = p;
+		}
+#line 625 "QuaParser.cpp" // lalr1.cc:859
     break;
 
-  case 13:
-#line 78 "QuaParser.yy" // lalr1.cc:859
-    {}
-#line 623 "QuaParser.cpp" // lalr1.cc:859
+  case 5:
+#line 127 "QuaParser.yy" // lalr1.cc:859
+    {
+			Block *p = new Block( Block::C_VALUE);
+//			p->crap.constant.value = TypedValue::Double($1);
+			(yylhs.value.block) = p;
+		}
+#line 635 "QuaParser.cpp" // lalr1.cc:859
+    break;
+
+  case 6:
+#line 132 "QuaParser.yy" // lalr1.cc:859
+    {
+			Block *p = new Block( Block::C_VALUE);
+			p->crap.constant.value = *((yystack_[0].value.typedval));
+			(yylhs.value.block) = p;
+		}
+#line 645 "QuaParser.cpp" // lalr1.cc:859
+    break;
+
+  case 7:
+#line 139 "QuaParser.yy" // lalr1.cc:859
+    { (yylhs.value.block) = (yystack_[0].value.block); }
+#line 651 "QuaParser.cpp" // lalr1.cc:859
     break;
 
 
-#line 627 "QuaParser.cpp" // lalr1.cc:859
+#line 655 "QuaParser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -784,71 +812,67 @@ namespace Qua {
   }
 
 
-  const signed char QuaParser::yypact_ninf_ = -4;
+  const signed char QuaParser::yypact_ninf_ = -14;
 
   const signed char QuaParser::yytable_ninf_ = -1;
 
   const signed char
   QuaParser::yypact_[] =
   {
-       0,    -4,    -4,     1,     1,     1,    -4,     6,     5,    -4,
-      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4
+      -6,   -14,   -14,   -14,   -14,    -6,     4,   -14,   -13,   -14,
+     -14
   };
 
   const unsigned char
   QuaParser::yydefact_[] =
   {
-       0,     2,     9,     0,     0,     0,    10,     0,     0,     4,
-       6,     7,     8,    14,    11,    13,    12,     1,     3,     5
+       0,     3,     4,     6,     5,     0,     0,     7,     0,     1,
+       2
   };
 
   const signed char
   QuaParser::yypgoto_[] =
   {
-      -4,    -4,    -4,    -1,    -4,    -4,    -4,    -3
+     -14,     1,   -14
   };
 
   const signed char
   QuaParser::yydefgoto_[] =
   {
-      -1,     7,     8,     9,    10,    11,    12,    14
+      -1,     6,     8
   };
 
   const unsigned char
   QuaParser::yytable_[] =
   {
-       1,    15,    16,     2,    13,    18,    17,    19,     2,     0,
-       0,     3,     4,     5,     0,     6,     3,     4,     5,     0,
-       6
+       1,     2,     3,     4,     9,    10,     7,     0,     0,     0,
+       0,     5
   };
 
   const signed char
   QuaParser::yycheck_[] =
   {
-       0,     4,     5,     3,     3,     0,     0,     8,     3,    -1,
-      -1,    11,    12,    13,    -1,    15,    11,    12,    13,    -1,
-      15
+       6,     7,     8,     9,     0,    18,     5,    -1,    -1,    -1,
+      -1,    17
   };
 
   const unsigned char
   QuaParser::yystos_[] =
   {
-       0,     0,     3,    11,    12,    13,    15,    17,    18,    19,
-      20,    21,    22,     3,    23,    23,    23,     0,     0,    19
+       0,     6,     7,     8,     9,    17,    25,    25,    26,     0,
+      18
   };
 
   const unsigned char
   QuaParser::yyr1_[] =
   {
-       0,    16,    17,    17,    18,    18,    19,    19,    19,    19,
-      19,    20,    21,    22,    23
+       0,    24,    25,    25,    25,    25,    25,    26
   };
 
   const unsigned char
   QuaParser::yyr2_[] =
   {
-       0,     2,     1,     2,     1,     2,     1,     1,     1,     1,
-       1,     2,     2,     2,     1
+       0,     2,     3,     1,     1,     1,     1,     1
   };
 
 
@@ -858,19 +882,17 @@ namespace Qua {
   const char*
   const QuaParser::yytname_[] =
   {
-  "\"end of file\"", "error", "$undefined", "WORD", "SYMBOL", "INT",
-  "ASSGN", "LSQB", "RSQB", "LBRA", "RBRA", "ROOM", "CLIENT", "JOIN",
-  "LEAVE", "NEWLINE", "$accept", "list_option", "command_list", "command",
-  "create_room_command", "join_room_command", "create_client_command",
-  "expression", YY_NULLPTR
+  "\"end of file\"", "error", "$undefined", "WORD", "SYMBOL", "IDENT",
+  "INT", "FLOAT", "TIME", "STRING", "TYPE_ATTRIBUTE", "QUA", "ASSGN",
+  "LSQB", "RSQB", "LBRA", "RBRA", "LB", "RB", "PLUS", "MINUS", "STAR",
+  "SLASH", "NEWLINE", "$accept", "atom", "expression", YY_NULLPTR
   };
 
 
   const unsigned char
   QuaParser::yyrline_[] =
   {
-       0,    63,    63,    63,    65,    65,    67,    68,    69,    70,
-      71,    74,    76,    78,    80
+       0,   116,   116,   117,   122,   127,   132,   139
   };
 
   // Print the state stack on the debug stream.
@@ -938,9 +960,9 @@ namespace Qua {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15
+      15,    16,    17,    18,    19,    20,    21,    22,    23
     };
-    const unsigned int user_token_number_max_ = 270;
+    const unsigned int user_token_number_max_ = 278;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -952,14 +974,14 @@ namespace Qua {
   }
 
 #line 5 "QuaParser.yy" // lalr1.cc:1167
-} // Qua
-#line 957 "QuaParser.cpp" // lalr1.cc:1167
-#line 83 "QuaParser.yy" // lalr1.cc:1168
+} // QSParse
+#line 979 "QuaParser.cpp" // lalr1.cc:1167
+#line 168 "QuaParser.yy" // lalr1.cc:1168
 
  
 
 void 
-Qua::QuaParser::error( const std::string &err_message )
+QSParse::QuaParser::error( const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << "\n"; 
 }
@@ -968,9 +990,9 @@ Qua::QuaParser::error( const std::string &err_message )
 /* include for access to scanner.yylex */
 #include "QuaLexer.h"
 static int 
-yylex( Qua::QuaParser::semantic_type *yylval,
-	   Qua::QuaLexer  &scanner,
-	   Qua::ParserDriver   &driver )
+yylex( QSParse::QuaParser::semantic_type *yylval,
+	   QSParse::QuaLexer  &scanner,
+	   QSParse::ParserDriver   &driver )
 {
    return( scanner.yylex(yylval) );
 }

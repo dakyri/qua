@@ -32,7 +32,7 @@
 
 /**
  ** \file QuaParser.hpp
- ** Define the Qua::parser class.
+ ** Define the QSParse::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -42,12 +42,37 @@
 // //                    "%code requires" blocks.
 #line 8 "QuaParser.yy" // lalr1.cc:377
 
-	namespace Qua {
+
+	#include "qua_version.h"
+	#include "StdDefs.h"
+	
+	#include "Qua.h"
+	#include "Voice.h"
+	#include "Sample.h"
+	#include "Pool.h"
+	#include "Lambda.h"
+	#include "Sym.h"
+	#include "Block.h"
+	#include "Template.h"
+	#include "QuaFX.h"
+	#include "Envelope.h"
+	#include "Executable.h"
+	#include "Channel.h"
+	#include "QuasiStack.h"
+	#include "QuaPort.h"
+	#include "QuaJoy.h"
+	#include "Markov.h"
+	#include "BaseVal.h"
+	#include "VstPlugin.h"
+	#include "Parse.h"
+	#include "MidiDefs.h"
+	
+	namespace QSParse {
 		class ParserDriver;
  		class QuaLexer;
 	}
 
-#line 51 "QuaParser.hpp" // lalr1.cc:377
+#line 76 "QuaParser.hpp" // lalr1.cc:377
 
 
 # include <cstdlib> // std::abort
@@ -118,8 +143,8 @@
 #endif
 
 #line 5 "QuaParser.yy" // lalr1.cc:377
-namespace Qua {
-#line 123 "QuaParser.hpp" // lalr1.cc:377
+namespace QSParse {
+#line 148 "QuaParser.hpp" // lalr1.cc:377
 
 
 
@@ -133,12 +158,17 @@ namespace Qua {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 36 "QuaParser.yy" // lalr1.cc:377
+    #line 64 "QuaParser.yy" // lalr1.cc:377
 
-	std::string *sval;
-	int ival;
+	std::string *stringval;
+	TypedValue *typedval;
+	int intval;
+	float floatval;
+	double doubleval;
+	Block *block;
+	Qua *qua;
 
-#line 142 "QuaParser.hpp" // lalr1.cc:377
+#line 172 "QuaParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -158,17 +188,25 @@ namespace Qua {
         END = 0,
         WORD = 258,
         SYMBOL = 259,
-        INT = 260,
-        ASSGN = 261,
-        LSQB = 262,
-        RSQB = 263,
-        LBRA = 264,
-        RBRA = 265,
-        ROOM = 266,
-        CLIENT = 267,
-        JOIN = 268,
-        LEAVE = 269,
-        NEWLINE = 270
+        IDENT = 260,
+        INT = 261,
+        FLOAT = 262,
+        TIME = 263,
+        STRING = 264,
+        TYPE_ATTRIBUTE = 265,
+        QUA = 266,
+        ASSGN = 267,
+        LSQB = 268,
+        RSQB = 269,
+        LBRA = 270,
+        RBRA = 271,
+        LB = 272,
+        RB = 273,
+        PLUS = 274,
+        MINUS = 275,
+        STAR = 276,
+        SLASH = 277,
+        NEWLINE = 278
       };
     };
 
@@ -467,12 +505,12 @@ namespace Qua {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 20,     ///< Last index in yytable_.
-      yynnts_ = 8,  ///< Number of nonterminal symbols.
-      yyfinal_ = 17, ///< Termination state number.
+      yylast_ = 11,     ///< Last index in yytable_.
+      yynnts_ = 3,  ///< Number of nonterminal symbols.
+      yyfinal_ = 9, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 16  ///< Number of tokens.
+      yyntokens_ = 24  ///< Number of tokens.
     };
 
 
@@ -483,8 +521,8 @@ namespace Qua {
 
 
 #line 5 "QuaParser.yy" // lalr1.cc:377
-} // Qua
-#line 488 "QuaParser.hpp" // lalr1.cc:377
+} // QSParse
+#line 526 "QuaParser.hpp" // lalr1.cc:377
 
 
 
