@@ -26,10 +26,10 @@ QuaPort::QuaPort(
 	environment.display.CreatePortBridge(this);
 }
 
-char *
+const char *
 QuaPort::name(uchar)
 {
-	return sym->name;
+	return sym->name.c_str();
 }
 
 bool
@@ -55,7 +55,7 @@ QuaPort::save(FILE *fp, short indent)
 //	if (appMimeType)
 //		fprintf(fp, "\n\t#mime \"%s\"", appMimeType);
 		
-	fprintf(fp,	" %s", sym->PrintableName());
+	fprintf(fp,	" %s", sym->printableName());
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);

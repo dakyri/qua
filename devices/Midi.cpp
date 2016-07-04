@@ -158,10 +158,10 @@ QuaMidiPort::~QuaMidiPort()
 #endif
 }
 
-char *
-QuaMidiPort::Name(uchar)
+const char *
+QuaMidiPort::name(uchar)
 {
-	return sym->name;
+	return sym->name.c_str();
 }
 
 QuaStreamIO::QuaStreamIO(Qua *q, QuaPort *p)
@@ -1211,7 +1211,7 @@ QuaMidiManager::disconnect(Input *s)
 	}
 	if (!anyEnabled &&
 		!closeInput(s->src.midi)) {
-		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name);
+		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name.c_str());
 		return B_ERROR;
 	}
 	s->src.midi = nullptr;
@@ -1237,7 +1237,7 @@ QuaMidiManager::disconnect(Output *s)
 	}
 	if (!anyEnabled &&
 		!closeOutput(s->dst.midi)) {
-		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name);
+		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name.c_str());
 		return B_ERROR;
 	}
 	s->dst.midi = nullptr;

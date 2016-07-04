@@ -159,7 +159,7 @@ class QuaMidiPort: 	public QuaPort
 public:
 	QuaMidiPort(std::string dmm, std::string nm, QuaMidiManager *, short, int32 myid);
 	~QuaMidiPort();
-	virtual char *	Name(uchar);
+	virtual const char * name(uchar);
 					
 	int32			id;
 	

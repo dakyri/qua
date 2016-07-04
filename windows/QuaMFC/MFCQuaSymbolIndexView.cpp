@@ -165,47 +165,47 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 					} else {
 						img = 10;
 					}
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, img);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, img);
 				}
 				break;
 			}
 			case TypedValue::S_CHANNEL: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 2);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 2);
 				}
 				break;
 			}
 			case TypedValue::S_SAMPLE: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 6);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 6);
 				}
 				break;
 			  }
 			case TypedValue::S_VOICE: {
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 8);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 8);
 				}
 				break;
 			 }
 			case TypedValue::S_LAMBDA: {
 				it = IndexItemFor(s);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 5);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 5);
 				}
 				break;
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
+				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
 				switch (p->type) {
 				case TypedValue::S_VOICE: {
 						if (iti != NULL) {
 							it = IndexItemFor(s, iti);
 							if (it == NULL) {
-								it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 4);
+								it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 4);
 							}
 						}
 						break;
@@ -214,7 +214,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 						if (iti != NULL) {
 							it = IndexItemFor(s, iti);
 							if (it == NULL) {
-								it = AddIndexItem(s->UniqueName(), (LPARAM)s, iti, 3);
+								it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 3);
 							}
 						} else {
 							fprintf(stderr, "parent index item not found\n");
@@ -247,28 +247,28 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 					} else {
 						img = 10;
 					}
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, regions, img);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, regions, img);
 				}
 				break;
 			}
 			case TypedValue::S_CHANNEL: {
 				HTREEITEM	it = IndexItemFor(s, channels);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, channels, 2);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, channels, 2);
 				}
 				break;
 			}
 			case TypedValue::S_SAMPLE: {
 				HTREEITEM	it = IndexItemFor(s, samples);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, samples, 6);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, samples, 6);
 				}
 				break;
 			  }
 			case TypedValue::S_VOICE: {
 				HTREEITEM	it = IndexItemFor(s, voices);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, voices, 8);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, voices, 8);
 				}
 				break;
 			 }
@@ -277,27 +277,27 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 				if (it == NULL) {
 					HTREEITEM	pit = NULL;
 					if (s->context == NULL || s->context->type == TypedValue::S_QUA) {
-						it = AddIndexItem(s->UniqueName(), (LPARAM)s, methods, 5);
+						it = AddIndexItem(s->uniqueName(), (LPARAM)s, methods, 5);
 					} else {
 						pit = IndexItemFor(s->context);
 						if (pit == NULL) {
 							pit = methods;
 						}
-						it = AddIndexItem(s->UniqueName(), (LPARAM)s, pit, 5);
+						it = AddIndexItem(s->uniqueName(), (LPARAM)s, pit, 5);
 					}
 				}
 				break;
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
+				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
 				switch (p->type) {
 					case  TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
 						if (ipt != NULL) {
 							HTREEITEM	it = IndexItemFor(s, ipt);
 							if (it == NULL) {
-								it = AddIndexItem(s->UniqueName(), (LPARAM)s, ipt, 4);
+								it = AddIndexItem(s->uniqueName(), (LPARAM)s, ipt, 4);
 							}
 						}
 						break;
@@ -307,7 +307,7 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 						if (ipt != NULL) {
 							HTREEITEM	it = IndexItemFor(s, ipt);
 							if (it == NULL) {
-								it = AddIndexItem(s->UniqueName(), (LPARAM)s, ipt, 3);
+								it = AddIndexItem(s->uniqueName(), (LPARAM)s, ipt, 3);
 							}
 						} else {
 							fprintf(stderr, "parent index item not found\n");
@@ -352,7 +352,7 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 	for (i=0; i<present.size(); i++) {
 		StabEnt	*s =present[i];
 		if (s && s->type == TypedValue::S_CLIP) {
-			fprintf(stderr, "\tadd %x %s\n", s, s->name);
+			fprintf(stderr, "\tadd %x %s\n", s, s->name.c_str());
 			addToSymbolIndex(s);
 		}
 	}
@@ -368,7 +368,7 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 		if (item.lParam >= QSI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
 			if (s->type == TypedValue::S_CLIP) {
-				fprintf(stderr, "\tfound %x %s\n", s, s->name);
+				fprintf(stderr, "\tfound %x %s\n", s, s->name.c_str());
 				if (find(present.begin(), present.end(), s) != present.end()) {
 					GetTreeCtrl().DeleteItem(hItem);
 				}
@@ -383,7 +383,7 @@ MFCQuaSymbolIndexView::symbolNameChanged(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
-		GetTreeCtrl().SetItemText(ht, s->UniqueName());
+		GetTreeCtrl().SetItemText(ht, s->uniqueName());
 	}
 }
 
@@ -407,7 +407,7 @@ MFCQuaSymbolIndexView::AddTopLevelClass(char *s, LPARAM type, HTREEITEM parent, 
 
 
 HTREEITEM
-MFCQuaSymbolIndexView::AddIndexItem(char *s, LPARAM type, HTREEITEM parent, int img)
+MFCQuaSymbolIndexView::AddIndexItem(const char *s, LPARAM type, HTREEITEM parent, int img)
 {
 	fprintf(stderr, "ai %s %x %x %d\n", s, type, parent, img);
 	HTREEITEM ht = GetTreeCtrl().InsertItem(
@@ -476,7 +476,7 @@ MFCQuaSymbolIndexView::IndexItemFor(StabEnt *s)
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name);
+				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
 				switch (p->type) {
 					case TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
@@ -855,11 +855,11 @@ MFCQuaSymbolIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	NMTVDISPINFO	*tvp = (NMTVDISPINFO *)pNotifyStruct;
 	HTREEITEM		it = tvp->item.hItem;
 
-	char			name[MAX_QUA_NAME_LENGTH];
+	string name;
 
 //	fprintf(stderr, "label edit end %s\n", tvp->item.pszText?tvp->item.pszText:"");
 	DWORD_PTR		selectedData = GetTreeCtrl().GetItemData(selectedItem);
-	if (selectedData > QSI_SYMBOL_LPARAM && SymTab::MakeValidSymbolName(tvp->item.pszText, name)) {
+	if (selectedData > QSI_SYMBOL_LPARAM && (name=SymTab::MakeValidSymbolName(tvp->item.pszText)).size()) {
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
 			case  TypedValue::S_LAMBDA:
@@ -1042,13 +1042,13 @@ MFCQuaSymbolIndexView::OnPopupAddMethod()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*pSym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup add child method %s\n", pSym->UniqueName());
+		fprintf(stderr, "Popup add child method %s\n", pSym->uniqueName());
 		switch (pSym->type) {
 			case TypedValue::S_LAMBDA:
 			case TypedValue::S_CHANNEL:
 			case TypedValue::S_VOICE:
 			case TypedValue::S_SAMPLE: {
-				string nmbuf = glob.MakeUniqueName(pSym, "action", 1);
+				string nmbuf = glob.makeUniqueName(pSym, "action", 1);
 				if (quaLink) {
 					StabEnt *mSym = quaLink->CreateMethod(nmbuf.c_str(), pSym);
 					if (mSym) {
@@ -1070,7 +1070,7 @@ MFCQuaSymbolIndexView::OnPopupDelete()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
+		fprintf(stderr, "Popup delete %s\n", sym->uniqueName());
 		switch (sym->type) {
 			case TypedValue::S_LAMBDA:
 				quaLink->DeleteObject(sym);

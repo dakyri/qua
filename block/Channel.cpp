@@ -136,7 +136,7 @@ Channel::Channel(std::string nm, short ch_id,
 bool
 Channel::Init()
 {
-	fprintf(stderr, "Channel::initialise %s\n", sym->name);
+	fprintf(stderr, "Channel::initialise %s\n", sym->name.c_str());
 	hasAudio = txStack->hasAudio|rxStack->hasAudio;
 #ifdef QUA_V_AUDIO
 	if (hasAudio&AUDIO_HAS_PLAYER) {
@@ -177,7 +177,7 @@ Channel::~Channel()
 //		Window()->Unlock();
 //	}
 	
-	fprintf(stderr, "deleting channel %s\n", sym->name);
+	fprintf(stderr, "deleting channel %s\n", sym->name.c_str());
 	if (rx.block) {
 		rx.block->DeleteAll();
 		rx.block = nullptr;
@@ -380,7 +380,7 @@ Channel::CheckInBuffers()
 		for (Input *i: activeStreamInputs) {
 			// get stream items
 			i->GetStreamItems(&recvStream);
-			fprintf(stderr, "Channel %s, receiving %d\n", sym->name, recvStream.nItems);
+			fprintf(stderr, "Channel %s, receiving %d\n", sym->name.c_str(), recvStream.nItems);
 		}
 		
 		if (recvStream.nItems > 0) {
@@ -631,7 +631,7 @@ status_t
 Channel::SaveSnapshot(FILE *fp)
 {
 	status_t	err = B_OK;
-	fprintf(fp, "<channel name=\"%s\">\n", sym->name);
+	fprintf(fp, "<channel name=\"%s\">\n", sym->name.c_str());
 	if (txStack) {
 		txStack->SaveSnapshot(fp, "tx");
 	}
@@ -671,7 +671,7 @@ Channel::Save(FILE *fp, short indent)
 //		} else {
 //			fprintf(fp,	" \\noAudiothru");
 //		}
-		fprintf(fp,	" %s", sym->name);
+		fprintf(fp,	" %s", sym->name.c_str());
 	SaveMainBlock(nullptr, fp, indent, sym, true, true, this, nullptr); 
 //	tab(fp, indent+1);
 //	fprintf(fp, "input {%s %s} {}\n",
@@ -945,12 +945,12 @@ Channel::Generate(size_t nFrames)
 }
 
 Input *
-Channel::AddInput(char *nm, QuaPort *p, short c, bool en)
+Channel::AddInput(const string &nm, QuaPort *p, short c, bool en)
 {
-	fprintf(stderr, "Channel %s adding input %s\n", sym->name, nm);
+	fprintf(stderr, "Channel %s adding input %s\n", sym->name.c_str(), nm.c_str());
 	Input	*s=nullptr;
 	activePortsLock.lock();
-	std::string inputName = glob.MakeUniqueName(sym, nm, 0);
+	std::string inputName = glob.makeUniqueName(sym, nm, 0);
 	inputs.Add(s=new Input(inputName, this, p, c, en));
 	DefineSymbol("gain", TypedValue::S_FLOAT, 0,
 					&s->gain, s->sym,
@@ -981,13 +981,13 @@ Channel::AddInput(char *nm, QuaPort *p, short c, bool en)
 }
 
 Output *
-Channel::AddOutput(char *nm, QuaPort *p, short c, bool en)
+Channel::AddOutput(const string &nm, QuaPort *p, short c, bool en)
 {
-	fprintf(stderr, "Channel %s adding output %s\n", sym->name, nm);
+	fprintf(stderr, "Channel %s adding output %s\n", sym->name.c_str(), nm.c_str());
 
 	activePortsLock.lock();
 	Output		*d=nullptr;
-	std::string outputName = glob.MakeUniqueName(sym, nm, 0);
+	std::string outputName = glob.makeUniqueName(sym, nm, 0);
 
 	outputs.Add(d=new Output(outputName, this, p, c, en));
 	DefineSymbol("gain", TypedValue::S_FLOAT, 0,
@@ -1051,7 +1051,7 @@ Channel::Enable(Input *s, bool en)
 		switch(s->device->deviceType) {
 		case QUA_DEV_MIDI: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable midi in (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NUM));
+				fprintf(stderr, "Channel %s, enable midi in (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getMidiManager()->connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
 				} else {
@@ -1084,7 +1084,7 @@ Channel::Enable(Input *s, bool en)
 #ifdef QUA_V_AUDIO
 		case QUA_DEV_AUDIO: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NUM));
+				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getAudioManager()->connect(s)) == B_OK) {
 					activeAudioInputs.Add(s);
 				} else {
@@ -1115,7 +1115,7 @@ Channel::Enable(Output *s, bool en)
 		switch(s->device->deviceType) {
 		case QUA_DEV_MIDI: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable midi out (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NAME));
+				fprintf(stderr, "Channel %s, enable midi out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NAME));
 				if ((err=getMidiManager()->connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
 				} else {
@@ -1148,7 +1148,7 @@ Channel::Enable(Output *s, bool en)
 #ifdef QUA_V_AUDIO
 		case QUA_DEV_AUDIO: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name, s->Name(NMFMT_NAME,NMFMT_NUM));
+				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getAudioManager()->connect(s)) == B_OK) {
 					activeAudioOutputs.Add(s);
 				} else {

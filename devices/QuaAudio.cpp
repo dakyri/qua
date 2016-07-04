@@ -76,8 +76,8 @@ QuaAudioPort::QuaAudioPort(char *nm, QuaAudioManager *qa, short subt)
 }
 
 
-char *
-QuaAudioPort::Name(uchar dfmt)
+const char *
+QuaAudioPort::name(uchar dfmt)
 {
 #ifdef QUA_V_AUDIO_ASIO
 	if (dfmt == NMFMT_NAME) {
@@ -92,7 +92,7 @@ QuaAudioPort::Name(uchar dfmt)
 		}
 	}
 #endif
-	return sym->name;
+	return sym->name.c_str();
 }
 
 
@@ -685,7 +685,7 @@ QuaAudioManager::removeSample(Sample *s)
 void
 QuaAudioManager::startInstance(Instance *i)
 {
-	fprintf(stderr, "start audio instance %s\n", i->sym->name);
+	fprintf(stderr, "start audio instance %s\n", i->sym->name.c_str());
 	if (i->channel == nullptr)
 		return;
 	Channel	*c = i->channel;

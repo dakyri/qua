@@ -31,8 +31,8 @@ inline Color AlphaColor(uchar a, COLORREF c)
 #endif
 class CFont;
 class CWnd;
-long AvgStringWidth(char *s, CFont *f);
-void StringExtent(char *s, CFont *f, CWnd *w, long &cx, long &cy);
+long AvgStringWidth(const char *s, CFont *f);
+void StringExtent(const char *s, CFont *f, CWnd *w, long &cx, long &cy);
 
 rgb_color	StrColor(char *str);
 char		*ColorStr(rgb_color color);

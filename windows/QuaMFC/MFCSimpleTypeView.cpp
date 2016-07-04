@@ -421,7 +421,7 @@ MFCSimpleTypeView::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *result)
 		*result = 0; // default action is to reject the edit 
 		StabEnt	*sym = SymForItem(plvItem->iItem);
 		if (sym != NULL) {
-			StabEnt	*fnd = glob.FindContextSymbol(plvItem->pszText, sym->context);
+			StabEnt	*fnd = glob.findContextSymbol(plvItem->pszText, sym->context);
 			if (fnd == NULL) {
 				GetListCtrl().SetItemText(plvItem->iItem, plvItem->iSubItem, plvItem->pszText); // is this necessary????
 				QuaPerceptualSet	*quaLink=parent->QuaLink();
@@ -430,7 +430,7 @@ MFCSimpleTypeView::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *result)
 						if (quaLink) {
 							quaLink->Rename(sym, plvItem->pszText);
 						} else {
-							glob.Rename(sym, plvItem->pszText);
+							glob.rename(sym, plvItem->pszText);
 						}
 						*result = 1;
 						break;
@@ -774,7 +774,7 @@ MFCSimpleTypeView::CreateList(CRect &r, MFCObjectView *v, UINT id)
 }
 
 long
-MFCSimpleTypeView::AddSymItem(char * nm, LPARAM lp, int im)
+MFCSimpleTypeView::AddSymItem(const char * nm, LPARAM lp, int im)
 {
 	long ind = GetListCtrl().InsertItem(0, nm, im);
 	if (ind >= 0) {
@@ -878,10 +878,10 @@ MFCSimpleTypeView::AddSym(StabEnt *s)
 			if (s->refType == TypedValue::REF_VALUE) {
 				return -1;
 			}
-			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
+			ind = AddSymItem(s->uniqueName(), (LPARAM)s, 0);
 			break;
 		case TypedValue::S_LAMBDA:
-			ind = AddSymItem(s->UniqueName(), (LPARAM)s, 0);
+			ind = AddSymItem(s->uniqueName(), (LPARAM)s, 0);
 			break;
 		default:
 			return -1;
@@ -968,12 +968,12 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 				}
 			}
 
-			sprintf(buf, "set '%s' type", itemSym->UniqueName());
+			sprintf(buf, "set '%s' type", itemSym->uniqueName());
 			ctxtMenu->AppendMenu(MF_POPUP, (UINT) setVarTypeMenu->m_hMenu, buf);
 
-			sprintf(buf, "delete '%s'", itemSym->UniqueName());
+			sprintf(buf, "delete '%s'", itemSym->uniqueName());
 			ctxtMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_DELETE_SELECTED, buf);
-			sprintf(buf, "set '%s' envelope", itemSym->UniqueName());
+			sprintf(buf, "set '%s' envelope", itemSym->uniqueName());
 			ctxtMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_ENVELOPE_SELECTED, buf);
 
 			CMenu		*dispVarMenu = new CMenu;
@@ -981,7 +981,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			dispVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_NODISPLAY_SELECTED, "none");
 			dispVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_CONTROL_SELECTED, "control");
 			dispVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_DISPLAY_SELECTED, "display");
-			sprintf(buf, "set '%s' display", itemSym->UniqueName());
+			sprintf(buf, "set '%s' display", itemSym->uniqueName());
 			ctxtMenu->AppendMenu(MF_POPUP, (UINT) dispVarMenu->m_hMenu, buf);
 
 			ctxtMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_SET_LENGTH_SELECTED, "set length");
@@ -1009,7 +1009,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 					case TypedValue::S_LONG: vnm = "longvar"; break;
 					case TypedValue::S_FLOAT: vnm = "floatvar"; break;
 				}
-				string	nmbuf = glob.MakeUniqueName(pSym, vnm, 1);
+				string	nmbuf = glob.makeUniqueName(pSym, vnm, 1);
 				StabEnt	*nsym=DefineSymbol(nmbuf, typ, 0, 0, pSym, TypedValue::REF_STACK, false, false, StabEnt::DISPLAY_NOT);
 				stkbl->ReAllocateChildren();
 				AddSym(nsym);
@@ -1018,7 +1018,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 	} else if (ret == ID_VARIABLECONTEXT_ADD_METHOD) {
 		if (parent && parent->Symbol()) {
 			StabEnt	*pSym = parent->Symbol();
-			string nmbuf = glob.MakeUniqueName(pSym, "action", 1);
+			string nmbuf = glob.makeUniqueName(pSym, "action", 1);
 			QuaPerceptualSet	*quaLink=parent->QuaLink();
 			if (quaLink) {
                 StabEnt *mSym = quaLink->CreateMethod(nmbuf, pSym);

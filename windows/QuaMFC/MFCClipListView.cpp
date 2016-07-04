@@ -178,11 +178,11 @@ MFCClipListView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 		StabEnt		*sym = (StabEnt *)selectedData;
 		switch (sym->type) {
 			case TypedValue::S_CLIP:
-				glob.Rename(sym, tvp->item.pszText);
+				glob.rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			case TypedValue::S_TAKE:
-				glob.Rename(sym, tvp->item.pszText);
+				glob.rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			default:
@@ -606,7 +606,7 @@ MFCClipListView::ItemFor(StabEnt *s)
 
 
 HTREEITEM
-MFCClipListView::AddItem(char *s, LPARAM type, HTREEITEM parent, int img)
+MFCClipListView::AddItem(const char *s, LPARAM type, HTREEITEM parent, int img)
 {
 	fprintf(stderr, "ai %s %x %x %d\n", s, type, parent, img);
 	HTREEITEM ht = GetTreeCtrl().InsertItem(
@@ -633,7 +633,7 @@ MFCClipListView::AddItem(StabEnt *s)
 				it = ItemFor(s, TVI_ROOT);
 				Take	*t = s->TakeValue();
 				if (it == NULL) {
-					it = AddItem(s->UniqueName(), (LPARAM)s, TVI_ROOT,
+					it = AddItem(s->uniqueName(), (LPARAM)s, TVI_ROOT,
 								(t->type==Take::STREAM)?3:
 								(t->type==Take::SAMPLE)?2:4);
 				}
@@ -644,7 +644,7 @@ MFCClipListView::AddItem(StabEnt *s)
 				if (c->media == NULL) { // an unattached clip object
 					it = ItemFor(s, TVI_ROOT);
 					if (it == NULL) {
-						it = AddItem(s->UniqueName(), (LPARAM)s, TVI_ROOT,
+						it = AddItem(s->uniqueName(), (LPARAM)s, TVI_ROOT,
 									10);
 					}
 					return it;
@@ -653,7 +653,7 @@ MFCClipListView::AddItem(StabEnt *s)
 				if (ts == NULL) { // an unattached clip object
 					it = ItemFor(s, TVI_ROOT);
 					if (it == NULL) {
-						it = AddItem(s->UniqueName(), (LPARAM)s, TVI_ROOT,
+						it = AddItem(s->uniqueName(), (LPARAM)s, TVI_ROOT,
 									(c->media->type==Take::STREAM)?9:
 									(c->media->type==Take::SAMPLE)?8:10);
 					}
@@ -662,7 +662,7 @@ MFCClipListView::AddItem(StabEnt *s)
 					HTREEITEM	itp = ItemFor(ts, TVI_ROOT);
 					it = ItemFor(s, itp);
 					if (it == NULL) {
-						it = AddItem(s->UniqueName(), (LPARAM)s, itp,
+						it = AddItem(s->uniqueName(), (LPARAM)s, itp,
 									(c->media->type==Take::STREAM)?9:
 									(c->media->type==Take::SAMPLE)?8:10);
 					}
@@ -671,7 +671,7 @@ MFCClipListView::AddItem(StabEnt *s)
 			}
 		}
 	}
-//	HTREEITEM ind = AddClipItem(s->UniqueName(), (LPARAM)s,
+//	HTREEITEM ind = AddClipItem(s->uniqueName(), (LPARAM)s,
 //					c->media==NULL?2:
 //					c->media->type==Take::STREAM?1:
 //					c->media->type==Take::SAMPLE?0:2);
@@ -738,7 +738,7 @@ MFCClipListView::OnPopupCreateClip()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup create clip %s\n", sym->UniqueName());
+		fprintf(stderr, "Popup create clip %s\n", sym->uniqueName());
 		Time	dur_time;
 		Time	at_time;
 		switch (sym->type) {
@@ -751,7 +751,7 @@ MFCClipListView::OnPopupCreateClip()
 							dur_time.Set(1,0,0,&Metric::std);
 							Voice	*v;
 							StreamTake	*take=sym->StreamTakeValue();
-							string	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
+							string	nmbuf = glob.makeUniqueName(chSym, "clip", 1);
 							if (take != NULL && (v = chSym->VoiceValue()) != NULL) {
 								Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //								MFCEditorItemView	*added_item = AddClipItemView(c);
@@ -763,7 +763,7 @@ MFCClipListView::OnPopupCreateClip()
 							at_time.Set(0,0,0,&Metric::std);
 							SampleTake	*take=sym->SampleTakeValue();
 							dur_time = take->Duration();
-							string 	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
+							string 	nmbuf = glob.makeUniqueName(chSym, "clip", 1);
 							if (take != NULL && (v = chSym->SampleValue()) != NULL) {
 								Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //								MFCEditorItemView	*added_item = AddClipItemView(c);
@@ -816,7 +816,7 @@ MFCClipListView::OnPopupEditClip()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
+		fprintf(stderr, "Popup delete %s\n", sym->uniqueName());
 		switch (sym->type) {
 			case TypedValue::S_CLIP:
 //				quaLink->DeleteObject(sym);

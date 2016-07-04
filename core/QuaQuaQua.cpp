@@ -99,7 +99,7 @@ CreateNewNote(int type, Block *P,
 
 	noteTo.properties = NULL;
 	noteTo.AddProperties(P->next->next->next);
-	ret_val.SetValue(&noteTo);
+	ret_val.SetPointerValue(&noteTo);
 	if (debug_gen)
 		fprintf(stderr, "creating type %d: pitch %d dynamic %d duration %d\n", ret_val.type,
 					noteTo.pitch,
@@ -260,7 +260,7 @@ CreateNewSysX(Block *P,
 	if (debug_gen)
 		fprintf(stderr, "creating %d: %d\n", ret_val.type,
 					sysXTo.length);
-	ret_val.SetValue(&sysXTo);
+	ret_val.SetPointerValue(&sysXTo);
    
     return ret_val;
 }

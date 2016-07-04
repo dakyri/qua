@@ -22,7 +22,7 @@ TypedValue::IntValue(QuasiStack *stack)
 {
 	if (refType == REF_STACK) {
 		while (stack && stack->context != val.stackAddress.context) {
-			fprintf(stderr, "stack has %s\n", stack->context->name);
+			fprintf(stderr, "stack has %s\n", stack->context->name.c_str());
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
@@ -38,7 +38,7 @@ TypedValue::IntValue(QuasiStack *stack)
 			case S_TIME:		return ((Time*)addr)->ticks;
 			}
 		} else {
-			fprintf(stderr, "IntValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "IntValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -113,7 +113,7 @@ TypedValue::TimeValue(QuasiStack *stack)
 			default:			return Time::zero;
 			}
 		} else {
-			fprintf(stderr, "TimeValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "TimeValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return Time::zero;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -148,7 +148,7 @@ TypedValue::FloatPValue(QuasiStack *stack)
 			case S_FLOAT:		return ((float *)addr);
 			}
 		} else {
-			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -186,7 +186,7 @@ TypedValue::FloatValue(QuasiStack *stack)
 			case S_STRANGE_POINTER:	return 0;
 			}
 		} else {
-			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -245,7 +245,7 @@ TypedValue::DoubleValue(QuasiStack *stack)
 			case S_STRANGE_POINTER:	return 0;
 			}
 		} else {
-			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "FloatValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -282,7 +282,7 @@ TypedValue::LongValue(QuasiStack *stack)
 			case S_STRANGE_POINTER:	return (int64)*((void **)addr);
 			}
 		} else {
-			fprintf(stderr, "LongValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "LongValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -324,7 +324,7 @@ TypedValue::PointerValue(QuasiStack *stack)
 {
 	if (refType == REF_STACK) {
 		while (stack && stack->context != val.stackAddress.context) {
-			fprintf(stderr, "%s not %s\n", val.stackAddress.context->name, stack->context->name);
+			fprintf(stderr, "%s not %s\n", val.stackAddress.context->name.c_str(), stack->context->name.c_str());
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
@@ -342,7 +342,7 @@ TypedValue::PointerValue(QuasiStack *stack)
 				return *((void **)addr);
 			}
 		} else {
-			fprintf(stderr, "PointerValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name:"\"global\"");
+			fprintf(stderr, "PointerValue: no stack matching ctxt %s\n", val.stackAddress.context?val.stackAddress.context->name.c_str() :"\"global\"");
 			return 0;
 		}
 	} else if (refType == REF_INSTANCE) {
@@ -737,9 +737,9 @@ TypedValue::StackableValue()
 *   set the value of a BaseValueType according to its type
 */
 void
-TypedValue::SetValue(const string &strval)
+TypedValue::SetTo(const string &strval)
 {
-	if (*strval) {
+	if (strval.size()) {
 		switch (type) {
 		case S_BOOL:		val.Bool = (atoi(strval.c_str()) != 0); break;
 		case S_BYTE:		val.byte = atoi(strval.c_str()); break;
@@ -749,7 +749,7 @@ TypedValue::SetValue(const string &strval)
 		case S_FLOAT:		val.Float = atof(strval.c_str()); break;
 		case S_POOL:		val.pool = findPool(strval.c_str()); break;
 		case S_SAMPLE:		val.sample = findSample(strval.c_str()); break;
-		case S_STRING:		val.string = strval; break;
+//		case S_STRING:		val.string = strval; break;
 		default:
 			internalError("can't set value to string, type = %d", type);
 		}

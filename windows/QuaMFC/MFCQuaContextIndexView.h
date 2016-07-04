@@ -26,7 +26,7 @@ public:
 	virtual void				OnInitialUpdate();
 
 	HTREEITEM					AddTopLevelClass(char *, LPARAM, HTREEITEM parent, int img);
-	HTREEITEM					AddIndexItem(char *, LPARAM, HTREEITEM parent, int img);
+	HTREEITEM					AddIndexItem(const char *, LPARAM, HTREEITEM parent, int img);
 	void						AddAllIndexItems();
 	HTREEITEM					IndexItemFor(StabEnt *, HTREEITEM parit);
 	HTREEITEM					IndexItemFor(StabEnt *);

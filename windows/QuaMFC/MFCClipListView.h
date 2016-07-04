@@ -58,7 +58,7 @@ public:
 	HTREEITEM				ItemFor(StabEnt *s, HTREEITEM parent);
 	HTREEITEM				ItemAtPoint(CPoint &);
 	HTREEITEM				AddItem(StabEnt *s);
-	HTREEITEM				AddItem(char *s, LPARAM type, HTREEITEM parent, int img);
+	HTREEITEM				AddItem(const char *s, LPARAM type, HTREEITEM parent, int img);
 	bool					RemoveItem(StabEnt *s);
 	bool					SelectClip(StabEnt *s, bool);
 

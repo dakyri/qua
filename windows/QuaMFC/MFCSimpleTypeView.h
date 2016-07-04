@@ -50,7 +50,7 @@ public:
 
 	virtual void			DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
-	long					AddSymItem(char *, LPARAM, int);
+	long					AddSymItem(const char *, LPARAM, int);
 	long					ItemForSym(StabEnt *s);
 	StabEnt *				SymForItem(long);
 	long					ItemAtPoint(CPoint &);

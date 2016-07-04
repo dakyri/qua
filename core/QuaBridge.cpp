@@ -143,7 +143,7 @@ QuaBridge::DisplayTempo(float t, bool async)
 }
 
 void
-QuaBridge::Rename(StabEnt *, char *)
+QuaBridge::Rename(StabEnt *, const string &nm)
 {
 	;
 }

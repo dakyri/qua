@@ -337,8 +337,8 @@ Block::Block(Block *model, StabEnt *newContext, bool unwind)
 	case C_SYM:
 		if (unwind) {
 			type = C_NAME;
-			crap.name = new char[strlen(model->crap.sym->name)+1];
-			strcpy(crap.name, model->crap.sym->name);
+			crap.name = new char[model->crap.sym->name.size()+1];
+			strcpy(crap.name, model->crap.sym->name.c_str());
 			QDBMSG_BLK("new Block() clone unwind symbol %s\n", crap.name,0);
 		}
 		break;
@@ -540,7 +540,7 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	
 	case C_NAME: {
 	    StabEnt	*S;
-	    S = glob.FindSymbol(crap.name);
+	    S = glob.findSymbol(crap.name);
 	    if (S == nullptr) {
 			internalError("Qua linkage error: \"%s\" not found", crap.name);
 			status = B_ERROR;
@@ -563,7 +563,7 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	case C_UNLINKED_CALL: {
 	    QDBMSG_BLK("Setting up unlinked call element: %s\n", crap.call.crap.name,0);
     
-    	StabEnt *S = glob.FindSymbol(crap.call.crap.name);
+    	StabEnt *S = glob.findSymbol(crap.call.crap.name);
 
 	    if (S == nullptr) {
 			internalError("Init: call symbol \"%s\" not found\n", crap.call.crap.name);
@@ -1904,7 +1904,7 @@ Block::Dump(FILE *fp, short indent)
 
 	case C_CALL:
 	    if (crap.call.crap.lambda) {
-			fprintf(fp, crap.call.crap.lambda->sym->name);
+			fprintf(fp, crap.call.crap.lambda->sym->name.c_str());
 		    if (crap.call.parameters) {
 		    	fprintf(fp, "(");
 	    		crap.call.parameters->Dump(fp, 0);
@@ -1920,7 +1920,7 @@ Block::Dump(FILE *fp, short indent)
 	case C_WAKE:
 	case C_SUSPEND:
 	    if (crap.call.crap.sym) {
-			fprintf(fp, crap.call.crap.sym->name);
+			fprintf(fp, crap.call.crap.sym->name.c_str());
 		    if (crap.call.parameters) {
 		    	fprintf(fp, "(");
 		    	if (crap.call.parameters)
@@ -2059,7 +2059,7 @@ Block::Dump(FILE *fp, short indent)
 	    break;
 	    
 	case C_SYM:
-		fprintf(fp, crap.sym->name);
+		fprintf(fp, crap.sym->name.c_str());
 		fprintf(fp, " ");
 		break;
 
@@ -2131,7 +2131,7 @@ void
 TypedValue::SetToSymbol(char *nm, StabEnt *ctxt)
 {
 	StabEnt *sym;
-	if ((sym=glob.FindContextSymbol(nm, ctxt)) != nullptr) {
+	if ((sym=glob.findContextSymbol(nm, ctxt)) != nullptr) {
 		Set(sym);
 		QDBMSG_BLK("set %d %s\n", val.stackAddress.offset, val.stackAddress.context->name);
 	} else {

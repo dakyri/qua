@@ -81,7 +81,7 @@ void MFCChannelView::OnDraw(CDC* pdc)
 	pdc->SetBkMode(TRANSPARENT);
 	char	buf[512];
 //	sprintf(buf, "%s (%d ins, %d outs)", channel->sym->name, channel->nAudioIns, channel->nAudioOuts);
-	sprintf(buf, "%s", channel->sym->name, channel->nAudioIns, channel->nAudioOuts);
+	sprintf(buf, "%s", channel->sym->name.c_str(), channel->nAudioIns, channel->nAudioOuts);
 	pdc->DrawText(buf, &textRect, DT_VCENTER|DT_LEFT);
 
 	for (short i=0; i<NInR(); i++) {
@@ -140,7 +140,7 @@ MFCChannelView::OnMove(int x, int y)
 	}
 #endif
 	frame.MoveToXY(x,y);
-	fprintf(stderr, "channel view %s move %d %d, %d %d\n", channel?channel->sym->name:"?", x, y, frame.left, frame.top);
+	fprintf(stderr, "channel view %s move %d %d, %d %d\n", channel?channel->sym->name.c_str():"?", x, y, frame.left, frame.top);
 }
 
 void
@@ -159,7 +159,7 @@ MFCChannelView::OnSize(UINT nType, int cx, int cy)
 		MFCOutputView	*ov = (MFCOutputView *)OutR(i);
 		ov->SetWindowPos(&wndTop, 0, 0, bounds.right-16, ov->bounds.bottom, SWP_NOMOVE);
 	}
-	fprintf(stderr, "channel view %s size %d %d\n", channel?channel->sym->name:"?", frame.left, frame.top);
+	fprintf(stderr, "channel view %s size %d %d\n", channel?channel->sym->name.c_str():"?", frame.left, frame.top);
 }
 
 void
@@ -416,7 +416,7 @@ PortPopup::AudioMenu(bool isInput, short nch)
 				chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), p->OutputName(j).c_str());
 			}
 		}
-		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->Name(NMFMT_NAME));
+		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->name(NMFMT_NAME));
 	}
 	return menu;
 }
@@ -445,7 +445,7 @@ PortPopup::MidiMenu(bool isInput)
 					chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), buf);
 				}
 			}
-			menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->Name(NMFMT_NAME));
+			menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->name(NMFMT_NAME));
 		}
 	}
 	return menu;

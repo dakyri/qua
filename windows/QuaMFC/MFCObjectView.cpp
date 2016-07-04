@@ -247,7 +247,7 @@ MFCObjectView::CompileBlock(QuaPerceptualSet *quaLink, MFCBlockEdit *bed, MFCBlo
 		buf[len] = 0;
 		fprintf(stderr, "%s<%s> len %d\n", blockName, buf, len);
 		char nm[256];
-		sprintf(nm, "%s %s", bed->symbol->UniqueName(), blockName);
+		sprintf(nm, "%s %s", bed->symbol->uniqueName(), blockName);
 		long state = quaLink->CompileBlock(bed->symbol, nm, buf, len);
 		ctl->SetState(state);
 		delete buf;
@@ -266,7 +266,7 @@ MFCObjectView::ParseBlock(QuaPerceptualSet *quaLink, MFCBlockEdit *bed, MFCBlock
 		buf[len] = 0;
 		fprintf(stderr, "%s<%s> len %d\n", blockName, buf, len);
 		char nm[256];
-		sprintf(nm, "%s %s", bed->symbol->UniqueName(), blockName);
+		sprintf(nm, "%s %s", bed->symbol->uniqueName(), blockName);
 		long state = quaLink->ParseBlock(bed->symbol, nm, buf, len);
 		delete buf;
 		return true;
@@ -513,14 +513,14 @@ MFCChannelObjectView::ChildPopulate(StabEnt *sym)
 			break;
 		case TypedValue::S_EVENT: {
 	// set main block for event handler
-			if (strcmp(sym->name, "Wake") == 0) {
-			} else if (strcmp(sym->name, "Sleep") == 0) {
-			} else if (strcmp(sym->name, "Receive") == 0) {
-			} else if (strcmp(sym->name, "Cue") == 0) {
-			} else if (strcmp(sym->name, "Start") == 0) {
-			} else if (strcmp(sym->name, "Stop") == 0) {
-			} else if (strcmp(sym->name, "Record") == 0) {
-			} else if (strcmp(sym->name, "Init") == 0) {
+			if (sym->name == "Wake") {
+			} else if (sym->name == "Sleep") {
+			} else if (sym->name == "Receive") {
+			} else if (sym->name == "Cue") {
+			} else if (sym->name == "Start") {
+			} else if (sym->name == "Stop") {
+			} else if (sym->name == "Record") {
+			} else if (sym->name == "Init") {
 			} else {
 			}
 			break;
@@ -548,13 +548,13 @@ MFCChannelObjectView::AttributePopulate()
 	}
 	// set main and rx block
 	if (txBlockEdit) {
-		fprintf(stderr, "set main block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set main block sym to %s\n", symbol->uniqueName());
 		txBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		txBlockEdit->SetValue(channel->tx.block);
 	}
 	if (rxBlockEdit) {
-		fprintf(stderr, "set rx block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set rx block sym to %s\n", symbol->uniqueName());
 		rxBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		rxBlockEdit->SetValue(channel->rx.block);
@@ -564,7 +564,7 @@ MFCChannelObjectView::AttributePopulate()
 void
 MFCChannelObjectView::SetName()
 {
-	nameView.SetWindowText(symbol?symbol->UniqueName():"(nul channel)");
+	nameView.SetWindowText(symbol?symbol->uniqueName():"(nul channel)");
 	CRect	r;
 	nameView.GetWindowRect(&r);
 	ScreenToClient(&r);
@@ -582,7 +582,7 @@ MFCChannelObjectView::ChildNameChanged(StabEnt *sym)
 	if (Symbol() == sym->context) {
 		long ind = variableView->ItemForSym(sym);
 		if (ind >= 0) {
-			variableView->GetListCtrl().SetItemText(ind, 0, sym->UniqueName());
+			variableView->GetListCtrl().SetItemText(ind, 0, sym->uniqueName());
 		}
 	}
 }
@@ -707,8 +707,8 @@ MFCChannelObjectView::PopFrameRepresentation(
 			;
 		}
 		fprintf(stderr, "ChannelView::PopFrameRepresentation: parent stack %x pfv %x nframe rep %d sym %s\n",
-			parentStack, pfv, NFR(), sym?sym->UniqueName():"(nul)");
-		sfv->CreateFrameView(bounds, sym?sym->UniqueName():"stack",
+			parentStack, pfv, NFR(), sym?sym->uniqueName():"(nul)");
+		sfv->CreateFrameView(bounds, sym?sym->uniqueName():"stack",
 			this, this, pfv, stack, add_children);
 //		sfv->SetSymbol(s);
 //		sfv->SetLinkage(quaLink);
@@ -1017,7 +1017,7 @@ MFCQuaBoolController::CreateControllerRepresentation(BRect &r, MFCStackFrameView
 	if (symbol) {
 		QuaControllerRepresentation	*qvr = this;
 		CRect	tr = InnerRect(r, 1);
-		ret = CreateButton(symbol->name, r, parv, id);
+		ret = CreateButton(symbol->name.c_str(), r, parv, id);
 		SetLCMsgParams(QM_SYM_CTL_CHANGED, (WPARAM)symbol, (LPARAM)qvr);
 //		SetMDMsgParams(QM_SYM_CTL_BEGIN_MOVE, (WPARAM)symbol, (LPARAM)qvr);
 //		SetMUMsgParams(QM_SYM_CTL_END_MOVE, (WPARAM)symbol, (LPARAM)qvr);
@@ -1084,7 +1084,7 @@ MFCQuaClipController::SetSelectorValues()
 	StabEnt	*p = schedulableSym->children;
 	while (p != NULL) {
 		if (p->type == TypedValue::S_CLIP) {
-			AddValue(p, p->name);
+			AddValue(p, p->name.c_str());
 		}
 		p = p->sibling;
 	}
@@ -1188,7 +1188,7 @@ MFCQuaChannelController::SetSelectorValues(StabEnt *ds)
 	StabEnt	*p = qSym->children;
 	while (p != NULL) {
 		if (p->type == TypedValue::S_CHANNEL && (ds == NULL || ds != p)) {
-			AddValue(p, p->name);
+			AddValue(p, p->name.c_str());
 		}
 		p = p->sibling;
 	}
@@ -1756,8 +1756,8 @@ MFCStackFrameView::AddChildFrame(QuasiStack *s)
 {
 	if (s && root) {
 //		fprintf(stderr, "Add child for %x %s %s\n", s,
-//			s->context?s->context->UniqueName():"(null context)",
-//			s->stackerSym?s->stackerSym->UniqueName():"(null stacker)");
+//			s->context?s->context->uniqueName():"(null context)",
+//			s->stackerSym?s->stackerSym->uniqueName():"(null stacker)");
 		QuaFrameRepresentation		*r = root->RepresentationFor(s);
 		if (r == NULL) {
 			root->quaLink->RequestPopFrameRepresentation(
@@ -1780,7 +1780,7 @@ MFCStackFrameView::AddController(StabEnt *c)
 {
 	if (c != NULL && frame != NULL) {
 		BRect	r(0,0, 100, 20);
-		fprintf(stderr, "Add controller for %x %s\n", c, c->UniqueName(), c->type);
+		fprintf(stderr, "Add controller for %x %s\n", c, c->uniqueName(), c->type);
 		switch (c->type) {
 			case TypedValue::S_VST_PARAM: {
 				break;
@@ -1906,7 +1906,7 @@ MFCStackFrameView::ArrangeChildren()
 	for (short i=0; i<NCR(); i++) {
 		QuaControllerRepresentation	*cr = CR(i);
 		if (cr && cr->symbol) {
-			StringExtent(cr->symbol->UniqueName(), &displayFont, this, sx, sy);
+			StringExtent(cr->symbol->uniqueName(), &displayFont, this, sx, sy);
 			switch (cr->symbol->type) {
 				case TypedValue::S_CLIP: {
 					MFCQuaClipController	*qcv = (MFCQuaClipController *)cr;
@@ -2022,7 +2022,7 @@ MFCStackFrameView::OnPaint()
 			switch (cr->symbol->type) {
 				case TypedValue::S_CLIP: {
 					MFCQuaClipController	*qcv = (MFCQuaClipController *)cr;
-					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
+					dc.DrawText(cr->symbol->uniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 
@@ -2039,23 +2039,23 @@ MFCStackFrameView::OnPaint()
 				case TypedValue::S_LONG:
 				case TypedValue::S_INT: {
 					MFCQuaIntController	*qcv = (MFCQuaIntController *)cr;
-					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
+					dc.DrawText(cr->symbol->uniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 				case TypedValue::S_DOUBLE:
 				case TypedValue::S_FLOAT: {
 					MFCQuaRealController	*qcv = (MFCQuaRealController *)cr;
-					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
+					dc.DrawText(cr->symbol->uniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 				case TypedValue::S_CHANNEL: {
 					MFCQuaChannelController	*qcv = (MFCQuaChannelController *)cr;
-					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
+					dc.DrawText(cr->symbol->uniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 				case TypedValue::S_TIME: {
 					MFCQuaTimeController	*qcv = (MFCQuaTimeController *)cr;
-					dc.DrawText(cr->symbol->UniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
+					dc.DrawText(cr->symbol->uniqueName(), -1, &qcv->labelFrame, DT_LEFT|DT_VCENTER);
 					break;
 				}
 			}
@@ -2097,7 +2097,7 @@ MFCInstanceObjectView::QuaLink()
 void
 MFCInstanceObjectView::SetName()
 {
-	nameView.SetWindowText(symbol?symbol->UniqueName():"(nul inst)");
+	nameView.SetWindowText(symbol?symbol->uniqueName():"(nul inst)");
 }
 
 void
@@ -2108,7 +2108,7 @@ MFCInstanceObjectView::OnDraw(CDC* pdc)
 	pdc->SelectObject(&displayFont);
 	pdc->SetBkMode(TRANSPARENT);
 	if (symbol) {
-//		pdc->DrawText(symbol->UniqueName(), &textRect, DT_VCENTER|DT_LEFT);
+//		pdc->DrawText(symbol->uniqueName(), &textRect, DT_VCENTER|DT_LEFT);
 	}
 }
 
@@ -2181,7 +2181,7 @@ MFCInstanceObjectView::ChildNameChanged(StabEnt *sym)
 	if (Symbol() == sym->context) {
 //		long ind = variableView->ItemForSym(sym);
 //		if (ind >= 0) {
-//			variableView->GetListCtrl().SetItemText(ind, 0, sym->UniqueName());
+//			variableView->GetListCtrl().SetItemText(ind, 0, sym->uniqueName());
 //		}
 	}
 }
@@ -2228,9 +2228,9 @@ MFCInstanceObjectView::PopFrameRepresentation(StabEnt *sym, QuasiStack *parentSt
 			;
 		}
 		fprintf(stderr, "PopFrameRepresentation: parent stack %x pfv %x nframe rep %d sym %s\n",
-			parentStack, pfv, NFR(), sym?sym->UniqueName():"(nul)");
+			parentStack, pfv, NFR(), sym?sym->uniqueName():"(nul)");
 		sfv->CreateFrameView(
-			bounds, sym?sym->UniqueName():"stack", this, pfv,
+			bounds, sym?sym->uniqueName():"stack", this, pfv,
 			stack, map, add_children);
 	}
 	if (map) {
@@ -2258,8 +2258,8 @@ MFCInstanceObjectView::PopFrameRepresentation(
 			;
 		}
 		fprintf(stderr, "PopFrameRepresentation: parent stack %x pfv %x nframe rep %d sym %s\n",
-			parentStack, pfv, NFR(), sym?sym->UniqueName():"(nul)");
-		sfv->CreateFrameView(bounds, sym?sym->UniqueName():"stack",
+			parentStack, pfv, NFR(), sym?sym->uniqueName():"(nul)");
+		sfv->CreateFrameView(bounds, sym?sym->uniqueName():"stack",
 			this, this, pfv, stack, add_children);
 	}
 }
@@ -2437,7 +2437,7 @@ MFCSampleObjectView::QuaLink()
 void
 MFCSampleObjectView::SetName()
 {
-	nameView.SetWindowText(symbol?symbol->UniqueName():"(nul sam)");
+	nameView.SetWindowText(symbol?symbol->uniqueName():"(nul sam)");
 	CRect	r;
 	nameView.GetWindowRect(&r);
 	ScreenToClient(&r);
@@ -2565,21 +2565,21 @@ MFCSampleObjectView::ChildPopulate(StabEnt *sym)
 			break;
 		case TypedValue::S_EVENT: {
 	// set main block for event handler
-			if (strcmp(sym->name, "Wake") == 0) {
+			if (sym->name == "Wake") {
 				;
-			} else if (strcmp(sym->name, "Sleep") == 0) {
+			} else if (sym->name == "Sleep") {
 				;
-			} else if (strcmp(sym->name, "Receive") == 0) {
+			} else if (sym->name == "Receive") {
 				if (rxBlockEdit) {
-					fprintf(stderr, "set rx block sym to %s\n", sym->UniqueName());
+					fprintf(stderr, "set rx block sym to %s\n", sym->uniqueName());
 					rxBlockEdit->SetSymbol(sym);
 					// and set value to text value of block
 				}
-			} else if (strcmp(sym->name, "Cue") == 0) {
-			} else if (strcmp(sym->name, "Start") == 0) {
-			} else if (strcmp(sym->name, "Stop") == 0) {
-			} else if (strcmp(sym->name, "Record") == 0) {
-			} else if (strcmp(sym->name, "Init") == 0) {
+			} else if (sym->name == "Cue") {
+			} else if (sym->name == "Start") {
+			} else if (sym->name == "Stop") {
+			} else if (sym->name == "Record") {
+			} else if (sym->name == "Init") {
 			} else {
 			}
 			break;
@@ -2611,13 +2611,13 @@ MFCSampleObjectView::AttributePopulate()
 	}
 	// set main and rx block
 	if (mainBlockEdit) {
-		fprintf(stderr, "set main block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set main block sym to %s\n", symbol->uniqueName());
 		mainBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		mainBlockEdit->SetValue(sample->mainBlock);
 	}
 	if (rxBlockEdit) {
-		fprintf(stderr, "set rx block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set rx block sym to %s\n", symbol->uniqueName());
 		rxBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		rxBlockEdit->SetValue(sample->rx.block);
@@ -2643,7 +2643,7 @@ MFCSampleObjectView::ChildNameChanged(StabEnt *sym)
 	if (Symbol() == sym->context) {
 		long ind = variableView->ItemForSym(sym);
 		if (ind >= 0) {
-			variableView->GetListCtrl().SetItemText(ind, 0, sym->UniqueName());
+			variableView->GetListCtrl().SetItemText(ind, 0, sym->uniqueName());
 		}
 	}
 }
@@ -2751,7 +2751,7 @@ MFCSampleObjectView::OnQuaBlockParse(WPARAM wparam, LPARAM lparam)
 				buf[len] = 0;
 				char nm[256];
 				fprintf(stderr, "rx<%s>\n", buf);
-				sprintf(nm, "%s receive", bed->symbol->UniqueName());
+				sprintf(nm, "%s receive", bed->symbol->uniqueName());
 				long state = quaLink->ParseBlock(bed->symbol, nm, buf, len);
 				rxBlkCtl->SetState(state);
 				delete buf;
@@ -3034,7 +3034,7 @@ MFCVoiceObjectView::QuaLink()
 void
 MFCVoiceObjectView::SetName()
 {
-	nameView.SetWindowText(symbol?symbol->UniqueName():"(nul vox)");
+	nameView.SetWindowText(symbol?symbol->uniqueName():"(nul vox)");
 	CRect	r;
 	nameView.GetWindowRect(&r);
 	ScreenToClient(&r);
@@ -3059,21 +3059,21 @@ MFCVoiceObjectView::ChildPopulate(StabEnt *sym)
 			break;
 		case TypedValue::S_EVENT: {
 	// set main block for event handler
-			if (strcmp(sym->name, "Wake") == 0) {
+			if (sym->name == "Wake") {
 				;
-			} else if (strcmp(sym->name, "Sleep") == 0) {
+			} else if (sym->name == "Sleep") {
 				;
-			} else if (strcmp(sym->name, "Receive") == 0) {
+			} else if (sym->name == "Receive") {
 				if (rxBlockEdit) {
-					fprintf(stderr, "set rx block sym to %s\n", sym->UniqueName());
+					fprintf(stderr, "set rx block sym to %s\n", sym->uniqueName());
 					rxBlockEdit->SetSymbol(sym);
 					// and set value to text value of block
 				}
-			} else if (strcmp(sym->name, "Cue") == 0) {
-			} else if (strcmp(sym->name, "Start") == 0) {
-			} else if (strcmp(sym->name, "Stop") == 0) {
-			} else if (strcmp(sym->name, "Record") == 0) {
-			} else if (strcmp(sym->name, "Init") == 0) {
+			} else if (sym->name == "Cue") {
+			} else if (sym->name == "Start") {
+			} else if (sym->name == "Stop") {
+			} else if (sym->name == "Record") {
+			} else if (sym->name == "Init") {
 			} else {
 			}
 			break;
@@ -3103,13 +3103,13 @@ MFCVoiceObjectView::AttributePopulate()
 	}
 	// set main block
 	if (mainBlockEdit) {
-		fprintf(stderr, "set main block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set main block sym to %s\n", symbol->uniqueName());
 		mainBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		mainBlockEdit->SetValue(voice->mainBlock);
 	}
 	if (rxBlockEdit) {
-		fprintf(stderr, "set rx block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set rx block sym to %s\n", symbol->uniqueName());
 		rxBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		rxBlockEdit->SetValue(voice->rx.block);
@@ -3135,7 +3135,7 @@ MFCVoiceObjectView::ChildNameChanged(StabEnt *sym)
 	if (Symbol() == sym->context) {
 		long ind = variableView->ItemForSym(sym);
 		if (ind >= 0) {
-			variableView->GetListCtrl().SetItemText(ind, 0, sym->UniqueName());
+			variableView->GetListCtrl().SetItemText(ind, 0, sym->uniqueName());
 		}
 	}
 }
@@ -3546,7 +3546,7 @@ MFCMethodObjectView::QuaLink()
 void
 MFCMethodObjectView::SetName()
 {
-	nameView.SetWindowText(symbol?symbol->UniqueName():"(nul act)");
+	nameView.SetWindowText(symbol?symbol->uniqueName():"(nul act)");
 	CRect	r;
 	nameView.GetWindowRect(&r);
 	ScreenToClient(&r);
@@ -3597,7 +3597,7 @@ MFCMethodObjectView::AttributePopulate()
 	}
 	// set main and rx block
 	if (mainBlockEdit) {
-		fprintf(stderr, "set main block sym to %s\n", symbol->UniqueName());
+		fprintf(stderr, "set main block sym to %s\n", symbol->uniqueName());
 		mainBlockEdit->SetSymbol(symbol);
 		// block edit to set text value
 		mainBlockEdit->SetValue(lambda->mainBlock);
@@ -3620,7 +3620,7 @@ MFCMethodObjectView::ChildNameChanged(StabEnt *sym)
 	if (Symbol() == sym->context) {
 		long ind = variableView->ItemForSym(sym);
 		if (ind >= 0) {
-			variableView->GetListCtrl().SetItemText(ind, 0, sym->UniqueName());
+			variableView->GetListCtrl().SetItemText(ind, 0, sym->uniqueName());
 		}
 	}
 }

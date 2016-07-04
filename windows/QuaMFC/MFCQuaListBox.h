@@ -40,7 +40,7 @@ public:
 	CRect						bounds;
 	CRect						frame;
 
-	void						AddValue(void *, char *);
+	void						AddValue(void *, const char *);
 	void						SelectValue(void *);
 	void						*Value(long);
 	void						ClearValues();
@@ -52,10 +52,10 @@ class MFCQuaSymListBox: public MFCQuaListBox
 {
 	DECLARE_DYNAMIC(MFCQuaSymListBox)
 public:
-	void						AddValue(StabEnt *, char *);
-	void						SelectValue(StabEnt *);
-	StabEnt						*Value(long);
-	char						*ValueStr(long);
+	void AddValue(StabEnt *, const char *);
+	void SelectValue(StabEnt *);
+	StabEnt	 *Value(long);
+	const char	*ValueStr(long);
 };
 
 

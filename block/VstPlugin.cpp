@@ -985,13 +985,14 @@ VstPlugin::SetProgramName(AEffect *plugin, long ind, char *nm)
 char *
 VstPlugin::GetParameterName(AEffect *plugin, long ind)
 {
-	static char nm[1024];
-	static char nnm[MAX_QUA_NAME_LENGTH];
+	static char nm[1024]; // todo xxxx vst says this is up to 8 chars
+	string nnm;
 	nm[0] = 0;
 	plugin->dispatcher(plugin,effGetParamName,ind,0,nm,0.0f);
-	if (!SymTab::MakeValidSymbolName(nm, nnm)) {
-		sprintf(nm, "param%d", ind);
-		return nm;
+	if ((nnm=SymTab::MakeValidSymbolName(nm, nnm)).size() == 0) {
+		sprintf(nnm, "param%d", ind);
+		nnm = "param";
+		nnm += to_string(ind);
 	}
 
 	return nnm;
@@ -1838,17 +1839,13 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 			}
 		}
 		if (scriptFile) {
-			BPath	fpath(path);
-			char	*dnm = (char *)fpath.Leaf();
-			char	qnmbuf[MAX_QUA_NAME_LENGTH];
-			char	bnmbuf[MAX_QUA_NAME_LENGTH];
-			strcpy(bnmbuf, dnm);
-			long	len = strlen(bnmbuf);
-			len -= 4;
-			bnmbuf[len] = '\0';	// lose '.dll'
-			quascript_name(bnmbuf, qnmbuf, MAX_QUA_NAME_LENGTH);
-			if (*qnmbuf == '\0') {
-				strcpy(qnmbuf, "vstfx");
+			string	fpath(path);
+			string dnm = Base(fpath);
+			string qnm;
+			string bnm = dnm;
+			qnm = quascript_name(bnm);
+			if (qnm.size() == 0) {
+				qnm = "vstfx";
 			}
 			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n", path, uintstr(afx->uniqueID).c_str());
 			fprintf(scriptFile, "\t\\noload\n");
@@ -1856,12 +1853,12 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 				fprintf(scriptFile, "\t\\synth\n");
 			}
 			fprintf(scriptFile, "\t\\ins %d \\outs %d \\nparam %d \\nprogram %d %s(\n",
-				afx->numInputs, afx->numOutputs, afx->numParams, afx->numPrograms, qnmbuf);
+				afx->numInputs, afx->numOutputs, afx->numParams, afx->numPrograms, qnm);
 			for (short j=0; j<afx->numParams; j++) {
 				/*
-				char	pqnm[MAX_QUA_NAME_LENGTH];
+				string pqnm;
 				char	*pnm = GetParameterName(afx, j);
-				quascript_name(pnm, pqnm, MAX_QUA_NAME_LENGTH);
+				pqnm = quascript_name(pnm);
 				if (*pqnm == 0) {
 					strcpy(pqnm, "param");
 				}
@@ -1912,7 +1909,7 @@ VstPluginList::ItemForName(char *nm)
 {
 	for (short i=0; ((unsigned)i)<size(); i++) {
 		VstPlugin	*p = ItemAt(i);
-		if (p->sym != nullptr && strcmp(p->sym->name, nm) == 0) {
+		if (p->sym != nullptr && strcmp(p->sym->name.c_str(), nm) == 0) {
 			return p;
 		}
 	}

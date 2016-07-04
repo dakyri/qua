@@ -101,15 +101,14 @@ public:
 class StabEnt: public TypedValue
 {
 public:
-						StabEnt(char *nm, base_type_t typ,
-							 StabEnt *context, int8 nd, ref_type_t ref);
+						StabEnt(const string &nm, base_type_t typ, StabEnt *context, int8 nd, ref_type_t ref);
 						~StabEnt();
 	bool				RefersToStream();
 	void				Initialize(QuasiStack *);
 	
-	char				*UniqueName();
-	char				*PreciseName();
-	char 				*PrintableName();
+	const char *uniqueName();
+	const char *preciseName();
+	const char *printableName();
 	
 	status_t			SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInternal);
 
@@ -123,10 +122,7 @@ public:
 	status_t			SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack);
 	status_t			SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack);
 
-	char				*StringValue(
-							StreamItem *items,
-							Stacker *i,
-							QuasiStack *stack);
+	const char* StringValue(StreamItem *items, Stacker *i, QuasiStack *stack);
 
 	bool				SetDisplayMode(ulong displayMode);
 	bool				SetEnvelopeMode(bool enable);
@@ -164,7 +160,7 @@ protected:
 	void				BaseAddress(LValue &, StreamItem *items,  Stacker *instance, QuasiStack *stack);
 
 public:
-    char				*name;
+    string name;
 #ifdef DEFINE_COUNT
     short				defineCount;
 #endif
@@ -192,29 +188,29 @@ StabEnt::Size(short nd)
 }
 
 // a very slackly thrown together symbol table
- 
+#include <string>
+using namespace std;
+
 class SymTab
 {
 public:
 					SymTab(int n);
 					~SymTab();
 
-	static bool		ValidSymbolName(char *nm);
-	static bool		MakeValidSymbolName(char *orig, char *valid);
+	static bool		ValidSymbolName(const string &nm);
+	static string	MakeValidSymbolName(const string &nm);
 
-	ulong			Hash(const std::string nm, StabEnt *context);
-	long			FindFreeInd(const char *nm, StabEnt *context, short &dcp);
-	StabEnt			*AddSymbol(char *nm, base_type_t typ,
-						 StabEnt *context, int8 nd, ref_type_t refc,
-						 short defcnt);
+	ulong hash(const string nm, StabEnt *context);
+	long findFreeInd(const string &nm, StabEnt *context, short &dcp);
+	StabEnt *addSymbol(const string &nm, base_type_t typ, StabEnt *context, int8 nd, ref_type_t refc, short defcnt);
 	void			PushContext(StabEnt *);
 	StabEnt			*PopContext(StabEnt *);
 	StabEnt			*TopContext();
-	StabEnt			*FindSymbol(const std::string nm, short def_cnt = -1);
-	StabEnt			*FindContextSymbol(const std::string nm, StabEnt *S, short def_cnt = -1);
+	StabEnt *findSymbol(const string &nm, short def_cnt = -1);
+	StabEnt *findContextSymbol(const string &nm, StabEnt *S, short def_cnt = -1);
 	void			DeleteSymbol(StabEnt *S, bool cleanup);
-	bool			Rename(StabEnt *S, const char *nm);
-	std::string MakeUniqueName(StabEnt *ctxt, std::string basenm, long startind);
+	bool rename(StabEnt *S, const string &nm);
+	string makeUniqueName(StabEnt *ctxt, const string basenm, long startind);
 	void			MoveSymbol(StabEnt *S, StabEnt *ctxt, StabEnt *np);
 	void			DumpGlobals(FILE *fp);
 	void			DumpContexts(FILE *fp);
@@ -222,8 +218,8 @@ public:
 		{ return stab[i]; }
 
 private:
-	long			FindSymbolInd(StabEnt *S, short def_cnt = -1);
-	long			FindContextSymbolInd(std::string nm, StabEnt *S, short def_cnt = -1);
+	long findSymbolInd(StabEnt *S, short def_cnt = -1);
+	long findContextSymbolInd(const string &nm, StabEnt *S, short def_cnt = -1);
 
 	StabEnt			*contextStack[MAX_CONTEXT_STACK];
 	int				contextCount;
@@ -231,24 +227,24 @@ private:
 	long			stabLen;
 };
 
-StabEnt *			FindSymbolInCtxt(const std::string nm, StabEnt *contxt);
-StabEnt *			FindTypedSymbolInCtxt(const std::string nm, base_type_t type, StabEnt *contxt);
-Instance *			FindInstance(StabEnt *contxt, std::string nm);
+StabEnt *			FindSymbolInCtxt(const string nm, StabEnt *contxt);
+StabEnt *			FindTypedSymbolInCtxt(const string nm, base_type_t type, StabEnt *contxt);
+Instance *			FindInstance(StabEnt *contxt, string nm);
 StabEnt				*DupSymbol(StabEnt *S, StabEnt *C);
-StabEnt				*DefineSymbol(const std::string nm, base_type_t typ, int8 ndim, void *val,
+StabEnt				*DefineSymbol(const string nm, base_type_t typ, int8 ndim, void *val,
 						StabEnt *context, ref_type_t reft,
 						bool isClone, bool isEnv, short disp_mode);
-Pool				*findPool(const std::string nm, short def_cnt = -1);
-Sample				*findSample(const std::string nm, short def_cnt = -1);
-Voice				*findVoice(const std::string nm, short def_cnt = -1);
-Channel				*findChannel(const std::string nm, short def_cnt = -1);
-Lambda				*findMethod(const std::string nm, short def_cnt = -1);
-Block				*findMethodMain(const std::string nm, short def_cnt = -1);
-Application			*findApplication(const std::string nm, short def_cnt = -1);
-QuaPort				*findQuaPort(const std::string nm, short def_cnt = -1);
-StabEnt				*findBuiltin(const std::string nm, short def_cnt = -1);
+Pool				*findPool(const string &nm, short def_cnt = -1);
+Sample				*findSample(const string &nm, short def_cnt = -1);
+Voice				*findVoice(const string &nm, short def_cnt = -1);
+Channel				*findChannel(const string &nm, short def_cnt = -1);
+Lambda				*findMethod(const string &nm, short def_cnt = -1);
+Block				*findMethodMain(const string &nm, short def_cnt = -1);
+Application			*findApplication(const string &nm, short def_cnt = -1);
+QuaPort				*findQuaPort(const string &nm, short def_cnt = -1);
+StabEnt				*findBuiltin(const string &nm, short def_cnt = -1);
 
-void				MakeUniqueName(char *nm);
+string makeUniqueName(const string &nm);
 status_t			LoadQuaSymbols(FILE *fp, StabEnt *c, Qua *u,
 							bool loadQ);
 extern SymTab		glob;

@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 #include <stdio.h>
 #include <time.h>
 #include <ctype.h>
@@ -729,11 +731,11 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 		sample_nm = "";
 	}
 
-	std::string nmbuf = glob.MakeUniqueName(qua->sym, sample_nm, 0);
+	std::string nmbuf = glob.makeUniqueName(qua->sym, sample_nm, 0);
 
 	Sample	*sample = qua->CreateSample(nmbuf, false);
 	if (sample) {
-		fprintf(stderr, "created sample %s\n", sample->sym->name);
+		fprintf(stderr, "created sample %s\n", sample->sym->name.c_str());
 		for (std::string p: pathList) {
 			std::string b = Qua::nameFromLeaf(p);
 			sample->AddSampleTake(b, p, false);
@@ -779,7 +781,7 @@ QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short
 		voice_nm = Qua::nameFromLeaf(pathList[0]);
 	}
 
-	voice_nm = glob.MakeUniqueName(qua->sym, voice_nm, 0);
+	voice_nm = glob.makeUniqueName(qua->sym, voice_nm, 0);
 
 	Voice	*voice = qua->CreateVoice(voice_nm, false);
 	if (voice) {
@@ -839,7 +841,7 @@ QuaDisplay::CreateChannel(char *nm, short chan,
 		channel_nm = "channel" + (chan>=0?chan+1:qua->nChannel+1);
 	}
 
-	std::string nmbuf = glob.MakeUniqueName(qua->sym, channel_nm, 0);
+	std::string nmbuf = glob.makeUniqueName(qua->sym, channel_nm, 0);
 	// stereo in and out at id, 'chan', midi and audio thru enabled ... no adding destingations
 	Channel	*channel = qua->AddChannel(
 						nmbuf, chan, nAuIn, nAuOut,
@@ -850,7 +852,7 @@ QuaDisplay::CreateChannel(char *nm, short chan,
 						add_dflt_str_out,
 						-1);
 	if (channel) {
-		fprintf(stderr, "created channel %s\n", channel->sym->name);
+		fprintf(stderr, "created channel %s\n", channel->sym->name.c_str());
 		// update index displays
 		for (i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(channel->sym);
@@ -872,10 +874,10 @@ QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
 	// create voice
 	short	i;
 
-	std::string nmbuf = glob.MakeUniqueName(parent, nm.size()>0?nm:"action", 0);
+	std::string nmbuf = glob.makeUniqueName(parent, nm.size()>0?nm:"action", 0);
 
 	Lambda	*lambda = qua->CreateMethod(nmbuf, parent, false);
-	fprintf(stderr, "created lambda %s\n", lambda->sym->name);
+	fprintf(stderr, "created lambda %s\n", lambda->sym->name.c_str());
 	if (lambda) {
 		// update index displays
 		for (i=0; i<NIndexer(); i++) {
@@ -900,7 +902,7 @@ QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
 StabEnt *
 QuaDisplay::CreateClip(std::string nm, Time *at_t, Time *dur_t)
 {
-	std::string clip_nm = glob.MakeUniqueName(qua->sym, nm.size() > 0? nm:"clip", 1);
+	std::string clip_nm = glob.makeUniqueName(qua->sym, nm.size() > 0? nm:"clip", 1);
 	Time st;
 	st.Set("0:0.0");
 	Time dt;
@@ -909,7 +911,7 @@ QuaDisplay::CreateClip(std::string nm, Time *at_t, Time *dur_t)
 	if (at_t) st = *at_t;
 	Clip	*clip = qua->addClip(clip_nm, st, dt, false);
 	if (clip) {
-		fprintf(stderr, "created clip %s\n", clip->sym->name);
+		fprintf(stderr, "created clip %s\n", clip->sym->name.c_str());
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->updateClipIndexDisplay();
 		}
@@ -926,9 +928,9 @@ QuaDisplay::CreateClip(std::string nm, Time *at_t, Time *dur_t)
 }
 
 void
-QuaDisplay::Rename(StabEnt *sym, char *nm)
+QuaDisplay::Rename(StabEnt *sym, const string &nm)
 {
-	glob.Rename(sym, nm);
+	glob.rename(sym, nm);
 	for (short i=0; i<NObjectRack(); i++) {
 		QuaObjectRepresentation *or =
 			ObjectRack(i)->RepresentationFor(sym);
@@ -985,7 +987,7 @@ QuaDisplay::LoadSampleTake(StabEnt *sampleSym, std::string path)
 	if (sample == nullptr) {
 		return;
 	}
-	std::string name = glob.MakeUniqueName(sampleSym, getBase(path),  1);
+	std::string name = glob.makeUniqueName(sampleSym, getBase(path),  1);
 	sample->AddSampleTake(name, path, true);
 }
 
@@ -999,7 +1001,7 @@ QuaDisplay::CreateStreamTake(StabEnt *voiceSym)
 	Time	duration;
 	duration.Set("1:0.0");
 
-	std::string nmbuf = glob.MakeUniqueName(voiceSym, "stream", 1);
+	std::string nmbuf = glob.makeUniqueName(voiceSym, "stream", 1);
 	voice->AddStreamTake(nmbuf, &duration, true);
 }
 
@@ -1245,7 +1247,7 @@ QuaDisplay::RequestPopFrameRepresentation(
 			if (stack) {
 #ifdef Q_FRAME_MAP
 				if (stack->GetFrameMap(map)) {
-					fprintf(stderr, "popping parent from request %s\n", sym?sym->UniqueName():"(null)"); 
+					fprintf(stderr, "popping parent from request %s\n", sym?sym->uniqueName():"(null)"); 
 					iv->PopFrameRepresentation(
 						sym, parent, stack, map, add_children);
 				}
@@ -1257,7 +1259,7 @@ QuaDisplay::RequestPopFrameRepresentation(
 		} else {
 #ifdef Q_FRAME_MAP
 			if (stack->GetFrameMap(map)) {
-				fprintf(stderr, "popping from request %s\n", sym?sym->UniqueName():"(null)"); 
+				fprintf(stderr, "popping from request %s\n", sym?sym->uniqueName():"(null)"); 
 				iv->PopFrameRepresentation(
 					sym, parent, stack, map, add_children);
 			}

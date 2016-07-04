@@ -34,7 +34,7 @@ Template::save(FILE *fp, short indent)
 	if (mimeType.size())
 		fprintf(fp, " \"%s\"", mimeType.c_str());
 
-	fprintf(fp,	" %s", sym->PrintableName());
+	fprintf(fp,	" %s", sym->printableName());
 
 	if (countControllers() > 0) {
 		fprintf(fp, "(");

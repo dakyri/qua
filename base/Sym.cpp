@@ -53,10 +53,10 @@ flag	debug_symtab=0;
 flag	debug_save=1;
 
 StabEnt *
-findBuiltin(const string nm, short dc)
+findBuiltin(const string &nm, short dc)
 {
 	StabEnt	*sym;
-	if((sym = glob.FindContextSymbol(nm,nullptr)) == nullptr) {
+	if((sym = glob.findContextSymbol(nm,nullptr)) == nullptr) {
 //		reportError("FindBuiltin: %s: not defined in null context\n", nm);
 		return nullptr;
     }
@@ -74,11 +74,11 @@ findBuiltin(const string nm, short dc)
  * FindSong:
  */
 Pool *
-findPool(const std::string nm, short dc)
+findPool(const std::string &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_POOL) {
@@ -88,11 +88,11 @@ findPool(const std::string nm, short dc)
 }
 
 Sample *
-findSample(const std::string  nm, short dc)
+findSample(const std::string  &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_SAMPLE) {
@@ -102,10 +102,10 @@ findSample(const std::string  nm, short dc)
 }
 
 Voice *
-findVoice(std::string  nm, short dc)
+findVoice(const std::string &nm, short dc)
 {
     StabEnt	*sym;
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_VOICE) {
@@ -116,11 +116,11 @@ findVoice(std::string  nm, short dc)
 
 
 Channel *
-findChannel(std::string nm, short dc)
+findChannel(const std::string &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_CHANNEL) {
@@ -130,11 +130,11 @@ findChannel(std::string nm, short dc)
 }
 
 Application *
-findApplication(std::string nm, short dc)
+findApplication(const std::string &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_APPLICATION) {
@@ -145,11 +145,11 @@ findApplication(std::string nm, short dc)
 
 
 Lambda *
-findMethod(const string nm, short dc)
+findMethod(const string &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_LAMBDA) {
@@ -160,9 +160,9 @@ findMethod(const string nm, short dc)
 
 
 QuaPort *
-findQuaPort(const string nm, short dc)
+findQuaPort(const string &nm, short dc)
 {
-	StabEnt		*sym = glob.FindContextSymbol(nm, nullptr, -1);
+	StabEnt		*sym = glob.findContextSymbol(nm, nullptr, -1);
 	if (sym == nullptr) {
 		return nullptr;
 	}
@@ -174,11 +174,11 @@ findQuaPort(const string nm, short dc)
 
 
 Block *
-findMethodMain(const string nm, short dc)
+findMethodMain(const string &nm, short dc)
 {
     StabEnt	*sym;
 
-    if ((sym = glob.FindSymbol(nm, dc)) == nullptr) {
+    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
 		return nullptr;
     }
     if (sym->type != TypedValue::S_LAMBDA) {
@@ -189,59 +189,47 @@ findMethodMain(const string nm, short dc)
 }
 
 bool
-SymTab::ValidSymbolName(char *nm)
+SymTab::ValidSymbolName(const string &nm)
 {
-	if (nm == nullptr) {
+	if (!nm.size()) {
 		return false;
 	}
-	if (!isalpha(*nm) && *nm != '_') {
-		return false;
-	}
-	char	*p = nm;
-	while (*p) {
+	auto p = nm.begin();
+	while (p != nm.end()) {
 		if (!isalnum(*p) && *p != '_') {
 			return false;
 		}
-		p++;
+		++p;
 	}
 	return true;
 }
 
-bool
-SymTab::MakeValidSymbolName(char *nm, char *nnm)
+string
+SymTab::MakeValidSymbolName(const string &nm)
 {
-	if (nm == nullptr || nnm == nullptr) {
-		return false;
-	}
-	while (*nm != '\0' && !isalpha(*nm) && *nm != '_') {
-		nm++;
-	}
-	if (*nm == '\0')
-		return false;
-	char	*nmp = nnm;
-	int		cnt = 0;
-	while (*nm != '\0') {
-		if (isalnum(*nm) || *nm == '_') {
-			*nmp = *nm;
-			nmp++;
-			if (++cnt >= MAX_QUA_NAME_LENGTH) {
-				break;
+	string newName;
+	bool inspace = false;
+	auto p = nm.begin();
+	while (p != nm.end()) {
+		if (isalnum(*p) || *p == '_') {
+			newName.push_back(*p);
+			inspace = false;
+		} else if (isspace(*p)) {
+			if (!inspace) {
+				newName.push_back('_');
+				inspace = true;
 			}
 		}
-		nm++;
+		p++;
 	}
-	*nmp = 0;
-	if (*nnm == '\0') {
-		return false;
-	}
-	return true;
+	return newName;
 }
 
 /*
  * DefineSymbol:
  */
 ulong
-SymTab::Hash(const std::string nm, StabEnt *context)
+SymTab::hash(const std::string nm, StabEnt *context)
 {
 	ulong	shite=0;
 	short	nc = nm.length();
@@ -255,11 +243,10 @@ SymTab::Hash(const std::string nm, StabEnt *context)
 }
 
 StabEnt *
-SymTab::FindContextSymbol(std::string nm, StabEnt *contxt, short def_cnt)
+SymTab::findContextSymbol(const string &nm, StabEnt *contxt, short def_cnt)
 {
 	int	stabind;
-	return (stabind = FindContextSymbolInd(nm,contxt,def_cnt)) >= 0?
-				stab[stabind]:nullptr;
+	return (stabind = findContextSymbolInd(nm,contxt,def_cnt)) >= 0? stab[stabind]:nullptr;
 }
 
 Instance *
@@ -275,7 +262,7 @@ FindInstance(StabEnt *ctxt, std::string nm)
 StabEnt *
 FindTypedSymbolInCtxt(std::string nm, base_type_t type, StabEnt *contxt)
 {
-	StabEnt *sym = glob.FindContextSymbol(nm,contxt,-1);
+	StabEnt *sym = glob.findContextSymbol(nm,contxt,-1);
 	if (sym != nullptr && sym->type == type) {
 		return sym;
 	}
@@ -285,24 +272,24 @@ FindTypedSymbolInCtxt(std::string nm, base_type_t type, StabEnt *contxt)
 StabEnt *
 FindSymbolInCtxt(std::string nm, StabEnt *contxt)
 {
-	return glob.FindContextSymbol(nm,contxt,-1);
+	return glob.findContextSymbol(nm,contxt,-1);
 }
 
 
 long
-SymTab::FindContextSymbolInd(const std::string nm, StabEnt *contxt, short def_cnt)
+SymTab::findContextSymbolInd(const string &nm, StabEnt *contxt, short def_cnt)
 {
-    int		i = Hash(nm, contxt);
+    int		i = hash(nm, contxt);
 
     if (1)//debug_symtab >= 2)
-    	fprintf(stderr, "symtab: looking for %s in context %s\n", nm.c_str(), contxt?contxt->name:"<glbl>");
+    	fprintf(stderr, "symtab: looking for %s in context %s\n", nm.c_str(), contxt?contxt->name.c_str() :"<glbl>");
     for (;;) {
 		if (debug_symtab >= 2) {
    			fprintf(stderr, "stab[%d]: %x\n", i, (unsigned)stab[i]);
    			fprintf(stderr, "\t%s%s context %s\n",
-   					stab[i]?stab[i]->name:"(not)",
-   					stab[i]&&stab[i]->isDeleted?" (deleted)":"",
-   					stab[i]&&stab[i]->context?stab[i]->context->name:"(not)");
+   					stab[i]?stab[i]->name.c_str():"(null)",
+   					stab[i] && stab[i]->isDeleted? " (deleted)":"",
+   					(stab[i] && stab[i]->context)? stab[i]->context->name.c_str() : "(not)" );
    		}
     	if (stab[i] != nullptr && !stab[i]->isDeleted) {
 			if (debug_symtab >= 2)
@@ -327,49 +314,47 @@ SymTab::FindContextSymbolInd(const std::string nm, StabEnt *contxt, short def_cn
 }
 
 bool
-SymTab::Rename(StabEnt *sym, const char *nm)
+SymTab::rename(StabEnt *sym, const string &nm)
 {
 	short	defcnt=-1;
 	
-	long	oldind = FindContextSymbolInd(sym->name, sym->context,
+	long	oldind = findContextSymbolInd(sym->name, sym->context,
 #ifdef DEFINE_COUNT
 								sym->defineCount
 #else
 								-1
 #endif
 							);
-	long	newind = FindFreeInd(nm, sym->context, defcnt);
+	long	newind = findFreeInd(nm, sym->context, defcnt);
 	if (newind < 0|| oldind < 0)
 		return false;
 	stab[newind] = sym;
-	delete [] sym->name;
-	sym->name = new char[strlen(nm)+1];
+	sym->name = nm;
 
 #ifdef DEFINE_COUNT
 	sym->defineCount = defcnt;
 #endif
 	
-	strcpy(sym->name, nm);
 	stab[oldind] = new StabEnt("", TypedValue::S_UNKNOWN, 0, -1, TypedValue::REF_VALUE);
 	// need the dummy entry, a null would break the hashing
 	return true;
 }
 
 long
-SymTab::FindSymbolInd(StabEnt *sym, short defcnt)
+SymTab::findSymbolInd(StabEnt *sym, short defcnt)
 {
     int		i;
     long	ind;
 
     if (debug_symtab >= 2)
-    	fprintf(stderr, "symtab: looking for %s, context stack length %d\n", sym->name, contextCount);
+    	fprintf(stderr, "symtab: looking for %s, context stack length %d\n", sym->name.c_str(), contextCount);
     for (i=contextCount-1; i>=0; i--) {
-		if ((ind=FindContextSymbolInd(sym->name, contextStack[i], defcnt)) >= 0) {
+		if ((ind=findContextSymbolInd(sym->name, contextStack[i], defcnt)) >= 0) {
 		    return ind;
 		}
     }
     if (debug_symtab)
-    	fprintf(stderr, "%s not found\n", sym->name, contextCount);
+    	fprintf(stderr, "%s not found\n", sym->name.c_str(), contextCount);
     return -1;
 }
 
@@ -407,14 +392,14 @@ void
 SymTab::DumpContexts(FILE *fp)
 {
 	for (short i=0; i<contextCount; i++) {
-		fprintf(fp, "Context %d %s", i, contextStack[i]?contextStack[i]->name:"null ctxt");
+		fprintf(fp, "Context %d %s", i, contextStack[i]?contextStack[i]->name.c_str() :"null ctxt");
 	}
 }
 
 long
-SymTab::FindFreeInd(const char *nm, StabEnt *context, short &defineCount)
+SymTab::findFreeInd(const string &nm, StabEnt *context, short &defineCount)
 {
-	int 	i = Hash(nm, context);
+	int i = hash(nm, context);
 	bool	foundDefCount = (defineCount >= 0);
 	
 	int		spot = -1;
@@ -446,7 +431,7 @@ SymTab::FindFreeInd(const char *nm, StabEnt *context, short &defineCount)
 			if (stab[i]) {
 // delete a disused stab ent!
 				if (debug_symtab >= 2)
-					fprintf(stderr, "Deleting %s\n", stab[i]->UniqueName());
+					fprintf(stderr, "Deleting %s\n", stab[i]->uniqueName());
 				delete stab[i];
 			}
 			spot = i;
@@ -470,11 +455,10 @@ SymTab::FindFreeInd(const char *nm, StabEnt *context, short &defineCount)
 }
 
 StabEnt *
-SymTab::AddSymbol(char *nm, base_type_t typ, StabEnt *context,
-				int8 nd, ref_type_t refc, short defineCount)
+SymTab::addSymbol(const string &nm, base_type_t typ, StabEnt *context, int8 nd, ref_type_t refc, short defineCount)
 {
 	int ind;
-	if ((ind = FindFreeInd(nm, context, defineCount)) == B_ERROR){
+	if ((ind = findFreeInd(nm, context, defineCount)) == B_ERROR){
 		return nullptr;
 	} else {
 		stab[ind] = new StabEnt(nm, typ, context, nd, refc);
@@ -482,7 +466,7 @@ SymTab::AddSymbol(char *nm, base_type_t typ, StabEnt *context,
 		stab[ind]->defineCount = defineCount;
 #endif
 		if (debug_symtab >= 2)
-			fprintf(stderr, "%s/%d added to glob at %d %x\n", nm, defineCount, ind, (unsigned)stab[ind]);
+			fprintf(stderr, "%s/%d added to glob at %d %x\n", nm.c_str(), defineCount, ind, (unsigned)stab[ind]);
 		return stab[ind];
 	}
 }
@@ -514,23 +498,23 @@ SymTab::MoveSymbol(StabEnt *sym, StabEnt *newctxt, StabEnt *symatpos)
 	}
 }
 
-std::string
-SymTab::MakeUniqueName(StabEnt *ctxt, std::string basenm, long startind)
+string
+SymTab::makeUniqueName(StabEnt *ctxt, const string basenm, long startind)
 {
 	short	nmind = startind;
-	StabEnt			*fnd = nullptr;
-	char nmbuf[100];
+	StabEnt *fnd = nullptr;
+	string nnm;
 	do {
 		if (nmind <= 0) {
-			strcpy(nmbuf, basenm.c_str());
+			nnm = basenm;
 		} else {
-			sprintf(nmbuf, "%s%d", basenm, nmind);
+			nnm = basenm + std::to_string(nmind);
 		}
-		fnd = FindContextSymbol(nmbuf, ctxt);
+		fnd = findContextSymbol(nnm, ctxt);
 		nmind++;
 	} while (fnd != nullptr);
 
-	return std::string(nmbuf);
+	return nnm;
 }
 
 
@@ -539,12 +523,12 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 {
 //	debug_symtab = 3;
 	if (debug_symtab >= 2)
-		fprintf(stderr, "SymTab::Delete(%s)\n", sym->name);
+		fprintf(stderr, "SymTab::Delete(%s)\n", sym->name.c_str());
 	if (sym->isDeleted)
 		return;
 	sym->isDeleted = true;
 	if (debug_symtab >= 2)
-		fprintf(stderr, "%s marked as deleted\n", sym->name);
+		fprintf(stderr, "%s marked as deleted\n", sym->name.c_str());
 	if (sym->context) {	// remove from sibling list
 		StabEnt		**spp = &sym->context->children,
 					*sp = sym->context->children;
@@ -556,7 +540,7 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 		if (sp) {
 			*spp = sp->sibling;
 			if (debug_symtab >= 2)
-				fprintf(stderr, "delete %s from context %x\n", sym->name, (unsigned)sym->context);
+				fprintf(stderr, "delete %s from context %x\n", sym->name.c_str(), (unsigned)sym->context);
 		}
 	}
 	
@@ -570,7 +554,7 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 		}
 	}
 	if (debug_symtab)
-		fprintf(stderr, "SymTab::Delete(%s)... clearing object type %d defCnt %d\n", sym->name, sym->type,
+		fprintf(stderr, "SymTab::Delete(%s)... clearing object type %d defCnt %d\n", sym->name.c_str(), sym->type,
 #ifdef DEFINE_COUNT
 					sym->defineCount
 #else
@@ -694,29 +678,31 @@ SymTab::PopContext(StabEnt *sym)
 }
 
 StabEnt *
-SymTab::FindSymbol(std::string nm, short def_cnt)
+SymTab::findSymbol(const string &nm, short def_cnt)
 {
     int		i;
     StabEnt	*p;
 
-	char	trueNm[MAX_QUA_NAME_LENGTH];
-	char buf[MAX_QUA_NAME_LENGTH];
-	strcpy(buf, nm.c_str());
-	char	*cp = buf, *np = trueNm;
-	while (*cp && *cp != '#') { *np++ = *cp++; }
-	*np = 0;
-	if (*cp == '#') {
-		def_cnt = atoi(cp+1);
+	string trueNm = nm;
+	auto np = trueNm.find('#');
+	if (np != trueNm.npos) {
+		def_cnt = atoi(trueNm.substr(np + 1).c_str());
+		trueNm.erase(np);
+		if (def_cnt < 0)
+			def_cnt = 0;
+	}
+	else {
+		def_cnt = -1;
 	}
 	
     if (debug_symtab >= 2)
-		fprintf(stderr, "symtab: looking for %s, def %d count %d\n", trueNm, def_cnt, contextCount);
+		fprintf(stderr, "symtab: looking for %s, def %d count %d\n", trueNm.c_str(), def_cnt, contextCount);
     for (i=contextCount-1; i>=0; i--) {
-		if ((p=FindContextSymbol(trueNm, contextStack[i], def_cnt)) != nullptr) {
+		if ((p=findContextSymbol(trueNm, contextStack[i], def_cnt)) != nullptr) {
 		    return p;
 		}
     }
-    return FindContextSymbol(trueNm, nullptr, def_cnt);
+    return findContextSymbol(trueNm, nullptr, def_cnt);
 }
 
 
@@ -725,10 +711,9 @@ SymTab::FindSymbol(std::string nm, short def_cnt)
 // StabEnt::*
 ///////////////////////////////////////////////////////////
 
-StabEnt::StabEnt(char *nm, base_type_t typ, StabEnt *ctext, int8 nd, ref_type_t reft)
+StabEnt::StabEnt(const string &nm, base_type_t typ, StabEnt *ctext, int8 nd, ref_type_t reft)
 {
-    name = new char[strlen(nm)+1];
-    strcpy(name, nm);
+    name = nm;
     Set(typ, reft, context, 0);
     if (nd >= 0) {
 	    size = new q_size_t[nd+1];
@@ -821,8 +806,6 @@ StabEnt::SetDefaultBounds()
 
 StabEnt::~StabEnt()
 {
-	if (name)
-		delete [] name;
 	if (size)
 		delete [] size;
 }
@@ -944,10 +927,10 @@ StabEnt::IsControlVar()
 }
 
 
-char *
-StabEnt::PreciseName()
+const char *
+StabEnt::preciseName()
 {
-	static char	buf[1024];
+	string nm;
 	StabEnt	*stk[32];
 	short	nstk=0;
 
@@ -967,9 +950,8 @@ StabEnt::PreciseName()
 		c = c->context;
 	}
 dump:
-	short pos=0;
 	while (nstk > 0) {
-		pos += sprintf(buf+pos, "%s.", stk[--nstk]->name);
+		nm +=  stk[--nstk]->name + ".";
 	}
 #ifdef DEFINE_COUNT
 	if (defineCount == 0) {
@@ -978,15 +960,14 @@ dump:
 		sprintf(buf+pos, "%s#%d", name, defineCount);
 	}
 #else
-	sprintf(buf+pos, "%s", name);
+	nm += name;
 #endif
-	return buf;
+	return nm.c_str();
 }
 
-char *
-StabEnt::UniqueName()
+const char *
+StabEnt::uniqueName()
 {
-	static char	buf[MAX_QUA_NAME_LENGTH+3];
 #ifdef DEFINE_COUNT
 	if (defineCount == 0) {
 		return name;
@@ -995,23 +976,23 @@ StabEnt::UniqueName()
 		return buf;
 	}
 #else
-	return name;
+	return name.c_str();
 #endif
 }
 
-char *
-StabEnt::PrintableName()
+const char *
+StabEnt::printableName()
 {
-	static char		nm[MAX_QUA_NAME_LENGTH];
-	char	*p = nm;
-	char 	*s = name;
+	string nm;
+
+	auto s = name.begin();
 	while (*s) {
 		switch (*s) {
-		case ' ': *p++ = '\\'; *p++=' '; break;
-		case '\t': *p++ = '\\'; *p++='t'; break;
-		case '.': *p++ = '\\'; *p++='.'; break;
+		case ' ':nm.push_back('\\'); nm.push_back(' '); break;
+		case '\t': nm.push_back('\\'); nm.push_back('t'); break;
+		case '.': nm.push_back('\\'); nm.push_back('.'); break;
 		default:
-			*p++ = *s;
+			nm.push_back(*s);
 		}
 		s++;
 	}
@@ -1022,9 +1003,8 @@ StabEnt::PrintableName()
 		sprintf(p, "\\%d", defineCount);
 	}
 #else
-	*p = '\0';
 #endif
-	return nm;
+	return nm.c_str();
 }
 
 status_t
@@ -1032,12 +1012,12 @@ StabEnt::SaveSnapshot(FILE *fp)
 {
 	status_t	err=B_NO_ERROR;
 	if (debug_save)
-		fprintf(stderr, "save %s\n", name);	
+		fprintf(stderr, "save %s\n", name.c_str());
 
 	if (!isDeleted && !isClone) {
 		switch(type) {
 			case S_QUA: {
-				fprintf(fp, "<qua name=\"%s\">\n", name);
+				fprintf(fp, "<qua name=\"%s\">\n", name.c_str());
 				// save global values
 
 				// save display data
@@ -1079,7 +1059,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 				break;
 				
 			case S_VOICE: {
-				fprintf(fp, "<voice name=\"%s\">\n", name);
+				fprintf(fp, "<voice name=\"%s\">\n", name.c_str());
 				// save stream take data
 				// save display data
 				// save instance stacks
@@ -1096,7 +1076,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			}
 				
 			case S_SAMPLE: {
-				fprintf(fp, "<sample name=\"%s\">\n", name);
+				fprintf(fp, "<sample name=\"%s\">\n", name.c_str());
 				// save sample take data
 				// save display data
 				// save instance stacks
@@ -1113,7 +1093,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			}
 				
 			case S_POOL: {
-				fprintf(fp, "<pool name=\"%s\">\n", name);
+				fprintf(fp, "<pool name=\"%s\">\n", name.c_str());
 				// save stream data
 				// save display data
 				// save instance stacks
@@ -1259,7 +1239,7 @@ StabEnt::SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack
 {
 	status_t	err=B_NO_ERROR;
 	if (debug_save)
-		fprintf(stderr, "save %s\n", name);	
+		fprintf(stderr, "save %s\n", name.c_str());
 
 	if (!isDeleted && !isClone) {
 		switch(type) {
@@ -1294,19 +1274,19 @@ StabEnt::SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char
 	ResultValue	rv = lv.CurrentValue();
 	if (isEnveloped) {
 		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\" %s>\n", name, rv.StringValue(), additionalAttributes);
+			fprintf(fp, "<envelope name=\"%s\" value=\"%s\" %s>\n", name.c_str(), rv.StringValue(), additionalAttributes);
 		}
 		else {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\">\n", name, rv.StringValue());
+			fprintf(fp, "<envelope name=\"%s\" value=\"%s\">\n", name.c_str(), rv.StringValue());
 		}
 		fprintf(fp, "</envelope>\n");
 	}
 	else {
 		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\" %s/>\n", name, rv.StringValue(), additionalAttributes);
+			fprintf(fp, "<fixed name=\"%s\" value=\"%s\" %s/>\n", name.c_str(), rv.StringValue(), additionalAttributes);
 		}
 		else {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\"/>\n", name, rv.StringValue());
+			fprintf(fp, "<fixed name=\"%s\" value=\"%s\"/>\n", name.c_str(), rv.StringValue());
 		}
 	}
 	return B_OK;
@@ -1316,10 +1296,10 @@ StabEnt::SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char
 status_t
 StabEnt::SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack)
 {
-	char	*strval = StringValue(NULL, stacker, stack);
+	const char	*strval = StringValue(NULL, stacker, stack);
 	if (strval && *strval) {
 		tab(fp, indent);
-		fprintf(fp, "%s = %s", PrintableName(), strval);
+		fprintf(fp, "%s = %s", printableName(), strval);
 	}
 	return B_NO_ERROR;
 }
@@ -1329,7 +1309,7 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 {
 	status_t	err=B_NO_ERROR;
 	if (debug_save)
-		fprintf(stderr, "save %s\n", name);	
+		fprintf(stderr, "save %s\n", name.c_str());
 
 	if (!isDeleted && !isClone
 			&& (saveInternalRefs || (refType != REF_INSTANCE && refType != REF_POINTER))
@@ -1397,8 +1377,8 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				tab(fp, indent);
 				Instance	*inst = InstanceValue();
 				if (inst) {
-					fprintf(fp, "instance %s(", inst->sym->name);
-					fprintf(fp, "%s,", inst->channel->sym->name);
+					fprintf(fp, "instance %s(", inst->sym->name.c_str());
+					fprintf(fp, "%s,", inst->channel->sym->name.c_str());
 					fprintf(fp, "%s,", inst->startTime.StringValue());
 					fprintf(fp, "%s)\n", inst->duration.StringValue());
 	//				if ((err=InstanceValue()->Save(fp, indent)) != B_NO_ERROR) {
@@ -1410,11 +1390,11 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 
 			case S_CLIP: {
 				Clip	*c = ClipValue(nullptr);
-				if (c && c->sym && c->sym->name) {
-					if (c->media && c->media->sym && c->media->sym->name) {
+				if (c && c->sym && c->sym->name.size()) {
+					if (c->media && c->media->sym && c->media->sym->name.size()) {
 						tab(fp, indent);
-						fprintf(fp, "clip %s(", c->sym->name);
-						fprintf(fp, "%s,", c->media->sym->name);
+						fprintf(fp, "clip %s(", c->sym->name.c_str());
+						fprintf(fp, "%s,", c->media->sym->name.c_str());
 						fprintf(fp, "%s,", c->start.StringValue());
 						fprintf(fp, "%s)\n", c->duration.StringValue());
 					}
@@ -1428,11 +1408,11 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 					if (t->type == Take::SAMPLE) {
 						SampleTake *st = (SampleTake*)t;
 						tab(fp, indent);
-						fprintf(fp, "take \\sample \"%s\" %s\n", st->path.c_str(), t->sym->name);
+						fprintf(fp, "take \\sample \"%s\" %s\n", st->path.c_str(), t->sym->name.c_str());
 					} else if (t->type == Take::STREAM) {
 						StreamTake *st = (StreamTake*)t;
 						tab(fp, indent);
-						fprintf(fp, "take \\stream %s\n", t->sym->name);
+						fprintf(fp, "take \\stream %s\n", t->sym->name.c_str());
 					}
 				}
 				break;
@@ -1496,7 +1476,7 @@ StabEnt::SaveValue(FILE *fp, Stacker *i, QuasiStack *s)
 	return B_NO_ERROR;
 }
 
-char *
+const char *
 StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 {
 	static char	buf[10*1024];
@@ -1524,15 +1504,15 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 	case S_STRING:
 		return val.string;
 	case S_QUA:
-		return val.qua->sym->name;
+		return val.qua->sym->name.c_str();
 	case S_TEMPLATE:
-		return val.qTemplate->sym->name;
+		return val.qTemplate->sym->name.c_str();
 	case S_VOICE:
-		return val.voice->sym->name;
+		return val.voice->sym->name.c_str();
 	case S_SAMPLE:
-		return val.sample->sym->name;
+		return val.sample->sym->name.c_str();
 	case S_POOL:
-		return val.pool->sym->name;
+		return val.pool->sym->name.c_str();
 
 #ifdef QUA_V_APP_HANDLER
 	case S_APPLICATION:
@@ -1540,9 +1520,9 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 #endif
 
 	case S_LAMBDA:
-		return val.lambda->sym->name;
+		return val.lambda->sym->name.c_str();
 	case S_INSTANCE:
-		return val.instance->sym->name;
+		return val.instance->sym->name.c_str();
 	case S_EXPRESSION:
 	case S_BLOCK: {
 		long	len = 0;
@@ -1565,7 +1545,7 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		} else {
 			sprintf(buf, "%s'%s",
 					((Time*)lval.addr)->StringValue(),
-					((Time*)lval.addr)->metric->name);
+					((Time*)lval.addr)->metric->name.c_str());
 		}
 		return buf;
 	default:
@@ -1602,7 +1582,7 @@ StabEnt::SaveSimpleBits(FILE *fp, short indent)
 		fprintf(fp, " \\range %s", minVal.StringValue());
 		fprintf(fp, " %s",  maxVal.StringValue());
 	}
-	fprintf(fp, " %s", PrintableName());
+	fprintf(fp, " %s", printableName());
 	if (hasInit) {
 		fprintf(fp, " = %s",  iniVal.StringValue());
 	}
@@ -1618,9 +1598,9 @@ StabEnt::Dump(FILE *fp, short ind)
 		fprintf(fp, "\t");
 	const char * k = qut::unfind(typeIndex, (int) type).c_str();
 	if (k) {
-		fprintf(fp, "%s (%s)", name, k);
+		fprintf(fp, "%s (%s)", name.c_str(), k);
 	} else {
-		fprintf(fp, "%s (type %d)", name, type);
+		fprintf(fp, "%s (type %d)", name.c_str(), type);
 	}
 #ifdef DEFINE_COUNT
 	if (defineCount > 1) {
@@ -1851,19 +1831,17 @@ DefineSymbol(std::string nm, base_type_t typ, int8 ndim,
 			ref_type_t refType, bool isClone, bool isEnveloped, short ctlMode)
 {
 	short defineCount;
-	char	name[MAX_QUA_NAME_LENGTH];
-	strcpy(name, nm.c_str());
-	char	*p = name;
-	while (*p && *p != '#') p++;
-	if (*p == '#') {
-		defineCount = atoi(p+1);
+	string name = nm;
+	auto p = name.find('#');
+	if (p != name.npos) {
+		defineCount = atoi(name.substr(p+1).c_str());
+		name.erase(p);
 		if (defineCount < 0)
 			defineCount = 0;
-		*p = 0;
 	} else {
 		defineCount = -1;
 	}
-	StabEnt *sym = glob.AddSymbol(name, typ, context, ndim, refType, defineCount);
+	StabEnt *sym = glob.addSymbol(name, typ, context, ndim, refType, defineCount);
 
 	if (sym == nullptr) {
 		if (defineCount >= 0)
@@ -1881,7 +1859,7 @@ DefineSymbol(std::string nm, base_type_t typ, int8 ndim,
 				0,
 #endif
 				typ, (unsigned)val,
-				context?context->name:"<glbl>",
+				context?context->name.c_str() :"<glbl>",
 				context?context->type:-1,
 				isClone?"clone":"", 
 				(ctlMode != StabEnt::DISPLAY_NOT)?"controller":"");

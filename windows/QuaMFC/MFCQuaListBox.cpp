@@ -128,7 +128,7 @@ MFCQuaListBox::OnDblClk()
 }
 
 void
-MFCQuaListBox::AddValue(void *s, char *nm)
+MFCQuaListBox::AddValue(void *s, const char *nm)
 {
 	long ind = AddString(nm);
 	SetItemData(ind, (DWORD_PTR)s);
@@ -170,7 +170,7 @@ END_MESSAGE_MAP()
 IMPLEMENT_DYNAMIC(MFCQuaSymListBox, CListBox)
 
 void
-MFCQuaSymListBox::AddValue(StabEnt *s, char *nm)
+MFCQuaSymListBox::AddValue(StabEnt *s, const char *nm)
 {
 	long ind = AddString(nm);
 	SetItemData(ind, (DWORD_PTR)s);
@@ -182,16 +182,16 @@ MFCQuaSymListBox::Value(long i)
 	return (StabEnt *)GetItemData(i);
 }
 
-char *
+const char *
 MFCQuaSymListBox::ValueStr(long i)
 {
 	StabEnt	*p = Value(i);
-	return p?p->name:"";
+	return p->name.c_str();
 }
 
 void
 MFCQuaSymListBox::SelectValue(StabEnt *s)
 {
-	SelectString(0, s->name);
+	SelectString(0, s->name.c_str());
 }
 

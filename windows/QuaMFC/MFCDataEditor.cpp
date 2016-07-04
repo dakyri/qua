@@ -423,7 +423,7 @@ MFCSequenceEditor::OnDrop(
 			for (i=0; i<dragon.count; i++) {
 				string	mime_t = Qua::identifyFile(dragon.data.filePathList->at(i));
 				if (mime_t.size() > 0) {
-					fprintf(stderr, "%s (%s)\n", dragon.data.filePathList->at(i), mime_t.c_str());
+					fprintf(stderr, "%s (%s)\n", dragon.data.filePathList->at(i).c_str(), mime_t.c_str());
 					if (mime_t == "audio/x-midi") {
 						drop_midi_file = true;
 						break;
@@ -1258,7 +1258,7 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 
 	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
 	wstring nm;
-	char *cp = item->sym->UniqueName();
+	const char *cp = item->sym->uniqueName();
 	while (*cp) {
 		nm.push_back(*cp++);
 	}

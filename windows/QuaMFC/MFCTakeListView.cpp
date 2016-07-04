@@ -388,7 +388,7 @@ MFCTakeListView::CreateList(CRect &r, MFCObjectView *v, MFCDataEditor *e, UINT i
 }
 
 long
-MFCTakeListView::AddTakeItem(char * nm, LPARAM lp, int im)
+MFCTakeListView::AddTakeItem(const char * nm, LPARAM lp, int im)
 {
 	long ind = GetListCtrl().InsertItem(0, nm, im);
 	if (ind >= 0) {
@@ -411,7 +411,7 @@ MFCTakeListView::AddTake(StabEnt *s)
 	if (c == NULL) {
 		return -1;
 	}
-	long ind = AddTakeItem(s->UniqueName(), (LPARAM)s,
+	long ind = AddTakeItem(s->uniqueName(), (LPARAM)s,
 					c->type==Take::STREAM?1:
 					c->type==Take::SAMPLE?0:2);
 	return ind;

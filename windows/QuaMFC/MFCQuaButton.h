@@ -23,7 +23,7 @@ public:
 
 	virtual void		DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
-	virtual bool		CreateButton(char *label, CRect &r, CWnd *w, UINT id);
+	virtual bool		CreateButton(const char *label, CRect &r, CWnd *w, UINT id);
 
 	afx_msg	void		OnMouseMove(UINT nFlags,CPoint point);
 	afx_msg void		OnLButtonDown(UINT nFlags, CPoint point);
@@ -103,7 +103,7 @@ public:
 	MFCSmallQuaChkBut();
 	virtual				~MFCSmallQuaChkBut();
 
-	virtual bool		CreateButton(char *label, CRect &r, CWnd *w, UINT id);
+	virtual bool		CreateButton(const char *label, CRect &r, CWnd *w, UINT id);
 
 	virtual void		DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
@@ -121,7 +121,7 @@ public:
 	MFCSmallQuaClsBut();
 	virtual				~MFCSmallQuaClsBut();
 
-	virtual bool		CreateButton(char *label, CRect &r, CWnd *w, UINT id);
+	virtual bool		CreateButton(const char *label, CRect &r, CWnd *w, UINT id);
 
 	virtual void		DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
@@ -140,7 +140,7 @@ public:
 	MFCSmallQuaMinBut();
 	virtual				~MFCSmallQuaMinBut();
 
-	virtual bool		CreateButton(char *label, CRect &r, CWnd *w, UINT id);
+	virtual bool		CreateButton(const char *label, CRect &r, CWnd *w, UINT id);
 
 	virtual void		DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
@@ -157,7 +157,7 @@ public:
 	MFCSmallQuaLetterBut(char c);
 	virtual				~MFCSmallQuaLetterBut();
 
-	virtual bool		CreateButton(char *label, CRect &r, CWnd *w, UINT id);
+	virtual bool		CreateButton(const char *label, CRect &r, CWnd *w, UINT id);
 
 	virtual void		DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 

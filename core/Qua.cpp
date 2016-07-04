@@ -140,7 +140,7 @@ Qua::OnCreationInit(bool chan_add)
 #endif
 	theStack = new QuasiStack(sym, this, sym, nullptr, nullptr, nullptr, this, nullptr);
 	
-	fprintf(stderr, "initting qua %s...\n", sym->name);
+	fprintf(stderr, "initting qua %s...\n", sym->name.c_str());
 	fprintf(stderr, "base value %d bytes\n", sizeof(base_val_t));
 	fprintf(stderr, "typed value %d bytes\n", sizeof(TypedValue));
 	fprintf(stderr, "result value %d bytes\n", sizeof(ResultValue));
@@ -253,7 +253,7 @@ Qua::PostCreationInit()
 
 #define INIT_BY_METHOD
 #ifdef INIT_BY_METHOD
-	StabEnt	*is = glob.FindContextSymbol("Init", sym, -1);
+	StabEnt	*is = glob.findContextSymbol("Init", sym, -1);
 	Lambda	*initMethod = nullptr;
 	if (is && is->type == TypedValue::S_LAMBDA) {
 		initMethod = is->LambdaValue();
@@ -277,7 +277,7 @@ Qua::PostCreationInit()
 			  initBlock->Reset(initStack)) {
 			initStack->lowerFrame = theStack;
 			
-			fprintf(stderr, "Executing Init method of %s...\n", sym->name);
+			fprintf(stderr, "Executing Init method of %s...\n", sym->name.c_str());
 			
 			bool ua_complete = (UpdateActiveBlock(
 		    					this,
@@ -477,7 +477,7 @@ Qua::RemoveChannel(short ch_id, bool updateDisplay)
 
 Qua::~Qua()
 {
-	fprintf(stderr, "Qua: about to delete %s\n", sym->name);
+	fprintf(stderr, "Qua: about to delete %s\n", sym->name.c_str());
 #ifdef QUA_V_AUDIO
 	environment.quaAudio->StopAudio();
 	fprintf(stderr, "Qua: stopped audio\n");
@@ -494,25 +494,25 @@ Qua::~Qua()
 #else
 	// XXX check thread hanging
 	theClock->UnsetAlarm();
-	fprintf(stderr, "Qua: waiting for main thread %s\n", sym->name);
+	fprintf(stderr, "Qua: waiting for main thread %s\n", sym->name.c_str());
 	if (myThread.joinable()) {
 		myThread.join();
 	}
 #endif
 	/* free up blocks used */
 
- 	fprintf(stderr, "%s::~Qua(). Halting channels ...\n", sym->name);
+ 	fprintf(stderr, "%s::~Qua(). Halting channels ...\n", sym->name.c_str());
 
    for (short i=0; i<nChannel; i++) {	
 		channel[i]->Stop();
 		// possibly unlock these
     }
 
- 	fprintf(stderr, "%s::~Qua(). Clearing context stack...\n", sym->name);
+ 	fprintf(stderr, "%s::~Qua(). Clearing context stack...\n", sym->name.c_str());
 	glob.PopContext(sym);
 	
 //	sym->Dump(stderr, 0);
- 	fprintf(stderr, "%s::~Qua(). Deleting symbols...\n", sym->name);
+ 	fprintf(stderr, "%s::~Qua(). Deleting symbols...\n", sym->name.c_str());
 	glob.DeleteSymbol(sym, true);
 
 	bridge.Cleanup();
@@ -535,12 +535,12 @@ Qua::SetTempo(float t, bool disp)
 
 
 void
-Qua::setName(const char *nm, bool setTitle)
+Qua::setName(const string &nm, bool setTitle)
 {
-	if (strcmp(nm, sym->name) != 0) {
-		glob.Rename(sym, nm);
+	if (nm != sym->name) {
+		glob.rename(sym, nm);
 		if (setTitle) {
-			bridge.displayArrangementTitle(sym->name);
+			bridge.displayArrangementTitle(sym->name.c_str());
 		}
 	}
 }
@@ -702,7 +702,7 @@ Qua::Stop()
 {
 	if (status != STATUS_SLEEPING) {
     	for (Schedulable *p = schedulees; p!=nullptr; p=p->next) {
-    		fprintf(stderr, "Stopping %x %s: ", (unsigned)p, p->sym->name);
+    		fprintf(stderr, "Stopping %x %s: ", (unsigned)p, p->sym->name.c_str());
     		p->QuaStop();
     		fprintf(stderr, "done\n");
     	}
@@ -1232,7 +1232,7 @@ Qua::CheckScheduledActivations()
 								&& theTime >= inst->startTime
 								&& theTime <= (inst->startTime + inst->duration)
 							  ) {
-							fprintf(stderr, "Waking %s at %s\n", inst->sym->name, theTime.StringValue());
+							fprintf(stderr, "Waking %s at %s\n", inst->sym->name.c_str(), theTime.StringValue());
 							Wake(inst);
 							activeInstances.push_back(inst);
 						}
@@ -1443,7 +1443,7 @@ Qua::RemoveMethod(Lambda *p, bool andD, bool updateDisplay)
 		bridge.RemoveMethodRepresentations(p->sym);
 	}
 	if (andD) {
-		fprintf(stderr, "removed lambda %s\n", p->sym->name);
+		fprintf(stderr, "removed lambda %s\n", p->sym->name.c_str());
 		glob.DeleteSymbol(p->sym, true);
 	}
 }
@@ -1492,7 +1492,7 @@ Qua::RemoveSchedulable(Schedulable *p, bool andDel, bool updateDisplay)
 		bridge.RemoveSchedulableRepresentations(p->sym);
 	}
 	if (andDel) {
-		fprintf(stderr, "removed schedulable %s\n", p->sym->name);
+		fprintf(stderr, "removed schedulable %s\n", p->sym->name.c_str());
 		glob.DeleteSymbol(p->sym, true);
 	}
 }
@@ -1573,10 +1573,10 @@ status_t
 Qua::Save(FILE *fp, short indent, bool clearHistory)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "qua %s\n", sym->PrintableName());
+	tab(fp, indent); fprintf(fp, "qua %s\n", sym->printableName());
 	tab(fp, indent); fprintf(fp, "{\n");
 	if (clearHistory) {
-		StabEnt	*is = glob.FindContextSymbol("Init", sym, -1);
+		StabEnt	*is = glob.findContextSymbol("Init", sym, -1);
 		if (is) {
 			glob.DeleteSymbol(is,true);
 		}
@@ -1650,7 +1650,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 	}
 	case 'POOL': {
 		Pool	*P = (Pool *) data;
-		if ((err=WriteChunk(fp, 'NAME', P->sym->name, strlen(P->sym->name))) != B_NO_ERROR) {
+		if ((err=WriteChunk(fp, 'NAME', (void*)P->sym->name.c_str(), P->sym->name.size())) != B_NO_ERROR) {
 			return err;
 		}
 
@@ -1671,7 +1671,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 	}
 	case 'TAKE': {
 		StreamTake	*S = (StreamTake *) data;
-		if ((err=WriteChunk(fp, 'NAME', S->sym->name, strlen(S->sym->name))) != B_NO_ERROR) {
+		if ((err = WriteChunk(fp, 'NAME', (void*)S->sym->name.c_str() , S->sym->name.size())) != B_NO_ERROR) {
 			return err;
 		}
 		if ((err=WriteChunk(fp, 'STRM', &S->stream, 0)) != B_NO_ERROR) {
@@ -1893,36 +1893,36 @@ TypedValue::StringValue()
 		return val.string?val.string:"";
 	case S_QUA:
 		return (val.qua != nullptr && val.qua->sym != nullptr)?
-			val.qua->sym->name:"_null_qua";
+			val.qua->sym->name.c_str():"_null_qua";
 	case S_TEMPLATE:
 		return (val.qTemplate != nullptr && val.qTemplate->sym != nullptr)?
-			val.qTemplate->sym->name:"null_template";
+			val.qTemplate->sym->name.c_str() :"null_template";
 	case S_VOICE:
 		return (val.voice != nullptr && val.voice->sym != nullptr)?
-			val.voice->sym->name:"_null_voice";
+			val.voice->sym->name.c_str() :"_null_voice";
 	case S_SAMPLE:
 		return (val.sample != nullptr && val.sample->sym != nullptr)?
-			val.sample->sym->name:"_null_sample";
+			val.sample->sym->name.c_str() :"_null_sample";
 	case S_CHANNEL:
 		return (val.channel != nullptr && val.channel->sym != nullptr)?
-			val.channel->sym->name:"_null_channel";
+			val.channel->sym->name.c_str() :"_null_channel";
 	case S_CLIP:
 		return (val.clip != nullptr && val.clip->sym != nullptr)?
-			val.clip->sym->name:"_null_clip";
+			val.clip->sym->name.c_str() :"_null_clip";
 	case S_POOL:
 		return (val.pool != nullptr && val.pool->sym != nullptr)?
-			val.pool->sym->name:"_null_pool";
+			val.pool->sym->name.c_str() :"_null_pool";
 #ifdef QUA_V_APP_HANDLER
 	case S_APPLICATION:
 		return (val.application != nullptr && val.application->sym != nullptr)?
-			val.application->sym->name:"null_application";
+			val.application->sym->name.c_str() :"null_application";
 #endif
 	case S_LAMBDA:
 		return (val.lambda != nullptr && val.lambda->sym != nullptr)?
-			val.lambda->sym->name:"_null_method";
+			val.lambda->sym->name.c_str() :"_null_method";
 	case S_INSTANCE:
 		return (val.instance != nullptr && val.instance->sym != nullptr)?
-			val.instance->sym->name:"_null_instance";
+			val.instance->sym->name.c_str() :"_null_instance";
 	case S_EXPRESSION:
 	case S_BLOCK: {
 		static char	txt[10*1024];

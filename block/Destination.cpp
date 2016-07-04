@@ -103,7 +103,7 @@ Output::Output(std::string nm,
 void
 Input::SaveSnapshot(FILE *fp, Channel *chan)
 {
-	fprintf(fp, "<input name=\"%s\">\n", sym->name);
+	fprintf(fp, "<input name=\"%s\">\n", sym->name.c_str());
 	StabEnt	*p = sym->children;
 	while (p != nullptr) {
 		p->SaveSimpleTypeSnapshot(fp, chan, nullptr);
@@ -189,7 +189,7 @@ Input::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 void
 Output::SaveSnapshot(FILE *fp, Channel *chan)
 {
-	fprintf(fp, "<output name=\"%s\">\n", sym->name);
+	fprintf(fp, "<output name=\"%s\">\n", sym->name.c_str());
 	StabEnt	*p = sym->children;
 	while (p != nullptr) {
 		p->SaveSimpleTypeSnapshot(fp, chan, nullptr);
@@ -394,7 +394,7 @@ Place::Name(uchar dfmt, uchar cfmt)
 
 	if (device->deviceType == QUA_DEV_MIDI) {
 		if (cfmt == NMFMT_NONE) {
-			return device->name(dfmt);
+			return (char *)device->name(dfmt);
 		} else {
 			if (deviceChannel == -1)
 				sprintf(buf, "%s:*", device->name(dfmt));
@@ -414,7 +414,7 @@ Place::Name(uchar dfmt, uchar cfmt)
 			sprintf(buf, "%s:%d", device->name(dfmt), deviceChannel);
 		}
 	} else if (device->deviceType == QUA_DEV_JOYSTICK) {
-		return device->name(dfmt);
+		return (char *)device->name(dfmt);
 	}
 
 	return buf;
@@ -563,10 +563,10 @@ Input::Save(FILE *fp, short indent, short i)
 	if (device) {
 		switch (device->deviceType) {
 			case QUA_DEV_AUDIO: {
-				fprintf(fp, " \\audio %s %d", device->sym->name, deviceChannel);
+				fprintf(fp, " \\audio %s %d", device->sym->name.c_str(), deviceChannel);
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
-						fprintf(fp, " \\audio %s %d", xDevice->sym->name, xChannel);
+						fprintf(fp, " \\audio %s %d", xDevice->sym->name.c_str(), xChannel);
 					} else {
 						fprintf(fp, " %d", xChannel);
 					}
@@ -574,21 +574,21 @@ Input::Save(FILE *fp, short indent, short i)
 				break;
 			}
 			case QUA_DEV_JOYSTICK: {
-				fprintf(fp, " \\joystick %s", device->sym->name);
+				fprintf(fp, " \\joystick %s", device->sym->name.c_str());
 				break;
 			}
 
 			case QUA_DEV_MIDI: {
-				fprintf(fp, " \\midi %s %d", device->sym->name, deviceChannel);
+				fprintf(fp, " \\midi %s %d", device->sym->name.c_str(), deviceChannel);
 				break;
 			}
 			case QUA_DEV_PARALLEL: {
-				fprintf(fp, " \\parallel %s", device->sym->name);
+				fprintf(fp, " \\parallel %s", device->sym->name.c_str());
 				break;
 			}
 		}
 	}
-	fprintf(fp, " %s", sym->name);
+	fprintf(fp, " %s", sym->name.c_str());
 #ifndef QUA_V_SAVE_INITASXML
 	if (sym->children) {
 		fprintf(fp, " {\n");
@@ -608,10 +608,10 @@ Output::Save(FILE *fp, short indent, short i)
 	if (device) {
 		switch (device->deviceType) {
 			case QUA_DEV_AUDIO: {
-				fprintf(fp, " \\audio %s %d", device->sym->name, deviceChannel);
+				fprintf(fp, " \\audio %s %d", device->sym->name.c_str(), deviceChannel);
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
-						fprintf(fp, " \\audio %s %d", xDevice->sym->name, xChannel);
+						fprintf(fp, " \\audio %s %d", xDevice->sym->name.c_str(), xChannel);
 					} else {
 						fprintf(fp, " %d", xChannel);
 					}
@@ -619,20 +619,20 @@ Output::Save(FILE *fp, short indent, short i)
 				break;
 			}
 			case QUA_DEV_JOYSTICK: {
-				fprintf(fp, " \\joystick %s", device->sym->name);
+				fprintf(fp, " \\joystick %s", device->sym->name.c_str());
 				break;
 			}
 			case QUA_DEV_MIDI: {
-				fprintf(fp, " \\midi %s %d", device->sym->name, deviceChannel);
+				fprintf(fp, " \\midi %s %d", device->sym->name.c_str(), deviceChannel);
 				break;
 			}
 			case QUA_DEV_PARALLEL: {
-				fprintf(fp, " \\parallel %s", device->sym->name);
+				fprintf(fp, " \\parallel %s", device->sym->name.c_str());
 				break;
 			}
 		}
 	}
-	fprintf(fp, " %s", sym->name);
+	fprintf(fp, " %s", sym->name.c_str());
 #ifndef QUA_V_SAVE_INITASXML
 	if (sym->children) {
 		fprintf(fp, " {\n");

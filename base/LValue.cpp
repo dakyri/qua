@@ -65,7 +65,7 @@ StabEnt::SetLValue(LValue &lval, StreamItem *items, Stacker *stacker, StabEnt *s
 	BaseAddress(lval, items, stacker, stack);
 	if (debug_lval >= 2) {
 		fprintf(stderr, "SetLValue: %s addr %x indirection %d stacker %x\n",
-			name, (unsigned) lval.addr, lval.indirection, (unsigned)lval.stacker);
+			name.c_str(), (unsigned) lval.addr, lval.indirection, (unsigned)lval.stacker);
 	}
 }
 
@@ -309,11 +309,11 @@ FindStackFor(QuasiStack *from, StabEnt *context, StabEnt *label, StabEnt *obj, l
 		}
 	}
 	fprintf(stderr, "... a quick hunt around and i couldn't find stack for %s.(%s/%s/%d) from %s\n",
-		context?context->name:"<null>",
-		label?label->name:"<null>",
-		obj?obj->name:"<null>",
+		context?context->name.c_str() :"<null>",
+		label?label->name.c_str() :"<null>",
+		obj?obj->name.c_str() :"<null>",
 		frameind,
-		from?from->context->name:"<null>");
+		from?from->context->name.c_str() :"<null>");
 	return nullptr;
 }
 
@@ -331,10 +331,10 @@ StabEnt::Initialize(QuasiStack *stack)
 		lval.Initialize();
 		
 		if (debug_lval)
-			fprintf(stderr, "Symbol %s initialised\n", UniqueName());
+			fprintf(stderr, "Symbol %s initialised\n", uniqueName());
 	} else {
 		if (debug_lval)
-			fprintf(stderr, "Symbol %s not initialised\n", UniqueName());
+			fprintf(stderr, "Symbol %s not initialised\n", uniqueName());
 	}
 }
 
@@ -356,7 +356,7 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 	
 	case Block::C_SYM: {
 		if (debug_lval >= 2) {
-			fprintf(stderr, "sym lval %s\n", b->crap.sym?b->crap.sym->name:"<>");
+			fprintf(stderr, "sym lval %s\n", b->crap.sym?b->crap.sym->name.c_str() :"<>");
 		}
 		if (b->crap.sym == nullptr) {
 			return;
@@ -642,7 +642,7 @@ LValue::StoreBlock(Block *v)
 {
 	if (addr != nullptr && sym != nullptr) {
 		if (debug_lval)
-			fprintf(stderr, "StoreBlock(): addr %s %x\n", sym->name, (unsigned) addr);
+			fprintf(stderr, "StoreBlock(): addr %s %x\n", sym->name.c_str(), (unsigned) addr);
 		switch(sym->type) {
 		case TypedValue::S_BLOCK:
 		case TypedValue::S_EXPRESSION:
@@ -682,8 +682,8 @@ LValue::StoreInt(int32 v)
 	  addr != nullptr) {
 		if (1)//debug_lval)
 			fprintf(stderr, "store_int %s.%s (%d): addr %x = %d. %x %x\n",
-				sym->context?sym->context->name:"<glbl>",
-				sym->name, sym->context?sym->context->type:-1,
+				sym->context?sym->context->name.c_str() :"<glbl>",
+				sym->name.c_str(), sym->context?sym->context->type:-1,
 				(unsigned) addr, v,
 				(unsigned) sym->context, (unsigned) sym->val.stackAddress.context);
 		switch(sym->type) {
@@ -714,8 +714,8 @@ LValue::StoreFloat(float v)
 	  addr != nullptr) {
 		if (debug_lval)
 			fprintf(stderr, "store_float %s.%s (%d): addr %x = %g. %x %x\n",
-				sym->context?sym->context->name:"<glbl>",
-				sym->name, sym->context?sym->context->type:-1,
+				sym->context?sym->context->name.c_str() :"<glbl>",
+				sym->name.c_str(), sym->context?sym->context->type:-1,
 				(unsigned) addr, v,
 				(unsigned)sym->context, (unsigned)sym->val.stackAddress.context);
 		switch(sym->type) {
@@ -751,7 +751,7 @@ LValue::StoreLong(int64 v)
 	  addr != nullptr) {
 		if (debug_lval)
 			fprintf(stderr, "store_long %s.%s (%d): addr %x = %lld. %x %x\n",
-				sym->context?sym->context->name:"<glbl>", sym->name, sym->context?sym->context->type:-1,
+				sym->context?sym->context->name.c_str() :"<glbl>", sym->name.c_str(), sym->context?sym->context->type:-1,
 				(unsigned)addr, v, (unsigned)sym->context, (unsigned) sym->val.stackAddress.context);
 		switch(sym->type) {
 			case TypedValue::S_BOOL:	*(bool*)addr = (v!=0); break;
@@ -898,7 +898,7 @@ LValue::Initialize()
 		return;
 	}
 	if (debug_lval)
-		fprintf(stderr, "lvalue: initialize %s-> %d %s\n", sym->name, sym->iniVal.type, sym->iniVal.StringValue());
+		fprintf(stderr, "lvalue: initialize %s-> %d %s\n", sym->name.c_str(), sym->iniVal.type, sym->iniVal.StringValue());
 	for (i=1; i<=sym->indirection; i++)
 		nobj *= sym->size[i];
 	for (i=0; i<nobj; i++) {
@@ -1096,7 +1096,7 @@ LValue::CurrentValue()
 		break;
 	case TypedValue::S_TIME:
 		ret_val.type = TypedValue::S_TIME;
-		ret_val.SetValue(((Time *)addr));
+		ret_val.SetValue(*((Time *)addr));
 		break;
 	case TypedValue::S_BLOCK:
 		ret_val.type = TypedValue::S_BLOCK;

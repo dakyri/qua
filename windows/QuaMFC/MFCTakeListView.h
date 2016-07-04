@@ -37,7 +37,7 @@ public:
 	virtual BOOL			OnDrop(COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 	virtual DROPEFFECT		OnDragOver(COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
 
-	long					AddTakeItem(char *, LPARAM, int);
+	long					AddTakeItem(const char *, LPARAM, int);
 	long					ItemForTake(StabEnt *s);
 	long					ItemAtPoint(CPoint &);
 	long					AddTake(StabEnt *s);

@@ -152,7 +152,7 @@ Pool::Init()
 	    uberQua->bridge.reportError("Qua: pool not found\n");
 	}
 	glob.PushContext(sym);
-	fprintf(stderr, "Initing pool %s\n", sym->name);
+	fprintf(stderr, "Initing pool %s\n", sym->name.c_str());
 
 	if (!Schedulable::Init())
 		goto err_ex;
@@ -358,7 +358,7 @@ Pool::Save(FILE *fp, short indent)
 		uberQua->bridge.WriteDisplayParameters(fp, sym);
 	}
 #endif
-	fprintf(fp,	" %s", sym->PrintableName());
+	fprintf(fp,	" %s", sym->printableName());
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);

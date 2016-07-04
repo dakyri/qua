@@ -24,7 +24,7 @@ struct joy_channel
 {
 	joy_channel(char *, long, long, bool);
 
-	char		name[MAX_QUA_NAME_LENGTH];
+	string name;
 	long		id;
 	long		flags;
 	bool		isFeedback;
@@ -155,7 +155,7 @@ struct joy_cap {
 #endif
 
 	short					subType;
-	char					name[MAX_QUA_NAME_LENGTH];
+	string name;
 	bool					hasFeedback;
 #ifdef QUA_V_JOYSTICK_DX
 	GUID					guid;

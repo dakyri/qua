@@ -197,11 +197,11 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 	do {
 		takeno++;
 		char buf[100];
-		sprintf(buf, "%s_%d.%s", sym->name, takeno, extension);
+		sprintf(buf, "%s_%d.%s", sym->name.c_str(), takeno, extension);
 		filenm = buf;
 		path == uberQua->sampleDirectoryPath + "/" + filenm;
 	} while (!_access(path.c_str(), 04));
-	takenm = glob.MakeUniqueName(sym, "record", 1);
+	takenm = glob.makeUniqueName(sym, "record", 1);
 	fprintf(stderr, "%s file %s path %s\n", filenm.c_str(), takenm.c_str(), path.c_str());
 
 	SampleFile	*file = new SampleFile(fileType, nChan, sampleSize, sampleRate);
@@ -221,7 +221,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 SampleTake	*
 Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 {
-	fprintf(stderr, "sample %s: adding sample take %s at %s\n", sym->name, nm.c_str(), path.c_str());
+	fprintf(stderr, "sample %s: adding sample take %s at %s\n", sym->name.c_str(), nm.c_str(), path.c_str());
 	SampleTake	*take;
 	take = new SampleTake(this, nm, path);
 
@@ -236,7 +236,7 @@ Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 	if (disp) {
 		uberQua->bridge.UpdateTakeIndexDisplay(sym);
 	}
-	fprintf(stderr, "sample %s: added sample take %s at %s\n", sym->name, nm.c_str(), path.c_str());
+	fprintf(stderr, "sample %s: added sample take %s at %s\n", sym->name.c_str(), nm.c_str(), path.c_str());
 	return take;
 }
 
@@ -557,7 +557,7 @@ Sample::Save(FILE *fp, short indent)
 	tab(fp, indent);
 	fprintf(fp,	"sample");
 	
-	fprintf(fp,	" %s", sym->PrintableName());
+	fprintf(fp,	" %s", sym->printableName());
 
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
@@ -725,7 +725,7 @@ Sample::Init()
 		uberQua->bridge.reportError("Qua: sampler not found");
 	}
 	glob.PushContext(sym);
-	fprintf(stderr, "Initing sample %s\n", sym->name);
+	fprintf(stderr, "Initing sample %s\n", sym->name.c_str());
 
 	if (!Schedulable::Init())
 		goto err_ex;

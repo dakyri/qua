@@ -206,7 +206,7 @@ MFCQuaButton::OnMouseMove(UINT nFlags,CPoint point)
 }
 
 bool
-MFCQuaButton::CreateButton(char *label, CRect &r, CWnd *w, UINT id)
+MFCQuaButton::CreateButton(const char *label, CRect &r, CWnd *w, UINT id)
 {
 	if (!Create(label, BS_OWNERDRAW|BS_PUSHBUTTON|TBS_TOOLTIPS, r, w, id)) {
 		return false;
@@ -411,7 +411,7 @@ MFCSmallQuaChkBut::DrawItem(LPDRAWITEMSTRUCT disP)
 
 
 bool
-MFCSmallQuaChkBut::CreateButton(char *label, CRect &r, CWnd *w, UINT id)
+MFCSmallQuaChkBut::CreateButton(const char *label, CRect &r, CWnd *w, UINT id)
 {
 	if (!Create(label, WS_CHILD|WS_VISIBLE|TBS_TOOLTIPS|BS_OWNERDRAW|BS_CHECKBOX, r, w, id)) {
 		return false;
@@ -476,7 +476,7 @@ MFCSmallQuaMinBut::DrawItem(LPDRAWITEMSTRUCT disP)
 
 
 bool
-MFCSmallQuaMinBut::CreateButton(char *label, CRect &r, CWnd *w, UINT id)
+MFCSmallQuaMinBut::CreateButton(const char *label, CRect &r, CWnd *w, UINT id)
 {
 	if (!Create(label, WS_CHILD|WS_VISIBLE|TBS_TOOLTIPS|BS_OWNERDRAW|BS_CHECKBOX, r, w, id)) {
 		return false;
@@ -542,7 +542,7 @@ MFCSmallQuaClsBut::DrawItem(LPDRAWITEMSTRUCT disP)
 
 
 bool
-MFCSmallQuaClsBut::CreateButton(char *label, CRect &r, CWnd *w, UINT id)
+MFCSmallQuaClsBut::CreateButton(const char *label, CRect &r, CWnd *w, UINT id)
 {
 	if (!Create(label, WS_CHILD|WS_VISIBLE|TBS_TOOLTIPS|BS_OWNERDRAW, r, w, id)) {
 		return false;
@@ -609,7 +609,7 @@ MFCSmallQuaLetterBut::DrawItem(LPDRAWITEMSTRUCT disP)
 
 
 bool
-MFCSmallQuaLetterBut::CreateButton(char *label, CRect &r, CWnd *w, UINT id)
+MFCSmallQuaLetterBut::CreateButton(const char *label, CRect &r, CWnd *w, UINT id)
 {
 	if (!Create(label, WS_CHILD|WS_VISIBLE|TBS_TOOLTIPS|BS_OWNERDRAW, r, w, id)) {
 		return false;

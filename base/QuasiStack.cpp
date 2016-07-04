@@ -388,7 +388,7 @@ QuasiStack::GetFrameMap(frame_map_hdr *&map)
 	QuasiStack **r = (QuasiStack **)cmap;
 	for (i=0; i<countFrames(); i++) {
 		if (frameAt(i)) {
-//			fprintf(stderr, "\tname %s\n", stackable->Controller(i)->UniqueName());
+//			fprintf(stderr, "\tname %s\n", stackable->Controller(i)->uniqueName());
 		}
 		*r++ = frameAt(i);
 	}
@@ -411,7 +411,7 @@ QuasiStack::Save(FILE *fp, short indent)
 {
 	bool		comma = false;
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s(", stackable->sym->PrintableName());
+	tab(fp, indent); fprintf(fp, "%s(", stackable->sym->printableName());
 	QuaControllerBridge *p;
 	int				i;
 	/*
@@ -691,7 +691,7 @@ QuasiStack::SetValue(Block *b)
 			return false;
 		}
 	} else if (b->type == Block::C_UNLINKED_CALL) {
-		if (strcmp(b->crap.call.crap.name, stackable->sym->name) != 0)
+		if (strcmp(b->crap.call.crap.name, stackable->sym->name.c_str()) != 0)
 			return false;
 	} else {
 		return false;

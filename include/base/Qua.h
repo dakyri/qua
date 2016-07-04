@@ -129,7 +129,7 @@ public:
 	Voice					*CreateVoice(std::string, bool andD);
 	Lambda					*CreateMethod(std::string, StabEnt *ctxt, bool andD);
 	bool					ParsePass2(class Parser *p, StabEnt **loadable);
-	void setName(const char *nm, bool setTitle=true);
+	void setName(const string &nm, bool setTitle=true);
 	void 					UpdateRecordDisplay();
 
 	Channel					*AddChannel(

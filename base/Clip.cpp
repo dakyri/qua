@@ -49,8 +49,8 @@ StreamTake::~StreamTake()
 status_t
 StreamTake::SaveSnapshot(FILE *fp)
 {
-	if (sym && sym->name) {
-		fprintf(fp, "<take type=\"stream\" name=\"%s\" duration=\"%s\">\n", sym->name, duration.StringValue());
+	if (sym && sym->name.size()) {
+		fprintf(fp, "<take type=\"stream\" name=\"%s\" duration=\"%s\">\n", sym->name.c_str(), duration.StringValue());
 		stream.SaveSnapshot(fp);
 		fprintf(fp, "</take>\n");
 	} else {
@@ -208,13 +208,13 @@ SampleTake::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 status_t
 SampleTake::SaveSnapshot(FILE *fp)
 {
-	if (sym && sym->name) {
+	if (sym && sym->name.size()) {
 		fprintf(fp, "<take type=\"sample\" ");
 		const char	*pnm = path.c_str();
 		if (pnm != nullptr && *pnm != '\0') {
 			fprintf(fp, "path=\"%s\" ", pnm);
 		}
-		fprintf(fp, "name=\"%s\"/>\n", sym->name);
+		fprintf(fp, "name=\"%s\"/>\n", sym->name.c_str());
 	} else {
 		return B_ERROR;
 	}
@@ -557,10 +557,10 @@ Clip::Set(Take *m, Time&s, Time &e)
 status_t
 Clip::SaveSnapshot(FILE *fp)
 {
-	if (sym && sym->name) {
-		fprintf(fp, "<clip name=\"%s\"", sym->name);
-		if (media && media->sym && media->sym->name) {
-			fprintf(fp, " take=\"%s\"", media->sym->name);
+	if (sym && sym->name.size()) {
+		fprintf(fp, "<clip name=\"%s\"", sym->name.c_str());
+		if (media && media->sym && media->sym->name.size()) {
+			fprintf(fp, " take=\"%s\"", media->sym->name.c_str());
 		}
 		fprintf(fp, " start=\"%s\"", start.StringValue());
 		fprintf(fp, " duration=\"%s\"", duration.StringValue());

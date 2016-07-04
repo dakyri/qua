@@ -207,7 +207,7 @@ MFCBlockEdit::OnDrop(
 			long pos = GetEditCtrl().CharFromPos(point);
 			fprintf(stderr, "pos = %d\n", pos);
 			StabEnt	*sym = dragon.data.symbol;
-			char	*sym_nm = sym->UniqueName();
+			const char	*sym_nm = sym->uniqueName();
 			long buflen = GetWindowTextLength();
 			char	*buf = new char[buflen+1];
 			char	*nbuf = new char[strlen(sym_nm)+buflen+3];

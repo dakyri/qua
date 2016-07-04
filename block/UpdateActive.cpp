@@ -427,7 +427,7 @@ UpdateActiveBlock(Qua *uberQua,
 
 					if (loopTime.ticks <= 0 || nextItem == nullptr) {
 						lastLoopStartTime = *updateTime;
-						inf->loopstartVar.SetValue(updateTime, stack);
+						inf->loopstartVar.SetPointerValue(updateTime, stack);
 						loopTime.ticks = 0;
 						nextItem = stream->IndexTo(clip->start);
 					} else {
@@ -438,7 +438,7 @@ UpdateActiveBlock(Qua *uberQua,
 								state = PLAYSTATE_LOOPEND;
 								loopTime.ticks = 0;
 								lastLoopStartTime = *updateTime;
-								inf->loopstartVar.SetValue(updateTime, stack);
+								inf->loopstartVar.SetPointerValue(updateTime, stack);
 								nextItem = stream->IndexTo(clip->start);
 							} else { // bug out and fill with zeros
 								state = PLAYSTATE_LOOPEND;
@@ -455,7 +455,7 @@ UpdateActiveBlock(Qua *uberQua,
 						}
 					}
 					inf->posVar.SetValue((int32)nextItem, stack);
-					inf->looptimeVar.SetValue(&loopTime, stack);
+					inf->looptimeVar.SetPointerValue(&loopTime, stack);
 				}
 				inf->stateVar.SetValue((int32)state, stack);		// is playing or running or just stopped
 			} else { // null clipe

@@ -174,7 +174,7 @@ QuaCommandLine::openListFile()
 		closeListFile();
 	}
 	listFile = fopen("qua.lst", "w");
-	fprintf(listFile, "%s\n", Qua::getVersionString());
+	fprintf(listFile, "%s\n", Qua::getVersionString().c_str());
 }
 
 void
@@ -247,12 +247,12 @@ QuaCommandLine::listMidi(FILE *fp)
 	short j;
 	fprintf(fp, "%d input ports and %d output ports\n", ni, no);
 	for (j = 0; j<ni; j++) {
-		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, wc2string(icap[j].szPname),
+		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, wc2string(icap[j].szPname).c_str(),
 			icap[j].wMid, icap[j].wPid,
 			icap[j].vDriverVersion & 0xFF, (icap[j].vDriverVersion & 0xFF00) >> 8);
 	}
 	for (j = 0; j<no; j++) {
-		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, wc2string(ocap[j].szPname),
+		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, wc2string(ocap[j].szPname).c_str(),
 			ocap[j].wMid, ocap[j].wPid,
 			ocap[j].vDriverVersion & 0xFF, (ocap[j].vDriverVersion & 0xFF00) >> 8,
 			//					ocap[j].wTechnology);

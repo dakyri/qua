@@ -34,7 +34,6 @@
 
 // !! ?? probably not the most logical place for all these, but
 // this is the first loaded file ... too many pointless changes else ...
-#define MAX_QUA_NAME_LENGTH 256
 #define MAX_QUA_AUDIO_OUTPUT	32
 #define MAX_QUA_AUDIO_INPUT	16
 #define MAX_QUA_CHANNEL_INPUT	16

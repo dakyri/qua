@@ -63,13 +63,13 @@ Instance::Instance(class Schedulable *s, std::string nm, Time t, Time d, Channel
 			nm = s->sym->name;
 		}
 
-		std::string nmbuf = glob.MakeUniqueName(s->sym, nm, 0);
+		std::string nmbuf = glob.makeUniqueName(s->sym, nm, 0);
 
 		sym = DefineSymbol(nmbuf, TypedValue::S_INSTANCE, 0,
 						this, s->sym,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT);
 //		interfaceBridge.SetSymbol(sym);
-		fprintf(stderr, "instance %s of %s defined at %s on %d\n",sym->UniqueName(), s->sym->name, startTime.StringValue(), (unsigned)channel);
+		fprintf(stderr, "instance %s of %s defined at %s on %d\n",sym->uniqueName(), s->sym->name.c_str(), startTime.StringValue(), (unsigned)channel);
 	}
 
 // keep a list of  the standard controllers
@@ -190,12 +190,12 @@ Instance::DestroyStacks()
 bool
 Instance::SetStacks()
 {
-//	fprintf(stderr, "main stack for %s\n", sym->UniqueName());
+//	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
 	if (schedulable->uberQua == nullptr)
 		return false;
 		
 	QuasiStack	*mainMainStack = mainStack;
-	fprintf(stderr, "main stack for %s\n", sym->UniqueName());
+	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
 	if (mainStack == nullptr) {
 		mainStack = new QuasiStack(schedulable->sym, this, sym, nullptr, nullptr, schedulable->uberQua->theStack, schedulable->uberQua, nullptr);
 
@@ -206,7 +206,7 @@ Instance::SetStacks()
 		mainMainStack = mainStack;
 	}
 	
-	fprintf(stderr, "wake stack for %s\n", sym->UniqueName());
+	fprintf(stderr, "wake stack for %s\n", sym->uniqueName());
 	if (wakeStack == nullptr && schedulable->wake.block) {
 		wakeStack = new QuasiStack(
 							schedulable->wake.sym,
@@ -216,7 +216,7 @@ Instance::SetStacks()
 		wakeStack->lowerFrame = mainMainStack;
 	}
 	
-	fprintf(stderr, "sleep stack for %s\n", sym->UniqueName());
+	fprintf(stderr, "sleep stack for %s\n", sym->uniqueName());
 	if (sleepStack == nullptr && schedulable->sleep.block) {
 		sleepStack = new QuasiStack(
 							schedulable->sleep.sym,
@@ -288,7 +288,7 @@ Instance::SetValue(Block *b)
 status_t
 Instance::SaveSnapshot(FILE *fp)
 {
-	fprintf(fp, "<instance name=\"%s\">\n", sym->name);
+	fprintf(fp, "<instance name=\"%s\">\n", sym->name.c_str());
 	if (sym && sym->context) {
 		StabEnt	*p = sym->context->children;
 		while (p!=nullptr) {
@@ -306,7 +306,7 @@ Instance::SaveSnapshot(FILE *fp)
 		}
 	}
 	if (mainStack) {
-		mainStack->SaveSnapshot(fp, sym->name);
+		mainStack->SaveSnapshot(fp, sym->name.c_str());
 	}
 	if (rxStack) {
 		rxStack->SaveSnapshot(fp, "rx");
@@ -448,10 +448,10 @@ status_t
 Instance::Save(FILE *fp, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s", schedulable->sym->PrintableName());
+	tab(fp, indent); fprintf(fp, "%s", schedulable->sym->printableName());
 	fprintf(fp, "(");
 	if (channel && channel->sym){
-		fprintf(stderr, "%s", channel->sym->name);
+		fprintf(stderr, "%s", channel->sym->name.c_str());
 	}
 	fprintf(fp, ", %s", startTime.StringValue());
 	fprintf(fp, ", %s", duration.StringValue());

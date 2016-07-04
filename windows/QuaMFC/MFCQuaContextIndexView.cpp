@@ -144,7 +144,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 			case TypedValue::S_QUA: {
 				HTREEITEM	it = IndexItemFor(s, quas);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, quas, 2);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, quas, 2);
 				}
 				break;
 			}
@@ -153,7 +153,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 				if (it == NULL) {
 #ifdef QUA_V_VST_HOST
 					VstPlugin	*vp = s->VstValue();
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, vstplugins,
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, vstplugins,
 							(vp->status==VST_PLUG_LOADED)?
 								(vp->isSynth?11:3):
 								(vp->isSynth?12:10));
@@ -165,7 +165,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 			case TypedValue::S_BUILTIN: {
 				HTREEITEM	it = IndexItemFor(s, builtins);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, builtins, 5);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, builtins, 5);
 					GetTreeCtrl().SortChildren(builtins);
 				}
 				break;
@@ -173,7 +173,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 			case TypedValue::S_LAMBDA: {
 				HTREEITEM	it = IndexItemFor(s, methods);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, methods, 6);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, methods, 6);
 					GetTreeCtrl().SortChildren(vstplugins);
 				}
 				break;
@@ -181,7 +181,7 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 			case TypedValue::S_TEMPLATE: {
 				HTREEITEM	it = IndexItemFor(s, templates);
 				if (it == NULL) {
-					it = AddIndexItem(s->UniqueName(), (LPARAM)s, templates, 4);
+					it = AddIndexItem(s->uniqueName(), (LPARAM)s, templates, 4);
 				}
 				break;
 			}
@@ -191,14 +191,14 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 					QuaPort	*p = s->PortValue();
 					switch (p->deviceType) {
 						case QUA_DEV_JOYSTICK:
-							it = AddIndexItem(s->UniqueName(), (LPARAM)s, ports, 9);
+							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 9);
 							break;
 						case QUA_DEV_AUDIO:
-							it = AddIndexItem(s->UniqueName(), (LPARAM)s, ports, 8);
+							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 8);
 							break;
 						default:
 						case QUA_DEV_MIDI:
-							it = AddIndexItem(s->UniqueName(), (LPARAM)s, ports, 7);
+							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 7);
 							break;
 					}
 				}
@@ -223,7 +223,7 @@ MFCQuaContextIndexView::symbolNameChanged(StabEnt *s)
 {
 	HTREEITEM ht = IndexItemFor(s);
 	if (ht != NULL) {
-		GetTreeCtrl().SetItemText(ht, s->UniqueName());
+		GetTreeCtrl().SetItemText(ht, s->uniqueName());
 	}
 }
 
@@ -246,7 +246,7 @@ MFCQuaContextIndexView::AddTopLevelClass(char *s, LPARAM type, HTREEITEM parent,
 
 
 HTREEITEM
-MFCQuaContextIndexView::AddIndexItem(char *s, LPARAM type, HTREEITEM parent, int img)
+MFCQuaContextIndexView::AddIndexItem(const char *s, LPARAM type, HTREEITEM parent, int img)
 {
 	HTREEITEM ht = GetTreeCtrl().InsertItem(
 				TVIF_TEXT|TVIF_PARAM|TVIF_STATE|TVIF_IMAGE|TVIF_SELECTEDIMAGE, /* nMask */
@@ -712,15 +712,15 @@ MFCQuaContextIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 				*result = 1;
 				break;
 			case TypedValue::S_LAMBDA:
-				glob.Rename(sym, tvp->item.pszText);
+				glob.rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			case TypedValue::S_TEMPLATE:
-				glob.Rename(sym, tvp->item.pszText);
+				glob.rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			case TypedValue::S_VST_PLUGIN:
-				glob.Rename(sym, tvp->item.pszText);
+				glob.rename(sym, tvp->item.pszText);
 				*result = 1;
 				break;
 			default:
@@ -809,7 +809,7 @@ MFCQuaContextIndexView::OnPopupDelete()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QCI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup delete %s\n", sym->UniqueName());
+		fprintf(stderr, "Popup delete %s\n", sym->uniqueName());
 		switch (sym->type) {
 			case TypedValue::S_QUA:
 //				quaLink->DeleteObject(sym);

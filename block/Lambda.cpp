@@ -35,7 +35,7 @@ Lambda::Save(FILE *fp, short indent)
 	if (isInit)
 		fprintf(fp, " \\reset");
 		
-	fprintf(fp, " %s", sym->name);
+	fprintf(fp, " %s", sym->name.c_str());
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
 		if ((err = saveControllers(fp, indent+2)) != B_NO_ERROR)
@@ -113,7 +113,7 @@ Lambda::Init()
 	StabEnt		*C = sym->context;
 	StabEnt		*OriginalState = glob.TopContext();
 	StabEnt		*p = nullptr;
-	fprintf(stderr, "Init() of lambda %s in ctxt %s block %x\n", sym->name, C?C->name:"<glbl>, block ", (unsigned)B);
+	fprintf(stderr, "Init() of lambda %s in ctxt %s block %x\n", sym->name.c_str(), C?C->name.c_str() :"<glbl>, block ", (unsigned)B);
 
 //	shit(sym, uberQua->sym);
 	glob.PushContext(sym);
@@ -127,7 +127,7 @@ Lambda::Init()
 				goto err_ex;
 		}
 	}
-	fprintf(stderr, "exit Init() of lambda %s in ctxt %s block %x\n", sym->name, C?C->name:"<glbl>, block ", (unsigned)B);
+	fprintf(stderr, "exit Init() of lambda %s in ctxt %s block %x\n", sym->name.c_str(), C?C->name.c_str() :"<glbl>, block ", (unsigned)B);
 	glob.PopContext(sym);
 	return true;
 

@@ -71,9 +71,9 @@ Schedulable::~Schedulable()
 void
 Schedulable::SetName(char *nm)
 {
-	if (strcmp(sym->name, nm) != 0) {
+	if (strcmp(sym->name.c_str(), nm) != 0) {
 		if (sym) {
-			glob.Rename(sym, nm);
+			glob.rename(sym, nm);
 		}
 
 #if defined(QUA_V_ARRANGER_INTERFACE)
@@ -247,7 +247,7 @@ Schedulable::Schedule(Block *b)
    	ResultValue		v0 = EvaluateExpression(b);
    	ResultValue		v1 = EvaluateExpression(b->Sibling(1));
    	ResultValue		v2 = EvaluateExpression(b->Sibling(2));
-	fprintf(stderr, "scheduling %s: ", sym->name);
+	fprintf(stderr, "scheduling %s: ", sym->name.c_str());
 	fprintf(stderr, "on %s ", v0.StringValue());
 	fprintf(stderr, "at %s ", v1.StringValue());
 	fprintf(stderr, "for %s\n", v2.StringValue());

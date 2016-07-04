@@ -16,11 +16,11 @@
 
 int32	nlpos = 0;
 
-inline bool AddToBuf(const char *s, char *buf, long &pos, long len)
+inline bool AddToBuf(const string &s, char *buf, long &pos, long len)
 {
-	if ((long)(pos+strlen(s))<len) {
-		strcpy(&buf[pos], s);
-		pos += strlen(s);
+	if ((long)(pos+s.size())<len) {
+		strcpy(&buf[pos], s.c_str());
+		pos += s.size();
 		return true;
 	}
 	return false;

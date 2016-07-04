@@ -108,7 +108,7 @@ public:
 
 	status_t			save(FILE *fp, short indent);
 
-	virtual char *		name(uchar);
+	virtual const char *		name(uchar);
 
 	bool				isControllable();
 	bool				isMultiSchedulable();

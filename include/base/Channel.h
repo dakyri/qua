@@ -6,6 +6,9 @@
 
 #include <stdio.h>
 #include <vector>
+#include <string>
+
+using namespace std;
 
 class Qua;
 
@@ -128,8 +131,8 @@ public:
 
 	uchar				hasAudio;
 	
-	Input				*AddInput(char *, QuaPort *, short, bool);
-	Output				*AddOutput(char *, QuaPort *, short, bool);
+	Input				*AddInput(const string &, QuaPort *, short, bool);
+	Output				*AddOutput(const string &, QuaPort *, short, bool);
 	void				SetInput(Input *, QuaPort *, short);
 	void				SetOutput(Output *, QuaPort *, short);
 	void				RemoveInput(Input *);

@@ -672,7 +672,7 @@ QSParser::ParseError(char *msg, ...)
 	va_start(args, msg);
 	vsprintf(buf1, msg, args);
 	if (txtSrcName.size() > 0) {
-	    sprintf(buf, "Parse error in %s, line %d: %s", txtSrcName, lineno, buf1);
+	    sprintf(buf, "Parse error in %s, line %d: %s", txtSrcName.c_str(), lineno, buf1);
 	} else {
 	    sprintf(buf, "Parse error, line %d: %s", lineno, buf1);
 	}
@@ -887,12 +887,14 @@ check_token:
 		    }
 		    *p = '\0';
 		    currentTokenType = TOK_VAL;
-		    char *buf = new char[strlen(currentToken)+1];
-		    strcpy(buf, currentToken);
-			currentTokenStringLiteral.assign(currentToken + 1, strlen(currentToken) - 2);
+			ParseError("assignment to string... skipping ... worm can bypassing");
+//		    char *buf = new char[strlen(currentToken)+1];
+//		    strcpy(buf, currentToken);
+//			currentTokenStringLiteral.assign(currentToken + 1, strlen(currentToken) - 2);
 			*currentToken = '\0';
 		    currentTokenVal.Set(TypedValue::S_STRING, TypedValue::REF_POINTER);
-		    currentTokenVal.SetValue(buf);
+// this stuff is problematic to say the least
+//		    currentTokenVal.SetValue(buf);
 			goto return_token;
 			break;
 		}
@@ -1430,7 +1432,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
     Block	*p, *varp;
 //	Block	**lastpp;
     long	curFunk=0, curSubFunk=0;
-    char	name[MAX_QUA_NAME_LENGTH];
+    string name;
     
 	curFunk = Block::C_UNKNOWN;
 	StabEnt		*builtinSym = findBuiltin(currentToken);
@@ -1439,7 +1441,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 		return nullptr;
 	}
 	fprintf(stderr, "parsing builtin <%s>...\n", currentToken);
-	strcpy(name, currentToken);	 
+	name = currentToken;	 
 	curFunk = builtinSym->BuiltinValue()->type;
 	curSubFunk = builtinSym->BuiltinValue()->subType;
 
@@ -1715,9 +1717,9 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		varp = ParseExpressionList(context, schedSym, currentToken, resolveNames);
     } else {
     	if ((varp=ParseBuiltin(context, schedSym)) == nullptr) {
-    		StabEnt		*sym = glob.FindSymbol(currentToken);
+    		StabEnt *sym = glob.findSymbol(currentToken);
 			if (debug_parse >= 2) {
-				fprintf(stderr, "name not builtin, sym = %x/%s/%d\n", sym, sym?sym->name:"unknown", sym?sym->type:-1);
+				fprintf(stderr, "name not builtin, sym = %x/%s/%d\n", sym, sym?sym->name.c_str() :"unknown", sym?sym->type:-1);
 			}
 
     		if (sym != nullptr) {
@@ -1877,11 +1879,10 @@ QSParser::ParseDExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 			if (varp) {
 	        	s=varp->TypeSymbol();
 				if (debug_parse) {
-					fprintf(stderr, "ParseDExp: struct ref type %d %s\n", varp->type, s?s->name:"no type sym");
+					fprintf(stderr, "ParseDExp: struct ref type %d %s\n", varp->type, s?s->name.c_str() :"no type sym");
 				}
 			}
-			char	name[MAX_QUA_NAME_LENGTH];
-			strcpy(name, currentToken);
+			string name = currentToken;
 			if (s) {
 	        	glob.PushContext(s);
 			}
@@ -2071,7 +2072,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 //    int			i;
 
 	if (debug_parse >= 2) {
-		fprintf(stderr, "doing block, ctxt %s\n", context?context->name:"global");
+		fprintf(stderr, "doing block, ctxt %s\n", context?context->name.c_str() :"global");
 	}
 	block = nullptr;
 	if (	strcmp(currentToken, "[") == 0 ||
@@ -2482,7 +2483,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
     	GetToken();
     }
     if (debug_parse >= 2)
-    	fprintf(stderr, "defining a type '%s' in %s %d\n", currentToken, context?context->name:"global", context?context->type:-1);
+    	fprintf(stderr, "defining a type '%s' in %s %d\n", currentToken, context?context->name.c_str() :"global", context?context->type:-1);
     	
 	mime = dataPath = nullptr;
     if (currentTokenType == TOK_TYPE) {
@@ -3034,12 +3035,12 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	}
 
 	case TypedValue::S_TAKE: {
-		char		nm[MAX_QUA_NAME_LENGTH];
+		string nm;
 		if (currentTokenType == TOK_WORD) {
-			strcpy(nm, currentToken);
+			nm = currentToken;
 			GetToken();
 		} else {
-			strcpy(nm, "takedata");
+			nm = "takedata";
 		}
 		if (schedSym) {
 			if (schedSym->type == TypedValue::S_SAMPLE) {
@@ -3074,14 +3075,12 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	}
 	
 	case TypedValue::S_INPUT: {
-		char		nm[MAX_QUA_NAME_LENGTH];
-		nm[0] = 0;
-
+		string nm;
 		if (currentTokenType == TOK_WORD) {
-			strcpy(nm, currentToken);
+			nm = currentToken;
 			GetToken();
 		} else {
-			strcpy(nm, "linein");
+			nm = "linein";
 		}
 /*
 		do {
@@ -3134,14 +3133,13 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	}
 	
 	case TypedValue::S_OUTPUT: {
-		char		nm[MAX_QUA_NAME_LENGTH];
-		nm[0] = 0;
+		string nm;
 
 		if (currentTokenType == TOK_WORD) {
-			strcpy(nm, currentToken);
+			nm = currentToken;
 			GetToken();
 		} else {
-			strcpy (nm, "lineout");
+			nm = "lineout";
 		}
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
@@ -3423,8 +3421,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		if (ndimensions != 0) {
 			ParseError("channel should be undimensioned");
 		}
-		char	nm[MAX_QUA_NAME_LENGTH];
-		strcpy(nm, currentToken);
+		string nm = currentToken;
 		GetToken();
 		if (nIns < 0) {
 			nIns = 2;
@@ -3626,7 +3623,7 @@ QSParser::ParseQua()
 			int type = FindType(currentToken);
 			if (type == TypedValue::S_QUA) {
 				GetToken();
-				glob.Rename(uberQua->sym, currentToken);
+				glob.rename(uberQua->sym, currentToken);
 //				q->sequencerWindow->Hide();
 //				q->mixerWindow->Hide();
 				GetToken();

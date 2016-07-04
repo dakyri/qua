@@ -71,7 +71,7 @@ public:
 #endif
 	void				ZotInsertCheck(bool, bool, bool, bool);
 
-	virtual char *		Name(uchar);
+	virtual const char *name(uchar);
 
 	short				NInputs();				
 	short				NOutputs();

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+using namespace std;
 
 struct qua_time;
 
@@ -193,7 +194,7 @@ public:
 	void					PopFrameRepresentations(StabEnt *, QuasiStack *);
 #endif
 	virtual void			RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent)=0;
-	virtual void			Rename(StabEnt *, char *)=0;
+	virtual void			Rename(StabEnt *, const string &)=0;
 
 	virtual void			RemoveSchedulableRepresentations(StabEnt *)=0;
 	virtual void			RemoveMethodRepresentations(StabEnt *)=0;
@@ -307,7 +308,7 @@ public:
 	virtual void			RemoveChannelRepresentations(StabEnt *) override;
 	virtual void			RemoveInstanceRepresentations(StabEnt *) override;
 
-	virtual void			Rename(StabEnt *sym, char *nm) override;
+	virtual void			Rename(StabEnt *sym, const string &nm) override;
 
 	virtual bool			HasDisplayParameters(StabEnt *sym) override;
 	virtual char			*DisplayParameterId() override;
@@ -419,7 +420,7 @@ public:
 	void					DisplayWake(Instance *);
 	void					DisplaySleep(Instance *);
 
-	void					Rename(StabEnt *, char *);	// calls to symbol table rename
+	void					Rename(StabEnt *, const string &);	// calls to symbol table rename
 	void					Delete(StabEnt *);	// calls to symbol table delete
 
 	bool					HasDisplayParameters(StabEnt *);

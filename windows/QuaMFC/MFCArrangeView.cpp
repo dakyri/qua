@@ -533,10 +533,10 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 			string nm;
 			if (ret == ID_EDIT_ADD_CLIP) {
 				dur_time.Set(1,0,0,at_time.metric);
-				nm = glob.MakeUniqueName(qSym, "region", 1);
+				nm = glob.makeUniqueName(qSym, "region", 1);
 			} else {
 				dur_time.ticks = 0;
-				nm = glob.MakeUniqueName(qSym, "marker", 1);
+				nm = glob.makeUniqueName(qSym, "marker", 1);
 			}
 			Clip	*c = qdoc->qua->addClip(nm, at_time, dur_time, true);
 //			MFCEditorItemView	*added_item = AddClipItemView(c);
@@ -1449,7 +1449,7 @@ MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
 			clipBounds.right-bounds.left, bounds.bottom-bounds.top);
 	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
 	wstring nm;
-	char *cp = instance->sym->UniqueName();
+	const char *cp = instance->sym->uniqueName();
 	while (*cp) { nm.push_back(*cp++); }
 	float lbx = bounds.left+2;
 #define LBLSEP 200

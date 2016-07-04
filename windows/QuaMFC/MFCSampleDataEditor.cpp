@@ -884,7 +884,7 @@ MFCSampleDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 				if ((v = chSym->SampleValue()) != NULL) {
 					Time	dur_time;
 					dur_time.Set(1,0,0,at_time.metric);
-					string	nmbuf = glob.MakeUniqueName(chSym, "clip", 1);
+					string	nmbuf = glob.makeUniqueName(chSym, "clip", 1);
 					Clip	*c = v->AddClip(nmbuf, take, at_time, dur_time, true);
 //					MFCEditorItemView	*added_item = AddClipItemView(c);
 				}

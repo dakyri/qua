@@ -187,7 +187,7 @@ LoweredBox(CDC *v, CRect *box, rgb_color col, bool fill)
 	v->Draw3dRect(box, Darker(col), Lighter(col));
 }
 
-long AvgStringWidth(char *s, CFont *f)
+long AvgStringWidth(const char *s, CFont *f)
 {
 	if ( s==NULL || *s=='\0' || f==NULL) {
 		return 0;
@@ -200,7 +200,7 @@ long AvgStringWidth(char *s, CFont *f)
 	return 0;
 }
 
-void StringExtent(char *s, CFont *f, CWnd *w, long &cx, long &cy)
+void StringExtent(const char *s, CFont *f, CWnd *w, long &cx, long &cy)
 {
 	if ( s==NULL || *s=='\0' || f==NULL || w== NULL) {
 		cx = 0;

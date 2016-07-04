@@ -30,7 +30,7 @@ public:
 
 	HTREEITEM					AddToSymbolIndex(StabEnt *s, HTREEITEM iti);
 	HTREEITEM					AddTopLevelClass(char *, LPARAM, HTREEITEM parent, int);
-	HTREEITEM					AddIndexItem(char *, LPARAM, HTREEITEM parent, int);
+	HTREEITEM					AddIndexItem(const char *, LPARAM, HTREEITEM parent, int);
 	void						AddAllIndexItems();
 	void						AddMethodIndexItems(StabEnt *, HTREEITEM parit);
 	void						AddInstanceIndexItems(StabEnt *, HTREEITEM parit);

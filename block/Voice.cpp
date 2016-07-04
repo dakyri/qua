@@ -183,7 +183,7 @@ Voice::Init()
 {
 	StabEnt		*stream;
 
-	fprintf(stderr, "Initing voice %s\n", sym->name);
+	fprintf(stderr, "Initing voice %s\n", sym->name.c_str());
 
 #ifdef VOICE_MAINSTREAM
 	mainStream.ClearStream();
@@ -403,7 +403,7 @@ Voice::Save(FILE *fp, short indent)
 	tab(fp, indent);
 
 	fprintf(fp,	"voice");
-	fprintf(fp,	" %s", sym->PrintableName());
+	fprintf(fp,	" %s", sym->printableName());
 	if (countControllers()>0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);
