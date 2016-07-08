@@ -598,7 +598,7 @@ MFCArrangeView::OnInitialUpdate()
 	} else if (qdoc->qua == NULL) {
 		reportError("ArrangeView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
-		SetLinkage(qdoc->qua->bridge.display);
+		SetLinkage(&qdoc->display);
 		quaLink->AddArranger(this);
 
 		CFrameWnd	*fw = GetParentFrame();

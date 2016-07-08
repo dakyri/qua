@@ -21,9 +21,10 @@
 #include "SampleBuffer.h"
 #include "Sample.h"
 #include "Markov.h"
-#if defined(QUA_V_ARRANGER_INTERFACE)
+
+#include "Dictionary.h"
+
 #include "QuaDisplay.h"
-#endif
 
 #if defined(QUA_V_AUDIO)
 #include "QuaAudio.h"
@@ -501,6 +502,8 @@ Block::TypeSymbol()
 // recursively delete all block elements in the block, including the past
 // initialization. all the per block stuff done by ~Block
 //////////////////////////////////////////////////////////////////////////////
+// XXXX I think when I did this initially, I thought it funny. Now it just smells funny.
+// It seems to work, but is full of all danger and badness.
 void
 Block::DeleteAll()
 {
@@ -866,11 +869,7 @@ Block::DoReset(void *V, void *B, int x)
 //		if (crap.call.crap.lambda->isInit) {
 		    if (higherFrame) {
    	 			crap.call.crap.lambda->mainBlock->Reset(higherFrame);
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 				higherFrame->stacker->uberQua->bridge.DisplayStatus(higherFrame);
-#endif
-
 		    }
 //		}
 
@@ -1865,7 +1864,7 @@ Block::Dump(FILE *fp, short indent)
 	case C_SAMPLE_PLAYER:
 	case C_TUNEDSAMPLE_PLAYER: 
 	case C_MARKOV_PLAYER: {
-		std::string s =qut::unfind(clipPlayerIndex, (int)subType);
+		std::string s =findClipPlayer(subType);
 		fprintf(fp, s.c_str());
 		Block		*params=nullptr;
 		
@@ -2086,7 +2085,7 @@ Block::Dump(FILE *fp, short indent)
 		break;
 
 	case C_CAST: {
-		std::string s = qut::unfind(typeIndex, (int)subType);
+		std::string s =findTypeName(subType);
 		fprintf(fp, "(#");
 		fprintf(fp, s.c_str());
 		fprintf(fp, " ");

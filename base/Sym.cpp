@@ -32,6 +32,7 @@
 #endif
 #include "Parse.h"
 #include "QuaPort.h"
+#include "Dictionary.h"
 
 #ifdef QUA_V_APP_HANDLER
 #include "include/Application.h"
@@ -798,9 +799,10 @@ StabEnt::SetDefaultBounds()
    	}
    	
     default:
-	    minVal.Set(S_UNKNOWN, REF_VALUE); minVal.SetValue((int)0);
+/*	    minVal.Set(S_UNKNOWN, REF_VALUE); minVal.SetValue((int)0);
 	    maxVal.Set(S_UNKNOWN, REF_VALUE); maxVal.SetValue((int)1);
-	    iniVal.Set(S_UNKNOWN, REF_VALUE); iniVal.SetValue((int)0);
+	    iniVal.Set(S_UNKNOWN, REF_VALUE); iniVal.SetValue((int)0);*/
+		break;
 	}
 }
 
@@ -927,7 +929,7 @@ StabEnt::IsControlVar()
 }
 
 
-const char *
+string
 StabEnt::preciseName()
 {
 	string nm;
@@ -962,7 +964,7 @@ dump:
 #else
 	nm += name;
 #endif
-	return nm.c_str();
+	return nm;
 }
 
 const char *
@@ -980,7 +982,7 @@ StabEnt::uniqueName()
 #endif
 }
 
-const char *
+string
 StabEnt::printableName()
 {
 	string nm;
@@ -1004,7 +1006,7 @@ StabEnt::printableName()
 	}
 #else
 #endif
-	return nm.c_str();
+	return nm;
 }
 
 status_t
@@ -1299,7 +1301,7 @@ StabEnt::SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, 
 	const char	*strval = StringValue(NULL, stacker, stack);
 	if (strval && *strval) {
 		tab(fp, indent);
-		fprintf(fp, "%s = %s", printableName(), strval);
+		fprintf(fp, "%s = %s", printableName().c_str(), strval);
 	}
 	return B_NO_ERROR;
 }
@@ -1577,12 +1579,12 @@ StabEnt::SaveSimpleType(FILE *fp, short indent, bool saveInternalRefs)
 status_t
 StabEnt::SaveSimpleBits(FILE *fp, short indent)
 {
-	fprintf(fp, "%s", qut::unfind(typeIndex, (int)type).c_str());
+	fprintf(fp, "%s", findTypeName(type).c_str());
 	if (hasBounds) {
 		fprintf(fp, " \\range %s", minVal.StringValue());
 		fprintf(fp, " %s",  maxVal.StringValue());
 	}
-	fprintf(fp, " %s", printableName());
+	fprintf(fp, " %s", printableName().c_str());
 	if (hasInit) {
 		fprintf(fp, " = %s",  iniVal.StringValue());
 	}
@@ -1596,7 +1598,7 @@ StabEnt::Dump(FILE *fp, short ind)
 {
 	for (short i=0; i<ind; i++)
 		fprintf(fp, "\t");
-	const char * k = qut::unfind(typeIndex, (int) type).c_str();
+	const char * k = findTypeName(type).c_str();
 	if (k) {
 		fprintf(fp, "%s (%s)", name.c_str(), k);
 	} else {

@@ -19,11 +19,7 @@
 #include "Qua.h"
 #include "QuaInsert.h"
 #include "QuaTypes.h"
-#ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
 #include "QuaDisplay.h"
-#endif
-#endif
 
 #include <unordered_map>
 
@@ -1037,9 +1033,7 @@ QuaMidiManager::QuaMidiManager()
 
 	for (i=0; i<nOutDevices; i++) {
 		QuaMidiPort *mp = new QuaMidiPort(wc2string(moc[i].szPname), wc2string(moc[i].szPname), this, QUA_PORT_OUT, i);
-#ifdef QUA_V_ARRANGER_INTERFACE
 		/* mp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);*/
-#endif
 		ports.push_back(mp);
 	}
 

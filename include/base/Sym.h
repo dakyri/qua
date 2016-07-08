@@ -107,8 +107,8 @@ public:
 	void				Initialize(QuasiStack *);
 	
 	const char *uniqueName();
-	const char *preciseName();
-	const char *printableName();
+	string preciseName();
+	string printableName();
 	
 	status_t			SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInternal);
 
@@ -203,8 +203,8 @@ public:
 	ulong hash(const string nm, StabEnt *context);
 	long findFreeInd(const string &nm, StabEnt *context, short &dcp);
 	StabEnt *addSymbol(const string &nm, base_type_t typ, StabEnt *context, int8 nd, ref_type_t refc, short defcnt);
-	void			PushContext(StabEnt *);
-	StabEnt			*PopContext(StabEnt *);
+	void			PushContext(StabEnt *sym);
+	StabEnt			*PopContext(StabEnt *expect=nullptr);
 	StabEnt			*TopContext();
 	StabEnt *findSymbol(const string &nm, short def_cnt = -1);
 	StabEnt *findContextSymbol(const string &nm, StabEnt *S, short def_cnt = -1);

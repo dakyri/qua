@@ -8,10 +8,7 @@
 #include "Instance.h"
 #include "QuasiStack.h"
 #include "Lambda.h"
-
-#ifdef QUA_V_ARRANGER_INTERFACE
 #include "QuaDisplay.h"
-#endif
 
 Notifiable::Notifiable(StabEnt *S):
 	Executable(S),

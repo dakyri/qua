@@ -27,11 +27,7 @@
 #include "QuaJoystick.h"
 #endif
 
-#ifdef QUA_V_ARRANGER_INTERFACE
-
 #include "QuaDisplay.h"
-
-#endif
 
 flag	debug_chan = 0;
 
@@ -431,7 +427,6 @@ Channel::CheckInBuffers()
 }
 
 
-#ifdef QUA_V_ARRANGER_INTERFACE
 void
 Channel::UpdateRecordDisplay()
 {
@@ -446,7 +441,6 @@ Channel::UpdateRecordDisplay()
 		}
 	}
 }
-#endif
 
 void
 Channel::EnableStreamRecord(Instance *i)
@@ -1218,7 +1212,7 @@ Input::NoodleEnable(bool en)
 			if (en) {
 				src.midi = channel->uberQua->quaMidi->OpenInput((QuaMidiPort *)device);
 				if (src.midi == nullptr) {
-					reportError("Can't open midi port %s", device->sym->name);
+					reportError("Can't open midi port %s", device->sym->name.c_str());
 					err = B_ERROR;
 				}
 				channel->activeStreamInputs.Add(this);
@@ -1239,7 +1233,7 @@ Input::NoodleEnable(bool en)
 					}
 				}
 				if (!anyEnabled && !channel->uberQua->quaMidi->CloseInput(src.midi)) {
-					reportError("Can't close input midi port %s", device->sym->name);
+					reportError("Can't close input midi port %s", device->sym->name.c_str());
 					err = B_ERROR;
 				}
 			}
@@ -1250,14 +1244,14 @@ Input::NoodleEnable(bool en)
 		case QUA_DEV_JOYSTICK: {
 			if (en) {
 				if (((QuaJoystickPort*)device)->CheckPortOpen()) {
-					reportError("Can't open joystick %s", device->sym->name);
+					reportError("Can't open joystick %s", device->sym->name.c_str());
 					return B_ERROR;
 				}
 				channel->activeStreamInputs.Add(this);
 			} else {
 				channel->activeStreamInputs.Del(this);
 				if (!((QuaJoystickPort*)device)->CheckPortClose()) {
-					reportError("Can't close joystick %s", device->sym->name);
+					reportError("Can't close joystick %s", device->sym->name.c_str());
 					err = B_ERROR;
 				}
 			}
@@ -1324,7 +1318,7 @@ Output::NoodleEnable(bool en)
 			if (en) {
 				dst.midi = channel->uberQua->quaMidi->OpenOutput((QuaMidiPort *)device);
 				if (dst.midi == nullptr) {
-					reportError("Can't open midi output port %s", device->sym->name);
+					reportError("Can't open midi output port %s", device->sym->name.c_str());
 					err = B_ERROR;
 				}
 				channel->activeStreamOutputs.Add(this);
@@ -1345,7 +1339,7 @@ Output::NoodleEnable(bool en)
 					}
 				}
 				if (!anyEnabled && !channel->uberQua->quaMidi->CloseOutput(dst.midi)) {
-					reportError("Can't close output midi port %s", device->sym->name);
+					reportError("Can't close output midi port %s", device->sym->name.c_str());
 					err = B_ERROR;
 				}
 			}

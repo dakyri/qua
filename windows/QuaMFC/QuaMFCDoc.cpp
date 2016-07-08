@@ -101,7 +101,7 @@ CQuaMFCDoc::OnNewDocument()
 		return FALSE;
 // careful here with OnNew called multiply ... but also with it being called if we use SDI
 	if (qua == NULL) {
-		qua = new Qua("Untitled", true);
+		qua = new Qua("Untitled", display, true);
 		qua->PostCreationInit();
 	}
 
@@ -124,7 +124,7 @@ CQuaMFCDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	string docext = getExt(docPath);
 	cerr << "got doc " << docPath << ", docExt" << docext << endl;
 	if (docext == "qs" || docext == "qua") {
-		qua = Qua::loadScriptFile(docPath.c_str());
+		qua = Qua::loadScriptFile(docPath.c_str(), display);
 		if (qua) {
 			string s(lpszPathName);
 			string snapshotPath = getParent(s)+"/"+getBase(s)+"."+"qx";
@@ -192,46 +192,46 @@ CQuaMFCDoc::Serialize(CArchive& ar)
 
 void CQuaMFCDoc::OnAddSample()
 {
-	if (qua && qua->bridge.display) {
-//		qua->bridge.display->CreateSample();
+	if (qua) {
+		display.CreateSample("New", vector<string>());
 		cerr << "unimplemented OnAddSample()" << endl;
 	}
 }
 
 void CQuaMFCDoc::OnAddVoice()
 {
-	if (qua && qua->bridge.display) {
-//		qua->bridge.display->CreateVoice();
+	if (qua) {
+		display.CreateVoice("New", vector<string>());
 		cerr << "unimplemented OnAddVoice()" << endl;
 	}
 }
 
 void CQuaMFCDoc::OnAddMethod()
 {
-	if (qua && qua->bridge.display) {
-		qua->bridge.display->CreateMethod(NULL, qua->sym);
+	if (qua) {
+		display.CreateMethod(NULL, qua->sym);
 	}
 }
 
 void CQuaMFCDoc::OnAddClip()
 {
-	if (qua && qua->bridge.display) {
+	if (qua) {
 		Time	start;
 		Time	dur;
 		start = qua->theTime;
 		dur.Set("1:0.0");
-		qua->bridge.display->CreateClip("region", &start, &dur);
+		display.CreateClip("region", &start, &dur);
 	}
 }
 
 void CQuaMFCDoc::OnAddMarker()
 {
-	if (qua && qua->bridge.display) {
+	if (qua) {
 		Time	start;
 		Time	dur;
 		start = qua->theTime;
 		dur.ticks = 0;
-		qua->bridge.display->CreateClip("marker", &start, &dur);
+		display.CreateClip("marker", &start, &dur);
 	}
 }
 

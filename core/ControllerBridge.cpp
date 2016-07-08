@@ -23,16 +23,10 @@
 #include "Envelope.h"
 #include "Qua.h"
 #include "ControllerBridge.h"
-
-
 #ifdef QUA_V_APP_HANDLER
 #include "Application.h"
 #endif
-
-#ifdef QUA_V_ARRANGER_INTERFACE
 #include "QuaDisplay.h"
-#endif
-
 
 void
 QuaControllerBridge::SetDisplayValue()
@@ -61,10 +55,6 @@ QuaControllerBridge::QuaControllerBridge(TimeKeeper *timeKeeper,
 	stacker = i;
 	envelope = NULL;
 	stackCtxt = stackCtx;
-#ifdef QUA_V_ARRANGER_INTERFACE
-//	screenControl = NULL;
-//	envelopePanel = NULL;
-#endif
 	stackFrame = stack;
 
 	if (sym->controlMode == StabEnt::DISPLAY_ENV) {
@@ -117,7 +107,6 @@ QuaControllerBridge::SetValue(Block *b)
 		envelope->SetValue(b);
 	} else if (sym->type == TypedValue::S_EXPRESSION ||
 		sym->type == TypedValue::S_BLOCK) {
-#ifdef QUA_V_ARRANGER_INTERFACE
 #ifdef XXXX
 		BlockCtrl	*PS = (BlockCtrl *)screenControl;
 		RWLock		*l = (RWLock *)(((int32)sym->maxVal.PointerValue())
@@ -147,7 +136,6 @@ QuaControllerBridge::SetValue(Block *b)
 
 			if (l) l->Unlock();
 		}
-#endif
 #endif
 	} else {
 		ResultValue v = EvaluateExpression(b);

@@ -631,7 +631,7 @@ LValue::AssignmentExtras()
 	} else if (sym->IsControlVar()) {
 		if (stacker) {
 			Qua	*q = stacker->uberQua;
-			q->bridge.display->UpdateControllerDisplay(stackerSym, stack, sym);
+			q->bridge.UpdateControllerDisplay(stackerSym, stack, sym);
 		}
 	}
 }
@@ -937,7 +937,7 @@ LValue::Initialize()
 bool
 LValue::SetToString(const char *strval)
 {
-//	reportError("set t o string %s %s", sym->name, strval);
+//	reportError("set t o string %s %s", sym->name.c_str(), strval);
 	if (addr == nullptr) {
 		return false;
 	}

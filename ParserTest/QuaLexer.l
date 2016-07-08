@@ -35,6 +35,7 @@ typedef QSParse::QuaParser::token token;
 #include "BaseVal.h"
 #include "VstPlugin.h"
 #include "MidiDefs.h"
+#include "Dictionary.h"
 	
 %}
  
@@ -42,6 +43,7 @@ typedef QSParse::QuaParser::token token;
 %option nodefault 
 %option yyclass="QuaLexer" 
 %option noyywrap 
+%option yylineno
 %option c++
 
 %x C_COMMENT
@@ -49,8 +51,8 @@ typedef QSParse::QuaParser::token token;
 DIGIT [0-9]
 INTEGER {DIGIT}+
 EXPONENT [eE][+-]?{INTEGER}
-ALF	[a-zA-Z]
-ALNUM [a-zA-Z0-9]
+ALF	[a-zA-Z_]
+ALNUM [a-zA-Z0-9_]
 IDENT {ALF}{ALNUM}*
 REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 
@@ -58,76 +60,69 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 
 [+-]?{INTEGER} { 
 	yylval->intval = atof(yytext);
-	return token::INT;     
+	return token::LITERAL_INT;     
 }
 
 [+-]?{REAL} {
 	yylval->floatval = atof(yytext);
-	return token::FLOAT;
+	return token::LITERAL_FLOAT;
 }
 
 {INTEGER}":"{INTEGER}"."{INTEGER} {
 	TypedValue *v = new TypedValue();
 	yylval->typedval = v;
-	return token::TIME;
-}
-
-{IDENT} {
-	yylval->stringval = new std::string(yytext);
-	return token::WORD;
+	return token::LITERAL_TIME;
 }
 
 \"([^\\\"]|\\.)*\" {
 	/*matches string-literal on a single line*/;
 	yylval->stringval = new std::string(yytext+1, strlen(yytext)-1);
-	return token::STRING;
+	return token::LITERAL_STRING;
 }
 
+"qua" { return token::QUA; }
+"voice" { return token::VOICE; }
+"sample" { return token::SAMPLE; }
+"channel" { return token::CHANNEL; }
+"function" { return token::LAMBDA; }
+"lambda" { return token::LAMBDA; }
+"struct" { return token::STRUCT; }
+"input" { return token::INPUT; }
+"output" { return token::OUTPUT; }
 
-"=" {
-	return(token::ASSGN);
+{IDENT} {
+	int type_id = findType(yytext);
+	if (type_id != TypedValue::S_UNKNOWN) {
+		yylval->typeval = type_id;
+		return token::TYPE;
+	}
+	yylval->stringval = new std::string(yytext);
+	return token::IDENT;
 }
 
+"=" { return token::ASSGN; }
+
+"[" { return token::LSQB; }
+"]" { return token::RSQB; }
+"{" { return token::LBRA; }
+"}" { return token::RBRA; }
+"(" { return token::LB; }
+")" { return token::RB; }
+
+"," { return token::COMMA; }
+":" { return token::COLON; }
+"::" { return token::COLON2; }
+";" { return token::SEMI; }
+"." { return token::DOT; }
+
+"+" { return token::PLUS; }
+"-" { return token::MINUS; }
+"*" { return token::STAR; }
+"/" { return token::SLASH; }
 
 
-"[" {
-	return(token::LSQB);
-}
-
-"]" {
-	return(token::RSQB);
-}
-
-"{" {
-	return(token::LBRA);
-}
-
-"}" {
-	return(token::RBRA);
-}
-
-"(" {
-	return(token::LB);
-}
-
-")" {
-	return(token::RB);
-}
-
-"+" {
-	return token::PLUS;
-}
-
-"-" {
-	return token::MINUS;
-}
-
-"*" {
-	return token::STAR;
-}
-
-"/" {
-	return token::SLASH;
+"\\"{IDENT} {
+	return token::TYPE_MODIFIER;
 }
 
 [ \t] {

@@ -1,14 +1,9 @@
 #include "qua_version.h"
 
 #include "StdDefs.h"
-
-
 #include "Sym.h"
 #include "Executable.h"
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 
 #include "Qua.h"
 #include "Block.h"

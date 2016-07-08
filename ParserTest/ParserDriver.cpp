@@ -6,9 +6,10 @@
 
 using namespace std;
 
-QSParse::ParserDriver::ParserDriver()
+QSParse::ParserDriver::ParserDriver(Qua *q)
 	: scanner(&cin)
-	, parser(scanner, *this)  {
+	, parser(scanner, *this)
+	, uberQua(q) {
 }
 
 QSParse::ParserDriver::~ParserDriver() {
@@ -24,38 +25,10 @@ QSParse::ParserDriver::parse(std::istream& inStream)
 	}
 }
 
-/*
-void 
-Cmd::CmdDriver::add_upper()
-{ 
-	uppercase++;
-	chars++;
-	words++;
+void
+QSParse::ParserDriver::setQua(Qua *q) {
+	uberQua = q;
 }
-
-void 
-Cmd::CmdDriver::add_lower()
-{ 
-	lowercase++;
-	chars++;
-	words++;
-}
-
-void 
-Cmd::CmdDriver::add_word( const std::string &word )
-{
-	words++;
-	chars += word.length();
-	for(const char &c : word ){
-		if( islower( c ) ) {
-			lowercase++;
-		} else if ( isupper( c ) )  {
-			uppercase++;
-		}
-	}
-}
-
-*/
 
 std::ostream& 
 QSParse::ParserDriver::print( std::ostream &stream )

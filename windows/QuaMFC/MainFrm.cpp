@@ -72,8 +72,8 @@ QuaMainFrame::OnAddChannelPopped(WPARAM wp, LPARAM lp)
 	if (m_pAddChanDialog) {
 		CQuaMFCDoc *doc = (CQuaMFCDoc *)GetActiveFrame()->GetActiveDocument();
 		if (doc && doc == m_pAddChanDialog->doc) {
-			if (doc->qua && doc->qua->bridge.display) {
-				doc->qua->bridge.display->CreateChannel(
+			if (doc->qua) {
+				doc->display.CreateChannel(
 					NULL, -1,
 					m_pAddChanDialog->nAudIn,
 					m_pAddChanDialog->nAudOut,

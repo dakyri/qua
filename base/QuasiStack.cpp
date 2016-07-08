@@ -16,11 +16,10 @@
 #include "Sample.h"
 #include "Instance.h"
 #include "Channel.h"
-#include "Parse.h"
+#include "VstPlugin.h"
+#include "Dictionary.h"
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 #ifdef QUA_V_APP_HANDLER
 #include "Application.h"
 #endif
@@ -140,7 +139,7 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 					if (vst->status == VST_PLUG_LOADED) {
 						stk.afx = vst->AEffectInstance();
 						if (stk.afx == nullptr) {
-							reportError("Can't instantiate %s", vst->sym->name);
+							reportError("Can't instantiate %s", vst->sym->name.c_str());
 						} else {
 							vst->Open(stk.afx);
 							vst->MainsOn(stk.afx);
@@ -300,11 +299,9 @@ QuasiStack::Trigger()
 		}
 	}
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	if (stacker) {
 		stacker->uberQua->bridge.DisplayStatus(this);
 	}
-#endif
 	return true;
 }
 
@@ -312,9 +309,7 @@ bool
 QuasiStack::UnTrigger()
 {
 	locusStatus = STATUS_SLEEPING;
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	stacker->uberQua->bridge.DisplayStatus(this);
-#endif
 	return true;
 }
 
@@ -411,7 +406,7 @@ QuasiStack::Save(FILE *fp, short indent)
 {
 	bool		comma = false;
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s(", stackable->sym->printableName());
+	tab(fp, indent); fprintf(fp, "%s(", stackable->sym->printableName().c_str());
 	QuaControllerBridge *p;
 	int				i;
 	/*
@@ -568,7 +563,7 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 					case Block::C_TUNEDSAMPLE_PLAYER:
 					case Block::C_STREAM_PLAYER:
 					case Block::C_MARKOV_PLAYER:
-						chlabel = qut::unfind(clipPlayerIndex, (int)s->callingBlock->type);
+						chlabel = findClipPlayer(s->callingBlock->type);
 						break;
 				}
 			}
@@ -629,7 +624,7 @@ QuasiStack::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		std::vector<std::string> textFragments;
 		LoadSnapshotChildren(element, textFragments);
 	} else if ((namestr == "fixed") || namestr == "envelope") {
-//		reportError("%s nm %s", nameAttr, context?context->name:"nul");
+//		reportError("%s nm %s", nameAttr, context?context->name.c_str():"nul");
 		if (hasNameAttr && context!=nullptr) {
 			StabEnt	*childsym = FindSymbolInCtxt(nameAttr, context);
 			if (childsym) {
@@ -871,13 +866,11 @@ void
 Stackable::ReAllocateChildren()
 {
 	int		i;
-#if defined(QUA_V_ARRANGER_INTERFACE)
-	for (i=0; i<stacksO.CountItems(); i++) {
-		QuasiStack	*qs = (QuasiStack*)stacksO.ItemAt(i);
+	for (i=0; i<stacksO.size(); i++) {
+		QuasiStack	*qs = stacksO.at(i);
 		qs->RemoveControlVariables();
 //		q->bridge.RemoveControlVariables(qs);
 	}
-#endif
 #ifdef LOTSALOX
 	stackableLock.Lock();
 #endif
@@ -900,13 +893,11 @@ Stackable::ReAllocateChildren()
 	stackableLock.Unlock();
 #else
 #endif	
-#if defined(QUA_V_ARRANGER_INTERFACE)
-	for (i=0; i<stacksO.CountItems(); i++) {
-		QuasiStack	*qs = (QuasiStack*)stacksO.ItemAt(i);
+	for (i=0; i<stacksO.size(); i++) {
+		QuasiStack	*qs = (QuasiStack*)stacksO.at(i);
 		qs->AddControlVariables();
 //		q->bridge.AddControlVariables(qs);
 	}
-#endif
 }
 
 // called:
@@ -919,14 +910,12 @@ Stackable::ReplaceBlock(Block *&blockv, Block*b)
 {
 	int		i;
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
-	for (i=0; i<stacksO.CountItems(); i++) {
-		QuasiStack	*qs = Stack(i);
+	for (i=0; i<stacksO.size(); i++) {
+		QuasiStack	*qs = stacksO.at(i);
 		if (qs) {
 			qs->RemoveHigherFrameRepresentations();
 		}
 	}
-#endif
 	
 #ifdef LOTSALOX
 	stackableLock.Lock();
@@ -949,15 +938,13 @@ Stackable::ReplaceBlock(Block *&blockv, Block*b)
 #endif	
 	if (oldBlock)
 		oldBlock->DeleteAll();
-	
-#if defined(QUA_V_ARRANGER_INTERFACE)
-	for (i=0; i<stacksO.CountItems(); i++) {
-		QuasiStack	*qs = Stack(i);
+
+	for (i=0; i<stacksO.size(); i++) {
+		QuasiStack	*qs = stacksO.at(i);
 		if (qs) {
 			qs->PopHigherFrameRepresentations();
 		}
 	}
-#endif
 }
 
 

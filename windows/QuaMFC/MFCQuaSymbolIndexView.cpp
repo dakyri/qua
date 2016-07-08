@@ -132,7 +132,7 @@ MFCQuaSymbolIndexView::OnInitialUpdate()
 	} else if (qdoc->qua == NULL) {
 		reportError("SymbolIndexView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
-		SetLinkage(qdoc->qua->bridge.display);
+		SetLinkage(&qdoc->display);
 		quaLink->AddIndexer(this);
 //		top = AddTopLevelClass(qdoc->qua->sym->name, S_QUA, TVI_ROOT);
 		channels = AddTopLevelClass("Channels", TypedValue::S_CHANNEL, TVI_ROOT, 0);
@@ -352,7 +352,7 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 	for (i=0; i<present.size(); i++) {
 		StabEnt	*s =present[i];
 		if (s && s->type == TypedValue::S_CLIP) {
-			fprintf(stderr, "\tadd %x %s\n", s, s->name.c_str());
+			fprintf(stderr, "\tadd %x %s\n", (unsigned)s, s->name.c_str());
 			addToSymbolIndex(s);
 		}
 	}
@@ -368,7 +368,7 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 		if (item.lParam >= QSI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
 			if (s->type == TypedValue::S_CLIP) {
-				fprintf(stderr, "\tfound %x %s\n", s, s->name.c_str());
+				fprintf(stderr, "\tfound %x %s\n", (unsigned)s, s->name.c_str());
 				if (find(present.begin(), present.end(), s) != present.end()) {
 					GetTreeCtrl().DeleteItem(hItem);
 				}

@@ -8,11 +8,7 @@
 #include "Sym.h"
 #include "Block.h"
 #include "StdDefs.h"
-#if defined(QUA_V_ARRANGER_INTERFACE)
-
 #include "QuaDisplay.h"
-
-#endif
 
 flag debug_method=0;
 
@@ -42,9 +38,7 @@ Lambda::Save(FILE *fp, short indent)
 			return err;;
 		fprintf(fp, ")");
 	}
-#ifdef QUA_V_ARRANGER_INTERFACE
 //	fprintf(fp,	"\n\display {%s}", uberQua->bridge.DisplayParameterSaveString(sym));
-#endif
 	err = SaveMainBlock(mainBlock, fp, indent, sym, false, false, nullptr, nullptr); 
 	return err;
 }

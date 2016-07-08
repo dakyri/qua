@@ -97,8 +97,7 @@ CreateNewNote(int type, Block *P,
 	}
     noteTo.duration = val.FloatValue(NULL);
 
-	noteTo.properties = NULL;
-	noteTo.AddProperties(P->next->next->next);
+	noteTo.attributes.add(P->next->next->next);
 	ret_val.SetPointerValue(&noteTo);
 	if (debug_gen)
 		fprintf(stderr, "creating type %d: pitch %d dynamic %d duration %d\n", ret_val.type,

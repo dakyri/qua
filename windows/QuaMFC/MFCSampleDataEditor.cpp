@@ -17,7 +17,10 @@
 #include "Qua.h"
 #include "Time.h"
 #include "Sample.h"
-#include "Parse.h"
+#include "QuaDisplay.h"
+#include "BaseVal.h"
+#include "Stackable.h"
+#include "Dictionary.h"
 
 IMPLEMENT_DYNCREATE(MFCSampleDataEditor, MFCSequenceEditor)
 

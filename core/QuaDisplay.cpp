@@ -114,7 +114,7 @@ QuaDisplay::PopHigherFrameRepresentations(StabEnt *stkSym, QuasiStack *parent)
 						pfr->AddChildFrame(s);
 					}
 				} else {
-					reportError("frame for stack %x of %s not found", parent, stkSym);
+					reportError("frame for stack %x of %s not found", parent, stkSym->name.c_str());
 				}
 			}
 		}
@@ -145,9 +145,8 @@ QuaDisplay::displayArrangementTitle(const char *nm)
 	}
 }
 
-QuaDisplay::QuaDisplay(Qua *q)
+QuaDisplay::QuaDisplay()
 {
-	qua = q;
 }
 
 QuaDisplay::~QuaDisplay()
@@ -177,29 +176,23 @@ QuaDisplay::WriteDisplayParameters(FILE *fp, StabEnt *)
 void
 QuaDisplay::RemoveSchedulableBridge(Schedulable *Q)
 {
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (Q->sym->type == TypedValue::S_LAMBDA) {
 		RemoveMethod(Q->sym->LambdaValue(), true);
 		return;
 	}
-#endif
-#ifdef QUA_V_ARRANGER_INTERFACE
 	Schedulable		*S;
 	Lambda			*M;
 	if (S = Q->schedulable) {
 		sequencerWindow->arrange->RemoveArrangerObject(Q, true);
-#ifdef QUA_V_MIXER_INTERFACE
 		if (S && S->controlPanel) {
 			mixerView->DeleteSchedulablePanel(S->controlPanel);
 		}
-#endif
 		RemoveSchedulable(S, true);
 	} else if ((M=Q->sym->LambdaValue()) != nullptr) {
 		RemoveMethod(M, true);
 	}
 	Q->RemoveSelf();
 	delete Q;
-#endif
 }
 */
 	/*
@@ -214,7 +207,6 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 		Qrect.Set(where->x, where->y, 50+where->x, where->y+20);
 	}
 
-#ifdef QUA_V_MIXER_INTERFACE
 	SchedulablePanel		*SC = nullptr;
 
 	if (mixerView->Window())
@@ -237,22 +229,16 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 				 quapp->quaSmallIcon->BitsLength(),
 				 0,
 				 B_CMAP8);
-#endif
 	
 	switch (S->type) {
 
 	case TypedValue::S_POOL: {
-#ifdef QUA_V_ARRANGER_INTERFACE
     	QO = new QuaObject(S, Qrect, &sicon,  &bicon, sequencerWindow->aquarium, this, red);
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
     	SC = new SchedulablePanel(CRect, S->PoolValue(), true);
-#endif
 		break;
 	}	
 
 	case TypedValue::S_SAMPLE: {
-#ifdef QUA_V_ARRANGER_INTERFACE
 		if (S->SampleValue()->selectedFilePathName) {
 			BFile		theFile(
 							S->SampleValue()->selectedFilePathName,
@@ -266,36 +252,26 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 			}
 		}
     	QO = new QuaObject(S, Qrect, &sicon,  &bicon, sequencerWindow->aquarium, this, yellow);
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
     	SC = new SchedulablePanel(CRect, S->SampleValue(), true);
-#endif
 		break;
 	}
 
 	case TypedValue::S_VOICE: {
-#ifdef QUA_V_ARRANGER_INTERFACE
 		QO = new QuaObject(S, Qrect,  &sicon, &bicon, sequencerWindow->aquarium, this, lavender);
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
     	SC = new SchedulablePanel(CRect, S->VoiceValue(), true);
-#endif
 		break;
 	}
 
 	case TypedValue::S_LAMBDA: {
-#ifdef QUA_V_ARRANGER_INTERFACE
 		if (S->context == sym) {
    		 	QO = new QuaObject(S, Qrect, &sicon,  &bicon, sequencerWindow->aquarium, this, ltGray);
 		}
-#endif
 		break;
 	}
  		
 
 #ifdef QUA_V_APP_HANDLER
 	case TypedValue::S_APPLICATION: {
-#ifdef QUA_V_ARRANGER_INTERFACE
 		if (S->ApplicationValue()->appFilePath.InitCheck() == B_OK) {
 			BFile		theFile(
 							S->ApplicationValue()->appFilePath.Path(),
@@ -309,18 +285,13 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 			}
 		}
     	QO = new QuaObject(S, Qrect, &sicon, &bicon, sequencerWindow->aquarium, this, purple);
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
     	SC = new SchedulablePanel(CRect, S->ApplicationValue(), true);
-#endif
 		break;
 	}
 #endif
 
 	case TypedValue::S_PORT: {
-#ifdef QUA_V_MIXER_INTERFACE
     	SC = new SchedulablePanel(CRect, S->PortValue(), S->PortValue()->IsMultiSchedulable());
-#endif
 		break;
 	}
 	
@@ -329,8 +300,7 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 	}
 	
 	}
-	
-#ifdef QUA_V_ARRANGER_INTERFACE
+
 	if (QO) {
 		QO->MoveTo(where.x, where.y);
 //		where += BPoint(0, QO->Bounds().bottom + 2);
@@ -339,12 +309,9 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 //			where.x += 60;
 //		}
 	}
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
 	if (SC) {
 		mixerView->AddSchedulablePanel(SC);
 	}
-#endif
 	return QO;
 return &S->interfaceBridge;
 }*/
@@ -702,7 +669,7 @@ QuaDisplay::CreateInstance(StabEnt *schSym, short chan, Time *at_t, Time *dur_t)
 	short	i;
 	Schedulable	*sch = schSym->SchedulableValue();
 	if (sch) {
-		Instance	*instance = sch->addInstance(nullptr, chan, at_t, dur_t, false);
+		Instance	*instance = sch->addInstance(sch->sym->name, chan, at_t, dur_t, false);
 		if (instance) {
 			for (i=0; i<NIndexer(); i++) {
 				Indexer(i)->addToSymbolIndex(instance->sym);
@@ -793,7 +760,7 @@ QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short
 		// update index displays
 		Instance	*instance=nullptr;
 		if (chan >= 0 && at_t != nullptr && dur_t != nullptr) {
-			instance = voice->addInstance(nullptr, chan, at_t, dur_t, false);
+			instance = voice->addInstance(voice->sym->name, chan, at_t, dur_t, false);
 		}
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(voice->sym);
@@ -1326,15 +1293,15 @@ QuaDisplay::RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation * i
 }
 
 void
-QuaDisplay::parseErrorViewClear(QSParser *p) {
+QuaDisplay::parseErrorViewClear() {
 }
 
 void
-QuaDisplay::parseErrorViewAddLine(QSParser *p, string s) {
+QuaDisplay::parseErrorViewAddLine(string s) {
 }
 
 void
-QuaDisplay::parseErrorViewShow(QSParser *p) {
+QuaDisplay::parseErrorViewShow() {
 }
 
 void
@@ -2118,15 +2085,15 @@ QuaIndexPerspective::~QuaIndexPerspective()
 	;
 }
 
+/*
+ remnant beos code ...
+*/
 #ifdef XXXXX
 
 status_t
 Executable::SetDisplayInfo(Block *b)
 {
 	displayInfo = b;
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
-
 	if (representation && b->type == C_LIST) {
 		Block	*p = b->crap.list.block;
 		if (!p) {
@@ -2151,7 +2118,6 @@ Executable::SetDisplayInfo(Block *b)
 			}
 		}
 	}
-#endif
 	return B_OK;
 }
 
@@ -2159,7 +2125,7 @@ Executable::SetDisplayInfo(Block *b)
 	virtual bool			ExtraneousMessage(class ArrangerObject *a, BMessage *inMsg);
 	virtual bool			ExtraneousMouse(class ArrangerObject *a, BPoint *where, ulong, ulong);
 	virtual void			DrawExtraneous(class ArrangerObject *a, BRect *r);
-#ifdef QUA_V_ARRANGER_INTERFACE
+
 bool
 QuaAudioPort::ExtraneousMouse(class ArrangerObject *a, BPoint where, ulong buts, ulong mods)
 {
@@ -2186,15 +2152,13 @@ QuaAudioPort::ExtraneousMouse(class ArrangerObject *a, BPoint where, ulong buts,
 	}
 	return false;
 }
-#endif
 
-#ifdef QUA_V_ARRANGER_INTERFACE
+
 bool
 Schedulable::ExtraneousMessage(class ArrangerObject *a, BMessage *inMsg)
 {
 	switch (inMsg->what) {
 	case SET_ENVELOPE:{
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		QuaControllerBridge		*cv = nullptr;
 		status_t err=inMsg->FindPointer("control var", (void **)&cv);
 		if (err == B_NO_ERROR) {
@@ -2205,7 +2169,6 @@ Schedulable::ExtraneousMessage(class ArrangerObject *a, BMessage *inMsg)
 			a->Invalidate();
 			return false;
 		}
-#endif
 		return true;
 	}
 	}
@@ -2222,12 +2185,10 @@ Schedulable::ExtraneousMouse(class ArrangerObject *a, BPoint *where, ulong buts,
 void
 Schedulable::DrawExtraneous(class ArrangerObject *a, BRect *r)
 {
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	if (a->displayedControlVariable) {
 		a->DrawDisplayedControlVariable(r);
 	}
-#endif
 }
-#endif
+
 
 #endif

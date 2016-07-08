@@ -29,7 +29,8 @@ class QuaInsert;
 class Input;
 class Output;
 class Time;
-class BPath;
+
+class QuaBridge;
 
 class QuaInsertableBridge;
 class QuaInstanceBridge;
@@ -71,6 +72,8 @@ enum qua_perpective_type {
 	QUAPSCV_GLOBALINDEX = 5,
 	QUAPSCV_ENVIRON = 6
 };
+
+#include "Parse.h"
 
 class QuaPort;
 
@@ -216,15 +219,134 @@ public:
 	virtual std::vector<StabEnt*> ClipSyms(short) = 0;
 
 	virtual Metric			*QMetric() = 0;
+
+	virtual void parseErrorViewClear() = 0;
+	virtual void parseErrorViewAddLine(std::string) = 0;
+	virtual void parseErrorViewShow() = 0;
+
+	virtual void tragicError(char *str, ...) = 0;
+	virtual void reportError(char *str, ...) = 0;
+	virtual int retryError(char *str, ...) = 0;
+	virtual bool abortError(char *str, ...) = 0;
+	virtual bool continueError(char *str, ...) = 0;
+	virtual int optionWin(int, char *str, ...) = 0;
+
+	virtual void setTo(Qua *) { }
+
 };
 
+class QuaDisplayStub : public QuaPerceptualSet
+{
+public:
+	virtual void			AddChannelRepresentations(QuaChannelRackPerspective *i) { };
+	virtual void			AddChannelRepresentations() { };
+
+	virtual StabEnt *		CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) { return nullptr; }
+	virtual StabEnt *		CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) { return nullptr; }
+	virtual StabEnt *		CreateChannel(
+		char *nm = nullptr, short c = -1,
+		uchar nin = 2, uchar nout = 2,
+		bool add_dflt_au_in = false,
+		bool add_dflt_au_out = false,
+		bool add_dflt_str_in = false,
+		bool add_dflt_str_out = false
+	) {
+		return nullptr;
+	}
+	virtual StabEnt	*		CreateMethod(std::string nm, StabEnt *p = nullptr) { return nullptr; }
+	virtual StabEnt	*		CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) { return nullptr; }
+	virtual StabEnt *		CreateInstance(StabEnt *, short, Time *, Time *) { return nullptr; }
+	virtual void			MoveInstance(StabEnt *, short, Time *, Time *) { };
+	virtual void			DeleteInstance(StabEnt *) { };
+	virtual void			DeleteObject(StabEnt *) { };
+	virtual void			ShowObjectRepresentation(StabEnt *) { };
+	virtual void			HideObjectRepresentation(StabEnt *) { };
+	virtual short			CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) { return 0; }
+	virtual short			ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) { return 0; }
+
+	virtual void			UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { };
+	virtual void			ControllerChanged(StabEnt *sym, QuasiStack *, TypedValue &t,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { };
+
+	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) { return std::vector<Envelope *>(); }
+
+	virtual void			GotoStartOfClip(StabEnt *) { };
+	virtual void			GotoEndOfClip(StabEnt *) { };
+	virtual void			SelectRegion(StabEnt *) { };
+
+	virtual void			CreateStreamTake(StabEnt *) { };
+	virtual void			LoadSampleTake(StabEnt *, std::string) { };
+	virtual void			UpdateTakeIndexDisplay(StabEnt *sym) { };
+	virtual void			updateClipIndexDisplay(StabEnt *sym) { };
+	virtual void			UpdateVariableIndexDisplay(StabEnt *sym) { };
+
+	// tempo or time is changed from the interface
+	virtual void			UpdateTempo(float tempo) { };
+	virtual void			UpdateGlobalTime(Time &t) { };
+
+#ifdef Q_FRAME_MAP
+	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) { };
+	virtual void			PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long) { };
+	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
+	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
+	virtual void			RequestRemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
+
+	void					PopFrameRepresentations(StabEnt *, QuasiStack *, frame_map_hdr *, long);
+#else
+	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) { };
+	virtual void			PopFrameRepresentation(StabEnt *rootSym, QuasiStack *stack) { };
+	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
+	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
+	virtual void			RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack) { };
+	virtual void			PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) { };
+
+	void					PopFrameRepresentations(StabEnt *, QuasiStack *);
+#endif
+	virtual void			RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) { };
+	virtual void			Rename(StabEnt *, const string &) { };
+
+	virtual void			RemoveSchedulableRepresentations(StabEnt *) { };
+	virtual void			RemoveMethodRepresentations(StabEnt *) { };
+	virtual void			RemoveChannelRepresentations(StabEnt *) { };
+	virtual void			RemoveInstanceRepresentations(StabEnt *) { };
+
+	virtual void			displayArrangementTitle(const char *) { };
+
+	virtual bool			HasDisplayParameters(StabEnt *) { return false; }
+	virtual char			*DisplayParameterId() { return ""; }
+	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *) { return B_OK; }
+
+	virtual long NChannel() { return 0; }
+	virtual StabEnt *QuaSym() { return nullptr; }
+	virtual StabEnt *ChannelSym(short i) { return nullptr; }
+	virtual std::vector<StabEnt*> SchedulableSyms() { return vector<StabEnt *>(); };
+	virtual std::vector<StabEnt*> MethodSyms(StabEnt *) { return vector<StabEnt *>(); };
+	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) { return vector<StabEnt *>(); };
+	virtual std::vector<StabEnt*> ClipSyms(short) { return vector<StabEnt *>(); };
+
+	virtual Metric *QMetric() { return nullptr; }
+
+	virtual void parseErrorViewClear() { };
+	virtual void parseErrorViewAddLine(std::string) { };
+	virtual void parseErrorViewShow() { };
+	virtual void tragicError(char *str, ...) {};
+	virtual void reportError(char *str, ...) {};
+	virtual int retryError(char *str, ...) { return 0; };
+	virtual bool abortError(char *str, ...) { return false; };
+	virtual bool continueError(char *str, ...) { return 0; };
+	virtual int optionWin(int, char *str, ...) { return 0; };
+
+};
+
+extern QuaDisplayStub defaultDisplay;
 class QSParser;
 
 // local display
 class QuaDisplay: public QuaPerceptualSet
 {
 public:
-	QuaDisplay(Qua *q);
+	QuaDisplay();
 	~QuaDisplay();
 
 	virtual void			displayArrangementTitle(const char *);
@@ -314,18 +436,20 @@ public:
 	virtual char			*DisplayParameterId() override;
 	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *) override;
 
-	Qua						*qua;
+	Qua *qua;
 
-	virtual void parseErrorViewClear(QSParser *);
-	virtual void parseErrorViewAddLine(QSParser *, std::string);
-	virtual void parseErrorViewShow(QSParser *);
+	virtual void parseErrorViewClear() override;
+	virtual void parseErrorViewAddLine(std::string) override;
+	virtual void parseErrorViewShow() override;
 
-	virtual void tragicError(char *str, ...);
-	virtual void reportError(char *str, ...);
-	virtual int retryError(char *str, ...);
-	virtual bool abortError(char *str, ...);
-	virtual bool continueError(char *str, ...);
-	virtual int optionWin(int, char *str, ...);
+	virtual void tragicError(char *str, ...) override;
+	virtual void reportError(char *str, ...) override;
+	virtual int retryError(char *str, ...) override;
+	virtual bool abortError(char *str, ...) override;
+	virtual bool continueError(char *str, ...) override;
+	virtual int optionWin(int, char *str, ...) override;
+
+	virtual void setTo(Qua *q) { qua = q;  }
 };
 
 
@@ -375,11 +499,11 @@ public:
 class QuaBridge
 {
 public:
-	QuaBridge(Qua *q);
+	QuaBridge(Qua &q, QuaPerceptualSet &d);
 	virtual ~QuaBridge();
 
-	bool					Spawn();
-	bool					Cleanup();
+	bool Spawn();
+	bool Cleanup();
 
 	void					displayArrangementTitle(const char *);
 
@@ -427,12 +551,18 @@ public:
 	char					*DisplayParameterId();
 	status_t				WriteDisplayParameters(FILE *, StabEnt *);
 
-	bool					ParseDisplayParameters(class QSParser *);
-	void					SetDisplayParameters(StabEnt *);
+	bool ParseDisplayParameters(class QSParser *);
+	void SetDisplayParameters(StabEnt *);
 
-	void parseErrorViewClear(QSParser *);
-	void parseErrorViewAddLine(QSParser *, std::string);
-	void parseErrorViewShow(QSParser *);
+	void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { 
+		display.UpdateControllerDisplay(stackerSym, stack, sym, srctype, src);
+	};
+
+
+	void parseErrorViewClear();
+	void parseErrorViewAddLine(std::string);
+	void parseErrorViewShow();
 
 	void tragicError(char *str, ...);
 	void reportError(char *str, ...);
@@ -441,8 +571,10 @@ public:
 	bool continueError(char *str, ...);
 	int optionWin(int, char *str, ...);
 
-	QuaDisplay				*display;	// may be null if there is no display
-	Qua						*uberQua;
+	void setDisplay(QuaPerceptualSet &d);
+protected:
+	QuaPerceptualSet &display;
+	Qua &uberQua;
 };
 
 

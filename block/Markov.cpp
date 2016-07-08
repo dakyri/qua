@@ -37,7 +37,6 @@ GenNextNote(struct MarkovInfo *minf)
     bool	silent=false;
 
     noteTo.dynamic = (vel_t)minf->baseNoteVelocity;
-	noteTo.properties = nullptr;
 	noteTo.pitch = 255;
 	noteTo.cmd = MIDI_CMD_NOT;
     
@@ -80,9 +79,9 @@ GenNextNote(struct MarkovInfo *minf)
 		for (last=0;last < MAX_GEN_HISTORY-1 &&minf->noteHistory[last].pitch >127; last++);
 		for (next_last=last+1;next_last < MAX_GEN_HISTORY &&minf->noteHistory[next_last].pitch >127; next_last++);
 
-	    if (minf->noteHistory[last].HasProperty(PROP_PHRASE_END)) { /* first note */
+	    if (minf->noteHistory[last].attributes.has(Attribute::PHRASE_END)) { /* first note */
 	    	pitch = select_list(MAX_ABS_NOTE, minf->markov->startNote);
-	    } else if (minf->noteHistory[next_last].HasProperty(PROP_PHRASE_END)) { /* first interval */
+	    } else if (minf->noteHistory[next_last].attributes.has(Attribute::PHRASE_END)) { /* first interval */
 	    	interv = ind_to_int(select_list(MAX_INTERVALS, minf->markov->startInterval));
 			pitch = minf->noteHistory[last].pitch + interv;
 	    } else {
@@ -105,7 +104,7 @@ GenNextNote(struct MarkovInfo *minf)
 	    	if (debug_gen)
 	    		fprintf(stderr, "out of bounds %d\n", pitch);
 	    	pitch = select_list(MAX_ABS_NOTE, minf->markov->startNote);
-			noteTo.AddProperty(PROP_PHRASE_END);
+			noteTo.attributes.add(Attribute::PHRASE_END);
 		}
 		
 		noteTo.pitch = pitch;
@@ -113,7 +112,7 @@ GenNextNote(struct MarkovInfo *minf)
     
 	
     for (i=MAX_GEN_HISTORY-1; i>0; i--) {
-		minf->noteHistory[i].ClearProperties();
+		minf->noteHistory[i].attributes.clear();
 		minf->noteHistory[i] = minf->noteHistory[i-1];
     }
     minf->noteHistory[0] = noteTo;
@@ -265,7 +264,7 @@ RhythmMarkov::Analyse(Stream &stream, Time &start, Time &end)
 				IR[rg++].dur = sn->note.duration;
 				if (rg == MAX_ISO_LEN-1 ||
 		    		(si->next && si->type == TypedValue::S_NOTE &&
-		    			((StreamNote *)si->next)->note.HasProperty(PROP_CELL_START))){
+		    			((StreamNote *)si->next)->note.attributes.has(Attribute::CELL_START))){
 		    		si = si->next;
 		    		break;
 				}

@@ -17,10 +17,7 @@
 #include "FloatQueue.h"
 
 #include <algorithm>
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 #ifdef QUA_V_AUDIO_ASIO
 QuaAsio		QuaAudioManager::asio;
 #endif
@@ -453,7 +450,6 @@ QuaAudioManager::Generate(size_t nFrames)
 		int nf = chan->Generate(nFrames);
 	}
 
-#ifdef QUA_V_ARRANGER_INTERFACE
 	// editors originally generated their own stuff on a free channel .. that's necessary in the big picture
 /*
 	editors.Lock();
@@ -465,7 +461,6 @@ QuaAudioManager::Generate(size_t nFrames)
 	}
 	editors.Unlock();
 	*/
-#endif
 	return true;
 }
 
@@ -802,10 +797,7 @@ QuaAudioManager::stopRecording(SampleInstance *ri)
 }
 
 
-
-
-#ifdef QUA_V_ARRANGER_INTERFACE
-
+/*
 bool
 destinationIndex(KeyIndex *, short nc)
 {
@@ -832,9 +824,7 @@ SourceChannelIndex(KeyIndex *, QuaAudioPort *, short nc)
 	return true;
 }
 
-
-#endif
-
+*/
 //		media_node	liveOne;
 //		err=r->GetNodeFor(liveNodes[i].node.node, &liveOne);
 //		for (short j=0; j<nIns; j++) {

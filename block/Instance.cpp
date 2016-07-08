@@ -448,7 +448,7 @@ status_t
 Instance::Save(FILE *fp, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s", schedulable->sym->printableName());
+	tab(fp, indent); fprintf(fp, "%s", schedulable->sym->printableName().c_str());
 	fprintf(fp, "(");
 	if (channel && channel->sym){
 		fprintf(stderr, "%s", channel->sym->name.c_str());
@@ -495,9 +495,7 @@ Instance::StartRecording()
 {
 	schedulable->status = STATUS_RECORDING;
 	status = STATUS_RECORDING;
-#ifdef QUA_V_ARRANGER_INTERFACE
 	uberQua->bridge.DisplayStatus(this);
-#endif
 }
 
 void
@@ -522,11 +520,9 @@ Instance::StopRecording()
 	default: {
 		uberQua->bridge.reportError("what a strange thing to be recording");
 	}}
-#ifdef QUA_V_ARRANGER_INTERFACE
 	uberQua->bridge.DisplayDuration(this);
 //	if (controlPanel)
 //		controlPanel->DisplayStatus(STATUS_RUNNING);
-#endif
 	status = STATUS_SLEEPING;
 	schedulable->status = STATUS_RUNNING;
 }
@@ -550,11 +546,9 @@ Instance::SetChannel(Channel * newchan, bool display)
 			channel->AddReceivingInstance(this);
 	}
 
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (display) {
 		uberQua->bridge.DisplayChannel(this);
 	}
-#endif
 	return B_NO_ERROR;
 }
 
@@ -562,11 +556,9 @@ status_t
 Instance::SetDuration(Time &t, bool display)
 {
 	duration = t;
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (display) {
 		uberQua->bridge.DisplayDuration(this);
 	}
-#endif
 	return B_NO_ERROR;
 }
 
@@ -574,11 +566,9 @@ status_t
 Instance::SetStartTime(Time &t, bool display)
 {
 	startTime = t;
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (display) {
 		uberQua->bridge.DisplayStartTime(this);
 	}
-#endif
 	return B_NO_ERROR;
 }
 

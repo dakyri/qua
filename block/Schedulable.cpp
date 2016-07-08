@@ -18,13 +18,7 @@
 #ifdef QUA_V_APP_HANDLER
 #include "Application.h"
 #endif
-#if defined(QUA_V_ARRANGER_INTERFACE)
-
 #include "QuaDisplay.h"
-
-#endif
-
-
 
 Schedulable::Schedulable(StabEnt *s, Qua *q, class Metric *m):
 	Notifiable(s),
@@ -75,10 +69,7 @@ Schedulable::SetName(char *nm)
 		if (sym) {
 			glob.rename(sym, nm);
 		}
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
-		uberQua->bridge.Rename(sym, nm);
-#endif			
+		uberQua->bridge.Rename(sym, nm);			
 	}
 }
 
@@ -141,18 +132,14 @@ Instance *
 Schedulable::addInstance(string nm, Time t, Time d, Channel * chan)
 {
 	Instance *i = new Instance(this, nm, t, d, chan);
-	instanceLock.lock();
-	instances.push_back(i);
-	instanceLock.unlock();
+	addInstToList(i);
 
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
 		uberQua->AddToSchedule(i);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		uberQua->display.CreateInstanceBridge(i);
-#endif
 	} else {
 		fprintf(stderr, "Schedulable: unexpected null while committing to schedule");
 	}
@@ -184,19 +171,12 @@ Schedulable::addInstance(string nm, short chan_id, Time *t, Time *d, bool disp)
 void
 Schedulable::removeInstance(Instance *i, bool display)
 {
-	instanceLock.lock();
-	auto ci = qut::find(instances, i);
-	if (ci != instances.end()) {
-		instances.erase(ci);
-	}
-	instanceLock.unlock();
+	removeInstFromList(i);
 	if (uberQua && i) {
 		uberQua->RemoveFromSchedule(i);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		if (display) {
 			uberQua->bridge.RemoveInstanceRepresentations(i->sym);
 		}
-#endif
 	}
 }
 
@@ -206,10 +186,7 @@ Schedulable::Trigger()
 	if (uberQua->status != STATUS_RUNNING) {
 		uberQua->Start();
 	}
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
-	AddInstance(nullptr, uberQua->theTime, Time::infinity, uberQua->channel[0]);
-#endif
+	addInstance(sym->name, uberQua->theTime, Time::infinity, uberQua->channel[0]);
 
 	return true;
 }
@@ -260,7 +237,7 @@ Schedulable::Schedule(Block *b)
 			c = uberQua->channel[chid];
 		}
 	}
-	i = addInstance(nullptr, v1.type == TypedValue::S_TIME?
+	i = addInstance(sym->name, v1.type == TypedValue::S_TIME?
 						*v1.TimeValue():
 						Time(v1.IntValue(nullptr), uberQua->metric),
 					v2.type == TypedValue::S_TIME?
@@ -318,9 +295,7 @@ Schedulable::Wake(Instance *i)
 		i->wokenAt = uberQua->theTime;
 		i->StartEnvelopes();
 		i->status = STATUS_RUNNING;
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		uberQua->bridge.DisplayWake(i);
-#endif
 	}
 	return B_NO_ERROR;
 }
@@ -336,9 +311,7 @@ Schedulable::Sleep(Instance *i)
 			i->channel->RemoveReceivingInstance(i);		
 
 		i->status = STATUS_SLEEPING;
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		uberQua->bridge.DisplaySleep(i);
-#endif
 	}
 	return B_NO_ERROR;
 }

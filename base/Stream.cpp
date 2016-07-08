@@ -13,6 +13,8 @@
 #include "Parse.h"
 #include "MidiDefs.h"
 
+#include "Dictionary.h"
+
 flag debug_stream=0;
 Stream::Stream()
 {
@@ -156,9 +158,9 @@ Stream::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		jHat = atoi(hatVal);
 	}
 	if (valTypeVal != nullptr) {
-		auto ci = typeIndex.find(valTypeVal);
-		if (ci != typeIndex.end()) {
-			vType = ci->second;
+		auto ci =findType(valTypeVal);
+		if (ci != TypedValue::S_UNKNOWN) {
+			vType = ci;
 			hasValueType = true;
 		}
 	}

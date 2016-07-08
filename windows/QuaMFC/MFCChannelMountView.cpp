@@ -182,7 +182,7 @@ MFCChannelMountView::OnInitialUpdate()
 	} else if (qdoc->qua == NULL) {
 		reportError("ChannelMountView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
-		SetLinkage(qdoc->qua->bridge.display);
+		SetLinkage(&qdoc->display);
 		quaLink->AddChannelRack(this);
 		quaLink->AddChannelRepresentations(this);
 	}

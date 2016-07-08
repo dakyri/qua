@@ -12,6 +12,11 @@
 #include "QuaMFC.h"
 #include "MFCQuaStateDisplay.h"
 
+#include "QuaDisplay.h"
+#include "BaseVal.h"
+#include "Stackable.h"
+#include "Dictionary.h"
+
 #include "Parse.h"
 
 

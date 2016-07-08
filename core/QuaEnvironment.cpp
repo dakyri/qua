@@ -50,11 +50,9 @@ QuaEnvironment::SetVstPluginDir(char *path, bool add, bool reload)
 	setbuf(fp, NULL);
 	VstPlugin::ScanFile(path, fp, NULL, true);
 	fclose(fp);
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (reload) {
 		display.RefreshVstPluginList();
 	}
-#endif
 #endif
 	return true;
 }
@@ -166,9 +164,7 @@ QuaEnvironment::Setup()
 							nextm = m->next;
 							if (m->sym->context == NULL) {
 								if (m->Init()) {
-#ifdef QUA_V_ARRANGER_INTERFACE
 									display.CreateMethodBridge(m);
-#endif
 									//					    	S->next = methods;
 									//					    	methods = S;
 								}
@@ -180,9 +176,7 @@ QuaEnvironment::Setup()
 							nextt = t->next;
 							if (t->sym->context == NULL) {
 								if (t->Init()) {
-#ifdef QUA_V_ARRANGER_INTERFACE
 									display.CreateTemplateBridge(t);
-#endif
 									//								F->next = templates;
 									//								templates = F;
 								}

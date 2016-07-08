@@ -14,7 +14,10 @@
 #include "MFCObjectView.h"
 
 #include "Sym.h"
-#include "Parse.h"
+#include "QuaDisplay.h"
+#include "BaseVal.h"
+#include "Stackable.h"
+#include "Dictionary.h"
 
 // MFCClipListView
 
@@ -243,7 +246,7 @@ MFCSimpleTypeView::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		rcLabel.left += OFFSET_OTHER;
 		rcLabel.right -= OFFSET_OTHER;
 
-		string tnm = qut::unfind(typeIndex, (int)itemSym->type);
+		string tnm = findTypeName(itemSym->type);
 		if (tnm.size()) {
 			pDC->SetTextColor(rgb_blue);
 			long h = pDC->DrawText(tnm.c_str() , -1, rcLabel, DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_VCENTER);
@@ -934,7 +937,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 			reportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 					caty[i], ID_VARIABLECONTEXT_ADD_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_ADD_VAR);
 		} else {
-			string tnm = qut::unfind(typeIndex, (int)caty[i]);
+			string tnm = findTypeName(caty[i]);
 			if (tnm.size()) {
 				sprintf(buf, "%s", tnm.c_str());
 				addVarMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_ADD_VAR + caty[i], buf);
@@ -960,7 +963,7 @@ MFCSimpleTypeView::ContextMenu(UINT nFlags, CPoint point)
 					reportError("Internal error. type index value exceeded in menu creator, is %d and shouldn't exceed %d",
 							caty[i], ID_VARIABLECONTEXT_SET_VAR_TYPE_RANGE-ID_VARIABLECONTEXT_SET_VAR_TYPE);
 				} else {
-					string tnm = qut::unfind(typeIndex, (int)caty[i]);
+					string tnm = findTypeName(caty[i]);
 					if (tnm.size() && itemSym->type != caty[i]) {
 						sprintf(buf, "%s", tnm.c_str());
 						setVarTypeMenu->AppendMenu(MF_STRING, ID_VARIABLECONTEXT_SET_VAR_TYPE + caty[i], buf);

@@ -15,17 +15,11 @@
 #include "Sampler.h"
 #include "QuaAudio.h"
 #include "Block.h"
-
 #ifdef QUA_V_JOYSTICK
 #include "QuaJoystick.h"
 #endif
-
-#ifdef QUA_V_ARRANGER_INTERFACE
-#include "Colors.h"
-#if defined(WIN32)
 #include "QuaDisplay.h"
-#endif
-#endif
+
 
 Place::Place(StabEnt *sy,
 			 Channel *c,

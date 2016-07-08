@@ -21,10 +21,7 @@
 #include "Channel.h"
 #include "SampleBuffer.h"
 #include "State.h"
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 
 
 Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short maxreq):
@@ -337,18 +334,14 @@ Sample::addInstance(std::string nm, Time t, Time d, Channel * chan)
 // duration in sec: ((float)sample->selectedNFrames)/kSamplingRate,
 //		Time(((float)nFrames)/(kSamplingRate*tv->uberQua->timeQuanta), tv->metric),
 	SampleInstance *i = new SampleInstance(this, nm, t, d, chan);
-	instanceLock.lock();
 	addInstToList(i);
-	instanceLock.unlock();
 	fprintf(stderr, "added sample instance\n");
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
 		uberQua->AddToSchedule(i);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		uberQua->display.CreateInstanceBridge(i);
-#endif
 	} else {
 		fprintf(stderr, "Sample: unexpected null while committing to schedule");
 	}
@@ -364,14 +357,10 @@ Sample::RemoveInstance(Instance *i, bool display)
 		environment.quaAudio->stopInstance(s);
 #endif
 	}
-	instanceLock.lock();
 	removeInstFromList(i);
-	instanceLock.unlock();
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	if (display) {
 		uberQua->bridge.RemoveInstanceRepresentations(s->sym);
 	}
-#endif
 }
 
 
@@ -557,7 +546,7 @@ Sample::Save(FILE *fp, short indent)
 	tab(fp, indent);
 	fprintf(fp,	"sample");
 	
-	fprintf(fp,	" %s", sym->printableName());
+	fprintf(fp,	" %s", sym->printableName().c_str());
 
 	if (countControllers() > 0) {
 		fprintf(fp, "(");

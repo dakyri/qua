@@ -47,7 +47,7 @@ MFCDeviceSelector::OnInitMenuPopup(
    BOOL bSysMenu 
    )
 {
-	fprintf(stderr, "oimp %x %d\n", pPopupMenu, nIndex);
+	fprintf(stderr, "oimp %x %d\n", (unsigned)pPopupMenu, nIndex);
 }
 
 void

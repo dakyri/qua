@@ -2,7 +2,7 @@
 #define _NOTE
 
 #include "StdDefs.h"
-#include "Properties.h"
+#include "Attributes.h"
 
 
 typedef unsigned char		pitch_t;
@@ -18,11 +18,10 @@ typedef int8				sysc_data_t;
 typedef	uchar				bank_t;
 
 // note class: my notes, midi noteon, keypress, noteoff
-class Note: public Attributable {
+class Note {
 public:
  	inline void
-	Set(pitch_t p, vel_t v, dur_t d, cmd_t c)
-	{
+	Set(pitch_t p, vel_t v, dur_t d, cmd_t c) {
 		pitch = p;
 		dynamic = v;
 		duration = d;
@@ -32,6 +31,7 @@ public:
 	cmd_t		cmd;		/* raw cmd and channel */
     pitch_t		pitch;		/* midi note # */
     vel_t		dynamic;
+	AttributeList attributes;
 };
 
 class Ctrl {

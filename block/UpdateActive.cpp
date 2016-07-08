@@ -22,9 +22,7 @@
 #if defined(QUA_V_VST_HOST)
 #include "VstPlugin.h"
 #endif
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 
 #ifdef QUA_V_DEBUG_CONSOLE
 flag		debug_update=0;

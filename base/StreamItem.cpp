@@ -12,6 +12,7 @@
 #include "Parse.h"
 #include "MidiDefs.h"
 
+#include "Dictionary.h"
 
 // danger. exterminate the enemy
 
@@ -338,11 +339,9 @@ StreamValue::Clone()
 status_t
 StreamValue::SaveSnapshot(FILE *fp)
 {
-	auto it = find_if(typeIndex.begin(), typeIndex.end(),
-		 [this](pair<string,int> vt) { return vt.second == value.type; }
-	);
-	if (it != typeIndex.end()) {
-		fprintf(fp, "<value time=\"%s\" valType=\"%s\" valValue=\"%s\"/>\n", time.StringValue(), it->first.c_str(), value.StringValue());
+	string nm = findTypeName(value.type);
+	if (nm.size()) {
+		fprintf(fp, "<value time=\"%s\" valType=\"%s\" valValue=\"%s\"/>\n", time.StringValue(), nm.c_str(), value.StringValue());
 	}
 	
 	return B_OK;

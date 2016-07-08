@@ -16,11 +16,13 @@
 #include "Parse.h"
 #include "QuaDisplay.h"
 
+#include "Dictionary.h"
+
 status_t
 Template::save(FILE *fp, short indent)
 {
 	status_t err=B_NO_ERROR;
-	const char *typenm = qut::unfind(typeIndex, (int)type).c_str();
+	const char *typenm = findTypeName(type).c_str();
 	
 	if (typenm == nullptr) {
 		internalError("Invalid type for template %s: not saved");
@@ -34,7 +36,7 @@ Template::save(FILE *fp, short indent)
 	if (mimeType.size())
 		fprintf(fp, " \"%s\"", mimeType.c_str());
 
-	fprintf(fp,	" %s", sym->printableName());
+	fprintf(fp,	" %s", sym->printableName().c_str());
 
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
@@ -42,9 +44,7 @@ Template::save(FILE *fp, short indent)
 			return err;;
 		fprintf(fp, ")");
 	}
-#ifdef QUA_V_ARRANGER_INTERFACE
 //	fprintf(fp,	"\n#display {%s}", uberQua->bridge.DisplayParameterSaveString(sym));
-#endif
 	err = SaveMainBlock(mainBlock, fp, indent, sym, false, false, nullptr, nullptr); 
 	return err;
 }
@@ -74,8 +74,6 @@ Template::Template(string nm, StabEnt *context,
 	
 	mimeType = mim;
 	path = pth;
-	
-#ifdef QUA_V_ARRANGER_INTERFACE
 	/*
 	if (path) {
 		BFile		theFile(path, (ulong)B_READ_ONLY);
@@ -108,19 +106,15 @@ Template::Template(string nm, StabEnt *context,
 			sicon = nullptr;
 		}
 	}*/
-#endif
 }
 
 Template::~Template()
 {
-
-#ifdef QUA_V_ARRANGER_INTERFACE
 	/*
 	if (sicon)
 		delete sicon;
 	if (bicon)
 		delete bicon;*/
-#endif
 }
 
 bool

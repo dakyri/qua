@@ -82,14 +82,16 @@ Qua::Qua(std::string path, bool chan_add):
 }
 */
 
-Qua::Qua(string nm, bool chan_add):
+QuaDisplayStub defaultDisplay;
+
+Qua::Qua(string nm, QuaPerceptualSet &display, bool chan_add):
 	Executable(
 		DefineSymbol(
 			(nm.size()?nm: string("New")), TypedValue::S_QUA, 0,
 			this, nullptr,	TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT)),
 	Stacker(this),
 	TimeKeeper(&Metric::std),
-	bridge(this)
+	bridge(*this, display)
 {
 	OnCreationInit(chan_add);
 }
@@ -135,9 +137,6 @@ Qua::OnCreationInit(bool chan_add)
 {
     StabEnt	*ts, *cs, *tempos;
 
-#ifdef QUA_V_ARRANGER_INTERFACE
-	bridge.display = new QuaDisplay(this);
-#endif
 	theStack = new QuasiStack(sym, this, sym, nullptr, nullptr, nullptr, this, nullptr);
 	
 	fprintf(stderr, "initting qua %s...\n", sym->name.c_str());
@@ -551,9 +550,7 @@ Qua::UpdateRecordDisplay()
 {
 	if (status == STATUS_RECORDING) {
     	for (short i=0; i<nChannel; i++) {
-#ifdef QUA_V_ARRANGER_INTERFACE
     		channel[i]->UpdateRecordDisplay();
-#endif
 		}
 	}
 }
@@ -592,7 +589,7 @@ Qua::CreateSample(std::string nm, bool andD)
 	if (nm.size() == 0) {
 		nm = string("sample") + std::to_string(new_sample_id++);
 	}
-	Sample *S = new Sample(nm, nullptr, this, MAX_BUFFERS_PER_SAMPLE, MAX_REQUESTS_PER_SAMPLE);
+	Sample *S = new Sample(nm, "", this, MAX_BUFFERS_PER_SAMPLE, MAX_REQUESTS_PER_SAMPLE);
     AddSchedulable(S);
 
 	if (andD) {
@@ -796,14 +793,14 @@ Qua::loadObject(StabEnt *obj)
 			if (t->mimeType && !found) {
 				err = be_roster->FindApp(t->mimeType, &app_ref);
 				if (err != B_OK) {
-					bridge.reportError("Can't find application binary for type %s", t->mimeType);
+					bridge.reportError("Can't find application binary for type %s", t->mimeType.c_str());
 					return nullptr;
 				}
 				ent.SetTo(&app_ref, true);
 				appPath.SetTo(&ent);
 			}
 			
-			api = new Application(((char *)appPath.Leaf()), &appPath, this, t->mimeType);			
+			api = new Application(((char *)appPath.Leaf()), &appPath, this, t->mimeType.c_str());
 			
 			if (t->Instantiate(api->sym) != B_OK) {
 				bridge.reportError("Can't instantiate template");
@@ -909,7 +906,7 @@ Qua::loadFile(std::string path)
 				return nullptr;
 			}	
 		} else {
-			bridge.reportError("what the hell do i do with %s files?", fileMainType);
+			bridge.reportError("what the hell do i do with %s files?", fileMainType.c_str());
 		}
 	} else 	if (fileSuperType == "text") {
 	
@@ -937,11 +934,11 @@ Qua::loadFile(std::string path)
 
 
 Qua *
-Qua::loadScriptFile(const char *path)
+Qua::loadScriptFile(const char *path, QuaPerceptualSet &display)
 {
 	std::string	thePath = path;
 	FILE		*theFile = fopen(path, "r");
-	Qua			*q=nullptr;
+	Qua *q = nullptr;
 	if (theFile == nullptr) {
 		fprintf(stderr, "loading %s failed: not found\n", path);
 	} else {
@@ -951,7 +948,9 @@ Qua::loadScriptFile(const char *path)
 //			fclose(theFile);
 //			return false;
 //		}
-		Parser		*p = new Parser(theFile, getBase(thePath), nullptr);
+		string sourcename = quascript_name(getBase(thePath));
+		q = new Qua(sourcename, display, false);
+		Parser		*p = new Parser(theFile, sourcename, q);
 		q = p->ParseQua();
 		p->ShowErrors();
 		if (q != nullptr && p->err_cnt == 0) {
@@ -1019,7 +1018,7 @@ Qua::loadSnapshotElement(tinyxml2::XMLElement* element)
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				bridge.reportError("voice '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("voice '%s' not found while loading snapshot", nameAttr.c_str());
 			}
 		}
 	} else if (namestr == "sample") {
@@ -1028,7 +1027,7 @@ Qua::loadSnapshotElement(tinyxml2::XMLElement* element)
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				bridge.reportError("sample '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("sample '%s' not found while loading snapshot", nameAttr.c_str());
 			}
 		}
 	} else if (namestr == "pool") {
@@ -1037,7 +1036,7 @@ Qua::loadSnapshotElement(tinyxml2::XMLElement* element)
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				bridge.reportError("pool '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("pool '%s' not found while loading snapshot", nameAttr.c_str());
 			}
 		}
 	} else if (namestr == "channel") {
@@ -1046,7 +1045,7 @@ Qua::loadSnapshotElement(tinyxml2::XMLElement* element)
 			if (v != nullptr) {
 				v->LoadSnapshotElement(element);
 			} else {
-				bridge.reportError("channel '%s' not found while loading snapshot", nameAttr);
+				bridge.reportError("channel '%s' not found while loading snapshot", nameAttr.c_str());
 			}
 		}
 	} else if (namestr == "instance") {
@@ -1573,7 +1572,7 @@ status_t
 Qua::Save(FILE *fp, short indent, bool clearHistory)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "qua %s\n", sym->printableName());
+	tab(fp, indent); fprintf(fp, "qua %s\n", sym->printableName().c_str());
 	tab(fp, indent); fprintf(fp, "{\n");
 	if (clearHistory) {
 		StabEnt	*is = glob.findContextSymbol("Init", sym, -1);
@@ -2088,10 +2087,6 @@ Qua::getCapabilityString()
 #ifdef QUA_V_PORT_PARAM
 #endif
 #ifdef QUA_V_STREAM_MESG
-#endif
-#ifdef QUA_V_CONTROLLER_INTERFACE
-#endif
-#ifdef QUA_V_ARRANGER_INTERFACE
 #endif
 #ifdef QUA_V_EDITOR_INTERFACE
 #endif

@@ -164,22 +164,32 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex making lexical analyser</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flex making lexical analyser</Message>
     </CustomBuild>
-    <CustomBuild Include="QuaParser.yy">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bison generating parser</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Bison generating parser</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ParserDriver.h" />
     <ClInclude Include="QuaLexer.h" />
     <ClInclude Include="QuaParser.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="QuaParser.yy">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">bison -d -v --output=QuaParser.cpp  QuaParser.yy</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bison generating parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Bison generating parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bison generating parser</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Bison generating parser</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">QuaParser.tab.cc;QuaParser.tab.hh</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

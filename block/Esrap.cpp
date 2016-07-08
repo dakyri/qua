@@ -13,6 +13,7 @@
 #include "Channel.h"
 #include "Lambda.h"
 
+#include "Dictionary.h"
 
 int32	nlpos = 0;
 
@@ -130,7 +131,7 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		case Block::C_STREAM_PLAYER:
 		case Block::C_GENERIC_PLAYER:
 		case Block::C_SAMPLE_PLAYER: {
-			std::string s=qut::unfind(clipPlayerIndex, (int) block->type);
+			std::string s=findClipPlayer(block->type);
 			if (s.size() == 0) {
 				fprintf(stderr, "not recognised player");
 			} else {
@@ -429,7 +430,7 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 			break;
 	
 		case Block::C_CAST: {
-			std::string s=qut::unfind(typeIndex, (int) block->crap.cast.type);
+			std::string s=findTypeName(block->crap.cast.type);
 			if (!AddToBuf("(#", buf, pos, len)) return false;
 			if (!AddToBuf(s.c_str(), buf, pos, len)) return false;
 			if (!AddToBuf(" ", buf, pos, len)) return false;

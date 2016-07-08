@@ -12,10 +12,7 @@
 //#include "include/Quapp.h"
 #include "Qua.h"
 #include "QuaInsert.h"
-
-#ifdef QUA_V_ARRANGER_INTERFACE
 #include "QuaDisplay.h"
-#endif
 
 QuaParallelPort::QuaParallelPort(char *devnm, QuaParallelManager *qj):
 	QuaPort(devnm, QUA_DEV_PARALLEL, QUA_DEV_GENERIC, QUA_PORT_IO)

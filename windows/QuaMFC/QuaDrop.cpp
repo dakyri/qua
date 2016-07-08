@@ -234,7 +234,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name.c_str());
 		return true;
 	} else if (object->IsDataAvailable(instanceFormat)) {
 		fprintf(stderr, "qua drop::instance\n");
@@ -251,7 +251,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name.c_str());
 		return true;
 	} else if (object->IsDataAvailable(voiceFormat)) {
 		fprintf(stderr, "qua drop::voice\n");
@@ -269,7 +269,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name.c_str());
 		return true;
 	} else if (object->IsDataAvailable(sampleFormat)) {
 		if (!object->GetData(sampleFormat, &medium)) {
@@ -286,7 +286,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::sample %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::sample %s\n", data.symbol->name.c_str());
 		return true;
 	} else if (object->IsDataAvailable(builtinFormat)) {
 		if (!object->GetData(builtinFormat, &medium)) {
@@ -303,7 +303,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::builtin %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::builtin %s\n", data.symbol->name.c_str());
 		return true;
 	} else if (object->IsDataAvailable(vstpluginFormat)) {
 		if (!object->GetData(vstpluginFormat, &medium)) {
@@ -320,7 +320,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::audio plugin %s\n", data.symbol->name);
+		fprintf(stderr, "qua drop::audio plugin %s\n", data.symbol->name.c_str());
 		return true;
 	} else {
 		// what have we got then .... it might well be a custom thing meant for a control

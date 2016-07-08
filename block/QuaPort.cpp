@@ -6,10 +6,7 @@
 #include "Block.h"
 #include "Qua.h"
 #include "QuaEnvironment.h"
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
 
 QuaPort::QuaPort(
 			std::string nm, short typ, short subt, short md):
@@ -55,7 +52,7 @@ QuaPort::save(FILE *fp, short indent)
 //	if (appMimeType)
 //		fprintf(fp, "\n\t#mime \"%s\"", appMimeType);
 		
-	fprintf(fp,	" %s", sym->printableName());
+	fprintf(fp,	" %s", sym->printableName().c_str());
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);

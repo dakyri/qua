@@ -158,17 +158,20 @@ namespace QSParse {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 64 "QuaParser.yy" // lalr1.cc:377
+    #line 65 "QuaParser.yy" // lalr1.cc:377
 
 	std::string *stringval;
+	std::vector<int> *vectival;
 	TypedValue *typedval;
 	int intval;
+	base_type_t typeval;
+	StabEnt *stabval;
 	float floatval;
 	double doubleval;
 	Block *block;
 	Qua *qua;
 
-#line 172 "QuaParser.hpp" // lalr1.cc:377
+#line 175 "QuaParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -188,25 +191,38 @@ namespace QSParse {
         END = 0,
         WORD = 258,
         SYMBOL = 259,
-        IDENT = 260,
-        INT = 261,
-        FLOAT = 262,
-        TIME = 263,
-        STRING = 264,
-        TYPE_ATTRIBUTE = 265,
+        TYPE = 260,
+        IDENT = 261,
+        LITERAL_INT = 262,
+        LITERAL_FLOAT = 263,
+        LITERAL_TIME = 264,
+        LITERAL_STRING = 265,
         QUA = 266,
-        ASSGN = 267,
-        LSQB = 268,
-        RSQB = 269,
-        LBRA = 270,
-        RBRA = 271,
-        LB = 272,
-        RB = 273,
-        PLUS = 274,
-        MINUS = 275,
-        STAR = 276,
-        SLASH = 277,
-        NEWLINE = 278
+        VOICE = 267,
+        SAMPLE = 268,
+        LAMBDA = 269,
+        CHANNEL = 270,
+        STRUCT = 271,
+        INPUT = 272,
+        OUTPUT = 273,
+        TYPE_MODIFIER = 274,
+        ASSGN = 275,
+        LSQB = 276,
+        RSQB = 277,
+        LBRA = 278,
+        RBRA = 279,
+        LB = 280,
+        RB = 281,
+        COMMA = 282,
+        COLON = 283,
+        COLON2 = 284,
+        SEMI = 285,
+        DOT = 286,
+        PLUS = 287,
+        MINUS = 288,
+        STAR = 289,
+        SLASH = 290,
+        NEWLINE = 291
       };
     };
 
@@ -388,7 +404,7 @@ namespace QSParse {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -406,7 +422,7 @@ namespace QSParse {
     static const char* const yytname_[];
 
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -505,12 +521,12 @@ namespace QSParse {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 11,     ///< Last index in yytable_.
-      yynnts_ = 3,  ///< Number of nonterminal symbols.
-      yyfinal_ = 9, ///< Termination state number.
+      yylast_ = 69,     ///< Last index in yytable_.
+      yynnts_ = 30,  ///< Number of nonterminal symbols.
+      yyfinal_ = 5, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 24  ///< Number of tokens.
+      yyntokens_ = 37  ///< Number of tokens.
     };
 
 
@@ -522,7 +538,7 @@ namespace QSParse {
 
 #line 5 "QuaParser.yy" // lalr1.cc:377
 } // QSParse
-#line 526 "QuaParser.hpp" // lalr1.cc:377
+#line 542 "QuaParser.hpp" // lalr1.cc:377
 
 
 

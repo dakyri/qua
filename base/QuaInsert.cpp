@@ -8,11 +8,7 @@
 #include "Block.h"
 #include "Executable.h"
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
-#if defined(WIN32)
-#include "include/QuaDisplay.h"
-#endif
-#endif
+#include "QuaDisplay.h"
 
 QuaInsert::QuaInsert(
 				Insertable *o,
@@ -68,7 +64,6 @@ QuaInsert::	Set(
 	}
 	id = i;
 	type = t;
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	/*
 	if (object->executable->representation) {
 		if (object->executable->representation->Window())
@@ -77,7 +72,6 @@ QuaInsert::	Set(
 		if (object->executable->representation->Window())
 			object->executable->representation->Window()->Unlock();
 	}*/
-#endif
 }
 
 void
@@ -92,7 +86,7 @@ QuaInsert::	SetName(char *n)
 	} else {
 		name = "";
 	}
-#if defined(QUA_V_ARRANGER_INTERFACE)
+
 	/*
 	if (object->executable->representation) {
 		if (object->executable->representation->Window())
@@ -101,7 +95,7 @@ QuaInsert::	SetName(char *n)
 		if (object->executable->representation->Window())
 			object->executable->representation->Window()->Unlock();
 	}*/
-#endif
+
 }
 
 QuaInsert::~QuaInsert()
@@ -110,7 +104,6 @@ QuaInsert::~QuaInsert()
 		delete name;
 }
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 /*
 void
 QuaInsert::Draw(BView *v, short dm)
@@ -161,7 +154,6 @@ QuaInsert::Draw(BView *v, short dm)
 		}
 	}
 }*/
-#endif
 
 
 Insertable::Insertable()
@@ -181,7 +173,6 @@ Insertable::FindInsert(char *nm, int32 id, short typ)
 	return nullptr;
 }
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 void
 Insertable::SetupInsertDisplay()
 {
@@ -219,7 +210,6 @@ Insertable::SetupInsertDisplay()
 		o->Window()->Unlock();
 	*/
 }
-#endif
 
 void
 Insertable::RemoveInsert(short ind)
@@ -232,10 +222,7 @@ Insertable::RemoveInsert(short ind)
 			i->quanexion->to->quanexion = nullptr;
 		else
 			i->quanexion->from->quanexion = nullptr;
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		insertableBridge.RemoveQuaNexion(i);
-#endif
 	}
 	delete i;
 }
@@ -258,9 +245,7 @@ Insertable::AddInsert(char *nm, int32 id, short typ, int32 w, int32 f)
 {
 	QuaInsert	*q = new QuaInsert(this, nullptr, nm, id, typ, w, f);
 	inserts.push_back(q);
-#ifdef QUA_V_ARRANGER_INTERFACE
 	SetupInsertDisplay();
-#endif
 	return q;
 }
 
@@ -270,8 +255,6 @@ Insertable::~Insertable()
 	for (auto ins = inserts.begin(); ins != inserts.end();) {
 		delete *ins;
 		ins = inserts.erase(ins);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		insertableBridge.RemoveQuaNexion(ins);
-#endif
 	}
 }

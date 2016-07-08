@@ -224,7 +224,7 @@ MFCObjectMountView::OnInitialUpdate()
 	} else if (qdoc->qua == NULL) {
 		reportError("ObjectMountView: initial update finds a null sequencer");
 	} else {	// set qua up with our hooks
-		SetLinkage(qdoc->qua->bridge.display);
+		SetLinkage(&qdoc->display);
 		quaLink->AddObjectRack(this);
 //		display->AddChannelRepresentations(this);
 		StabEnt	*pars = qdoc->qua->sym;
@@ -329,9 +329,9 @@ MFCObjectMountView::OnDestroy()
 {
 	long cnt = NOR();
 	for (short i=0; i<cnt; i++) {
-		fprintf(stderr, "bout to delete object rep %x\n", this);
+		fprintf(stderr, "bout to delete object rep %x\n", (unsigned) this);
 		DeleteObjectRepresentation(OR(0));
-		fprintf(stderr, "deleted object rep %x\n", this);
+		fprintf(stderr, "deleted object rep %x\n", (unsigned) this);
 	}
 	CScrollView::OnDestroy();
 }

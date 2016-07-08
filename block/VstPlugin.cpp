@@ -18,6 +18,7 @@
 
 #include "BaseVal.h"
 #include "Stackable.h"
+#include "Parse.h"
 #include "VstPlugin.h"
 #include "SampleBuffer.h"
 
@@ -27,7 +28,7 @@
 #include "Note.h"
 #include "QuasiStack.h"
 #include "QuaAudio.h"
-#include "Parse.h"
+
 
 // bogus avoidance of a messy issue of the
 // HostCallback knowing which of the hostside
@@ -225,7 +226,7 @@ VstPlugin::Load()
 		Close(plugin);
 		status = VST_PLUG_LOADED;
 	} else { // can't load the dll, what next?
-		reportError("load of vst plugin %s at %s fails", sym->name, pluginExecutable.Path());
+		reportError("load of vst plugin %s at %s fails", sym->name.c_str(), pluginExecutable.Path());
 		return B_ERROR;
 	}
 

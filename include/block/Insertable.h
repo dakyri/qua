@@ -16,9 +16,8 @@ public:
 	QuaInsert			*FindInsert(char *name, int32 id, short typ);
 	void				RemoveInsert(short index);
 	void				RemoveInsertById(int32 id);
-#ifdef QUA_V_ARRANGER_INTERFACE
 	virtual void		SetupInsertDisplay();
-#endif
+
 	std::vector<QuaInsert*>	inserts;
 };
 #endif

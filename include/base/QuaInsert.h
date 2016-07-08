@@ -56,9 +56,7 @@ public:
 						QuaNexion(QuaInsert *, QuaInsert *, uchar type, uchar width,
 								ObjectViewContainer *parent);
 						~QuaNexion();
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	void				Draw(bool scrub=false);
-#endif
 	
 	QuaInsert			*from;
 	QuaInsert			*to;

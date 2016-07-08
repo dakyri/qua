@@ -25,11 +25,7 @@
 #include "QuaAudio.h"
 #include "QuaFX.h"
 #include "SampleBuffer.h"
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
-#endif
-
 
 Voice::Voice(std::string nm, Qua *parent):
 	Schedulable(
@@ -189,13 +185,13 @@ Voice::Init()
 	mainStream.ClearStream();
 #endif		
 	if (sym == nullptr) {
-		uberQua->bridge.reportError("Initialization: voice symbol '%s' not found\n" , sym->name);
+		uberQua->bridge.reportError("Initialization: voice symbol '%s' not found\n" , sym->name.c_str());
 	    return false;
 	}
 #ifdef VOICE_MAINSTREAM
 	stream = glob.FindSymbol("stream", -1);
 	if (stream == nullptr) {
-		uberQua->bridge.reportError("Initializing voice %s: stream symbol not found\n", sym->name);
+		uberQua->bridge.reportError("Initializing voice %s: stream symbol not found\n", sym->name.c_str());
 	    return false;
 	}
 #endif
@@ -403,7 +399,7 @@ Voice::Save(FILE *fp, short indent)
 	tab(fp, indent);
 
 	fprintf(fp,	"voice");
-	fprintf(fp,	" %s", sym->printableName());
+	fprintf(fp,	" %s", sym->printableName().c_str());
 	if (countControllers()>0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);
@@ -540,18 +536,14 @@ Instance *
 Voice::addInstance(std::string nm, Time t, Time d, Channel * chan)
 {
 	VoiceInstance *i = new VoiceInstance(this, nm, t, d, chan);
-	instanceLock.lock();
 	addInstToList(i);
-	instanceLock.unlock();
 
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
 		uberQua->AddToSchedule(i);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		uberQua->display.CreateInstanceBridge(i);
-#endif
 	} else {
 		fprintf(stderr, "Voice: unexpected null while committing to schedule");
 	}

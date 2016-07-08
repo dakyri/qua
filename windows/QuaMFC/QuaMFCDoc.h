@@ -12,6 +12,8 @@
 class Qua;
 class QuaMFCCCDialog;
 
+#include "QuaDisplay.h"
+
 class CQuaMFCDoc : public CDocument
 {
 protected: // create from serialization only
@@ -20,8 +22,8 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	Qua			*qua;
-
+	Qua *qua;
+	QuaDisplay display;
 // Operations
 public:
 

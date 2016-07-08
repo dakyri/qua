@@ -17,16 +17,12 @@
 #include "QuaDirect.h"
 #endif
 
-#ifdef QUA_V_ARRANGER_INTERFACE
-#if defined(WIN32)
-#else
-#endif
-#endif
+
 
 #define AXIS_NOISE 10
 #define ZERO_DRIFT 0.10
 
-flag debug_joy=0;
+int debug_joy=0;
 
 #ifdef QUA_V_JOYSTICK_MMC
 // here for now as it probably should be in a library
@@ -177,14 +173,12 @@ QuaJoystickPort::Open(Qua *q)
 //c_dfDIMouse 
 //c_dfDIMouse2 
 //c_dfDIJoystick2 
-#ifdef QUA_V_ARRANGER_INTERFACE
 	err = dxStick->SetCooperativeLevel(nullptr, /* HWND hDlg, ... a big doozy !!!! ??? this must be a valid window*/ 
 						  DISCL_EXCLUSIVE | DISCL_BACKGROUND);
 	if (err != DI_OK) {
 		fprintf(stderr, "Open SetDataFormat() error %s\n", direct_error_string(err));
 		return B_ERROR;
 	}
-#endif
 
 	DIDEVCAPS	caps;
 	caps.dwSize = sizeof(caps);
@@ -707,14 +701,9 @@ QuaJoystickManager::QuaJoystickManager(Qua &q)
 			p->name, this,
 			QUA_JOY_DX,
 			p->hasFeedback
-#ifdef QUA_V_ARRANGER_INTERFACE
 			, quapp->joySmallIcon, quapp->joyBigIcon
-#endif
 			);
-
-#ifdef QUA_V_ARRANGER_INTERFACE
 		jp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);
-#endif
 		ports.AddItem(jp);
 	}
 #endif

@@ -10,12 +10,7 @@
 //#include "PoolPlayer.h"
 #include "QuasiStack.h"
 #include "Channel.h"
-
-#if defined(QUA_V_ARRANGER_INTERFACE)
-
 #include "QuaDisplay.h"
-
-#endif
 
 flag debug_anal = 0;
 
@@ -192,17 +187,13 @@ Pool::addInstance(std::string nm, Time t, Time d, Channel * chan)
 //		 mainStream->EndTime(), tv, representation->color);
 //	return p;
 	PoolInstance *i = new PoolInstance(this, nm, t, d, chan);
-	instanceLock.lock();
 	addInstToList(i);
-	instanceLock.unlock();
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
 		uberQua->AddToSchedule(i);
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //		uberQua->display.CreateInstanceBridge(i);
-#endif
 	} else {
 		fprintf(stderr, "Schedulable: unexpected null while committing to schedule");
 	}
@@ -218,12 +209,8 @@ Pool::removeInstance(Instance *i, bool disp)
 	if (p->status == STATUS_RUNNING)
 		uberQua->poolPlayer->StopInstance(p);
 #endif
-	instanceLock.lock();
 	removeInstFromList(i);
-	instanceLock.unlock();
-#if defined(QUA_V_ARRANGER_INTERFACE)
 //	uberQua->display.RemoveInstanceBridge(i);
-#endif
 }
 
 
@@ -352,13 +339,11 @@ Pool::Save(FILE *fp, short indent)
 	tab(fp, indent);
 
 	fprintf(fp,	"pool");
-#ifdef QUA_V_ARRANGER_INTERFACE
 	if (uberQua->bridge.HasDisplayParameters(sym)) {
 		fprintf(fp,	" \\display %s ", uberQua->bridge.DisplayParameterId());
 		uberQua->bridge.WriteDisplayParameters(fp, sym);
 	}
-#endif
-	fprintf(fp,	" %s", sym->printableName());
+	fprintf(fp,	" %s", sym->printableName().c_str());
 	if (countControllers() > 0) {
 		fprintf(fp, "(");
 		err = saveControllers(fp, indent+2);

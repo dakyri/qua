@@ -15,9 +15,11 @@
 #include "Schedulable.h"
 #include "QuaDisplay.h"
 
-QuaBridge::QuaBridge(Qua *q)
+QuaBridge::QuaBridge(Qua &q, QuaPerceptualSet &d)
+	: uberQua(q)
+	, display(d)
 {
-	uberQua = q;
+	display.setTo(&q);
 }
 
 QuaBridge::~QuaBridge()
@@ -40,29 +42,20 @@ QuaBridge::AddQuaNexion(QuaInsert *i, QuaInsert *di)
 bool
 QuaBridge::HasDisplayParameters(StabEnt *s)
 {
-	if (display) {
-		return display->HasDisplayParameters(s);
-	}
-	return false;
+	return display.HasDisplayParameters(s);
 }
 
 
 char *
 QuaBridge::DisplayParameterId()
 {
-	if (display) {
-		return display->DisplayParameterId();
-	}
-	return "";
+	return display.DisplayParameterId();
 }
 
 status_t
 QuaBridge::WriteDisplayParameters(FILE *fp, StabEnt *s)
 {
-	if (display) {
-		return display->WriteDisplayParameters(fp, s);
-	}
-	return B_OK;
+	return display.WriteDisplayParameters(fp, s);
 }
 
 bool
@@ -137,23 +130,19 @@ QuaBridge::DisplayStatus(Instance *inst)
 void
 QuaBridge::DisplayTempo(float t, bool async)
 {
-	if (display) {
-		display->DisplayTempo(t, async);
-	}
+	display.DisplayTempo(t, async);
 }
 
 void
-QuaBridge::Rename(StabEnt *, const string &nm)
+QuaBridge::Rename(StabEnt *s, const string &nm)
 {
-	;
+	display.Rename(s, nm);
 }
 
 void
 QuaBridge::displayArrangementTitle(const char *nm)
 {
-	if (display) {
-		display->displayArrangementTitle(nm);
-	}
+	display.displayArrangementTitle(nm);
 }
 
 void
@@ -165,88 +154,68 @@ QuaBridge::RemoveControlVariables(QuasiStack *qs)
 void
 QuaBridge::updateClipIndexDisplay(StabEnt *sym)
 {
-	if (display) {
-		display->updateClipIndexDisplay(sym);
-	}
+	display.updateClipIndexDisplay(sym);
 }
 
 void
 QuaBridge::UpdateTakeIndexDisplay(StabEnt *sym)
 {
-	if (display) {
-		display->UpdateTakeIndexDisplay(sym);
-	}
+	display.UpdateTakeIndexDisplay(sym);
 }
 
 void
 QuaBridge::UpdateVariableIndexDisplay(StabEnt *sym)
 {
-	if (display) {
-		display->UpdateVariableIndexDisplay(sym);
-	}
+	display.UpdateVariableIndexDisplay(sym);
 }
 
 void
 QuaBridge::UpdateSequencerTimeDisplay(bool async)
 {
-	if (display) {
-		display->DisplayGlobalTime(display->qua->theTime, async);
-	}
+	display.DisplayGlobalTime(uberQua.theTime, async);
 }
 
 void
 QuaBridge::PopHigherFrameRepresentations(QuasiStack *qs)
 {
 	StabEnt	*rootSym = qs->stackerSym;
-	if (display) {
 #ifdef Q_FRAME_MAP
-		display->PopHigherFrameRepresentations(rootSym, qs, nullptr, 0);
+	display.PopHigherFrameRepresentations(rootSym, qs, nullptr, 0);
 #else
-		display->PopHigherFrameRepresentations(rootSym, qs);
+	display.PopHigherFrameRepresentations(rootSym, qs);
 #endif
-	}
 }
 
 void
 QuaBridge::RemoveHigherFrameRepresentations(QuasiStack *qs)
 {
 	StabEnt	*rootSym = qs->stackerSym;
-	if (display) {
-		display->RemoveHigherFrameRepresentations(rootSym, qs);
-	}
+	display.RemoveHigherFrameRepresentations(rootSym, qs);
 }
 
 
 void
 QuaBridge::RemoveSchedulableRepresentations(StabEnt *sym)
 {
-	if (display) {
-		display->RemoveSchedulableRepresentations(sym);
-	}
+	display.RemoveSchedulableRepresentations(sym);
 }
 
 void
 QuaBridge::RemoveMethodRepresentations(StabEnt *sym)
 {
-	if (display) {
-		display->RemoveMethodRepresentations(sym);
-	}
+	display.RemoveMethodRepresentations(sym);
 }
 
 void
 QuaBridge::RemoveChannelRepresentations(StabEnt *sym)
 {
-	if (display) {
-		display->RemoveChannelRepresentations(sym);
-	}
+	display.RemoveChannelRepresentations(sym);
 }
 
 void
 QuaBridge::RemoveInstanceRepresentations(StabEnt *sym)
 {
-	if (display) {
-		display->RemoveInstanceRepresentations(sym);
-	}
+	display.RemoveInstanceRepresentations(sym);
 }
 
 
@@ -254,8 +223,8 @@ QuaBridge::RemoveInstanceRepresentations(StabEnt *sym)
 void
 QuaBridge::AddSchedulableRepresentation(Schedulable *s)
 {
-	for (short i=0; i<display->NIndexer(); i++) {
-		QuaIndexPerspective	*crv = display->Indexer(i);
+	for (short i=0; i<display.NIndexer(); i++) {
+		QuaIndexPerspective	*crv = display.Indexer(i);
 		crv->addToSymbolIndex(s->sym);
 	}
 }
@@ -263,8 +232,8 @@ QuaBridge::AddSchedulableRepresentation(Schedulable *s)
 void
 QuaBridge::AddMethodRepresentation(Lambda *m)
 {
-	for (short i=0; i<display->NIndexer(); i++) {
-		QuaIndexPerspective	*crv = display->Indexer(i);
+	for (short i=0; i<display.NIndexer(); i++) {
+		QuaIndexPerspective	*crv = display.Indexer(i);
 		crv->addToSymbolIndex(m->sym);
 	}
 }
@@ -272,14 +241,12 @@ QuaBridge::AddMethodRepresentation(Lambda *m)
 void
 QuaBridge::AddDestinationRepresentations(Channel *c)
 {
-	if (display) {
-		for (short i=0; i<display->NChannelRack(); i++) {
-			QuaChannelRackPerspective	*crv = display->ChannelRack(i);
-			if (crv != nullptr) {
-				QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
-				if (cv != nullptr) {
-					cv->AddDestinationRepresentations();
-				}
+	for (short i=0; i<display.NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = display.ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->AddDestinationRepresentations();
 			}
 		}
 	}
@@ -288,14 +255,12 @@ QuaBridge::AddDestinationRepresentations(Channel *c)
 void
 QuaBridge::RemoveDestinationRepresentation(Channel *c, Input *s)
 {
-	if (display) {
-		for (short i=0; i<display->NChannelRack(); i++) {
-			QuaChannelRackPerspective	*crv = display->ChannelRack(i);
-			if (crv != nullptr) {
-				QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
-				if (cv != nullptr) {
-					cv->RemoveInputRepresentation(s);
-				}
+	for (short i=0; i<display.NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = display.ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->RemoveInputRepresentation(s);
 			}
 		}
 	}
@@ -304,14 +269,12 @@ QuaBridge::RemoveDestinationRepresentation(Channel *c, Input *s)
 void
 QuaBridge::RemoveDestinationRepresentation(Channel *c, Output *s)
 {
-	if (display) {
-		for (short i=0; i<display->NChannelRack(); i++) {
-			QuaChannelRackPerspective	*crv = display->ChannelRack(i);
-			if (crv != nullptr) {
-				QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
-				if (cv != nullptr) {
-					cv->RemoveOutputRepresentation(s);
-				}
+	for (short i=0; i<display.NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = display.ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->RemoveOutputRepresentation(s);
 			}
 		}
 	}
@@ -321,24 +284,18 @@ QuaBridge::RemoveDestinationRepresentation(Channel *c, Output *s)
 
 
 void
-QuaBridge::parseErrorViewClear(QSParser *p) {
-	if (display != nullptr) {
-		return display->parseErrorViewClear(p);
-	}
+QuaBridge::parseErrorViewClear() {
+	return display.parseErrorViewClear();
 }
 
 void
-QuaBridge::parseErrorViewAddLine(QSParser *p, string s) {
-	if (display != nullptr) {
-		return display->parseErrorViewAddLine(p, s);
-	}
+QuaBridge::parseErrorViewAddLine(string s) {
+	return display.parseErrorViewAddLine(s);
 }
 
 void
-QuaBridge::parseErrorViewShow(QSParser *p) {
-	if (display != nullptr) {
-		return display->parseErrorViewShow(p);
-	}
+QuaBridge::parseErrorViewShow() {
+	return display.parseErrorViewShow();
 }
 
 
@@ -349,9 +306,7 @@ QuaBridge::tragicError(char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		return display->tragicError(buf);
-	}
+	display.tragicError(buf);
 	va_end(args);
 }
 
@@ -361,9 +316,7 @@ QuaBridge::reportError(char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		display->reportError(buf);
-	}
+	display.reportError(buf);
 	va_end(args);
 }
 
@@ -373,9 +326,7 @@ QuaBridge::retryError(char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		return display->retryError(buf);
-	}
+	display.retryError(buf);
 	va_end(args);
 	return 0;
 }
@@ -386,9 +337,7 @@ QuaBridge::abortError(char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		return display->abortError(buf);
-	}
+	display.abortError(buf);
 	va_end(args);
 	return 0;
 }
@@ -399,9 +348,7 @@ QuaBridge::continueError(char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		return display->continueError(buf);
-	}
+	display.continueError(buf);
 	va_end(args);
 	return 0;
 }
@@ -412,9 +359,7 @@ QuaBridge::optionWin(int i, char *str, ...) {
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
-	if (display != nullptr) {
-		return display->optionWin(i, buf);
-	}
+	display.optionWin(i, buf);
 	va_end(args);
 	return 0;
 }

@@ -11,10 +11,8 @@
 #include "Expression.h"
 #include "Qua.h"
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 #include "QuaDisplay.h"
 
-#endif
 
 Envelope::Envelope(StabEnt *symbol,
 					Metric *m,
@@ -218,12 +216,10 @@ Envelope::AddSegment(Time &t, float v, uchar type, bool draw)
 		CueAndSet(cueTime);
 	}
 
-#if defined(QUA_V_ARRANGER_INTERFACE)
 	/*
 	if (interfaceBridge && draw) {
 		interfaceBridge->DrawNewEnvSegment(this, ins_at);
 	}*/
-#endif
 
 	return ins_at;
 }
@@ -256,12 +252,10 @@ Envelope::MoveSegment(int i, Time &t, float v, bool draw)
 	if (!MoveableSegment(i,t,v))
 		return false;
 	if (segment[i].time != t || segment[i].val != v) {	
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		/*
 		if (interfaceBridge && draw) {
 			interfaceBridge->DrawNewEnvSegPosition(this, i, true);
-		}*/
-#endif		
+		}*/	
 		segment[i].time = t;
 		segment[i].val = v;
 		
@@ -270,13 +264,10 @@ Envelope::MoveSegment(int i, Time &t, float v, bool draw)
 			CueAndSet(cueTime);
 		}
 
-		
-#if defined(QUA_V_ARRANGER_INTERFACE)
 		/*
 		if (interfaceBridge && draw) {
 			interfaceBridge->DrawNewEnvSegPosition(this, i, false);
 		}*/
-#endif
 	}
 	return true;
 }
