@@ -244,7 +244,7 @@ Block				*findMethodMain(const string &nm, short def_cnt = -1);
 Application			*findApplication(const string &nm, short def_cnt = -1);
 StabEnt				*findBuiltin(const string &nm, short def_cnt = -1);
 
-QuaPort *findQuaPort(const int type, const string &nm);
+QuaPort *findQuaPort(const int type, const string &nm, int direction=0, int nports=-1);
 
 string makeUniqueName(const string &nm);
 status_t LoadQuaSymbols(FILE *fp, StabEnt *c, Qua *u,

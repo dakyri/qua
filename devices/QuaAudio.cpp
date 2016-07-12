@@ -308,7 +308,7 @@ QuaAudioManager::~QuaAudioManager()
 }
 
 QuaPort *
-QuaAudioManager::findPortByName(string name) {
+QuaAudioManager::findPortByName(const string name, int direction, int nports) {
 	return ports.size() > 0 ? ports[0] : nullptr;
 }
 

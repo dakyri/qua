@@ -73,7 +73,7 @@ public:
 	virtual status_t disconnect(Input *)=0;
 	virtual status_t disconnect(Output *)=0;
 
-	virtual QuaPort * findPortByName(string name) = 0;
+	virtual QuaPort * findPortByName(const string name, int dirn, int nports=-1) = 0;
 
 	bool destinationIndex(std::unordered_map<std::string, P *> &index) {
 		for (short i = 0; i < countPorts(); i++) {
@@ -109,23 +109,27 @@ class QuaPort
 	: public Stackable, public Insertable
 {
 public:
-						QuaPort(std::string, short typ, short subt, short mode);
+	QuaPort(std::string, short typ, short subt, short mode);
 
+	status_t save(FILE *fp, short indent);
 
-	status_t			save(FILE *fp, short indent);
+	virtual const char * name(uchar);
+	virtual bool hasMode(const int mode);
 
-	virtual const char *		name(uchar);
-
-	bool				isControllable();
-	bool				isMultiSchedulable();
+	bool isControllable();
+	bool isMultiSchedulable();
 	
 //	inline PortObject	*PortObjectView() { return (PortObject *)representation; }
 	
-	short				deviceType;
-	short				deviceSubType;
-	short				mode;
+	short deviceType;
+	short deviceSubType;
+	short mode;
 
 };
 
+inline const string
+portDirectionName(const int direction) {
+	return string(direction == QUA_PORT_IN ? "in" : direction == QUA_PORT_OUT ? "out" : direction == QUA_PORT_IO ? "i/o" : "?");
+}
 
 #endif

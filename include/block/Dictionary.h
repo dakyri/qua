@@ -20,3 +20,4 @@ int32 findTypeAttribute(const char *s);
 
 string findClipPlayer(int type);
 string findTypeName(int type);
+string findAttributeName(int type);

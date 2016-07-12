@@ -9,7 +9,7 @@ QuaOSCManager::~QuaOSCManager() {
 }
 
 QuaPort *
-QuaOSCManager::findPortByName(string nm) {
+QuaOSCManager::findPortByName(const string nm, int direction, int nports) {
 	return nullptr;
 }
 status_t

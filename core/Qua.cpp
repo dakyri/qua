@@ -2135,24 +2135,23 @@ Qua::getCapabilityString()
 
 
 QuaPort *
-findQuaPort(int deviceType, const string &nm)
+findQuaPort(int deviceType, const string &nm, int direction, int nports)
 {
 	QuaPort *p = nullptr;
 	switch (deviceType) {
 	case Attribute::DEVICE_AUDIO:
-		p = getAudioManager().findPortByName(nm);
+		p = getAudioManager().findPortByName(nm, direction, nports);
 		break;
 	case Attribute::DEVICE_MIDI:
-		p = environment.quaMidi.findPortByName(nm);
+		p = environment.quaMidi.findPortByName(nm, direction, nports);
 		break;
 	case Attribute::DEVICE_JOYSTICK:
 #ifdef QUA_V_JOYSTICK
-		p = environment.quaJoystick->findPortByName(nm);
+		p = environment.quaJoystick->findPortByName(nm, direction, nports);
 #endif
 		break;
 	case Attribute::DEVICE_PARALLEL:
-		p = environment.quaParallel.findPortByName(nm);
-
+		p = environment.quaParallel.findPortByName(nm, direction, nports);
 		break;
 	case Attribute::DEVICE_OSC:
 		break;

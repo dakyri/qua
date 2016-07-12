@@ -40,7 +40,7 @@ public:
 	 ~QuaParallelManager();
 					
 
-	virtual QuaPort *findPortByName(string nm) override;
+	virtual QuaPort *findPortByName(const string nm, int direction, int nports) override;
 
 	virtual status_t connect(Input *);
 	virtual status_t connect(Output *);

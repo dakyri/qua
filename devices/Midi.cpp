@@ -1034,11 +1034,17 @@ QuaMidiManager::QuaMidiManager()
 		QuaMidiPort *mp = new QuaMidiPort(wc2string(moc[i].szPname), wc2string(moc[i].szPname), this, QUA_PORT_OUT, i);
 		/* mp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);*/
 		ports.push_back(mp);
+		if (dfltOutput == nullptr) {
+			dfltOutput = mp;
+		}
 	}
 
 	for (i=0; i<nInDevices; i++) {
 		QuaMidiPort *mp = new QuaMidiPort(wc2string(mic[i].szPname), wc2string(mic[i].szPname), this, QUA_PORT_IN, i);
 		ports.push_back(mp);
+		if (dfltInput == nullptr) {
+			dfltInput = mp;
+		}
 	}
 
 	delete moc;
@@ -1159,8 +1165,13 @@ QuaMidiManager::remove(QuaMidiIn *d)
 #endif
 
 QuaPort *
-QuaMidiManager::findPortByName(string name) {
-	return ports.size() > 0 ? ports[0] : nullptr;
+QuaMidiManager::findPortByName(const string name, int direction, int nports) {
+	for (auto p : ports) {
+		if (p->hasMode(direction)) {
+			return p;
+		}
+	}
+	return nullptr;
 }
 
 status_t

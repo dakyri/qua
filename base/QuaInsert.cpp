@@ -10,6 +10,8 @@
 
 #include "QuaDisplay.h"
 
+#include <iostream>
+
 QuaInsert::QuaInsert(
 				Insertable *o,
 				QuaNexion *q,
@@ -31,7 +33,7 @@ QuaInsert::QuaInsert(
 	type = t;
 	width = w;
 	format = fmt;
-	fprintf(stderr, "new insert %x in %x <%s> %d\n", this, object, name, id);
+	cerr << "new insert " << (unsigned)this << " in " << (unsigned)object<< " <" << name << "> " << id << endl;
 }
 
 QuaInsert::	QuaInsert()
@@ -164,7 +166,6 @@ QuaInsert *
 Insertable::FindInsert(char *nm, int32 id, short typ)
 {
 	for (auto ins: inserts) {
-//		fprintf(stderr, "find %d %x %d %s\n", i, ins, ins->id, ins->name);
 		if (id >= 0 && ins->id == id && (typ == ANY_INSERT || typ == ins->type))
 			return ins;
 		if (nm && ins->name && strcmp(nm, ins->name) == 0 && (typ == ANY_INSERT || typ == ins->type))
@@ -216,7 +217,7 @@ Insertable::RemoveInsert(short ind)
 {
 	QuaInsert	*i = inserts[ind];
 	inserts.erase(inserts.begin()+ind);
-	fprintf(stderr, "remove insert %x %x %x\n", (unsigned)i, (unsigned)i->quanexion, (unsigned)i->quanexion?i->quanexion->parent:nullptr);
+	cerr << "remove insert " << (unsigned)i << " " << (unsigned)i->quanexion << " " << (unsigned)(i->quanexion ? i->quanexion->parent : nullptr)<< endl;
 	if (i->quanexion && i->quanexion->parent) {
 		if (i->quanexion->from == i)
 			i->quanexion->to->quanexion = nullptr;

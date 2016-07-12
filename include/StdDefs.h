@@ -67,6 +67,8 @@ std::string getExt(const std::string &path);
 std::string getSupertype(const std::string &path);  // of a mime type
 
 using namespace std;
+#include <limits>
+#include <algorithm>
 
 namespace qut {
 	template<typename T> bool del(vector<T> &a, T &i) {
@@ -74,6 +76,12 @@ namespace qut {
 		if (ai == a.end()) return false;
 		a.erase(ai);
 		return true;
+	}
+
+	template<typename T> T maxel(vector<T> &a) {
+		auto cp = std::max_element(a.begin(), a.end());
+		if (cp == a.end()) return std::numeric_limits<T>::min();
+		return *cp;
 	}
 
 	template<typename K, typename V> K unfind(typename unordered_map<K, V> &m, typename V &v) {

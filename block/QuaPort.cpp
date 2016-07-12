@@ -8,6 +8,8 @@
 #include "QuaEnvironment.h"
 #include "QuaDisplay.h"
 
+#include <iostream>
+
 QuaPort::QuaPort(
 			std::string nm, short typ, short subt, short md):
 	Stackable(
@@ -38,6 +40,12 @@ QuaPort::isMultiSchedulable()
 	return false;
 }
 
+bool
+QuaPort::hasMode(const int m) {
+	if (m == QUA_PORT_UNKNOWN)  return true; 
+	if (m == QUA_PORT_IO) return mode == m;
+	return (mode & m) != 0;
+}
 
 status_t
 QuaPort::save(FILE *fp, short indent)

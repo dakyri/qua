@@ -2197,7 +2197,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	bool	first=true;
 
-	short nport = 0;
 	bool doLoadPlugin = false;
 	bool isSynthPlugin = false;
 	bool isEnabled = true;
@@ -2598,14 +2597,14 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			nm = "linein";
 		}
 		vector<int> chans;
-		string portDeviceName;
+		string portDeviceName = currentToken;
 		QuaPort *port = nullptr;
 		StabEnt *sym = nullptr;
-		bool found = parsePort(deviceKind, portDeviceName, port, sym, chans);
+		bool found = parsePort(deviceKind, portDeviceName, port, sym, QUA_PORT_IN, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
 			Input *s = cha->AddInput(nm, portDeviceName, port, chans[0], true);
-			for (short i=1; i<nport; i++) {
+			for (short i=1; i<chans.size(); i++) {
 				s->setPortInfo(port, chans[i], i);
 			}
 			// todo this is a a strage attempt to do initialization of parameters like port gain: XXXX do this differently, it sucks
@@ -2640,7 +2639,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			}
 			break;
 		}
-		cout << "found an input and done " << endl;
+		cout << "found an input and done, currently at " << currentToken << endl;
 		break;
 	}
 	
@@ -2655,14 +2654,14 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			nm = "lineout";
 		}
 		vector<int> chans;
-		string portDeviceName;
+		string portDeviceName = currentToken;
 		QuaPort *port = nullptr;
 		StabEnt *sym = nullptr;
-		bool found = parsePort(deviceKind, portDeviceName, port, sym, chans);
+		bool found = parsePort(deviceKind, portDeviceName, port, sym, QUA_PORT_OUT, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
 			Output *s = cha->AddOutput(nm, portDeviceName, port, chans[0], true);
-			for (short i=1; i<nport; i++) {
+			for (short i=1; i<chans.size(); i++) {
 				s->setPortInfo(port, chans[i], i);
 			}
 			// xxxx as aboce
@@ -2697,7 +2696,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			}
 			break;
 		}
-		cout << "found an toutput and done " << endl;
+		cout << "found an toutput and done, currently at " << currentToken << endl;
 		break;
 	}
 	
@@ -2868,7 +2867,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		QuaPort		*P;
 		if (!uberQua || context != uberQua->sym)
 			ParseError("port must be in outer context.");
-		P = findQuaPort(-1, currentToken);
+		P = findQuaPort(-1, currentToken, QUA_PORT_IO);
 		if (P == nullptr) {
 			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
 //			, quapp->quaSmallIcon, quapp->quaBigIcon);
@@ -3194,6 +3193,7 @@ QSParser::parseChannelId(vector<int> &s)
 }
 
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 /**
@@ -3201,7 +3201,7 @@ using namespace std;
 * at the moment, were not really expecting channels or vsts but this is a priority
 */
 bool
-QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &sym, vector<int> &chans)
+QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &sym, int direction, vector<int> &chans)
 {
 	cerr << "parsing port " << portName << endl;
 	port = nullptr;
@@ -3216,12 +3216,18 @@ QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &
 		}
 	} else if (currentTokenType == TOK_VAL){
 		if (currentTokenVal.type == TypedValue::S_STRING) {
-			port = findQuaPort(deviceType, portName);
-			ParseError("port '%s' not found", currentToken);
 			GetToken();
 			if (strcmp(currentToken, ":") == 0) {
 				GetToken();
 				parseChannelId(chans);
+			}
+			int m = qut::maxel(chans);
+			port = findQuaPort(deviceType, portName, direction, m > 0? m+1: -1);
+			if (port == nullptr) {
+				string portTypeName = findAttributeName(deviceType);
+				string directionName = portDirectionName(direction);
+				ParseError("match for %s port '%s'/%s/%d not found", portTypeName.c_str(), portName.c_str(), directionName.c_str(), m);
+				return false;
 			}
 		} else {
 			parseChannelId(chans);

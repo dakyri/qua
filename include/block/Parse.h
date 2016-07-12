@@ -66,7 +66,7 @@ public:
 	void			ParseFormalsList(StabEnt *context, StabEnt *S, bool);
 	bool			ParseProgFile();
 	class Qua		*ParseQua();
-	bool parsePort(int deviceKind, string &portName, QuaPort* &port, StabEnt* &sym, vector<int> &channels);
+	bool parsePort(int deviceKind, string &portName, QuaPort* &port, StabEnt* &sym, int direction, vector<int> &channels);
 	void parseChannelId(vector<int> &channels);
 	long ParseDimentia(uint16 *dim);
 	Block *ParseDefine(StabEnt *context, StabEnt *S);

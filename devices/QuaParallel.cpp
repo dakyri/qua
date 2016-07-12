@@ -131,7 +131,7 @@ QuaParallelManager::~QuaParallelManager()
 
 
 QuaPort *
-QuaParallelManager::findPortByName(string name) {
+QuaParallelManager::findPortByName(const string name, int direction, int nports) {
 	return ports.size() > 0? ports[0]:nullptr;
 }
 

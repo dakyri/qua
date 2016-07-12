@@ -446,8 +446,13 @@ auto it = find_if(typeIndex.begin(), typeIndex.end(),
 );
 
 */
+
 string findTypeName(int type) {
 	return qut::unfind(typeIndex, type);
+}
+
+string findAttributeName(int type) {
+	return qut::unfind(objectSubTypeIndex, type);
 }
 
 string findClipPlayer(int type) {
