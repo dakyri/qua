@@ -4,9 +4,9 @@ qua Test2
 {
 	channel \outs 2 \midithru channel1
 	{
-//		input	in1	"In-A USB MidiSport 2x2":*
-		input	in1	"In USB Keystation":*
-		output	out1	"ASIO Echo WDM":0,1
+//		input \midi in1 "In-A USB MidiSport 2x2":*
+		input \midi in1 "In USB Keystation":*
+		output \audio out1 "ASIO Echo WDM":0,1
 		tx {
 			VB1
 		}

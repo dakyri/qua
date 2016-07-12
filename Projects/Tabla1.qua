@@ -124,8 +124,8 @@ qua Test1
 
 	channel channel1
 	{
-		input	"In-A USB MidiSport 2x2":1	in1
-		output	"Out-A USB MidiSport 2x2":1	out1
+		input \midi in1 "In-A USB MidiSport 2x2":1
+		output \midi out1 "Out-A USB MidiSport 2x2":1
 	}
 
 // main bit of sequencer

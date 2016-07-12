@@ -63,7 +63,7 @@ void
 PoolPlayer::StopInstance(PoolInstance *i)
 {
 	schlock.lock();
-	auto ci = qut::find(instances, i);
+	auto ci = std::find(instances.begin(), instances.end(), i);
 	if (ci != instances.end()) {
 		instances.erase(ci);
 	}

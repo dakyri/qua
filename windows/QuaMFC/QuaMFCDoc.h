@@ -13,6 +13,13 @@ class Qua;
 class QuaMFCCCDialog;
 
 #include "QuaDisplay.h"
+#include "QuaMFCGlobal.h"
+
+class QuaMFCDisplay : public QuaDisplay {
+	virtual void parseErrorViewAddLine(std::string msg) override { ::reportError(msg); }
+	virtual void tragicError(const char *str, ...) override;
+	virtual void reportError(const char *str, ...) override;
+};
 
 class CQuaMFCDoc : public CDocument
 {
@@ -23,7 +30,7 @@ protected: // create from serialization only
 // Attributes
 public:
 	Qua *qua;
-	QuaDisplay display;
+	QuaMFCDisplay display;
 // Operations
 public:
 

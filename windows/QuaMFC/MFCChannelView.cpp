@@ -260,10 +260,10 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 		selMenu = p->submenu;
 		switch (selMenu) {
 			case 0:
-				channel->AddOutput("out", selPort, selChannel, true);
+				channel->AddOutput("out", "*", selPort, selChannel, true);
 				break;
 			case 1:
-				channel->AddInput("out", selPort, selChannel, true);
+				channel->AddInput("out", "*", selPort, selChannel, true);
 				break;
 			case 2:
 				channel->RemoveOutput(channel->outputs.Item(selChannel));
@@ -400,9 +400,9 @@ PortPopup::AudioMenu(bool isInput, short nch)
 {
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
-	short n_p = environment.quaAudio->countPorts();
+	short n_p = environment.quaAudio.countPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaAudioPort *p = environment.quaAudio->port(i);
+		QuaAudioPort *p = environment.quaAudio.port(i);
 		CMenu	*chmenu = new CMenu;
 		chmenu->CreatePopupMenu();
 		if (isInput) {
@@ -426,9 +426,9 @@ PortPopup::MidiMenu(bool isInput)
 {
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
-	short n_p = environment.quaMidi->countPorts();
+	short n_p = environment.quaMidi.countPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaMidiPort *p = environment.quaMidi->port(i);
+		QuaMidiPort *p = environment.quaMidi.port(i);
 		if (	(isInput && (p->mode & QUA_PORT_IN)) ||
 				(!isInput && (p->mode & QUA_PORT_OUT))) {
 			CMenu	*chmenu = new CMenu;

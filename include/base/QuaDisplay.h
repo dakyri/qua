@@ -224,12 +224,8 @@ public:
 	virtual void parseErrorViewAddLine(std::string) = 0;
 	virtual void parseErrorViewShow() = 0;
 
-	virtual void tragicError(char *str, ...) = 0;
-	virtual void reportError(char *str, ...) = 0;
-	virtual int retryError(char *str, ...) = 0;
-	virtual bool abortError(char *str, ...) = 0;
-	virtual bool continueError(char *str, ...) = 0;
-	virtual int optionWin(int, char *str, ...) = 0;
+	virtual void tragicError(const char *str, ...) = 0;
+	virtual void reportError(const char *str, ...) = 0;
 
 	virtual void setTo(Qua *) { }
 
@@ -330,12 +326,8 @@ public:
 	virtual void parseErrorViewClear() { };
 	virtual void parseErrorViewAddLine(std::string) { };
 	virtual void parseErrorViewShow() { };
-	virtual void tragicError(char *str, ...) {};
-	virtual void reportError(char *str, ...) {};
-	virtual int retryError(char *str, ...) { return 0; };
-	virtual bool abortError(char *str, ...) { return false; };
-	virtual bool continueError(char *str, ...) { return 0; };
-	virtual int optionWin(int, char *str, ...) { return 0; };
+	virtual void tragicError(const char *str, ...) {};
+	virtual void reportError(const char *str, ...) {};
 
 };
 
@@ -367,10 +359,10 @@ public:
 	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) override;
 	virtual std::vector<StabEnt*> ClipSyms(short) override;
 
-	virtual Metric			*QMetric() override;
-	virtual StabEnt *		CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
-	virtual StabEnt *		CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
-	virtual StabEnt *		CreateChannel(
+	virtual Metric *QMetric() override;
+	virtual StabEnt * CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
+	virtual StabEnt * CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
+	virtual StabEnt * CreateChannel(
 									char *nm=nullptr, short c=-1,
 									uchar nin=2, uchar nout=2,
 									bool add_dflt_au_in=false,
@@ -378,36 +370,36 @@ public:
 									bool add_dflt_str_in=false,
 									bool add_dflt_str_out=false
 									) override;
-	virtual StabEnt *		CreateMethod(std::string nm, StabEnt *p = nullptr) override;
-	virtual StabEnt	*		CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) override;
-	virtual StabEnt *		CreateInstance(StabEnt *, short, Time *, Time *) override;
-	virtual void			MoveInstance(StabEnt *, short, Time *, Time *) override;
-	virtual void			DeleteInstance(StabEnt *) override;
-	virtual void			DeleteObject(StabEnt *) override;
-	virtual void			ShowObjectRepresentation(StabEnt *) override;
-	virtual void			HideObjectRepresentation(StabEnt *) override;
-	virtual short			CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
-	virtual short			ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
+	virtual StabEnt * CreateMethod(std::string nm, StabEnt *p = nullptr) override;
+	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) override;
+	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) override;
+	virtual void MoveInstance(StabEnt *, short, Time *, Time *) override;
+	virtual void DeleteInstance(StabEnt *) override;
+	virtual void DeleteObject(StabEnt *) override;
+	virtual void ShowObjectRepresentation(StabEnt *) override;
+	virtual void HideObjectRepresentation(StabEnt *) override;
+	virtual short CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
+	virtual short ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
 
 	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) override;
 
-	virtual void			CreateStreamTake(StabEnt *) override;
-	virtual void			LoadSampleTake(StabEnt *, std::string ) override;
-	virtual void			UpdateTakeIndexDisplay(StabEnt *sym) override;
-	virtual void			updateClipIndexDisplay(StabEnt *sym) override;
-	virtual void			UpdateVariableIndexDisplay(StabEnt *sym) override;
+	virtual void CreateStreamTake(StabEnt *) override;
+	virtual void LoadSampleTake(StabEnt *, std::string ) override;
+	virtual void UpdateTakeIndexDisplay(StabEnt *sym) override;
+	virtual void updateClipIndexDisplay(StabEnt *sym) override;
+	virtual void UpdateVariableIndexDisplay(StabEnt *sym) override;
 
-	virtual void			UpdateTempo(float tempo) override;
-	virtual void			UpdateGlobalTime(Time &t) override;
+	virtual void UpdateTempo(float tempo) override;
+	virtual void UpdateGlobalTime(Time &t) override;
 
-	virtual void			GotoStartOfClip(StabEnt *) override;
-	virtual void			GotoEndOfClip(StabEnt *) override;
-	virtual void			SelectRegion(StabEnt *) override;
+	virtual void GotoStartOfClip(StabEnt *) override;
+	virtual void GotoEndOfClip(StabEnt *) override;
+	virtual void SelectRegion(StabEnt *) override;
 
-	virtual void			UpdateControllerDisplay(StabEnt *stackersym, QuasiStack *stack, StabEnt *sym,
+	virtual void UpdateControllerDisplay(StabEnt *stackersym, QuasiStack *stack, StabEnt *sym,
 								qua_perpective_type srctype=QUAPSCV_NOT,
 								QuaPerspective *src = nullptr) override;
-	virtual void			ControllerChanged(StabEnt *sym, QuasiStack *stack, TypedValue &t,
+	virtual void ControllerChanged(StabEnt *sym, QuasiStack *stack, TypedValue &t,
 								qua_perpective_type srctype=QUAPSCV_NOT,
 								QuaPerspective *src = nullptr) override;
 // called by interface to pop the stack frame, given a map of it at a particular level
@@ -441,13 +433,8 @@ public:
 	virtual void parseErrorViewClear() override;
 	virtual void parseErrorViewAddLine(std::string) override;
 	virtual void parseErrorViewShow() override;
-
-	virtual void tragicError(char *str, ...) override;
-	virtual void reportError(char *str, ...) override;
-	virtual int retryError(char *str, ...) override;
-	virtual bool abortError(char *str, ...) override;
-	virtual bool continueError(char *str, ...) override;
-	virtual int optionWin(int, char *str, ...) override;
+	virtual void tragicError(const char *str, ...) override;
+	virtual void reportError(const char *str, ...) override;
 
 	virtual void setTo(Qua *q) { qua = q;  }
 };
@@ -505,22 +492,22 @@ public:
 	bool Spawn();
 	bool Cleanup();
 
-	void					displayArrangementTitle(const char *);
+	void displayArrangementTitle(const char *);
 
-	void					PopHigherFrameRepresentations(QuasiStack *);
-	void					RemoveHigherFrameRepresentations(QuasiStack *);
+	void PopHigherFrameRepresentations(QuasiStack *);
+	void RemoveHigherFrameRepresentations(QuasiStack *);
 
-	void					AddDestinationRepresentations(Channel *);
-	void					RemoveDestinationRepresentation(Channel *, Input *);
-	void					RemoveDestinationRepresentation(Channel *, Output *);
+	void AddDestinationRepresentations(Channel *);
+	void RemoveDestinationRepresentation(Channel *, Input *);
+	void RemoveDestinationRepresentation(Channel *, Output *);
 
-	void					AddSchedulableRepresentation(Schedulable *);
-	void					AddMethodRepresentation(Lambda *);
+	void AddSchedulableRepresentation(Schedulable *);
+	void AddMethodRepresentation(Lambda *);
 
-	void					RemoveSchedulableRepresentations(StabEnt *);
-	void					RemoveMethodRepresentations(StabEnt *);
-	void					RemoveChannelRepresentations(StabEnt *);
-	void					RemoveInstanceRepresentations(StabEnt *);
+	void RemoveSchedulableRepresentations(StabEnt *);
+	void RemoveMethodRepresentations(StabEnt *);
+	void RemoveChannelRepresentations(StabEnt *);
+	void RemoveInstanceRepresentations(StabEnt *);
 
 	void					UpdateTakeIndexDisplay(StabEnt *sym);
 	void					updateClipIndexDisplay(StabEnt *sym);
@@ -554,8 +541,7 @@ public:
 	bool ParseDisplayParameters(class QSParser *);
 	void SetDisplayParameters(StabEnt *);
 
-	void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
-		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { 
+	void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym, qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { 
 		display.UpdateControllerDisplay(stackerSym, stack, sym, srctype, src);
 	};
 
@@ -563,13 +549,8 @@ public:
 	void parseErrorViewClear();
 	void parseErrorViewAddLine(std::string);
 	void parseErrorViewShow();
-
-	void tragicError(char *str, ...);
-	void reportError(char *str, ...);
-	int retryError(char *str, ...);
-	bool abortError(char *str, ...);
-	bool continueError(char *str, ...);
-	int optionWin(int, char *str, ...);
+	void tragicError(const char *str, ...);
+	void reportError(const char *str, ...);
 
 	void setDisplay(QuaPerceptualSet &d);
 protected:

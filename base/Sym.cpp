@@ -159,21 +159,6 @@ findMethod(const string &nm, short dc)
     return sym->LambdaValue();
 }
 
-
-QuaPort *
-findQuaPort(const string &nm, short dc)
-{
-	StabEnt		*sym = glob.findContextSymbol(nm, nullptr, -1);
-	if (sym == nullptr) {
-		return nullptr;
-	}
-	if (sym->type != TypedValue::S_PORT) {
-		return nullptr;
-	}
-	return sym->PortValue();
-}
-
-
 Block *
 findMethodMain(const string &nm, short dc)
 {
@@ -203,6 +188,14 @@ SymTab::ValidSymbolName(const string &nm)
 		++p;
 	}
 	return true;
+}
+
+
+string
+SymTab::MakeValidSymbolName(const char *p)
+{
+	if (p == nullptr || *p == '\0') return string();
+	return MakeValidSymbolName(string(p));
 }
 
 string

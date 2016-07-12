@@ -1305,29 +1305,14 @@ QuaDisplay::parseErrorViewShow() {
 }
 
 void
-QuaDisplay::tragicError(char *str, ...) {
+QuaDisplay::tragicError(const char *str, ...) {
 
 }
 void
-QuaDisplay::reportError(char *str, ...) {
+QuaDisplay::reportError(const char *str, ...) {
 
 }
-int
-QuaDisplay::retryError(char *str, ...) {
-	return 0;
-}
-bool
-QuaDisplay::abortError(char *str, ...) {
-	return false;
-}
-bool
-QuaDisplay::continueError(char *str, ...) {
-	return false;
-}
-int
-QuaDisplay::optionWin(int, char *str, ...) {
-	return 0;
-}
+
 
 //////////////////////////////////////////////
 // QuaContextDisplay

@@ -409,7 +409,7 @@ MFCQuaSymbolIndexView::AddTopLevelClass(char *s, LPARAM type, HTREEITEM parent, 
 HTREEITEM
 MFCQuaSymbolIndexView::AddIndexItem(const char *s, LPARAM type, HTREEITEM parent, int img)
 {
-	fprintf(stderr, "ai %s %x %x %d\n", s, type, parent, img);
+	fprintf(stderr, "ai %s %x %x %d\n", s, (unsigned)type, (unsigned)parent, img);
 	HTREEITEM ht = GetTreeCtrl().InsertItem(
 				TVIF_TEXT|TVIF_PARAM|TVIF_STATE|TVIF_IMAGE|TVIF_SELECTEDIMAGE, /* nMask */
 				s,

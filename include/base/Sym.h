@@ -199,6 +199,7 @@ public:
 
 	static bool		ValidSymbolName(const string &nm);
 	static string	MakeValidSymbolName(const string &nm);
+	static string	MakeValidSymbolName(const char *p);
 
 	ulong hash(const string nm, StabEnt *context);
 	long findFreeInd(const string &nm, StabEnt *context, short &dcp);
@@ -241,11 +242,12 @@ Channel				*findChannel(const string &nm, short def_cnt = -1);
 Lambda				*findMethod(const string &nm, short def_cnt = -1);
 Block				*findMethodMain(const string &nm, short def_cnt = -1);
 Application			*findApplication(const string &nm, short def_cnt = -1);
-QuaPort				*findQuaPort(const string &nm, short def_cnt = -1);
 StabEnt				*findBuiltin(const string &nm, short def_cnt = -1);
 
+QuaPort *findQuaPort(const int type, const string &nm);
+
 string makeUniqueName(const string &nm);
-status_t			LoadQuaSymbols(FILE *fp, StabEnt *c, Qua *u,
+status_t LoadQuaSymbols(FILE *fp, StabEnt *c, Qua *u,
 							bool loadQ);
 extern SymTab		glob;
 extern void			define_global_symbols();

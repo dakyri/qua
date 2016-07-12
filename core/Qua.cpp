@@ -350,9 +350,9 @@ Qua::PostCreationInit()
 
 #endif
 #ifdef QUA_V_AUDIO
-	status_t err=environment.quaAudio->StartAudio();
+	status_t err=environment.quaAudio.StartAudio();
 	if (err != B_OK) {
-		bridge.reportError("Can't start audio: %s\n", environment.quaAudio->ErrorString(err));
+		bridge.reportError("Can't start audio: %s\n", environment.quaAudio.ErrorString(err));
 	}
 #endif
 	return B_OK;
@@ -378,25 +378,25 @@ Qua::AddChannel(std::string nm, short ch_id,
 	}
  	Channel *c = new Channel(nm, ch_id, au_thru, midi_thru, nAudioIns, nAudioOuts, this);
  	if (add_dflt_str_in) {
-		if (environment.quaMidi && environment.quaMidi->dfltInput) {
-			Input *s = c->AddInput("midin", environment.quaMidi->dfltInput, midi_ch, true);
+		if (environment.quaMidi.dfltInput) {
+			Input *s = c->AddInput("midin", "*", environment.quaMidi.dfltInput, midi_ch, true);
 		}
 	}
 	if (add_dflt_str_out) {
-		if (environment.quaMidi && environment.quaMidi->dfltOutput) {
-			Output *d = c->AddOutput("midout", environment.quaMidi->dfltOutput, midi_ch, true);
+		if (environment.quaMidi.dfltOutput) {
+			Output *d = c->AddOutput("midout", "*", environment.quaMidi.dfltOutput, midi_ch, true);
 		}
 	}
 #ifdef QUA_V_AUDIO
  	if (add_dflt_au_in) {
 
-		if (environment.quaAudio && environment.quaAudio->dfltInput) {
-			Input *s = c->AddInput("audin", environment.quaAudio->dfltInput, 0, true);
+		if (getAudioManager().dfltInput) {
+			Input *s = c->AddInput("audin", "*", environment.quaAudio.dfltInput, 0, true);
 			// try and make a stereo pair
 			if (nAudioIns == 2) {
-				if (environment.quaAudio->dfltInput->NInputChannels(0) == 1) {
-					s->setPortInfo(environment.quaAudio->dfltInput, 1, 1);
-				} else if (environment.quaAudio->dfltInput->NInputChannels(0) == 2) {
+				if (getAudioManager().dfltInput->NInputChannels(0) == 1) {
+					s->setPortInfo(getAudioManager().dfltInput, 1, 1);
+				} else if (getAudioManager().dfltInput->NInputChannels(0) == 2) {
 					;
 				} else {
 					;
@@ -406,13 +406,13 @@ Qua::AddChannel(std::string nm, short ch_id,
 		}
 	}
 	if (add_dflt_au_out) {
-		if (environment.quaAudio && environment.quaAudio->dfltOutput) {
-			Output *d = c->AddOutput("audout", environment.quaAudio->dfltOutput,0, true);
+		if (getAudioManager().dfltOutput) {
+			Output *d = c->AddOutput("audout", "*", getAudioManager().dfltOutput, 0, true);
 			// try and make a stereo pair
 			if (nAudioOuts == 2) {
-				if (environment.quaAudio->dfltOutput->NOutputChannels(0) == 1) {
-					d->setPortInfo(environment.quaAudio->dfltOutput, 1, 1);
-				} else if (environment.quaAudio->dfltOutput->NOutputChannels(0) == 2) {
+				if (getAudioManager().dfltOutput->NOutputChannels(0) == 1) {
+					d->setPortInfo(getAudioManager().dfltOutput, 1, 1);
+				} else if (getAudioManager().dfltOutput->NOutputChannels(0) == 2) {
 					;
 				} else {
 					;
@@ -478,7 +478,7 @@ Qua::~Qua()
 {
 	fprintf(stderr, "Qua: about to delete %s\n", sym->name.c_str());
 #ifdef QUA_V_AUDIO
-	environment.quaAudio->StopAudio();
+	getAudioManager().StopAudio();
 	fprintf(stderr, "Qua: stopped audio\n");
 #endif
 	
@@ -2131,3 +2131,34 @@ Qua::getCapabilityString()
 
 	return caps;
 }
+
+
+
+QuaPort *
+findQuaPort(int deviceType, const string &nm)
+{
+	QuaPort *p = nullptr;
+	switch (deviceType) {
+	case Attribute::DEVICE_AUDIO:
+		p = getAudioManager().findPortByName(nm);
+		break;
+	case Attribute::DEVICE_MIDI:
+		p = environment.quaMidi.findPortByName(nm);
+		break;
+	case Attribute::DEVICE_JOYSTICK:
+#ifdef QUA_V_JOYSTICK
+		p = environment.quaJoystick->findPortByName(nm);
+#endif
+		break;
+	case Attribute::DEVICE_PARALLEL:
+		p = environment.quaParallel.findPortByName(nm);
+
+		break;
+	case Attribute::DEVICE_OSC:
+		break;
+	case Attribute::DEVICE_SENSOR:
+		break;
+	}
+	return p;
+}
+

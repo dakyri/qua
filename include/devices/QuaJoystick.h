@@ -113,7 +113,9 @@ class QuaJoystickManager: public QuaPortManager<QuaJoystickPort>
 public:
 	 QuaJoystickManager();
 	 ~QuaJoystickManager();
-					
+
+	 virtual QuaPort *findPortByName(string nm) override;
+
 	virtual status_t Connect(Input *);
 	virtual status_t Connect(Output *);
 	virtual status_t Disconnect(Input *);

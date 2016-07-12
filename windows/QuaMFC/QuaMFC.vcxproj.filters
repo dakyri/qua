@@ -524,5 +524,8 @@
     <ClInclude Include="MFCQuaChannelBox.h">
       <Filter>Header Files\MFC\Widget</Filter>
     </ClInclude>
+    <ClInclude Include="QuaMFCGlobal.h">
+      <Filter>Source Files\MFC\Main</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

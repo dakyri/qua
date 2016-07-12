@@ -124,6 +124,8 @@ public:
 
 	QuaMidiPort *midiPortForId(int32);
 
+	virtual QuaPort *findPortByName(string nm) override;
+
 	virtual status_t connect(Input *);
 	virtual status_t connect(Output *);
 	virtual status_t disconnect(Input *);

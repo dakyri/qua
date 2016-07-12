@@ -614,14 +614,14 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 
 	CMenu		*ctxtMenu = new CMenu;
 	ctxtMenu->CreatePopupMenu();
-	short	i=0;
-	char	buf[128];
-	short	hitType;
-	void	*hitIt=NULL;
-	CPoint	itPt = point;
+	int i=0;
+	char buf[128];
+	short hitType;
+	void *hitIt=NULL;
+	CPoint itPt = point;
 	itPt += GetScrollPosition();
 	MFCEditorItemView	* iv = ItemViewAtPoint(itPt, nFlags|MK_CONTROL, hitType, hitIt);
-	bool	menu_built = false;
+	bool menu_built = false;
 	if (iv != NULL) {
 		if (iv->type == MFCEditorItemView::LIST) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
@@ -638,7 +638,7 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 					controllerMenu->CreatePopupMenu();
 					for (i=0; i<128; i++) {
 						if (i != siv->listitemData1) {
-							string cnm = qut::unfind(dfltMidiCtrlLabelIndex, (int)i);
+							string cnm = qut::unfind(dfltMidiCtrlLabelIndex, i);
 							if (cnm.size()) {
 								sprintf(buf, "control %d", i);
 								controllerMenu->AppendMenu(MF_STRING, ID_STREAMEDITORCONTEXT_DUP_CONTROLLER+i, buf);

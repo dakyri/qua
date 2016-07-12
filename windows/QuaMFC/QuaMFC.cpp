@@ -520,3 +520,36 @@ void reportError(const char *fmt, ...)
 	va_end(args);
 }
 
+
+void reportError(string msg)
+{
+	AfxMessageBox(msg.c_str());
+}
+
+void
+QuaMFCDisplay::reportError(const char *fmt, ...)
+{
+	char		buf[2056];
+
+	va_list		args;
+	va_start(args, fmt);
+
+	vsprintf(buf, fmt, args);
+	strcat(buf, "\n...");
+	AfxMessageBox(buf);
+	va_end(args);
+}
+
+void
+QuaMFCDisplay::tragicError(const char *fmt, ...)
+{
+	char		buf[2056];
+
+	va_list		args;
+	va_start(args, fmt);
+
+	vsprintf(buf, fmt, args);
+	strcat(buf, "\n...");
+	AfxMessageBox(buf);
+	va_end(args);
+}

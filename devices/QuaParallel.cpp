@@ -129,6 +129,12 @@ QuaParallelManager::~QuaParallelManager()
 }
 
 
+
+QuaPort *
+QuaParallelManager::findPortByName(string name) {
+	return ports.size() > 0? ports[0]:nullptr;
+}
+
 long
 QuaParallelManager::updateWrapper( void* userData)
 {

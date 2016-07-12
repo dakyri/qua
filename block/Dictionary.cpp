@@ -264,39 +264,42 @@ std::unordered_map<std::string, int> objectSubTypeIndex = {
 	{ "node",		Attribute::NODE },
 	{ "modal",		Attribute::MODAL },
 	{ "oncer",		Attribute::ONCER },
-	{ "fixed",		Attribute::FIXED },
-	{ "label",		Attribute::LABEL },
+	{ "exception",	Attribute::EXCEPT },
 	{ "reset",		Attribute::RESET },
 	{ "toggle",		Attribute::TOGGLE },
 	{ "held",		Attribute::HELD },
 	{ "resetto",	Attribute::RESETTO },
-	{ "trigger",	Attribute::TRIGGER },
+	{ "fixed",		Attribute::FIXED },
+	{ "label",		Attribute::LABEL },
 	{ "range",		Attribute::RANGE },
-	{ "load",		Attribute::LOAD },
-	{ "noload",		Attribute::NOLOAD },
-	{ "synth",		Attribute::SYNTH },
+	{ "trigger",	Attribute::TRIGGER },
+	{ "mime",		Attribute::MIME },
 	{ "enable",		Attribute::ENABLE },
 	{ "disable",	Attribute::DISABLE },
-	{ "exception",	Attribute::EXCEPT },
-	{ "mime",		Attribute::MIME },
+	{ "load",		Attribute::LOAD },
+	{ "noload",		Attribute::NOLOAD },
 	{ "ins",		Attribute::INS },
 	{ "outs",		Attribute::OUTS },
+	{ "id",			Attribute::ID },
+	{ "midithru",	Attribute::MIDITHRU },
+	{ "audiothru",	Attribute::AUDIOTHRU },
+	{ "noMidithru",	Attribute::NO_MIDITHRU },
+	{ "noAudiothru", Attribute::NO_AUDIOTHRU },
+	{ "map",		Attribute::MAP_VSTPARAM },
+	{ "synth",		Attribute::SYNTH },
 	{ "nparam",		Attribute::NPARAM },
 	{ "nprogram",	Attribute::NPROGRAM },
-	{ "id",			Attribute::ID },
-	{ "audiothru",	Attribute::AUDIOTHRU },
-	{ "midithru",	Attribute::MIDITHRU },
-	{ "noAudiothru", Attribute::NO_AUDIOTHRU },
-	{ "noMidithru",	Attribute::NO_MIDITHRU },
-	{ "map",		Attribute::MAP_VSTPARAM },
 	{ "audio",		Attribute::DEVICE_AUDIO },
-	{ "parallel",	Attribute::DEVICE_PARALLEL },
-	{ "joystick",	Attribute::DEVICE_JOYSTICK },
 	{ "midi",		Attribute::DEVICE_MIDI },
+	{ "joystick",	Attribute::DEVICE_JOYSTICK },
+	{ "parallel",	Attribute::DEVICE_PARALLEL },
+	{ "osc",		Attribute::DEVICE_OSC },
+	{ "sensor",		Attribute::DEVICE_SENSOR },
 	{ "path",		Attribute::PATH },
+	{ "takes",		Attribute::TAKES },
 	{ "stream",		Attribute::STREAM },
-	{ "sample",		Attribute::SAMPLE },
-	{ "takes",		Attribute::TAKES }
+	{ "sample",		Attribute::SAMPLE }
+
 };
 
 std::unordered_map<std::string, int> dfltEventIndex = {
@@ -411,7 +414,7 @@ int32 findConstant(const char *s)
 {
 	auto v = constantIndex.find(s);
 
-	return v == constantIndex.end() ? TypedValue::S_UNKNOWN : v->second;
+	return v == constantIndex.end() ? INT_MIN : v->second;
 }
 
 

@@ -1843,7 +1843,8 @@ Block::Dump(FILE *fp, short indent)
 		break;
 		
 	case C_BUILTIN: {
-		std::string s = qut::unfind(builtinCommandIndex, (int)subType);
+		int t = subType;
+		std::string s = qut::unfind(builtinCommandIndex, t);
 		fprintf(fp, s.c_str());
 		Block		*params=nullptr;
 		

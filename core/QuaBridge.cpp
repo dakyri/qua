@@ -301,7 +301,7 @@ QuaBridge::parseErrorViewShow() {
 
 
 void
-QuaBridge::tragicError(char *str, ...) {
+QuaBridge::tragicError(const char *str, ...) {
 	char		buf[180];
 	va_list		args;
 	va_start(args, str);
@@ -311,55 +311,11 @@ QuaBridge::tragicError(char *str, ...) {
 }
 
 void
-QuaBridge::reportError(char *str, ...) {
+QuaBridge::reportError(const char *str, ...) {
 	char		buf[180];
 	va_list		args;
 	va_start(args, str);
 	vsprintf(buf, str, args);
 	display.reportError(buf);
 	va_end(args);
-}
-
-int
-QuaBridge::retryError(char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	display.retryError(buf);
-	va_end(args);
-	return 0;
-}
-
-bool
-QuaBridge::abortError(char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	display.abortError(buf);
-	va_end(args);
-	return 0;
-}
-
-bool
-QuaBridge::continueError(char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	display.continueError(buf);
-	va_end(args);
-	return 0;
-}
-
-int
-QuaBridge::optionWin(int i, char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	display.optionWin(i, buf);
-	va_end(args);
-	return 0;
 }

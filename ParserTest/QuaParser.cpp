@@ -668,7 +668,7 @@ namespace QSParse {
   case 10:
 #line 207 "QuaParser.yy" // lalr1.cc:859
     {
-		Qua *q = new Qua(*(yystack_[0].value.stringval), false);
+		Qua *q = new Qua(*(yystack_[0].value.stringval), defaultDisplay, false);
 		driver.uberQua = q;
 	    glob.PushContext(q->sym);
 	}

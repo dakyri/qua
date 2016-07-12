@@ -284,7 +284,7 @@ QSParser::ShowErrors()
 
 
 int
-QSParser::GetToken()
+QSParser::GetToken(bool hasWorms)
 {
 //    int		v, l;
     uchar	c;
@@ -473,11 +473,15 @@ check_token:
 		    }
 		    *p = '\0';
 		    currentTokenType = TOK_VAL;
-			ParseError("assignment to string... skipping ... worm can bypassing");
+			if (hasWorms) {
+				cout << "accepting input " << currentToken << endl;
+			} else {
+				cout << "not accepting input " << currentToken << endl;
+				ParseError("assignment to string... skipping ... worm can bypassing");
+			}
 //		    char *buf = new char[strlen(currentToken)+1];
 //		    strcpy(buf, currentToken);
 //			currentTokenStringLiteral.assign(currentToken + 1, strlen(currentToken) - 2);
-			*currentToken = '\0';
 		    currentTokenVal.Set(TypedValue::S_STRING, TypedValue::REF_POINTER);
 // this stuff is problematic to say the least
 //		    currentTokenVal.SetValue(buf);
@@ -670,7 +674,7 @@ check_token:
 				unGetChar();
     }
 return_token:
-	if (debug_parse >= 2) {
+	if (debug_parse >= 1) {
 		if (currentTokenType == TOK_VAL) {
 			fprintf(stderr, "token value(%s)\n", currentTokenVal.StringValue());
 		} else {
@@ -1141,7 +1145,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 					break;
 				}
 				default: {
-					uberQua->bridge.abortError("Unknown builtin function ...");
+					uberQua->bridge.parseErrorViewAddLine("Unknown builtin function ...");
 					varp = p;
 					break;
 				}
@@ -1194,7 +1198,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 		}
 		
 		default: {
-			uberQua->bridge.abortError("Unknown builtin function ...");
+			uberQua->bridge.parseErrorViewAddLine("Unknown builtin function ...");
 			varp = p;
 		}
 	}
@@ -1670,6 +1674,9 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 			strcmp(currentToken, "}") == 0) {
 		block = nullptr;
     } else if (strcmp(currentToken, "define") == 0 || currentTokenType == TOK_TYPE) {
+		if (debug_parse) {
+			cerr << "processing a define at " << currentToken << " type " << currentTokenType << endl;
+		}
        	Block *b =ParseDefine(	context, schedSym);
       	block = b;
     } else if (strcmp(currentToken, "<<") == 0) {
@@ -2190,29 +2197,26 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	bool	first=true;
 
-	QuaPort		*trxport[MAX_DESTINATION_AUDIO_PORT];
-	short		sch[MAX_DESTINATION_AUDIO_PORT];
-	for (short i=0; i<MAX_DESTINATION_AUDIO_PORT; i++) {
-		trxport[i] = nullptr;
-		sch[i] = -1;
-	}
-	short		nport = 0;
-	bool	doLoadPlugin = false;
-	bool	isSynthPlugin = false;
-	bool	isEnabled = true;
-	bool	mapVstParams = false;
-	bool	isStream = false;
-	bool	isSample = false;
-	uint32	id32 = 'qua6';
-	int32	nIns = 2;
-	int32	nOuts = 2;
-	int32	nParam = 0;
-	int32	nProgram = 0;
-	bool	audioThru = false;
-	bool	midiThru = false;
+	short nport = 0;
+	bool doLoadPlugin = false;
+	bool isSynthPlugin = false;
+	bool isEnabled = true;
+	bool mapVstParams = false;
+	bool isStream = false;
+	bool isSample = false;
+	uint32 id32 = 'qua6';
+	int32 nIns = 2;
+	int32 nOuts = 2;
+	int32 nParam = 0;
+	int32 nProgram = 0;
+	bool audioThru = false;
+	bool midiThru = false;
+	int deviceKind = Attribute::DEVICE_MIDI;
 	while (currentTokenType == TOK_TYPE) {
 		subType = findTypeAttribute(currentToken);
-//		fprintf(stderr, "subtype %d %s\n", subType,currentToken);
+		if (debug_parse) {
+			cerr << "subtype " <<  subType << " at " << currentToken << endl;
+		}
     	switch (subType) {
     	
    		case Attribute::LOAD:
@@ -2267,104 +2271,25 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 		case Attribute::DEVICE_AUDIO: {
 			GetToken();
-			if (currentTokenType == TOK_WORD) {
-				if (nport == 0 || (trxport[nport-1] != nullptr && trxport[nport-1]->deviceType == QUA_DEV_AUDIO)) {
-					QuaPort	*pt;
-					pt = findQuaPort(currentToken);
-					if (pt == nullptr) {
-						ParseError("audio port '%s' not found", currentToken);
-					} else {
-						trxport[0] = pt;
-						nport++;
-					}
-					GetToken();
-					if (currentTokenType == TOK_VAL) {
-						sch[0] = currentTokenVal.IntValue(nullptr);
-						GetToken();
-						while (currentTokenType == TOK_VAL) {
-							trxport[nport] = trxport[nport-1];
-							sch[nport] = currentTokenVal.IntValue(nullptr);
-							nport++;
-							GetToken();
-						}
-					} else {
-						sch[0] = 0;
-					}
-				} else {
-					ParseError("spurious port definition near '%s'", currentToken);
-					while (currentTokenType == TOK_VAL) {
-						GetToken();
-					}
-				}
-			}
+			deviceKind = Attribute::DEVICE_AUDIO;
 			break;
 		}
 
 		case Attribute::DEVICE_MIDI: {
 			GetToken();
-			if (currentTokenType == TOK_WORD) {
-				if (nport == 0) {
-					QuaPort	*pt;
-					pt = findQuaPort(currentToken);
-					if (pt == nullptr) {
-						ParseError("midi port '%s' not found", currentToken);
-					} else {
-						trxport[0] = pt;
-						nport++;
-					}
-					if (currentTokenType == TOK_VAL) {
-						sch[0] = currentTokenVal.IntValue(nullptr);
-						GetToken();
-					} else {
-						sch[0] = -1;
-					}
-				} else {
-					ParseError("spurious port definition near '%s'", currentToken);
-					if (currentTokenType == TOK_VAL) {
-						GetToken();
-					}
-				}
-			}
+			deviceKind = Attribute::DEVICE_MIDI;
 			break;
 		}
 
 		case Attribute::DEVICE_JOYSTICK: {
 			GetToken();
-			if (currentTokenType == TOK_WORD) {
-				if (nport == 0) {
-					QuaPort	*pt;
-					pt = findQuaPort(currentToken);
-					if (pt == nullptr) {
-						ParseError("parallel port '%s' not found", currentToken);
-					} else {
-						trxport[0] = pt;
-						nport++;
-					}
-				} else {
-					ParseError("spurious port definition near '%s'", currentToken);
-				}
-				GetToken();
-			}
+			deviceKind = Attribute::DEVICE_JOYSTICK;
 			break;
 		}
 
 		case Attribute::DEVICE_PARALLEL: {
 			GetToken();
-			if (currentTokenType == TOK_WORD) {
-				if (nport == 0) {
-					QuaPort	*pt;
-					pt = findQuaPort(currentToken);
-					if (pt == nullptr) {
-						ParseError("parallel port '%s' not found", currentToken);
-					} else {
-						trxport[0] = pt;
-						nport++;
-					}
-				} else {
-					ParseError("spurious port definition near '%s'", currentToken);
-				}
-				GetToken();
-			}
+			deviceKind = Attribute::DEVICE_PARALLEL;
 			break;
 		}
 
@@ -2496,6 +2421,9 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
     }
 	if (type != TypedValue::S_EVENT && currentTokenType != TOK_WORD) {
 		ParseError("Expected identifier in definition near '%s'", currentToken);
+		if (debug_parse) {
+			cerr << "expect ident: type " << type << " subtype " << subType << " at " << currentToken << " (" << currentTokenType << ")" << endl;
+		}
 		if (dataPath) delete dataPath;
 		if (mime) delete mime;
 		return nullptr;
@@ -2662,28 +2590,25 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_INPUT: {
 		string nm;
+		cerr << "defining an input" << endl;
 		if (currentTokenType == TOK_WORD) {
 			nm = currentToken;
-			GetToken();
+			GetToken(true);
 		} else {
 			nm = "linein";
 		}
-/*
-		do {
-			rxport[nport] = ParsePortId(&sch[nport]);
-			nport++;
-			if (strcmp(currentToken, ",") != 0) {
-				break;
-			}
-			GetToken();
-		} while (!atEof());
-*/
+		vector<int> chans;
+		string portDeviceName;
+		QuaPort *port = nullptr;
+		StabEnt *sym = nullptr;
+		bool found = parsePort(deviceKind, portDeviceName, port, sym, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
-			Input *s = cha->AddInput(nm, trxport[0], sch[0], true);
+			Input *s = cha->AddInput(nm, portDeviceName, port, chans[0], true);
 			for (short i=1; i<nport; i++) {
-				s->setPortInfo(trxport[i], sch[i], i);
+				s->setPortInfo(port, chans[i], i);
 			}
+			// todo this is a a strage attempt to do initialization of parameters like port gain: XXXX do this differently, it sucks
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
 				s->initBlock = ParseBlockInfo(s->sym, s->sym);
@@ -2698,6 +2623,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 //			glob.PushContext(s->sym);
 //			s->initBlock = ParseBlockInfo(s->sym, s->sym);
 //			glob.PopContext();
+			// xxxx as aboce
 			if (strcmp(currentToken, "{") == 0) {
 				Block		*b = ParseBlockInfo(context, schedSym);
 				if (b) {
@@ -2714,25 +2640,32 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			}
 			break;
 		}
-
+		cout << "found an input and done " << endl;
 		break;
 	}
 	
 	case TypedValue::S_OUTPUT: {
 		string nm;
+		cerr << "defining an oputput" << endl;
 
 		if (currentTokenType == TOK_WORD) {
 			nm = currentToken;
-			GetToken();
+			GetToken(true);
 		} else {
 			nm = "lineout";
 		}
+		vector<int> chans;
+		string portDeviceName;
+		QuaPort *port = nullptr;
+		StabEnt *sym = nullptr;
+		bool found = parsePort(deviceKind, portDeviceName, port, sym, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
-			Output *s = cha->AddOutput(nm, trxport[0], sch[0], true);
+			Output *s = cha->AddOutput(nm, portDeviceName, port, chans[0], true);
 			for (short i=1; i<nport; i++) {
-				s->setPortInfo(trxport[i], sch[i], i);
+				s->setPortInfo(port, chans[i], i);
 			}
+			// xxxx as aboce
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
 				s->initBlock = ParseBlockInfo(s->sym, s->sym);
@@ -2747,6 +2680,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 //			glob.PushContext(s->sym);
 //			s->initBlock = ParseBlockInfo(s->sym, s->sym);
 //			glob.PopContext();
+			// xxxx as above
 			if (strcmp(currentToken, "{") == 0) {
 				Block		*b = ParseBlockInfo(context, schedSym);
 				if (b) {
@@ -2763,6 +2697,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			}
 			break;
 		}
+		cout << "found an toutput and done " << endl;
 		break;
 	}
 	
@@ -2933,7 +2868,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		QuaPort		*P;
 		if (!uberQua || context != uberQua->sym)
 			ParseError("port must be in outer context.");
-		P = findQuaPort(currentToken, -1);
+		P = findQuaPort(-1, currentToken);
 		if (P == nullptr) {
 			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
 //			, quapp->quaSmallIcon, quapp->quaBigIcon);
@@ -3004,6 +2939,9 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	}
 	
 	case TypedValue::S_CHANNEL: {
+		if (debug_parse) {
+			cerr << "define channel " << currentToken << " in " << nIns << ", " << nOuts << " thrue " << audioThru << "," << midiThru << endl;
+		}
 		if (ndimensions != 0) {
 			ParseError("channel should be undimensioned");
 		}
@@ -3235,48 +3173,65 @@ QSParser::ParseQua()
 }
 
 void
-QSParser::ParseChannelId(short *s)
+QSParser::parseChannelId(vector<int> &s)
 {
-	if (s) {
-		if (strcmp(currentToken,"*") == 0) {
-			*s = -1;
-		} else if (strcmp(currentToken,"!") == 0) {
-			*s = 0;
-		} else {
-			*s = atoi(currentToken);
+	for (;;) {
+		if (strcmp(currentToken, "*") == 0) {
+			s.push_back(-1);
 		}
+		else if (strcmp(currentToken, "!") == 0) {
+			s.push_back(0);
+		}
+		else {
+			s.push_back(atoi(currentToken));
+		}
+		GetToken();
+		if (strcmp(currentToken, ",")) {
+			break;
+		}
+		GetToken();
 	}
-	GetToken();
 }
 
-QuaPort *
-QSParser::ParsePortId(short *s)
+#include <vector>
+using namespace std;
+
+/**
+* portname could have regular expressions ... at least some chars like '*' or '?'
+* at the moment, were not really expecting channels or vsts but this is a priority
+*/
+bool
+QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &sym, vector<int> &chans)
 {
-	QuaPort		*pt = nullptr;
-	if (currentTokenType == TOK_WORD) {	// name of a global destination ie bus
+	cerr << "parsing port " << portName << endl;
+	port = nullptr;
+	sym = nullptr;
+	if (currentTokenType == TOK_WORD) {	// this would be a symbol .. a vst or a channel or another input
+		portName = currentToken;
+		sym = glob.findSymbol(currentToken);
 		GetToken();
 		if (strcmp(currentToken, ":") == 0) {	// might want to do this for setting midi channels
 			GetToken();
-			ParseChannelId(s);
+			parseChannelId(chans);
 		}
 	} else if (currentTokenType == TOK_VAL){
 		if (currentTokenVal.type == TypedValue::S_STRING) {
-			pt = findQuaPort(currentTokenVal.StringValue());
-			if (pt == nullptr) {
-				ParseError("port '%s' not found", currentTokenVal.StringValue());
-			}
+			port = findQuaPort(deviceType, portName);
+			ParseError("port '%s' not found", currentToken);
 			GetToken();
 			if (strcmp(currentToken, ":") == 0) {
 				GetToken();
-				ParseChannelId(s);
+				parseChannelId(chans);
 			}
 		} else {
-			ParseChannelId(s);
+			parseChannelId(chans);
 		}
 	} else {
 		ParseError("Expect a port identifier near '%s'", currentToken);
+		return false;
 	}
-	return pt;
+
+	return true;
 }
 
 // called to parse a sequence of blocks in a fragment into

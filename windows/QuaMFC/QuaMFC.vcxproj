@@ -279,6 +279,7 @@
     <ClInclude Include="QuaMFC.h" />
     <ClInclude Include="QuaMFCCCDialog.h" />
     <ClInclude Include="QuaMFCDoc.h" />
+    <ClInclude Include="QuaMFCGlobal.h" />
     <ClInclude Include="QuaMFCView.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Splash.h" />

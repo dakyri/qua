@@ -122,19 +122,20 @@ class QuaAudioManager
 {
 public:
 	QuaAudioManager();
-	~QuaAudioManager();
-	
-	virtual status_t connect(Input *);
-	virtual status_t connect(Output *);
-	virtual status_t disconnect(Input *);
-	virtual status_t disconnect(Output *);
+	virtual ~QuaAudioManager();
 
-	status_t			StartAudio();
-	status_t			StopAudio();
+	virtual QuaPort *findPortByName(string nm) override;
+	virtual status_t connect(Input *) override;
+	virtual status_t connect(Output *) override;
+	virtual status_t disconnect(Input *) override;
+	virtual status_t disconnect(Output *) override;
 
-	char *				ErrorString(status_t err);
+	status_t StartAudio();
+	status_t StopAudio();
 
-	bool				Generate(size_t nFrames);
+	char * ErrorString(status_t err);
+
+	bool Generate(size_t nFrames);
 
 #ifdef QUA_V_AUDIO_ASIO
 	static QuaAsio		asio;

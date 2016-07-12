@@ -70,12 +70,7 @@ extern HINSTANCE quaAppInstance;
 extern HMODULE quaAppModule;
 #endif
 
-
-#include <string>
-using namespace std;
-
-extern void reportError(const char *fmt, ...);
-
+#include "QuaMFCGlobal.h"
 /////////////////////////////////////////////////////////////////////////////
 
 //{{AFX_INSERT_LOCATION}}

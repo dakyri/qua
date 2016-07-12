@@ -731,6 +731,13 @@ QuaJoystickManager::~QuaJoystickManager()
 	fprintf(stderr, "deleted joystick manager\n");
 }
 
+
+QuaPort *
+QuaJoystickManager::findPortByName(string name) {
+	return ports.size() > 0 ? ports[0] : nullptr;
+}
+
+
 #ifdef QUA_V_JOYSTICK_DX
 
 void

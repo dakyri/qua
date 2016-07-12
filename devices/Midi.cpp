@@ -814,8 +814,7 @@ QuaMidiOut::OutputStream(Time theTime, Stream *A, uchar chan)
 			StreamNote *q=(StreamNote*)p;
 			
 		    if (debug_midi>=2)
-				fprintf(stderr, "note %x... %d %d\n",
-						q->note.cmd, theTime.ticks, q->time.ticks);
+				fprintf(stderr, "note %x... %d %d\n", q->note.cmd, theTime.ticks, q->time.ticks);
 		
 		    if (q->note.cmd & MIDI_CMD_BYTE) {
 				if (theTime >= q->time) {
@@ -1140,7 +1139,7 @@ QuaMidiManager::closeOutput(QuaMidiOut *c)
 bool
 QuaMidiManager::remove(QuaMidiOut *d)
 {
-	auto ci = qut::find(outputs, d);
+	auto ci = std::find(outputs.begin(), outputs.end(), d);
 	if (ci != outputs.end()) {
 		outputs.erase(ci);
 	}
@@ -1150,7 +1149,7 @@ QuaMidiManager::remove(QuaMidiOut *d)
 bool
 QuaMidiManager::remove(QuaMidiIn *d)
 {
-	auto ci = qut::find(inputs, d);
+	auto ci = std::find(inputs.begin(), inputs.end(), d);
 	if (ci != inputs.end()) {
 		inputs.erase(ci);
 	}
@@ -1158,6 +1157,11 @@ QuaMidiManager::remove(QuaMidiIn *d)
 }
 
 #endif
+
+QuaPort *
+QuaMidiManager::findPortByName(string name) {
+	return ports.size() > 0 ? ports[0] : nullptr;
+}
 
 status_t
 QuaMidiManager::connect(Input *s)

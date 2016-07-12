@@ -25,7 +25,7 @@ int main(char **argv, int argc)
 //	setup_application_globals();	// some app setup may rely on command line, but probably not these days
 	string input;
 	for (string qnm: cmd.loadNames) {
-		Qua * q = Qua::loadScriptFile(qnm.c_str());
+		Qua * q = Qua::loadScriptFile(qnm.c_str(), defaultDisplay);
 		if (q != NULL) {
 			fprintf(stderr, "got a qua\n");
 			//			q->sym->Dump(stderr, 0);

@@ -205,7 +205,7 @@ block : expression
 // definitions
 ////////////////////////////
 qua_defn : QUA IDENT {
-		Qua *q = new Qua(*$2, false);
+		Qua *q = new Qua(*$2, defaultDisplay, false);
 		driver.uberQua = q;
 	    glob.PushContext(q->sym);
 	} LBRA qua_child_defn_list block RBRA {

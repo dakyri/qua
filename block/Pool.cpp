@@ -120,7 +120,7 @@ Pool::DeleteTake(StreamTake *take)
 	if (outTakes.size() <= 1)
 		return B_ERROR;
 	if (take == selectedTake) {
-		auto ci = qut::find(outTakes, take);
+		auto ci = std::find(outTakes.begin(), outTakes.end(), take);
 		if (ci != outTakes.end()) {
 			outTakes.erase(ci);
 			del = true;
@@ -128,7 +128,7 @@ Pool::DeleteTake(StreamTake *take)
 
 		SelectTake(outTakes[0]);
 	} else {
-		auto ci = qut::find(outTakes, take);
+		auto ci = std::find(outTakes.begin(), outTakes.end(), take);
 		if (ci != outTakes.end()) {
 			outTakes.erase(ci);
 			del = true;

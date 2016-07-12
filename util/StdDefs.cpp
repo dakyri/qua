@@ -324,7 +324,6 @@ string getBase(const string &path) {
 	if (it != string::npos) {
 		s.erase(s.begin()+it, s.end());
 	} else {
-		s = "";
 	}
 	return s;
 }

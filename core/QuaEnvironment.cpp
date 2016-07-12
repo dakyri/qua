@@ -2,39 +2,22 @@
 
 #include "StdDefs.h"
 #include "Qua.h"
-#include "QuaEnvironment.h"
 #include "QuaMidi.h"
 #include "QuaAudio.h"
 #include "QuaParallel.h"
 #include "QuaJoy.h"
 #include "QuaOSC.h"
+#include "QuaEnvironment.h"
 
 QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
 	: display(d)
 {
 	version = Qua::getVersionString();
-#ifdef QUA_V_AUDIO
-	quaAudio = nullptr;
-#endif
-#ifdef QUA_V_JOYSTICK
-	quaJoystick = nullptr;
-#endif
-	quaMidi = nullptr;
-	quaParallel = nullptr;
 }
 
 int
 QuaEnvironment::SetupDevices()
 {
-#ifdef QUA_V_AUDIO
-	quaAudio = new QuaAudioManager();
-#endif
-#ifdef QUA_V_JOYSTICK
-	quaJoystick = new QuaJoystickManager();
-#endif
-	quaMidi = new QuaMidiManager();
-	quaParallel = new QuaParallelManager();
-
 	return B_OK;
 }
 
@@ -62,14 +45,6 @@ QuaEnvironment::~QuaEnvironment()
 #if defined(QUA_V_POOLPLAYER)
 	delete poolPlayer;
 #endif
-#ifdef QUA_V_JOYSTICK
-	delete quaJoystick;
-#endif
-#ifdef QUA_V_AUDIO
-	delete quaAudio;
-#endif
-	delete quaMidi;
-	delete quaParallel;
 }
 int
 QuaEnvironment::Setup()
@@ -103,7 +78,7 @@ QuaEnvironment::Setup()
 	char	vuf[1024];
 	int		nc;
 	if ((nc = GetModuleFileName(quaAppModule, vuf, 1024)) == 0) {
-		TragicError("Can't find Home...");
+		tragicError("Can't find Home...");
 	}
 	appPath.SetTo(vuf);
 	stderr, printf("App path %s\n", appPath.Path());
@@ -209,3 +184,11 @@ QuaEnvironment::Setup()
 #endif
 	return B_OK;
 }
+
+QuaAudioManager &getAudioManager() { return environment.quaAudio; }
+QuaMidiManager &getMidiManager() { return environment.quaMidi; }
+#ifdef QUA_V_JOYSTICK
+QuaJoystickManager &getJoyManager() { return environment.quaJoy; }
+#endif
+QuaParallelManager &getParallelManager() { return environment.quaParallel; }
+QuaOSCManager &getOSCManager() { return environment.quaOSC; }

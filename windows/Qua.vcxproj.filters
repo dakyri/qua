@@ -156,9 +156,6 @@
     <ClInclude Include="..\include\base\PoolPlayer.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\base\Properties.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\base\QuaInsert.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
@@ -276,6 +273,12 @@
     <ClInclude Include="..\include\block\Lambda.h">
       <Filter>Header Files\block</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\block\Dictionary.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base\Attributes.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -318,9 +321,6 @@
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\Note.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\base\Properties.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\QuaInsert.cpp">
@@ -466,6 +466,12 @@
     </ClCompile>
     <ClCompile Include="..\block\Lambda.cpp">
       <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\Dictionary.cpp">
+      <Filter>Source Files\block</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\Attributes.cpp">
+      <Filter>Source Files\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

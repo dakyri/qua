@@ -44,7 +44,7 @@ public:
 	
 	void			SkipSpace();
 	void			SkipLine();
-	int				GetToken();
+	int				GetToken(bool worms=false);
 
 	std::string		comment;
 	void			AddCharToComment(char c);
@@ -66,10 +66,10 @@ public:
 	void			ParseFormalsList(StabEnt *context, StabEnt *S, bool);
 	bool			ParseProgFile();
 	class Qua		*ParseQua();
-	class QuaPort	*ParsePortId(short *chan);
-	void			ParseChannelId(short *chan);
-	long			ParseDimentia(uint16 *dim);
-	Block			*ParseDefine(StabEnt *context, StabEnt *S);
+	bool parsePort(int deviceKind, string &portName, QuaPort* &port, StabEnt* &sym, vector<int> &channels);
+	void parseChannelId(vector<int> &channels);
+	long ParseDimentia(uint16 *dim);
+	Block *ParseDefine(StabEnt *context, StabEnt *S);
 
 	void 			ParseError(char *str, ...);
 	void			ShowErrors();

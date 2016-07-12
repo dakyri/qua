@@ -307,6 +307,11 @@ QuaAudioManager::~QuaAudioManager()
 	fprintf(stderr, "~QuaAudioManager: all done ... phew!\n");
 }
 
+QuaPort *
+QuaAudioManager::findPortByName(string name) {
+	return ports.size() > 0 ? ports[0] : nullptr;
+}
+
 status_t
 QuaAudioManager::StartAudio()
 {

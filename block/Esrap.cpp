@@ -102,9 +102,11 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 			std::string s;
 			if (block->subType == Block::BUILTIN_CREATE) {
 				AddNL(buf, pos, len, indent, crlf);
-				s = qut::unfind(builtinCommandIndex, (int)block->crap.call.crap.createType);
+				int typ = block->crap.call.crap.createType;
+				s = qut::unfind(builtinCommandIndex, typ);
 			} else {
-				s=qut::unfind(builtinCommandIndex, (int) block->subType);
+				int typ = block->subType;
+				s=qut::unfind(builtinCommandIndex, typ);
 			}
 			if (s.size() == 0) {
 				if (!AddToBuf("undefined", buf, pos, len)) return false;

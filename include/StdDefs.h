@@ -66,27 +66,17 @@ std::string getBase(const std::string &path);
 std::string getExt(const std::string &path);
 std::string getSupertype(const std::string &path);  // of a mime type
 
+using namespace std;
+
 namespace qut {
-	template<typename T> typename std::vector<T>::iterator find(std::vector<T> a, T i) {
-		for (auto ai = a.begin(); ai != a.end(); ++ai) {
-			if (*ai == i) {
-				return ai;
-			}
-		}
-		return a.end();
+	template<typename T> bool del(vector<T> &a, T &i) {
+		auto ai = std::find(a.begin(), a.end(), i);
+		if (ai == a.end()) return false;
+		a.erase(ai);
+		return true;
 	}
 
-	template<typename T> bool del(std::vector<T> a, T i) {
-		for (auto ai = a.begin(); ai != a.end(); ++ai) {
-			if (*ai == i) {
-				a.erase(ai);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	template<typename K, typename V> K unfind(typename std::unordered_map<K, V> m, typename V v) {
+	template<typename K, typename V> K unfind(typename unordered_map<K, V> &m, typename V &v) {
 		for (auto mi = m.begin(); mi != m.end(); ++mi) {
 			if (mi->second == v) {
 				return mi->first;

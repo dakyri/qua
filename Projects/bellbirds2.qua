@@ -1,30 +1,31 @@
-qua bellbirds2
+qua bellbirds
 {
-	channel 0 channel1 {
-		input {midi1:1 AudioIn}{}
-		output {midi1:1 Mixer} {}
+	channel channel1 {
+		input \midi midi "midi1":1
+		input \audio audioin "Audio1"
+		output \midi midi "midi1":1
+		output \audio audioout "Mixer"
 	}
-	channel 1 channel2 {
-		input {midi1:2 AudioIn}{}
-		output {midi1:2 Mixer} {}
+	channel channel2 {
+		input \midi midi "midi1":2
+		input \audio audioin "Audio1"
+		output \midi midi "midi1":2
+		output \audio audioout "Mixer"
 	}
-	channel 2 channel3 {
-		input {midi1:3 AudioIn}{}
-		output {midi1:3 Mixer} {}
+	channel channel3 {
+		input \midi midi "midi1":3
+		input \audio audioin "Audio1"
+		output \midi midi "midi1":3
+		output \audio audioout "Mixer"
 	}
-	channel 3 channel4 {
-		input {midi1:4 AudioIn}{}
-		output {midi1:4 Mixer} {}
+	channel channel4 {
+		input \midi midi "midi1":4
+		input \audio audioin "Audio1"
+		output \midi midi "midi1":4
+		output \audio audioout "Mixer"
 	}
-	channel 4 channel5 {
-		input {midi1:5 AudioIn}{}
-		output {midi1:5 Mixer} {}
-	}
-	sample
-	   takes {
-		{"/Obscenity/sound/bellbirds2" "Original"}
-		}
-	    display {0xeeee6400, {0 0}} bellbirds2() {
+	sample bellbirds2 {
+	   take "/Obscenity/sound/bellbirds2" // "Original" 
 	}
 
 	tempo = 120

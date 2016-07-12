@@ -23,19 +23,19 @@ class Qua;
 class InputList: public std::vector<Input *>
 {
 public:
-	inline bool Has(Input *i) { return qut::find(*this, i) != end(); }
+	inline bool Has(Input *i) { return std::find(begin(), end(), i) != end(); }
 	inline Input *Item(short i) { return i >= 0 && ((size_t)i) < size() ? at(i) : nullptr; }
 	inline void Add(Input *p) { if (!Has(p)) push_back(p); }
-	inline void Del(Input *i) { auto ci = qut::find(*this, i); if (ci != end()) erase(ci); }
+	inline void Del(Input *i) { auto ci = std::find(begin(), end(), i); if (ci != end()) erase(ci); }
 };
 
 class OutputList: public std::vector<Output *>
 {
 public:
-	inline bool Has(Output *i) { return qut::find(*this, i) != end();	}
+	inline bool Has(Output *i) { return  std::find(begin(), end(), i) != end();	}
 	inline Output *Item(short i) { return i >= 0 && ((size_t)i) < size() ? at(i) : nullptr; }
 	inline void Add(Output *p) { if (!Has(p)) push_back(p); }
-	inline void Del(Output *i) { auto ci = qut::find(*this, i); if (ci != end()) erase(ci); }
+	inline void Del(Output *i) { auto ci = std::find(begin(), end(), i); if (ci != end()) erase(ci); }
 };
 
 
@@ -131,8 +131,8 @@ public:
 
 	uchar				hasAudio;
 	
-	Input				*AddInput(const string &, QuaPort *, short, bool);
-	Output				*AddOutput(const string &, QuaPort *, short, bool);
+	Input				*AddInput(const string &, const string &deviceName, QuaPort *, short, bool);
+	Output				*AddOutput(const string &, const string &deviceName, QuaPort *, short, bool);
 	void				SetInput(Input *, QuaPort *, short);
 	void				SetOutput(Output *, QuaPort *, short);
 	void				RemoveInput(Input *);
@@ -187,11 +187,6 @@ public:
 	short				recordState;
 	bool				reRecord;
 
-	QuaAudioManager *getAudioManager();
-	QuaMidiManager *getMidiManager();
-	QuaJoystickManager *getJoyManager();
-	QuaParallelManager *getParallelManager();
-	QuaOSCManager *getOSCManager();
 };
 
 Channel	*LoadChannel(FILE *fp, Qua *u);

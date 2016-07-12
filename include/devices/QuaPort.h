@@ -11,11 +11,15 @@ class Stream;
 class ArrangerObject;
 
 enum {
-	QUA_DEV_NOT			= 0,
-	QUA_DEV_JOYSTICK	= 1,
-	QUA_DEV_MIDI		= 2,
-	QUA_DEV_AUDIO		= 3,
-	QUA_DEV_PARALLEL	= 4
+	QUA_DEV_NOT = 0,
+	QUA_DEV_JOYSTICK = 1, // standard joystick data
+	QUA_DEV_MIDI = 2, // regular midi port
+	QUA_DEV_AUDIO = 3, // regular external audio device
+	QUA_DEV_PARALLEL = 4, // historical name, but now to represent hardware ports in general, usb in particular for wierd devices
+	QUA_DEV_VST = 5, // a vst or similar plugin, especially one with multiple pinouts or pinins
+	QUA_DEV_CHANNEL = 6, // standard qua channel output, internal routing
+	QUA_DEV_OSC = 7, // OSC message stream, port is a port on an internat connection
+	QUA_DEV_SENSOR = 8 // stream of sensor data eg orientation on a tablet
 };
 
 enum {
@@ -68,6 +72,8 @@ public:
 	virtual status_t connect(Output *)=0;
 	virtual status_t disconnect(Input *)=0;
 	virtual status_t disconnect(Output *)=0;
+
+	virtual QuaPort * findPortByName(string name) = 0;
 
 	bool destinationIndex(std::unordered_map<std::string, P *> &index) {
 		for (short i = 0; i < countPorts(); i++) {

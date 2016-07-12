@@ -108,7 +108,7 @@
     <ClInclude Include="..\include\base\Note.h" />
     <ClInclude Include="..\include\base\Pool.h" />
     <ClInclude Include="..\include\base\PoolPlayer.h" />
-    <ClInclude Include="..\include\base\Properties.h" />
+    <ClInclude Include="..\include\base\Attributes.h" />
     <ClInclude Include="..\include\base\Qua.h" />
     <ClInclude Include="..\include\base\QuaCommandLine.h" />
     <ClInclude Include="..\include\base\QuaDisplay.h" />
@@ -127,6 +127,7 @@
     <ClInclude Include="..\include\block\Block.h" />
     <ClInclude Include="..\include\block\Buflist.h" />
     <ClInclude Include="..\include\block\Controllable.h" />
+    <ClInclude Include="..\include\block\Dictionary.h" />
     <ClInclude Include="..\include\block\Executable.h" />
     <ClInclude Include="..\include\block\Expression.h" />
     <ClInclude Include="..\include\block\Insertable.h" />
@@ -168,7 +169,7 @@
     <ClCompile Include="..\base\LValue.cpp" />
     <ClCompile Include="..\base\Metric.cpp" />
     <ClCompile Include="..\base\Note.cpp" />
-    <ClCompile Include="..\base\Properties.cpp" />
+    <ClCompile Include="..\base\Attributes.cpp" />
     <ClCompile Include="..\base\QuaInsert.cpp" />
     <ClCompile Include="..\base\QuasiStack.cpp" />
     <ClCompile Include="..\base\Stacker.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="..\block\Block.cpp" />
     <ClCompile Include="..\block\Channel.cpp" />
     <ClCompile Include="..\block\Destination.cpp" />
+    <ClCompile Include="..\block\Dictionary.cpp" />
     <ClCompile Include="..\block\Esrap.cpp" />
     <ClCompile Include="..\block\Executable.cpp" />
     <ClCompile Include="..\block\Expression.cpp" />

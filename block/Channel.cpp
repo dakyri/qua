@@ -138,7 +138,7 @@ Channel::Init()
 	if (hasAudio&AUDIO_HAS_PLAYER) {
 		fprintf(stderr, "Channel::initialise starting audio for player channel\n");
 
-		getAudioManager()->startChannel(this);
+		getAudioManager().startChannel(this);
 	}
 #endif
 	if (initBlock) {
@@ -491,7 +491,7 @@ Channel::StopRecording()
 	if (audioRecordInstance) {
 		audioRecordInstance->StopRecording();
 #ifdef QUA_V_AUDIO
-		getAudioManager()->stopRecording(audioRecordInstance);
+		getAudioManager().stopRecording(audioRecordInstance);
 #endif
 		audioRecordInstance = nullptr;
 	}
@@ -601,7 +601,7 @@ void
 Channel::RemoveReceivingInstance(Instance *i)
 {
 	receivingLock.lock();
-	auto ci = qut::find(receivingInstances, i);
+	auto ci = std::find(receivingInstances.begin(), receivingInstances.end(), i);
 	if (ci != receivingInstances.end()) {
 		receivingInstances.erase(ci);
 	}
@@ -939,7 +939,7 @@ Channel::Generate(size_t nFrames)
 }
 
 Input *
-Channel::AddInput(const string &nm, QuaPort *p, short c, bool en)
+Channel::AddInput(const string &nm, const string &deviceName, QuaPort *p, short c, bool en)
 {
 	fprintf(stderr, "Channel %s adding input %s\n", sym->name.c_str(), nm.c_str());
 	Input	*s=nullptr;
@@ -975,7 +975,7 @@ Channel::AddInput(const string &nm, QuaPort *p, short c, bool en)
 }
 
 Output *
-Channel::AddOutput(const string &nm, QuaPort *p, short c, bool en)
+Channel::AddOutput(const string &nm, const string &deviceName, QuaPort *p, short c, bool en)
 {
 	fprintf(stderr, "Channel %s adding output %s\n", sym->name.c_str(), nm.c_str());
 
@@ -1046,7 +1046,7 @@ Channel::Enable(Input *s, bool en)
 		case QUA_DEV_MIDI: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable midi in (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
-				if ((err=getMidiManager()->connect(s)) == B_OK) {
+				if ((err=getMidiManager().connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
 				} else {
 					uberQua->bridge.reportError("failed to open midi input %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
@@ -1054,7 +1054,7 @@ Channel::Enable(Input *s, bool en)
 				}
 			} else {
 				activeStreamInputs.Del(s);
-				getMidiManager()->disconnect(s);
+				getMidiManager().disconnect(s);
 			}
 			break;
 		}
@@ -1079,15 +1079,15 @@ Channel::Enable(Input *s, bool en)
 		case QUA_DEV_AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
-				if ((err=getAudioManager()->connect(s)) == B_OK) {
+				if ((err=getAudioManager().connect(s)) == B_OK) {
 					activeAudioInputs.Add(s);
 				} else {
-					uberQua->bridge.reportError("failed to open audio input %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), getAudioManager()->ErrorString(err));
+					uberQua->bridge.reportError("failed to open audio input %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), getAudioManager().ErrorString(err));
 					return false;
 				}
 			} else {
 				activeAudioInputs.Del(s);
-				getAudioManager()->disconnect(s);
+				getAudioManager().disconnect(s);
 			}
 			break;
 		}
@@ -1110,7 +1110,7 @@ Channel::Enable(Output *s, bool en)
 		case QUA_DEV_MIDI: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable midi out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NAME));
-				if ((err=getMidiManager()->connect(s)) == B_OK) {
+				if ((err=getMidiManager().connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
 				} else {
 					uberQua->bridge.reportError("failed to open midi output %s\n", s->Name(NMFMT_NAME,NMFMT_NAME));
@@ -1118,7 +1118,7 @@ Channel::Enable(Output *s, bool en)
 				}
 			} else {
 				activeStreamOutputs.Del(s);
-				getMidiManager()->disconnect(s);
+				getMidiManager().disconnect(s);
 			}
 			break;
 		}
@@ -1143,15 +1143,15 @@ Channel::Enable(Output *s, bool en)
 		case QUA_DEV_AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
-				if ((err=getAudioManager()->connect(s)) == B_OK) {
+				if ((err=getAudioManager().connect(s)) == B_OK) {
 					activeAudioOutputs.Add(s);
 				} else {
-					uberQua->bridge.reportError("failed to open audio output %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), getAudioManager()->ErrorString(err));
+					uberQua->bridge.reportError("failed to open audio output %s\n%s", s->Name(NMFMT_NAME,NMFMT_NUM), getAudioManager().ErrorString(err));
 					return false;
 				}
 			} else {
 				activeAudioOutputs.Del(s);
-				getAudioManager()->disconnect(s);
+				getAudioManager().disconnect(s);
 			}
 			break;
 		}
@@ -1173,29 +1173,6 @@ Channel::SetOutput(Output *d, QuaPort *p, short c)
 {
 	uberQua->bridge.reportError("unimp");
 }
-
-QuaAudioManager *getAudioManager() {
-	return environment.quaAudio;
-}
-
-QuaMidiManager *getMidiManager() {
-	return environment.quaMidi;
-}
-
-#ifdef QUA_V_JOYSTICK
-QuaJoystickManager *getJoyManager() {
-	return environment.quaJoystick;
-}
-#endif
-
-QuaParallelManager *getParallelManager() {
-	return environment.quaParallel;
-}
-
-QuaOSCManager *getOSCManager() {
-	return nullptr; //  environment.quaAudio;
-}
-
 
 #ifdef XXX
 //////////////////////////////////////////////////
@@ -1394,8 +1371,3 @@ Output::NoodleEnable(bool en)
 
 #endif
 
-QuaAudioManager * Channel::getAudioManager() { return environment.quaAudio; }
-QuaMidiManager *Channel::getMidiManager() { return environment.quaMidi; }
-QuaJoystickManager *Channel::getJoyManager() { return nullptr; }
-QuaParallelManager *Channel::getParallelManager() { return environment.quaParallel; }
-QuaOSCManager *Channel::getOSCManager() { return nullptr; }

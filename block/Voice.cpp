@@ -86,7 +86,7 @@ void
 Voice::RemoveClip(Clip *c, bool disp)
 {
 	if (c) {
-		auto ci = qut::find(clips, c);
+		auto ci = std::find(clips.begin(), clips.end(), c);
 		if (ci != clips.end()) {
 			clips.erase(ci);
 		}
@@ -149,14 +149,14 @@ Voice::DeleteTake(StreamTake *take, bool disp)
 //	if (outTakes.CountItems() <= 1)
 //		return B_ERROR;
 	if (take == selectedTake) {
-		auto ci = qut::find(outTakes, take);
+		auto ci = std::find(outTakes.begin(), outTakes.end(), take);
 		if (ci != outTakes.end()) {
 			outTakes.erase(ci);
 			del = true;
 		}
 		SelectTake(outTakes[0], false);
 	} else {
-		auto ci = qut::find(outTakes, take);
+		auto ci = std::find(outTakes.begin(), outTakes.end(), take);
 		if (ci != outTakes.end()) {
 			outTakes.erase(ci);
 			del = true;
@@ -249,7 +249,7 @@ Voice::Wake(Instance *i)
 #endif
 #ifdef QUA_V_AUDIO
 		if (i->mainStack->hasAudio != AUDIO_NONE) {
-			environment.quaAudio->startInstance(i);
+			getAudioManager().startInstance(i);
 		}
 #endif
 		return Schedulable::Wake(i);

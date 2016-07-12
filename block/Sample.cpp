@@ -117,7 +117,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	}
 	SynchronizeBuffers();
 #ifdef QUA_V_AUDIO
-	environment.quaAudio->addSample(this);
+	getAudioManager().addSample(this);
 #endif
 }
 
@@ -148,7 +148,7 @@ Sample::RemoveClip(Clip *c, bool disp)
 Sample::~Sample()
 {
 #ifdef QUA_V_AUDIO
-	environment.quaAudio->removeSample(this);
+	getAudioManager().removeSample(this);
 #endif
 	delete fileBuffer;
 //	for (short i=0; i<CountTakes(); i++) {
@@ -354,7 +354,7 @@ Sample::RemoveInstance(Instance *i, bool display)
 	SampleInstance	*s = (SampleInstance *)i;
 	if (s->status == STATUS_RUNNING) {
 #ifdef QUA_V_AUDIO
-		environment.quaAudio->stopInstance(s);
+		getAudioManager().stopInstance(s);
 #endif
 	}
 	removeInstFromList(i);
@@ -402,7 +402,7 @@ Sample::Wake(Instance *i)
 #endif
 		
 #ifdef QUA_V_AUDIO
-		environment.quaAudio->startInstance(i);
+		getAudioManager().startInstance(i);
 #endif
 		return Schedulable::Wake(i);
 	}
@@ -418,7 +418,7 @@ Sample::Sleep(Instance *i)
 	if (i && i->status != STATUS_SLEEPING) {
 		SampleInstance	*inst = (SampleInstance *)i;
 #ifdef QUA_V_AUDIO
-		environment.quaAudio->stopInstance(inst);
+		getAudioManager().stopInstance(inst);
 #endif
 //		fprintf(stderr, "to sleep...\n");
 #ifdef LOTSALOX
