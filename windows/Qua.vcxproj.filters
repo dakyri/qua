@@ -279,6 +279,9 @@
     <ClInclude Include="..\include\base\Attributes.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\base\OSCMessage.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -472,6 +475,9 @@
     </ClCompile>
     <ClCompile Include="..\base\Attributes.cpp">
       <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\block\OSCMessage.cpp">
+      <Filter>Source Files\block</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

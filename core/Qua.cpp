@@ -54,9 +54,6 @@
 #ifdef QUA_V_AUDIO
 #include "Sampler.h"
 #endif
-#if defined(QUA_V_APP_HANDLER)
-#include "Application.h"
-#endif
 
 
 QuaEnvironmentDisplay environmentDisplay;
@@ -772,49 +769,6 @@ Qua::loadObject(StabEnt *obj)
 
 		switch (t->type) {
 		
-#if defined QUA_V_APP_HANDLER
-
-		case S_APPLICATION: {
-			
-			Application			*api;
-			entry_ref			app_ref;
-			status_t			err;
-			BPath				appPath;
-			BEntry				ent;
-			bool				found = false;
-			if (t->path) {
-				appPath.SetTo(t->path);
-				ent.SetTo(t->path, true);
-				ent.GetRef(&app_ref);
-				if (ent.Exists())
-					found = true;
-			}
-			
-			if (t->mimeType && !found) {
-				err = be_roster->FindApp(t->mimeType, &app_ref);
-				if (err != B_OK) {
-					bridge.reportError("Can't find application binary for type %s", t->mimeType.c_str());
-					return nullptr;
-				}
-				ent.SetTo(&app_ref, true);
-				appPath.SetTo(&ent);
-			}
-			
-			api = new Application(((char *)appPath.Leaf()), &appPath, this, t->mimeType.c_str());
-			
-			if (t->Instantiate(api->sym) != B_OK) {
-				bridge.reportError("Can't instantiate template");
-			}
-
-			newObj = CreateDisplayObjects(api->sym, where);
-
-			api->next = schedulees;
-			schedulees = api;
-
-			break;
-		}
-#endif
-
 		case TypedValue::S_SAMPLE: {
 			Sample			*sam;
 			sam = CreateSample(nullptr, true);
@@ -866,14 +820,8 @@ Qua::loadFile(std::string path)
 	
 // load an application binary
 	if (fileSuperType == "application") {
-#if defined(QUA_V_APP_HANDLER)
-		Application			*api;
-		api = new Application(nm, path, this, ((char *)fileMainType.Type()));			
-		api->next = schedulees;
-		schedulees = api;
-		newObj = CreateDisplayObjects(api->sym, where);
-#endif
-		return newObj;
+		// todo xxxxx perhaps here convenience construction of an osc link
+		return nullptr;
 
 	} else 	if (fileSuperType == "audio") {
 		if (	fileMainType == "audio/x-aiff" ||
@@ -1911,11 +1859,6 @@ TypedValue::StringValue()
 	case S_POOL:
 		return (val.pool != nullptr && val.pool->sym != nullptr)?
 			val.pool->sym->name.c_str() :"_null_pool";
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION:
-		return (val.application != nullptr && val.application->sym != nullptr)?
-			val.application->sym->name.c_str() :"null_application";
-#endif
 	case S_LAMBDA:
 		return (val.lambda != nullptr && val.lambda->sym != nullptr)?
 			val.lambda->sym->name.c_str() :"_null_method";
@@ -2080,18 +2023,6 @@ string
 Qua::getCapabilityString()
 {
 	string caps;
-#ifdef QUA_V_APP_HANDLER
-#endif
-#ifdef QUA_V_QUADDON
-#endif
-#ifdef QUA_V_PORT_PARAM
-#endif
-#ifdef QUA_V_STREAM_MESG
-#endif
-#ifdef QUA_V_EDITOR_INTERFACE
-#endif
-#ifdef QUA_V_MIXER_INTERFACE
-#endif
 #ifdef QUA_V_AUDIO
 #ifdef QUA_V_AUDIO_ASIO
 	caps += "asio ";

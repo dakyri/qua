@@ -11,15 +11,12 @@
 #include "Block.h"
 #include "Parse.h"
 #include "MidiDefs.h"
+#include "OSCMessage.h"
 
 #include "Dictionary.h"
 
-// danger. exterminate the enemy
-
 StreamItemCache		FreeNote(sizeof(StreamNote));
-#ifdef QUA_V_APP_HANDLER
 StreamItemCache		FreeMesg(sizeof(StreamMesg));
-#endif
 StreamItemCache		FreeValue(sizeof(StreamValue));
 StreamItemCache		FreeCtrl(sizeof(StreamCtrl));
 StreamItemCache		FreeSysX(sizeof(StreamSysX));
@@ -79,9 +76,7 @@ StreamItem::operator delete(void *q)
 	switch(((StreamItem *)q)->type) {
 	case TypedValue::S_NOTE: 		delete (StreamNote *)q; break;
 	case TypedValue::S_BEND: 		delete (StreamBend *)q; break;
-#ifdef QUA_V_APP_HANDLER
-	case TypedValue::S_MESSAGE:	delete (StreamMesg *)q; break;
-#endif
+	case TypedValue::S_MESSAGE:		delete (StreamMesg *)q; break;
 	case TypedValue::S_VALUE: 		delete (StreamValue *)q; break;
 	case TypedValue::S_CTRL: 		delete (StreamCtrl *)q; break;
 	case TypedValue::S_PROG: 		delete (StreamProg *)q; break;
@@ -260,16 +255,15 @@ StreamItem::Duration()
 /*
  * StreamMesg
  */
-#ifdef QUA_V_APP_HANDLER
 void *
 StreamMesg::operator new(size_t sz)
 {
 	return FreeMesg.Alloc();
 }
 
-StreamMesg::StreamMesg(class Time *t, BMessage *mp)
+StreamMesg::StreamMesg(class Time *t, OSCMessage *mp)
 {
-    type = S_MESSAGE;
+    type = TypedValue::S_MESSAGE;
     mesg = mp;
     time = *t;
     next = nullptr;
@@ -285,15 +279,14 @@ StreamMesg::operator delete(void *q)
 StreamItem *
 StreamMesg::Clone()
 {
-	return new StreamMesg(&time, mesg?new BMessage((*mesg)):nullptr);
+	return new StreamMesg(&time, mesg?new OSCMessage(*mesg):nullptr);
 }
 
 
 status_t
 StreamMesg::SaveSnapshot(FILE *fp)
 {
-	fprintf(fp, "<mesg time=\"%s\">\n",
-		time.StringValue(), note.pitch, note.duration, note.dynamic, note.cmd);
+	fprintf(fp, "<mesg time=\"%s\">\n", time.StringValue());
 	return B_OK;
 }
 
@@ -302,8 +295,6 @@ StreamMesg::~StreamMesg()
 	if (mesg)
 		delete mesg;
 }
-
-#endif
 
 /*
  * StreamValue

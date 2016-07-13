@@ -3,13 +3,6 @@
 
 #if defined(WIN32)
 
-#undef QUA_V_APP_HANDLER
-#undef QUA_V_QUADDON
-#undef QUA_V_PORT_PARAM
-#undef QUA_V_STREAM_MESG
-#undef QUA_V_CONTROLLER_INTERFACE
-#undef QUA_V_EDITOR_INTERFACE
-#undef QUA_V_MIXER_INTERFACE
 #define QUA_V_AUDIO
 #undef QUA_V_AUDIO_ASIO
 #define QUA_V_DIRECT_MIDI
@@ -28,8 +21,6 @@
 #define QUA_V_SAVE_INITASXML
 
 #endif
-
-#undef OLD_LIST
 
 // !! ?? probably not the most logical place for all these, but
 // this is the first loaded file ... too many pointless changes else ...

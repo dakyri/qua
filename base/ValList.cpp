@@ -2,6 +2,7 @@
 
 #include "BaseVal.h"
 #include "Stackable.h"
+#include "OSCMessage.h"
 //
 // List of TypedValue....
 //
@@ -49,127 +50,45 @@ TypedValueList::AddItem(TypedValue *val)
 	}
 }
 
-#ifdef QUA_V_APP_HANDLER
 bool
-TypedValueList::AddToMessage(BMessage *msg)
+TypedValueList::AddToMessage(OSCMessage *msg)
 {
-#ifdef OLD_LIST
-	if (Items[0].type != S_STRING)
-		return FALSE;
-	for (int i=1; i<Count; i++) {
-		switch(Items[i].type) {
-		case S_INT:
-			msg->AddInt32(Items[0].StringValue(),
-						Items[i].IntValue(nullptr));
-			break;
-
-		case S_BYTE:
-			msg->AddInt8(Items[0].StringValue(),
-						Items[i].ByteValue(nullptr));
-			break;
-		case S_FLOAT:
-			msg->AddFloat(Items[0].StringValue(),
-						Items[i].FloatValue(nullptr));
-			break;
-
-		case S_SHORT:
-			msg->AddInt16(Items[0].StringValue(),
-						Items[i].ShortValue(nullptr));
-			break;
-
-		case S_BOOL:
-			msg->AddInt32(Items[0].StringValue(),
-						Items[i].BoolValue(nullptr));
-			break;
-
-		case S_STRING:
-			msg->AddString(Items[0].StringValue(),
-						Items[i].StringValue());
-			break;
-		case S_LONG:
-			msg->AddInt64(Items[0].StringValue(),
-						Items[i].LongValue(nullptr));
-			break;
-
-		case S_LIST	:			// send all values.
-			break;
-		case S_APPLICATION:		// send messenger
-			break;
-		
-//		case S_UNKNOWN: break;
-//		case S_VOICE: break;
-//		case S_POOL	: break;
-//		case S_LAMBDA: break;
-//		case S_STREAM:	break;
-//		case S_CHANNEL:	break;
-//		case S_QUA:	break;
-//		case S_STREAM_ITEM:	break;
-//		case S_VALUE:	break;
-//		case S_TIME:	break;
-//		case S_TIME:	break;
-//		case S_NOTE	:	break;
-//		case S_NOTE:	break;
-//		case S_CTRL	:	break;
-//		case S_CTRL:	break;
-//		case S_SYSX	:	break;
-//		case S_SYSX:	break;
-//		case S_SYSC	:	break;
-//		case S_SYSC	:	break;
-//		case S_MESSAGE:	break;
-//		case S_EXPRESSION:	break;
-//		case S_BLOCK:	break;
-//		case S_BEND:	break;
-//		case S_BEND	:	break;
-//		case S_DESTINATION:	break;
-		}
-	}
-#else
 	TypedValueListItem	*p = head;
 	if (!p)
 		return false;
-	if (head->value.type != S_STRING)
-		return FALSE;
+	if (head->value.type != TypedValue::S_STRING)
+		return false;
 	p = p->next;
 	while (p) {
 		switch(p->value.type) {
-		case S_INT:
-			msg->AddInt32(head->value.StringValue(),
-						p->value.IntValue(nullptr));
+		case TypedValue::S_INT:
+			msg->addInt32(p->value.IntValue(nullptr));
 			break;
 
-		case S_BYTE:
-			msg->AddInt8(head->value.StringValue(),
-						p->value.ByteValue(nullptr));
+		case TypedValue::S_BYTE:
+			msg->addInt8(p->value.ByteValue(nullptr));
 			break;
-		case S_FLOAT:
-			msg->AddFloat(head->value.StringValue(),
-						p->value.FloatValue(nullptr));
+		case TypedValue::S_FLOAT:
+			msg->addFloat(p->value.FloatValue(nullptr));
 			break;
 
-		case S_SHORT:
-			msg->AddInt16(head->value.StringValue(),
-						p->value.ShortValue(nullptr));
+		case TypedValue::S_SHORT:
+			msg->addInt16(p->value.ShortValue(nullptr));
 			break;
 
-		case S_BOOL:
-			msg->AddInt32(head->value.StringValue(),
-						p->value.BoolValue(nullptr));
+		case TypedValue::S_BOOL:
+			msg->addInt32(p->value.BoolValue(nullptr));
 			break;
 
-		case S_STRING:
-			msg->AddString(head->value.StringValue(),
-						p->value.StringValue());
+		case TypedValue::S_STRING:
+			msg->addString(p->value.StringValue());
 			break;
-		case S_LONG:
-			msg->AddInt64(head->value.StringValue(),
-						p->value.LongValue(nullptr));
+		case TypedValue::S_LONG:
+			msg->addInt64(p->value.LongValue(nullptr));
 			break;
 
-		case S_LIST	:			// send all values.
+		case TypedValue::S_LIST	:			// send all values.
 			break;
-		case S_APPLICATION:		// send messenger
-			break;
-		
 //		case S_UNKNOWN: break;
 //		case S_VOICE: break;
 //		case S_POOL	: break;
@@ -197,8 +116,6 @@ TypedValueList::AddToMessage(BMessage *msg)
 //		case S_DESTINATION:	break;
 		}
 	}
-#endif
-	return TRUE;
+	return true;
 }
 
-#endif

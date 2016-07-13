@@ -31,7 +31,6 @@
 void
 QuaControllerBridge::SetDisplayValue()
 {
-	fprintf(stderr, "Set display\n");
 	// deleted stuff from the original that set the display value of the screenControl display thingy according to current value
 	// also did stuff with onscreen envelopes
 }

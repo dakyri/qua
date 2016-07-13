@@ -578,7 +578,6 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 		case TypedValue::S_VOICE:
 		case TypedValue::S_SAMPLE:
 		case TypedValue::S_POOL:
-		case TypedValue::S_APPLICATION:
    		case TypedValue::S_PORT:
 			delete [] crap.call.crap.name;
 	    	crap.call.crap.sym = S;

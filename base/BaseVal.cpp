@@ -682,9 +682,6 @@ class Schedulable *
 	case S_VOICE: 	return val.voice;
 	case S_POOL: 	return val.pool;
 		//	case S_PORT: 	return val.port;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
 	}
 	return nullptr;
 }
@@ -697,9 +694,6 @@ TypedValue::ExecutableValue()
 	case S_VOICE: 	return val.voice;
 	case S_POOL: 	return val.pool;
 		//	case S_PORT: 	return val.port;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
 	case S_LAMBDA:	return val.lambda;
 	case S_TEMPLATE: return val.qTemplate;
 	}
@@ -721,9 +715,6 @@ TypedValue::StackableValue()
 	case S_QUA: 	return val.qua;
 	case S_EVENT:	return val.event;
 	case S_CHANNEL: return val.channel;
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION: return val.application;
-#endif
 #ifdef QUA_V_VST_HOST
 	case S_VST_PLUGIN: return val.vst;
 #endif

@@ -270,26 +270,6 @@ QuaDisplay::CreateSchedulableBridge(Schedulable *S)
 	}
  		
 
-#ifdef QUA_V_APP_HANDLER
-	case TypedValue::S_APPLICATION: {
-		if (S->ApplicationValue()->appFilePath.InitCheck() == B_OK) {
-			BFile		theFile(
-							S->ApplicationValue()->appFilePath.Path(),
-							B_READ_ONLY);
-			BNodeInfo	nodeInfo(&theFile);
-			if ((err=nodeInfo.GetTrackerIcon(&bicon, B_LARGE_ICON)) != B_NO_ERROR) {
-				reportError("Qua: can't find application icon, %s\n", ErrorStr(err));
-			}
-			if ((err=nodeInfo.GetTrackerIcon(&sicon, B_MINI_ICON)) != B_NO_ERROR) {
-				reportError("Qua: can't find application icon, %s\n", ErrorStr(err));
-			}
-		}
-    	QO = new QuaObject(S, Qrect, &sicon, &bicon, sequencerWindow->aquarium, this, purple);
-    	SC = new SchedulablePanel(CRect, S->ApplicationValue(), true);
-		break;
-	}
-#endif
-
 	case TypedValue::S_PORT: {
     	SC = new SchedulablePanel(CRect, S->PortValue(), S->PortValue()->IsMultiSchedulable());
 		break;

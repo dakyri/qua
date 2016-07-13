@@ -15,9 +15,6 @@
 #include "Channel.h"
 #include "Schedulable.h"
 
-#ifdef QUA_V_APP_HANDLER
-#include "Application.h"
-#endif
 #include "QuaDisplay.h"
 
 Schedulable::Schedulable(StabEnt *s, Qua *q, class Metric *m):
@@ -200,7 +197,6 @@ Schedulable::UnTrigger()
 		switch(sym->type) {
 		case TypedValue::S_POOL:
 		case TypedValue::S_SAMPLE:
-		case TypedValue::S_APPLICATION:
 		case TypedValue::S_VOICE: {
 			for (Instance *p: instances) {
 				if (	p->startTime < uberQua->theTime &&

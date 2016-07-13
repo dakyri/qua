@@ -34,10 +34,6 @@
 #include "QuaPort.h"
 #include "Dictionary.h"
 
-#ifdef QUA_V_APP_HANDLER
-#include "include/Application.h"
-#endif
-
 SymTab				glob(MAX_SYMBOLS);
 StabEnt				*typeSymbolStreamItem=nullptr,
 					*typeSymbolClip=nullptr,
@@ -129,21 +125,6 @@ findChannel(const std::string &nm, short dc)
     }
     return sym->ChannelValue();
 }
-
-Application *
-findApplication(const std::string &nm, short dc)
-{
-    StabEnt	*sym;
-
-    if ((sym = glob.findSymbol(nm, dc)) == nullptr) {
-		return nullptr;
-    }
-    if (sym->type != TypedValue::S_APPLICATION) {
-		return nullptr;
-    }
-    return sym->ApplicationValue();
-}
-
 
 Lambda *
 findMethod(const string &nm, short dc)
@@ -556,9 +537,6 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 #endif
 			);
 	switch(sym->type) {
-#ifdef QUA_V_APP_HANDLER
-	case TypedValue::S_APPLICATION:		delete sym->ApplicationValue(); break;
-#endif
 	case TypedValue::S_VOICE:			delete sym->VoiceValue(); break;
 	case TypedValue::S_LAMBDA:			delete sym->LambdaValue(); break;
 	case TypedValue::S_TEMPLATE:		delete sym->TemplateValue(); break;
@@ -816,7 +794,6 @@ StabEnt::RefersToStream()
 		case S_VOICE:
 		case S_POOL:
 		case S_LAMBDA:
-		case S_APPLICATION:
 		case S_SAMPLE:
 		case S_QUA:
 			return false;
@@ -938,7 +915,6 @@ StabEnt::preciseName()
 		case S_CHANNEL:
 		case S_VOICE:
 		case S_POOL:
-		case S_APPLICATION:
 			goto dump;
 		}
 		stk[nstk++] = c;
@@ -1102,27 +1078,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 				}
 				fprintf(fp, "</pool>\n");
 				break;
-			}
-				
-#ifdef QUA_V_APP_HANDLER
-			case S_APPLICATION: {
-				// save stream data
-				// save display data
-				// save instance stacks
-				fprintf(fp, "<application name=\"%s\">\n", name);
-				StabEnt	*p = children;
-				while (p!= nullptr) {
-					err=p->SaveSnapshot(fp);
-					if (err != B_NO_ERROR) {
-						break;
-					}
-					p = p->sibling;
-				}
-				fprintf(fp, "</application>\n");
-				break;
-			}
-#endif
-				
+			}				
 			case S_PORT:
 				break;
 				
@@ -1341,15 +1297,7 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 					return err;
 				}
 				break;
-				
-#ifdef QUA_V_APP_HANDLER
-			case S_APPLICATION:
-				if ((err=ApplicationValue()->Save(fp, indent)) != B_NO_ERROR) {
-					return err;
-				}
-				break;
-#endif
-				
+
 			case S_PORT:
 				if ((err=PortValue()->save(fp, indent)) != B_NO_ERROR) {
 					return err;
@@ -1508,12 +1456,6 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 		return val.sample->sym->name.c_str();
 	case S_POOL:
 		return val.pool->sym->name.c_str();
-
-#ifdef QUA_V_APP_HANDLER
-	case S_APPLICATION:
-		return val.application->sym->name;
-#endif
-
 	case S_LAMBDA:
 		return val.lambda->sym->name.c_str();
 	case S_INSTANCE:
@@ -1638,7 +1580,6 @@ StabEnt::TypeSymbol()
 	case S_VOICE:
 	case S_POOL:
 	case S_SAMPLE:
-	case S_APPLICATION:
 	case S_LAMBDA:
 	case S_INSTANCE:
 	case S_STREAM:

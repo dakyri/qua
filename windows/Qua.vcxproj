@@ -106,6 +106,7 @@
     <ClInclude Include="..\include\base\Metric.h" />
     <ClInclude Include="..\include\base\MidiDefs.h" />
     <ClInclude Include="..\include\base\Note.h" />
+    <ClInclude Include="..\include\base\OSCMessage.h" />
     <ClInclude Include="..\include\base\Pool.h" />
     <ClInclude Include="..\include\base\PoolPlayer.h" />
     <ClInclude Include="..\include\base\Attributes.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="..\block\Markov.cpp" />
     <ClCompile Include="..\block\Lambda.cpp" />
     <ClCompile Include="..\block\Nofifiable.cpp" />
+    <ClCompile Include="..\block\OSCMessage.cpp" />
     <ClCompile Include="..\block\Parse.cpp" />
     <ClCompile Include="..\block\Pool.cpp" />
     <ClCompile Include="..\block\QuaFX.cpp" />

@@ -6,6 +6,7 @@
 #include "QuaTime.h"
 #include "QuasiStack.h"
 
+#include "Note.h"
 //////////////////////////////////////////////////////////////////
 //  base value class
 //  a 64 bit value union. 
@@ -29,7 +30,6 @@
 typedef int8	ref_type_t;
 
 class Voice;
-class Application;
 class Lambda;
 class StreamItem;
 class Stream;
@@ -72,6 +72,7 @@ class Take;
 class SampleTake;
 class StreamTake;
 class Clip;
+class OSCMessage;
 
 class TypedValueList
 {
@@ -84,13 +85,13 @@ public:
 		head = tail = nullptr;
 	}
 
-	class TypedValueListItem	*head;
-	class TypedValueListItem	*tail;
+	class TypedValueListItem *head;
+	class TypedValueListItem *tail;
 
-	void				AddItem(void *I, short t);
-	void				AddItem(class TypedValue *v);
-
-	void				Clear();
+	void AddItem(void *I, short t);
+	void AddItem(class TypedValue *v);
+	bool AddToMessage(OSCMessage *msg);
+	void Clear();
 };
 
 // our base value is 64 bit. all these structures should fit that.
@@ -160,7 +161,6 @@ union base_val_t {
 	Sample				*sample;
 	Voice				*voice;
 	Lambda				*lambda;
-	Application			*application;
 	Qua					*qua;
 	Instance			*instance;
 	Take				*take;
@@ -170,6 +170,9 @@ union base_val_t {
 	Output				*output;
 	QuaPort				*port;
 	char				*string;
+	// todo
+	// xxx 
+	// these should be 
 	class Note			*noteP;
 	class Ctrl			*ctrlP;
 	class SysX			*sysXP;
@@ -177,6 +180,8 @@ union base_val_t {
 	class Prog			*progP;
 	class Bend			*bendP;
 	class QuaJoy		*joyP;
+	// converted to direct references 
+
 	FILE				*file;
 	class Block			**blockP;
 	class Block			*block;
@@ -188,15 +193,7 @@ union base_val_t {
 	VstPlugin			*vst;
 	int32				vstParam;
 	int32				vstProgram;
-
-#ifdef QUA_V_PORT_PARAM
-	BParameter			*parameter;
-#endif
-
-#if defined(QUA_V_STREAM_MESG)
-	BMessage			*mesgP;
-#endif
-
+	OSCMessage			*mesgP;
 };
 
 
@@ -235,7 +232,6 @@ public:
 		S_VOICE		= 2,
 		S_POOL		= 3,
 		S_SAMPLE	= 4,
-		S_APPLICATION	= 5,
 		S_LAMBDA		= 6,
 
 		S_INSTANCE		= 8,
@@ -494,7 +490,6 @@ public:
 	StreamItem		*StreamItemValue();
 	Note			*NoteValue();
 	Qua				*QuaValue();
-	Application		*ApplicationValue();
 	Ctrl			*CtrlValue();
 	SysX			*SysXValue();
 	SysC			*SysCValue();
@@ -502,7 +497,7 @@ public:
 	Prog			*ProgValue();
 	Lambda			*LambdaValue();
 	Voice			*VoiceValue();
-	TypedValueList	*ListValue();
+	TypedValueList	&ListValue();
 	Channel			*ChannelValue();
 	Envelope		*EnvelopeValue();
 	Block			*BlockValue();
@@ -521,10 +516,7 @@ public:
 	int32			VstProgramValue(); // the value of a program
 #endif
 
-#if defined(QUA_V_STREAM_MESG)
-	BMessage		*MessageValue();
-#endif
-	
+	OSCMessage		*MessageValue();
 	Schedulable		*SchedulableValue();
 	Executable		*ExecutableValue();
 	Stackable		*StackableValue();
@@ -558,20 +550,19 @@ public:
 	void			Set(base_type_t, ref_type_t ref);
 
 	void			SetToSymbol(char *nm, StabEnt *ctxt);
-#ifndef OLD_LIST
-	inline void Set(TypedValueList *l)
+
+	inline void Set(TypedValueList &l)
 	{
 		if (type == S_LIST) {
 			val.list.Clear();
 		}
 		type = S_LIST;
-		val.list.head = l->head;
-		val.list.tail = l->tail;
-		l->head = l->tail = nullptr;
+		val.list.head = l.head;
+		val.list.tail = l.tail;
+		l.head = l.tail = nullptr;
 		refType = REF_VALUE;
 		indirection = 0;
 	}
-#endif
 	
 	inline void	
 	SetStackReference(StabEnt *newc, int32 off)
@@ -705,12 +696,6 @@ TypedValue::SysCValue()
 	return type == S_SYSC && (refType == REF_VALUE || refType == REF_POINTER)? val.sysCP: nullptr;
 }
 
-inline Application *
-TypedValue::ApplicationValue()
-{
-	return type == S_APPLICATION && refType == REF_VALUE? val.application: nullptr;
-}
-
 inline StreamItem *
 TypedValue::StreamItemValue()
 {
@@ -724,10 +709,10 @@ TypedValue::NoteValue()
 	return type == S_NOTE && (refType == REF_VALUE || refType == REF_POINTER)? val.noteP: nullptr;
 }
 
-inline Ctrl	 *
+inline Ctrl	*
 TypedValue::CtrlValue()
 {
-	return type == S_CTRL && (refType == REF_VALUE || refType == REF_POINTER)? val.ctrlP: nullptr;
+	return type == S_CTRL && (refType == REF_VALUE || refType == REF_POINTER)? val.ctrlP : nullptr;
 }
 
 inline Lambda *
@@ -747,15 +732,6 @@ TypedValue::VoiceValue(){
 	return type == S_VOICE && refType == REF_VALUE? val.voice: nullptr;
 }
 
-inline TypedValueList	 *
-TypedValue::ListValue()
-{
-#ifdef OLD_LIST
-	return type == S_LIST? val.list: nullptr;
-#else
-	return type == S_LIST? &val.list: nullptr;
-#endif
-}
 
 inline Channel *
 TypedValue::ChannelValue()
@@ -766,11 +742,7 @@ TypedValue::ChannelValue()
 inline Time *
 TypedValue::TimeValue()
 {
-	return (type == S_TIME)?
-				(refType > 0?
-					val.timeP:
-					(Time *)&val.time)
-				: 0;
+	return (type == S_TIME)? (refType > 0? val.timeP: (Time *)&val.time) : 0;
 }
 
 inline Block *
@@ -867,6 +839,7 @@ TypedValue::OutputValue()
 	return (type == S_OUTPUT)?val.output: nullptr;
 }
 
+
 #if defined(QUA_V_VST_HOST)
 inline int32
 TypedValue::VstParamValue()
@@ -885,6 +858,12 @@ inline Take *
 TypedValue::TakeValue()
 {
 	return (type == S_TAKE)?val.take: nullptr;
+}
+
+inline TypedValueList &
+TypedValue::ListValue()
+{
+	return val.list;
 }
 
 #endif

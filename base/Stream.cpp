@@ -12,6 +12,7 @@
 #include "Qua.h"
 #include "Parse.h"
 #include "MidiDefs.h"
+#include "OSCMessage.h"
 
 #include "Dictionary.h"
 
@@ -196,10 +197,8 @@ Stream::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		bend.Set(bendamt, hasCommand?cmd:MIDI_BEND);
 		AddToStream(&bend, &atTime);
 	} else if (namestr == "mesg") {
-#ifdef QUA_V_APP_HANDLER
 		Note	note;
 		AddToStream(&note, &atTime);
-#endif
 	} else if (namestr == "prog") {
 		Prog	prog;
 		prog.Set(program, bank, subBank, hasCommand?cmd:MIDI_PROG);
@@ -485,17 +484,13 @@ Stream::AddToStream(class QuaJoy *tp, Time *tag)
 	return i;
 }
 
-#if defined(QUA_V_APP_HANDLER)
-
 StreamMesg *
-Stream::AddToStream(BMessage *mp, Time *tag)
+Stream::AddToStream(OSCMessage *mp, Time *tag)
 {
 	StreamMesg *i = new StreamMesg(tag, mp);
 	AppendItem(i);
 	return i;
 }
-
-#endif
 
 StreamLogEntry *
 Stream::AddToStream(LogEntry *sp, Time *tag)
@@ -517,9 +512,7 @@ Stream::AddToStream(StreamItem *p, Time *tag)
 		return AddToStream(&((StreamJoy*)p)->joy,tag);
 	}
 
-#ifdef QUA_V_APP_HANDLER
-	case TypedValue::S_MESSAGE: return AddToStream(new BMessage(*((StreamMesg*)p)->mesg),tag);
-#endif
+	case TypedValue::S_MESSAGE: return AddToStream(new OSCMessage(*((StreamMesg*)p)->mesg),tag);
 	case TypedValue::S_PROG: return AddToStream(&((StreamProg*)p)->prog,tag);
 	case TypedValue::S_BEND: return AddToStream(&((StreamBend*)p)->bend,tag);
 	case TypedValue::S_SYSX: return AddToStream(&((StreamSysX*)p)->sysX,tag);
@@ -835,26 +828,6 @@ Stream::DeleteItem(TypedValueList *L)
 	StreamItem	**qq = &head, *q=head;
 	int			cnt = 0;
 
-#ifdef OLD_LIST
-	for (short i=0; i<L->Count; i++) {
-		if (L->Items[i].type == TypedValue::S_STREAM_ITEM) {
-			StreamItem	*p = L->Items[i].StreamItemValue();
-			while (q) {
-				if (*qq == p) {
-					*qq == p->next;
-					if (p->next == nullptr) {
-						tail = q;
-					}
-					delete p;
-					cnt ++;
-					break;
-				}
-				qq = &q->next;
-				q = q->next;
-			}
-		}
-	}
-#else
 	TypedValueListItem	*lip = L->head;
 	while (lip) {
 		if (lip->value.type == TypedValue::S_STREAM_ITEM) {
@@ -875,7 +848,7 @@ Stream::DeleteItem(TypedValueList *L)
 		}
 		lip = lip->next;
 	}
-#endif
+
 	if (head == nullptr)
 		tail = nullptr;
 	return cnt;
@@ -1347,9 +1320,7 @@ Stream::InsertItem(Time *time, TypedValue *val)
 	if (val->type == TypedValue::S_NOTE) {
 		r = new StreamNote(time, val->NoteValue());
 	} else if (val->type == TypedValue::S_MESSAGE) {
-#ifdef QUA_V_APP_HANDLER
 		r = new StreamMesg(time, val->MessageValue());
-#endif
 	} else
 		return 0;
 		
@@ -1410,9 +1381,9 @@ Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 				break;
 			}
 
-#ifdef QUA_V_APP_HANDLER
 			case TypedValue::S_MESSAGE: {
 				StreamMesg *q = (StreamMesg *)p;
+				/* todo xxxx save of S_MESSAGE
 				size_t	s = q->mesg->FlattenedSize();
 				char	*buf = new char[s];
 
@@ -1426,9 +1397,9 @@ Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 					return B_ERROR;
 				}
 				delete buf;
+				*/
 				break;
 			}
-#endif
 	//		case TypedValue::S_VALUE: {
 	//			StreamValue *q = (StreamValue *)p;
 	//			break;
@@ -1531,20 +1502,19 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 
-#ifdef QUA_V_APP_HANDLER
 		case TypedValue::S_MESSAGE: {
+			/* todo xxxx read back osc message daya
 			StreamMesg *q = new StreamMesg(&t, nullptr);
-			q->mesg = new BMessage();
-
+			q->mesg = new OSCMessage();
 			size_t	s;
 			if (fread(&s, sizeof(s), 1, fp) !=  1) {
-				reportError("Couldn't read flattened message size");
+				//reportError("Couldn't read flattened message size");
 				return B_ERROR;
 			}
 			char	*buf = new char[s];
 
 			if (fread(buf, s, 1, fp) !=  1) {
-				reportError("Couldn't read flattened message");
+				//reportError("Couldn't read flattened message");
 				return B_ERROR;
 			}
 			q->mesg->Unflatten(buf);
@@ -1552,9 +1522,9 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			delete buf;
 			
 			AppendItem(q);
+			*/
 			break;
 		}
-#endif
 
 //		case TypedValue::S_VALUE: {
 //			StreamValue *q = (StreamValue *)p;

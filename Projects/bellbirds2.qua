@@ -25,7 +25,7 @@ qua bellbirds
 		output \audio audioout "Mixer"
 	}
 	sample bellbirds2 {
-	   take "/Obscenity/sound/bellbirds2" // "Original" 
+	   take take1 "/Obscenity/sound/bellbirds2" // "Original" 
 	}
 
 	tempo = 120

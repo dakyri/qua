@@ -339,7 +339,6 @@ std::unordered_map<std::string, int> typeIndex = {
 	{ "channel",		TypedValue::S_CHANNEL },
 	{ "instance",	TypedValue::S_INSTANCE },
 	{ "pool",		TypedValue::S_POOL },
-	{ "application",	TypedValue::S_APPLICATION },
 	{ "block",		TypedValue::S_BLOCK },
 	{ "expression",	TypedValue::S_EXPRESSION },
 	{ "sample",		TypedValue::S_SAMPLE },

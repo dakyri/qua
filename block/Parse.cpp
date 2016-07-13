@@ -29,10 +29,6 @@
 #include "MidiDefs.h"
 #include "Dictionary.h"
 
-#if defined(QUA_V_APP_HANDLER)
-#include "Application.h"
-#endif
-
 #include <iostream>
 
 int				debug_parse=1;
@@ -1360,7 +1356,6 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 			   		case TypedValue::S_VOICE:
 			   		case TypedValue::S_POOL:
 			   		case TypedValue::S_SAMPLE:
-			   		case TypedValue::S_APPLICATION:
 			   		case TypedValue::S_PORT:
 			   			varp->type = Block::C_SCHEDULE;
 			   			varp->crap.call.crap.sym = sym;
@@ -2133,9 +2128,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		if (currentTokenType == TOK_TYPE) {
 			templateType=findType(currentToken);
 			switch (templateType) {
-			case TypedValue::S_APPLICATION:
-	    		GetToken();
-				break;
 			case TypedValue::S_SAMPLE:
 				GetToken();
 				break;
@@ -2819,46 +2811,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    break;
 	}
 
-#if defined(QUA_V_APP_HANDLER)
-	case TypedValue::S_APPLICATION: {
-		if (ndimensions != 0) {
-			ParseError("application should be undimensioned");
-		}
-
-		Application *A;
-		if (!uberQua || context != uberQua->sym)
-			ParseError("app control must be in outer context");
-
-		if (*dataPath) {
-			BEntry		ent(dataPath);
-			BPath		appath(dataPath);
-			
-			if (ent.InitCheck() == B_NO_ERROR) {
-			    A = new Application(currentToken, &appath, uberQua, *mime?mime:nullptr);
-			    A->next = schedulees;
-			    schedulees = A;
-			} else {
-				AbortError("Application %s not found", dataPath);
-			    A = new Application(currentToken, nullptr, uberQua, *mime?mime:nullptr);
-			    A->next = schedulees;
-			    schedulees = A;
-			}
-		} else {
-		    A = new Application(currentToken, nullptr, uberQua, *mime?mime:nullptr);
-		    A->next = schedulees;
-		    schedulees = A;
-		}					
-	    GetToken();
-	    glob.PushContext(A->sym);
-	    sym = A->sym;
-	    ParseSchedulable(A);
-
-	    glob.PopContext();
-
-		schedulable = A; 
-	    break;
-	}
-#endif	
 	case TypedValue::S_PORT: {
 		if (ndimensions != 0) {
 			ParseError("port should be undimensioned");

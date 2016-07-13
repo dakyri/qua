@@ -74,13 +74,11 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
 	 	break;
     }
     
-#ifdef QUA_V_APP_HANDLER
     case  Block::BUILTIN_MESG: {
 		ret_val = CreateNewMesg(block->crap.call.parameters,
 				items, stacker, stack);
 		break;	 
     }
-#endif
     
     case  Block::BUILTIN_SYSX: {
 		ret_val = CreateNewSysX(block->crap.call.parameters,
@@ -121,13 +119,11 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
 	 			break;
 			}
 		    
-#ifdef QUA_V_APP_HANDLER
-			case TypedValue::TypedValue::S_MESG: {
+			case TypedValue::S_MESSAGE: {
 				ret_val = CreateNewMesg(block->crap.call.parameters,
-						items, stacker, stack);
+						items, stacker, stackCtxt, stack);
 				break;	 
 			}
-#endif
     
 			case  TypedValue::TypedValue::S_SYSX: {
 				ret_val = CreateNewSysX(block->crap.call.parameters,
@@ -481,33 +477,17 @@ EvaluateExpression(Block *block, StreamItem *items, Stacker *stacker, StabEnt *s
 					 = (int32)active;
 			break;
 		} else if (block->subType == Block::LIST_NORM) {	// an TypedValue::S_LIST
-#ifdef OLD_LIST
-			TypedValueList	*L = new TypedValueList();
-			ret_val.Set(TypedValue::S_LIST, TypedValue::REF_POINTER);
-			ret_val.SetValue(L);
-			for (Block *B = block->crap.list.block; B != nullptr;
-						B = B->next) {
-						
-				ResultValue expv = EvaluateExpression(B, items, stacker, stackCtxt, stack);
-				if (expv.Blocked()) {
-					// should block? leave for now...
-					// BIG ????????. ALSO for Block::C_SEQ_LIST
-				}
-				ret_val.ListValue()->AddItem(expv);
-			}
-#else
 			ret_val = TypedValue::List();
 			for (Block *B = block->crap.list.block; B != nullptr;
 						B = B->next) {
 						
 				ResultValue expv = EvaluateExpression(B, items, stacker, stackCtxt, stack);
 				if (expv.Blocked()) {
-					// should block? leave for now...
+					// should block? leave for now... xxxx todo
 					// BIG ????????. ALSO for Block::C_SEQ_LIST
 				}
-				ret_val.ListValue()->AddItem(&expv);
+				ret_val.ListValue().AddItem(&expv);
 			}
-#endif
 			ret_val.flags = ResultValue::COMPLETE;
 			break;
 		}

@@ -1,5 +1,5 @@
 pool qua6_1 {
-	function Init [
+	take take1 [
 		note("f#5",	6, 80, "cell start")
 		note("e5",	6, 80)
 		note("bb5",	6, 80, "cell start")

@@ -37,6 +37,7 @@
 #endif
 #include "Parse.h"
 #include "Sym.h"
+#include "OSCMessage.h"
 
 
 flag		debug_gen = 0;
@@ -217,8 +218,7 @@ CreateNewProg(Block *P,
 	progTo.bank = NON_PROG;
 	progTo.subbank = NON_PROG;
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d\n", ret_val.type,
-					progTo.program);
+		fprintf(stderr, "creating %d: %d\n", ret_val.type, progTo.program);
 	ret_val.SetPointerValue(&progTo);
    
     return ret_val;
@@ -310,20 +310,23 @@ CreateNewSysC(int which, Block *P,
     return ret_val;
 }
 
-#ifdef QUA_V_APP_HANDLER
+/*
+ xxxx todo careful with ownership
+ assumption now is that the stream processor takes ownership, or if not added to a stream, then deleted by updateactive
+*/
 ResultValue
 CreateNewMesg(Block *P,
 			StreamItem *items,
-			Stacker *stacker, QuasiStack *stack)
+			Stacker *stacker,
+			StabEnt *stackCtxt, QuasiStack *stack)
 {
-	BMessage		*msg;
-    ResultValue		val,
-    				ret_val;
-    int				type;
+	OSCMessage *msg;
+    ResultValue val, ret_val;
+    char *path;
 
-	ret_val.Set(TypedValue::S_MESSAGE, REF_POINTER);
-	ret_val.SetValue((void*)NULL);
-	ret_val.complete = TRUE;
+	ret_val.Set(TypedValue::S_MESSAGE, TypedValue::REF_POINTER);
+	ret_val.SetPointerValue((void*)nullptr);
+	ret_val.flags = ResultValue::COMPLETE;
 
     val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
 	if (val.Blocked()) {
@@ -333,26 +336,30 @@ CreateNewMesg(Block *P,
 	if (!val.Complete()) {
 		ret_val.flags |= ~ResultValue::COMPLETE;
 	}
-// mess id!
-    type = val.IntValue(NULL);
 
-	msg = new BMessage(type);
+    path = val.StringValue();
+	msg = new OSCMessage(path);
 // items to add!	
 	P = P->next;
 	while (P != NULL) {
 	    val = EvaluateExpression(P, items, stacker, stackCtxt, stack);
-	    if (!val.blocked && val.type == TypedValue::S_LIST) {
-	    	val.ListValue()->AddToMessage(msg);
-	    	delete val.ListValue();
+	    if (!val.Blocked()) {
+			if (val.type == TypedValue::S_LIST) {
+				val.ListValue().AddToMessage(msg);
+				if (!val.Complete()) {
+					ret_val.flags |= ~ResultValue::COMPLETE;
+				}
+			} else {
+				msg->add(val);
+			}
 	    }
-    	if (!val.complete) ret_val.complete = FALSE;
+
 	    P = P->next;
 	}
-	ret_val.SetValue(msg);
+	ret_val.SetPointerValue(msg);
    
     return ret_val;
 }
-#endif
 
 ResultValue
 Find(Stream *S, Block *Query)
@@ -364,7 +371,7 @@ Find(Stream *S, Block *Query)
 	for (StreamItem *p=S->head; p!=NULL; p=p->next) {
 		ResultValue cond_val = EvaluateExpression(Query, p, NULL, NULL);
 		if (cond_val.IntValue(NULL)) {
-			ret_val.ListValue()->AddItem(p, TypedValue::S_STREAM_ITEM);
+			ret_val.ListValue().AddItem(p, TypedValue::S_STREAM_ITEM);
 			break;
 		}
 	}

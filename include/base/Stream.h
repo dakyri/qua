@@ -119,23 +119,18 @@ public:
 };
 
 
-#if defined(QUA_V_STREAM_MESG)
-
 class StreamMesg: public StreamItem
 {
 public:
-	StreamMesg(BMessage *mp, class Time *tag);
+	StreamMesg(class Time *tag, OSCMessage *mp);
 	~StreamMesg();
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
 	
- 	BMessage *mesg;
+ 	OSCMessage *mesg;
 };
-
-#endif
-
 
 class StreamValue: public StreamItem
 {
@@ -218,9 +213,7 @@ public:
 	StreamLogEntry	*AddToStream(LogEntry *sp, Time *tag);
 	StreamValue		*AddToStream(TypedValue *sp, Time *tag);
 	void			AddToStream(Stream *S, Time *tag=nullptr);
-#if defined(QUA_V_STREAM_MESG)
-	StreamMesg		*AddToStream(BMessage *mp, Time *tag);
-#endif
+	StreamMesg		*AddToStream(OSCMessage *mp, Time *tag);
 	void			InsertStream(Stream *B, Time *tag=nullptr);
 	void			AppendStream(Stream *B);
 	void			AppendItem(StreamItem *I);

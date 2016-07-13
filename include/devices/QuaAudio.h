@@ -65,10 +65,6 @@ public:
 	QuaAudioPort(char *, QuaAudioManager *, short st);
 	~QuaAudioPort();
 					
-
-#ifdef QUA_V_PORT_PARAM
-	void				ZotParameterGroup(BParameterGroup *, StabEnt *);
-#endif
 	void				ZotInsertCheck(bool, bool, bool, bool);
 
 	virtual const char *name(uchar);

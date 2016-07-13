@@ -1231,21 +1231,11 @@ UpdateActiveBlock(Qua *uberQua,
 			val = EvaluateExpression(B,	mainStream->head, stacker, stackCtxt, stack);
 
 			if (val.type == TypedValue::S_LIST) {
-#ifdef OLD_LIST
-				for (short i=0; i<val.ListValue()->Count; i++) {
-					mainStream->AddToStream(
-							&val.ListValue()->Items[i],
-							updateTime);
+				// todo xxxx this was commented out ... it may be broken, but lets open it up anyway
+				for (TypedValueListItem *p=val.ListValue().head; p != nullptr; p=p->next) {
+					mainStream->AddToStream(&p->value , updateTime);
 				}
-				delete val.ListValue();
-#else
-//				for (short i=0; i<val.ListValue()->Count; i++) {
-//					mainStream->AddToStream(
-//							&val.ListValue()->Items[i],
-//							updateTime);
-//				}
-				val.ListValue()->Clear();
-#endif // OLD_LIST
+				val.ListValue().Clear();
 			} else {
 				switch (val.type) {
 				case TypedValue::S_NOTE: {
@@ -1263,10 +1253,9 @@ UpdateActiveBlock(Qua *uberQua,
 				    	mainStream->PrintStream(stderr);
 #endif						
 				    break;
-				}
-#ifdef QUA_V_APP_HANDLER				
+				}			
 				case TypedValue::S_MESSAGE: {
-					BMessage		*mp = val.MessageValue();
+					OSCMessage		*mp = val.MessageValue();
 					
 #ifdef QUA_V_DEBUG_CONSOLE
 					if (debug_update)
@@ -1275,7 +1264,6 @@ UpdateActiveBlock(Qua *uberQua,
 				    mainStream->AddToStream(mp, updateTime);
 				    break;
 				}
-#endif
 				case TypedValue::S_CTRL: {
 					Ctrl		*mp = val.CtrlValue();
 					

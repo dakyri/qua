@@ -43,10 +43,6 @@
 #include "Parse.h"
 #include "QuaPort.h"
 
-#ifdef QUA_V_APP_HANDLER
-#include "include/Application.h"
-#endif
-
 flag	debug_lval=0;
 
 //////////////////////////////////////////////////////////////////////////
@@ -101,9 +97,6 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 #ifdef QUA_V_VST_HOST
 		case S_VST_PARAM:	lval.addr = (char *) stack->stk.afx; return;
 		case S_VST_PROGRAM:	lval.addr = (char *) stack->stk.afx; return;
-#endif
-#ifdef QUA_V_PORT_PARAM
-		case S_PORTPARAM:	lval.addr = (char *) val.parameter; return;
 #endif
 		default:
 			lval.addr = (char *) val.pointer; return;
@@ -198,7 +191,6 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 					case S_VOICE:
 					case S_LAMBDA:
 					case S_POOL:
-					case S_APPLICATION:
 					case S_QUA:
 					case S_CHANNEL:
 					case S_SAMPLE:
@@ -464,7 +456,6 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 				case TypedValue::S_VOICE:
 				case TypedValue::S_LAMBDA:
 				case TypedValue::S_POOL:
-				case TypedValue::S_APPLICATION:
 				case TypedValue::S_QUA:
 				case TypedValue::S_CHANNEL:
 				case TypedValue::S_SAMPLE:
@@ -1066,7 +1057,6 @@ LValue::CurrentValue()
 	case TypedValue::S_SAMPLE:
 	case TypedValue::S_PORT:
 	case TypedValue::S_QUA:
-	case TypedValue::S_APPLICATION:
 		ret_val.type = sym->type;
 		ret_val.val = sym->val;
 		break;

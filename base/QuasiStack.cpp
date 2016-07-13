@@ -20,9 +20,6 @@
 #include "Dictionary.h"
 
 #include "QuaDisplay.h"
-#ifdef QUA_V_APP_HANDLER
-#include "Application.h"
-#endif
 #ifdef QUA_V_VST_HOST
 #include "VstPlugin.h"
 #endif

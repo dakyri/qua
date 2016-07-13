@@ -14,10 +14,6 @@
 #include "QuaPort.h"
 #include "ControllerBridge.h"
 
-#ifdef QUA_V_APP_HANDLER
-#include "Application.h"
-#endif
-
 status_t
 Loggable::SaveLogInfo(FILE *fp, short indent)
 {
