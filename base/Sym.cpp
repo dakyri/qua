@@ -1872,15 +1872,15 @@ define_global_symbols()
 ////////////////////////////////
     class Time		zero;
     Note		t;
-    StreamNote	x(&zero, &t);
+    StreamNote	x(zero, t);
     Ctrl		s;
-    StreamCtrl	y(&zero, &s);
+    StreamCtrl	y(zero, s);
     Prog		r;
-    StreamProg	z(&zero, &r);
+    StreamProg	z(zero, r);
     QuaJoy		q;
-    StreamJoy	v(&zero, &q);
+    StreamJoy	v(zero, q);
     SysC		rr;
-    StreamSysC	w(&zero, &rr);
+    StreamSysC	w(zero, rr);
 //	fprintf(stderr, "offsets %d %d %d\n",
 //			((char *)&x.note - (char *) &x),
 //			((char *)&x.note.pitch - (char *)&x.note),

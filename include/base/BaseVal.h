@@ -7,6 +7,7 @@
 #include "QuasiStack.h"
 
 #include "Note.h"
+#include "QuaJoy.h"
 //////////////////////////////////////////////////////////////////
 //  base value class
 //  a 64 bit value union. 
@@ -173,13 +174,13 @@ union base_val_t {
 	// todo
 	// xxx 
 	// these should be 
-	class Note			*noteP;
-	class Ctrl			*ctrlP;
-	class SysX			*sysXP;
-	class SysC			*sysCP;
-	class Prog			*progP;
-	class Bend			*bendP;
-	class QuaJoy		*joyP;
+	Note note;
+	SysX sysX;
+	Ctrl ctrl;
+	SysC sysC;
+	Prog prog;
+	Bend bend;
+	QuaJoy joy;
 	// converted to direct references 
 
 	FILE				*file;
@@ -488,13 +489,13 @@ public:
 	Instance		*InstanceValue();
 	Sample			*SampleValue();
 	StreamItem		*StreamItemValue();
-	Note			*NoteValue();
 	Qua				*QuaValue();
-	Ctrl			*CtrlValue();
-	SysX			*SysXValue();
-	SysC			*SysCValue();
-	Bend			*BendValue();
-	Prog			*ProgValue();
+	Note &NoteValue();
+	SysX &SysXValue();
+	Ctrl &CtrlValue();
+	SysC &SysCValue();
+	Bend &BendValue();
+	Prog &ProgValue();
 	Lambda			*LambdaValue();
 	Voice			*VoiceValue();
 	TypedValueList	&ListValue();
@@ -672,28 +673,40 @@ TypedValue::QuaValue()
 	return type == S_QUA && refType == REF_VALUE? val.qua: nullptr;
 }
 
-inline Bend *
-TypedValue::BendValue()
-{
-	return type == S_BEND && (refType == REF_VALUE || refType == REF_POINTER)? val.bendP: nullptr;
-}
-
-inline Prog *
-TypedValue::ProgValue()
-{
-	return type == S_PROG && (refType == REF_VALUE || refType == REF_POINTER)? val.progP: nullptr;
-}
-
-inline SysX *
+inline SysX &
 TypedValue::SysXValue()
 {
-	return type == S_SYSX && (refType == REF_VALUE || refType == REF_POINTER)? val.sysXP: nullptr;
+	return type == S_SYSX ? val.sysX : SysX().set();
 }
 
-inline SysC *
+inline Note &
+TypedValue::NoteValue()
+{
+	return type == S_NOTE? val.note : Note().set();
+}
+
+inline Bend &
+TypedValue::BendValue()
+{
+	return type == S_BEND? val.bend : Bend().set();
+}
+
+inline Prog &
+TypedValue::ProgValue()
+{
+	return type == S_PROG? val.prog : Prog().set();
+}
+
+inline SysC &
 TypedValue::SysCValue()
 {
-	return type == S_SYSC && (refType == REF_VALUE || refType == REF_POINTER)? val.sysCP: nullptr;
+	return type == S_SYSC ? val.sysC : SysC().set();
+}
+
+inline Ctrl	&
+TypedValue::CtrlValue()
+{
+	return type == S_CTRL ? val.ctrl : Ctrl().set();
 }
 
 inline StreamItem *
@@ -703,17 +716,6 @@ TypedValue::StreamItemValue()
 }
 
 
-inline Note	 *
-TypedValue::NoteValue()
-{
-	return type == S_NOTE && (refType == REF_VALUE || refType == REF_POINTER)? val.noteP: nullptr;
-}
-
-inline Ctrl	*
-TypedValue::CtrlValue()
-{
-	return type == S_CTRL && (refType == REF_VALUE || refType == REF_POINTER)? val.ctrlP : nullptr;
-}
 
 inline Lambda *
 TypedValue::LambdaValue()

@@ -16,6 +16,8 @@
 
 #include "Dictionary.h"
 
+#include <iostream>
+
 flag debug_stream=0;
 Stream::Stream()
 {
@@ -186,39 +188,31 @@ Stream::LoadSnapshotElement(tinyxml2::XMLElement *element)
 		LoadSnapshotChildren(element, textFragments);
 	} else if (namestr == "note") {
 		Note	note;
-		note.Set(pitch, velocity, duration, hasCommand?cmd:MIDI_NOTE_ON);
-		AddToStream(&note, &atTime);
+		note.set(pitch, velocity, duration, hasCommand?cmd:MIDI_NOTE_ON);
+		AddToStream(note, atTime);
 	} else if (namestr == "ctrl") {
-		Ctrl	ctrl;
-		ctrl.Set(controller, amount, hasCommand?cmd:MIDI_CTRL);
-		AddToStream(&ctrl, &atTime);
+		AddToStream(Ctrl().set(controller, amount, hasCommand ? cmd : MIDI_CTRL), atTime);
 	} else if (namestr == "bend") {
-		Bend	bend;
-		bend.Set(bendamt, hasCommand?cmd:MIDI_BEND);
-		AddToStream(&bend, &atTime);
+		AddToStream(Bend().set(bendamt, hasCommand ? cmd : MIDI_BEND), atTime);
 	} else if (namestr == "mesg") {
-		Note	note;
-		AddToStream(&note, &atTime);
+		OSCMessage *msg = nullptr;
+		AddToStream(msg, atTime);
+		cerr << "XXXXXXX" << " message snapshot not implemented" << endl;
 	} else if (namestr == "prog") {
-		Prog	prog;
-		prog.Set(program, bank, subBank, hasCommand?cmd:MIDI_PROG);
-		AddToStream(&prog, &atTime);
+		AddToStream(Prog().set(program, bank, subBank, hasCommand ? cmd : MIDI_PROG), atTime);
 	} else if (namestr == "sysc") {
 		if (hasCommand) {
-			SysC	sysc;
-			sysc.Set(cmd, data1, data2);
-			AddToStream(&sysc, &atTime);
+			AddToStream(SysC().set(cmd, data1, data2), atTime);
 		}
 	} else if (namestr == "sysx") {
 		LoadSnapshotChildren(element, textFragments);
 		short	cnt=textFragments.size(); // TODO this looked wrong in original version don't quite get what i was on or if i was wrong
 	} else if (namestr == "joy") {
-		QuaJoy	joy;
-		AddToStream(&joy, &atTime);
+		AddToStream(QuaJoy().set(), atTime);
 	} else if (namestr == "value") {
 		if (hasValueType) {
 			TypedValue	val;
-			AddToStream(&val, &atTime);
+			AddToStream(val, atTime);
 		}
 	}
 
@@ -394,7 +388,7 @@ Stream::ClearStream()
 //}
 
 StreamNote *
-Stream::AddToStream(Note *tp, Time *tag)
+Stream::AddToStream(Note &tp, Time &tag)
 {
 	StreamNote *i=new StreamNote(tag, tp);
     AppendItem(i);
@@ -402,7 +396,7 @@ Stream::AddToStream(Note *tp, Time *tag)
 }
 
 StreamCtrl *
-Stream::AddToStream(Ctrl *tp, Time *tag)
+Stream::AddToStream(Ctrl &tp, Time &tag)
 {
 	StreamCtrl *i=new StreamCtrl(tag, tp);
     AppendItem(i);
@@ -410,7 +404,7 @@ Stream::AddToStream(Ctrl *tp, Time *tag)
 }
 
 StreamBend *
-Stream::AddToStream(Bend *tp, Time *tag)
+Stream::AddToStream(Bend &tp, Time &tag)
 {
 	StreamBend *i=new StreamBend(tag, tp);
     AppendItem(i);
@@ -418,7 +412,7 @@ Stream::AddToStream(Bend *tp, Time *tag)
 }
 
 StreamSysX *
-Stream::AddToStream(SysX *tp, Time *tag)
+Stream::AddToStream(SysX &tp, Time &tag)
 {
 	StreamSysX *i=new StreamSysX(tag, tp);
     AppendItem(i);
@@ -426,7 +420,7 @@ Stream::AddToStream(SysX *tp, Time *tag)
 }
 
 StreamSysC *
-Stream::AddToStream(SysC *tp, Time *tag)
+Stream::AddToStream(SysC &tp, Time &tag)
 {
 	StreamSysC *i = new StreamSysC(tag, tp);
     AppendItem(i);
@@ -434,7 +428,7 @@ Stream::AddToStream(SysC *tp, Time *tag)
 }
 
 StreamProg *
-Stream::AddToStream(Prog *tp, Time *tag)
+Stream::AddToStream(Prog &tp, Time &tag)
 {
 	StreamProg * i = new StreamProg(tag, tp);
 	AppendItem(i);
@@ -442,7 +436,7 @@ Stream::AddToStream(Prog *tp, Time *tag)
 }
 
 StreamValue *
-Stream::AddToStream(class TypedValue *tp, Time *tag)
+Stream::AddToStream(TypedValue &tp, Time &tag)
 {
 	StreamValue *i= new StreamValue(tag, tp);
 	AppendItem(i);
@@ -450,7 +444,7 @@ Stream::AddToStream(class TypedValue *tp, Time *tag)
 }
 
 StreamJoy *
-Stream::AddJoyAxisToStream(uchar stick, uchar which, float v,  Time *tag)
+Stream::AddJoyAxisToStream(uchar stick, uchar which, float v,  Time &tag)
 {
 	StreamJoy *i= new StreamJoy(tag, stick, which, QUA_JOY_AXIS);
 	i->joy.value.axis = v;
@@ -459,7 +453,7 @@ Stream::AddJoyAxisToStream(uchar stick, uchar which, float v,  Time *tag)
 }
 
 StreamJoy *
-Stream::AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time *tag)
+Stream::AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time &tag)
 {
 	StreamJoy *i= new StreamJoy(tag, stick, which, QUA_JOY_HAT);
 	i->joy.value.hat = v;
@@ -468,7 +462,7 @@ Stream::AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time *tag)
 }
 
 StreamJoy *
-Stream::AddJoyButtonToStream(uchar stick, uchar which, bool v,  Time *tag)
+Stream::AddJoyButtonToStream(uchar stick, uchar which, bool v,  Time &tag)
 {
 	StreamJoy *i= new StreamJoy(tag, stick, which, QUA_JOY_BUTTON);
 	i->joy.value.button = v;
@@ -477,7 +471,7 @@ Stream::AddJoyButtonToStream(uchar stick, uchar which, bool v,  Time *tag)
 }
 
 StreamJoy *
-Stream::AddToStream(class QuaJoy *tp, Time *tag)
+Stream::AddToStream(QuaJoy &tp, Time &tag)
 {
 	StreamJoy *i= new StreamJoy(tag, tp);
 	AppendItem(i);
@@ -485,7 +479,7 @@ Stream::AddToStream(class QuaJoy *tp, Time *tag)
 }
 
 StreamMesg *
-Stream::AddToStream(OSCMessage *mp, Time *tag)
+Stream::AddToStream(OSCMessage *mp, Time &tag)
 {
 	StreamMesg *i = new StreamMesg(tag, mp);
 	AppendItem(i);
@@ -493,7 +487,7 @@ Stream::AddToStream(OSCMessage *mp, Time *tag)
 }
 
 StreamLogEntry *
-Stream::AddToStream(LogEntry *sp, Time *tag)
+Stream::AddToStream(LogEntry *sp, Time &tag)
 {
 	StreamLogEntry *i = new StreamLogEntry(tag, sp);
 	InsertItem(i);
@@ -501,23 +495,17 @@ Stream::AddToStream(LogEntry *sp, Time *tag)
 }
 
 StreamItem *
-Stream::AddToStream(StreamItem *p, Time *tag)
+Stream::AddToStream(StreamItem *p, Time &tag)
 {
     switch (p->type) {
-	case TypedValue::S_NOTE: {
-		return AddToStream(&((StreamNote*)p)->note,tag);
-	}
-	
-	case TypedValue::S_JOY: {
-		return AddToStream(&((StreamJoy*)p)->joy,tag);
-	}
-
-	case TypedValue::S_MESSAGE: return AddToStream(new OSCMessage(*((StreamMesg*)p)->mesg),tag);
-	case TypedValue::S_PROG: return AddToStream(&((StreamProg*)p)->prog,tag);
-	case TypedValue::S_BEND: return AddToStream(&((StreamBend*)p)->bend,tag);
-	case TypedValue::S_SYSX: return AddToStream(&((StreamSysX*)p)->sysX,tag);
-	case TypedValue::S_SYSC: return AddToStream(&((StreamSysC*)p)->sysC,tag);
-	case TypedValue::S_CTRL: return AddToStream(&((StreamCtrl*)p)->ctrl,tag);
+	case TypedValue::S_NOTE: return AddToStream(((StreamNote*)p)->note,tag);
+	case TypedValue::S_SYSX: return AddToStream(((StreamSysX*)p)->sysX, tag);
+	case TypedValue::S_JOY:  return AddToStream(((StreamJoy*)p)->joy, tag); 
+	case TypedValue::S_MESSAGE: return AddToStream(new OSCMessage(*((StreamMesg*)p)->mesg), tag);
+	case TypedValue::S_PROG: return AddToStream(((StreamProg*)p)->prog, tag);
+	case TypedValue::S_BEND: return AddToStream(((StreamBend*)p)->bend, tag);
+	case TypedValue::S_SYSC: return AddToStream(((StreamSysC*)p)->sysC, tag);
+	case TypedValue::S_CTRL: return AddToStream(((StreamCtrl*)p)->ctrl, tag);
 	case TypedValue::S_STREAM_ITEM: {
 		internalError("AddToStream: unexpected stream_item stream item");
 		return nullptr;
@@ -527,10 +515,10 @@ Stream::AddToStream(StreamItem *p, Time *tag)
 		if (q->value.type == TypedValue::S_STREAM_ITEM) {
 			StreamItem	*i = q->value.StreamItemValue();
 			StreamItem	*j = i->Clone();
-			AddStreamItems(j, 1, nullptr);
+			AddStreamItems(j, 1, Time());
 			return j;
 		} else {
-			return AddToStream(&q->value,	tag);
+			return AddToStream(q->value, tag);
 		}
 	}
 	
@@ -541,15 +529,15 @@ Stream::AddToStream(StreamItem *p, Time *tag)
 }
 
 void
-Stream::AddToStream(Stream *S, Time *offt)
+Stream::AddToStream(Stream *S, Time &offt)
 {
 	StreamItem	*p;
     for (p = S->head; p != nullptr; p=p->next) {
-    	Time	timeat = p->time;
-    	if (offt) timeat = timeat - *offt;
+		Time	timeat = p->time;
+		if (offt.ticks) timeat -= offt;
     	if (debug_stream)
     		fprintf(stderr, "chan:p = %x %d\n", (unsigned) p, p->type);
-		AddToStream(p, &timeat);
+		AddToStream(p, timeat);
 
     }
 	if (debug_stream)
@@ -607,7 +595,7 @@ Stream::InsertItem(StreamItem *l)
 }
 
 void
-Stream::ModifyItemTime(StreamItem *l, Time *tag)
+Stream::ModifyItemTime(StreamItem *l, Time &tag)
 {
 	StreamItem *p = head, **pp =&head, *prev=nullptr,
 			*insert_after=nullptr, *insert_before = nullptr,
@@ -616,7 +604,7 @@ Stream::ModifyItemTime(StreamItem *l, Time *tag)
 		if (p == l) {
 			take_from = pp;
 		}
-		if (p->time > *tag && insert_before == nullptr) {
+		if (p->time > tag && insert_before == nullptr) {
 			insert_after = prev;
 			insert_before = p;
 		}
@@ -624,7 +612,7 @@ Stream::ModifyItemTime(StreamItem *l, Time *tag)
 		prev = p;
 		p = p->next;
 	}
-	l->time = *tag;
+	l->time = tag;
 	if (take_from == nullptr) {
 		internalError("modifying demented stream...not");
 		return;
@@ -644,7 +632,7 @@ Stream::ModifyItemTime(StreamItem *l, Time *tag)
 }
 
 void
-Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
+Stream::AddStreamItems(StreamItem *sp, short r, Time &tag)
 {
 
     if (nItems < MAX_STREAM) {
@@ -665,8 +653,7 @@ Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
 				if (sp->type == TypedValue::S_NOTE) {
 					((StreamNote*)sp)->note.duration /= r;
 				}
-				if (tag)
-					sp->time = ((sp->time - startt) / r) + *tag;
+				sp->time = ((sp->time - startt) / r) + tag;
 				sp = sp->next;
 				nItems++;
 			}
@@ -677,7 +664,7 @@ Stream::AddStreamItems(StreamItem *sp, short r, Time *tag)
 }
 
 void
-Stream::ItemRefsAt(Time after, Time time, TypedValueList &found)
+Stream::ItemRefsAt(Time &after, Time &time, TypedValueList &found)
 {
 	StreamItem *p = head, *q=nullptr, *l=nullptr, *t=nullptr;
 
@@ -697,7 +684,7 @@ Stream::ItemRefsAt(Time after, Time time, TypedValueList &found)
 }
 
 void
-Stream::ItemRefsBetween(Time after, Time time, TypedValueList &found)
+Stream::ItemRefsBetween(Time &after, Time &time, TypedValueList &found)
 {
 	StreamItem *p = head, *q=nullptr, *l=nullptr, *t=nullptr;
 
@@ -946,7 +933,7 @@ Stream::SetDuration(StreamItem *ip, dur_t newdur)
 											np->note.pitch);
 				if (nop) {
 					Time	newt = np->time.ticks + ((int)newdur);
-					ModifyItemTime(nop, &newt);
+					ModifyItemTime(nop, newt);
 				} else {
 					np->note.duration = newdur;
 				}
@@ -968,7 +955,7 @@ Stream::MoveNoteAgglomerate(
 	Time	delta = t - agglomerate[0]->time;
 	for (auto p: agglomerate) {
 		Time		newt = p->time + delta;
-		ModifyItemTime(p, &newt);
+		ModifyItemTime(p, newt);
 		if (p->type == TypedValue::S_NOTE)
 			((StreamNote *)p)->note.pitch = newpitch;
 	}
@@ -1225,7 +1212,7 @@ Stream::DuplicateController(ctrl_t ctl_from, ctrl_t ctl_to)
 		if (p->type == TypedValue::S_CTRL) {
 			StreamCtrl	*pc = (StreamCtrl *)p;
 			if (pc->ctrl.controller == ctl_from) {
-				StreamCtrl	*npc = new StreamCtrl(&p->time, pc->ctrl.cmd, ctl_to, pc->ctrl.amount);
+				StreamCtrl	*npc = new StreamCtrl(p->time, pc->ctrl.cmd, ctl_to, pc->ctrl.amount);
 				npc->next = p->next;
 				p->next = npc;
 				if (npc->next == nullptr) {
@@ -1313,19 +1300,19 @@ Stream::Split(cmd_t type, Block *condition, Stacker *stacker,
 }
 
 int
-Stream::InsertItem(Time *time, TypedValue *val)
+Stream::InsertItem(Time &time, TypedValue &val)
 {
 	StreamItem *p, *q = nullptr, *r;
 	
-	if (val->type == TypedValue::S_NOTE) {
-		r = new StreamNote(time, val->NoteValue());
-	} else if (val->type == TypedValue::S_MESSAGE) {
-		r = new StreamMesg(time, val->MessageValue());
+	if (val.type == TypedValue::S_NOTE) {
+		r = new StreamNote(time, val.NoteValue());
+	} else if (val.type == TypedValue::S_MESSAGE) {
+		r = new StreamMesg(time, val.MessageValue());
 	} else
 		return 0;
 		
 	for (p=head; p!=nullptr; p=p->next) {
-		if (p->time > *time)
+		if (p->time > time)
 			break;
 		q = p;
 	}
@@ -1484,7 +1471,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			t.metric = &Metric::std;
 		switch (type) {
 		case TypedValue::S_NOTE: {
-			StreamNote	*q = new StreamNote(&t, nullptr);
+			StreamNote	*q = new StreamNote(t, Note().set());
 			ReadVar(q->note.cmd);
 			ReadVar(q->note.pitch);
 			ReadVar(q->note.dynamic);
@@ -1494,7 +1481,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 		case TypedValue::S_BEND: {
-			StreamBend *q = new StreamBend(&t,nullptr);
+			StreamBend *q = new StreamBend(t, Bend().set());
 			ReadVar(q->bend.cmd);
 			ReadVar(q->bend.bend);
 			
@@ -1531,7 +1518,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 //			break;
 //		}
 		case TypedValue::S_CTRL: {
-			StreamCtrl *q = new StreamCtrl(&t, nullptr);
+			StreamCtrl *q = new StreamCtrl(t, Ctrl().set());
 			ReadVar(q->ctrl.cmd);
 			ReadVar(q->ctrl.controller);
 			ReadVar(q->ctrl.amount);
@@ -1540,7 +1527,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 		case TypedValue::S_PROG: {
-			StreamProg *q = new StreamProg(&t, nullptr);
+			StreamProg *q = new StreamProg(t, Prog().set());
 			ReadVar(q->prog.cmd);
 			ReadVar(q->prog.program);
 			ReadVar(q->prog.bank);
@@ -1550,7 +1537,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 		case TypedValue::S_SYSX: {
-			StreamSysX *q = new StreamSysX(&t, nullptr);
+			StreamSysX *q = new StreamSysX(t, SysX().set());
 			ReadVar(q->sysX.length);
 			q->sysX.data = new char[q->sysX.length];
 //			if ((err=fp->Read(q->sysX.data, q->sysX.length))<B_NO_ERROR) {
@@ -1564,7 +1551,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 			break;
 		}
 		case TypedValue::S_SYSC: {
-			StreamSysC *q = new StreamSysC(&t, nullptr);
+			StreamSysC *q = new StreamSysC(t, SysC().set());
 			ReadVar(q->sysC.cmd);
 			ReadVar(q->sysC.data1);
 			ReadVar(q->sysC.data2);
@@ -1577,7 +1564,7 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 //			break;
 //		}
 		case TypedValue::S_JOY: {
-			StreamJoy *q = new StreamJoy(&t, nullptr);
+			StreamJoy *q = new StreamJoy(t, QuaJoy().set());
 //			ReadVar(q->joy.x);
 //			ReadVar(q->joy.y);
 //			ReadVar(q->joy.deltax);

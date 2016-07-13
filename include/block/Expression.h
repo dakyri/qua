@@ -24,9 +24,9 @@ ResultValue		Find(Stream *S, Block *Query);
 void PlayAtClock(struct OldPlayInfo *P, StreamItem *items,
 						Stacker *instance, QuasiStack *stack,
 						class TypedValueList &l);
-Note *PlayNextNote(struct OldPlayInfo *P);
-Note *WhirlNextNote(struct WhirlInfo *W);
-Note *GenNextNote(struct MarkovInfo *G);
+Note &PlayNextNote(struct OldPlayInfo *P);
+Note &WhirlNextNote(struct WhirlInfo *W);
+Note &GenNextNote(struct MarkovInfo *G);
 
 int stringToNote(char *buf);
 

@@ -279,7 +279,7 @@ Qua::PostCreationInit()
 		    					this,
 		    					&mainStream,
 		    					initBlock,
-		    					&theTime,
+		    					theTime,
 		    					this,
 								sym,
 		    					initStack,
@@ -1125,7 +1125,7 @@ Qua::AddToSchedule(Instance *inst)
 	if (!inst) return false;
 	TypedValue	v;
 	v.Set(inst);
-	schedule.AddToStream(&v, &inst->startTime);
+	schedule.AddToStream(v, inst->startTime);
 	if (inst->startTime < theTime && (inst->startTime+inst->duration) >theTime) {
 		cueItem = nullptr;
 	}

@@ -73,7 +73,8 @@ struct MarkovInfo  : public GenericPlayInfo
 // operational data used by
     short rFormNo;			// current rhythmic form number.
     short rFormInd;			// index into current rhythmic cell
-    Note noteHistory[MAX_GEN_HISTORY]; // previous results
+    vector<Note> noteHistory; // previous results
+	vector<AttributeList> attribHistory;
 };
 
 int int_to_ind(int interv);

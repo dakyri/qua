@@ -36,7 +36,7 @@ Notifiable::Notification(Block *B, Stacker *i, StabEnt *stackCtxt, QuasiStack *s
 	    					i->uberQua,
 	    					&mainStream,
 	    					B,
-	    					&Now,
+	    					Now,
 							i,
 							stackCtxt,
 	    					s,

@@ -114,20 +114,17 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
     case Block::BUILTIN_CREATE: {
 		switch (block->crap.call.crap.createType) {
 			case TypedValue::S_NOTE: {
-				ret_val = CreateNewNote(block->type,
-						block->crap.call.parameters, items, stacker, stackCtxt, stack);	 
+				ret_val = CreateNewNote(block->type, block->crap.call.parameters, items, stacker, stackCtxt, stack);	 
 	 			break;
 			}
 		    
 			case TypedValue::S_MESSAGE: {
-				ret_val = CreateNewMesg(block->crap.call.parameters,
-						items, stacker, stackCtxt, stack);
+				ret_val = CreateNewMesg(block->crap.call.parameters, items, stacker, stackCtxt, stack);
 				break;	 
 			}
     
 			case  TypedValue::TypedValue::S_SYSX: {
-				ret_val = CreateNewSysX(block->crap.call.parameters,
-						items, stacker, stackCtxt, stack);
+				ret_val = CreateNewSysX(block->crap.call.parameters, items, stacker, stackCtxt, stack);
 				break;	 
 			}
 		    
@@ -139,20 +136,17 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
 			}
 		    
 			case  TypedValue::S_CTRL: {
-				ret_val = CreateNewCtrl(block->crap.call.parameters,
-						items, stacker, stackCtxt, stack);
+				ret_val = CreateNewCtrl(block->crap.call.parameters, items, stacker, stackCtxt, stack);
 				break;	 
 			}
 		    
 			case  TypedValue::S_BEND: {
-				ret_val = CreateNewBend(block->crap.call.parameters,
-						items, stacker, stackCtxt, stack);
+				ret_val = CreateNewBend(block->crap.call.parameters, items, stacker, stackCtxt, stack);
 				break;	 
 			}
 		    
 			case  TypedValue::S_PROG: {
-				ret_val = CreateNewProg(block->crap.call.parameters,
-						items, stacker, stackCtxt, stack);
+				ret_val = CreateNewProg(block->crap.call.parameters, items, stacker, stackCtxt, stack);
 				break;	 
 			}
 		}
@@ -215,7 +209,7 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
     						items, stacker, stackCtxt, stack);
     	Time	time(clockat, P->uberQua->metric);
     	ret_val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
-    	ret_val.SetValue((int32)P->mainStream->InsertItem(&time, &item));
+    	ret_val.SetValue((int32)P->mainStream->InsertItem(time, item));
     	break;
 	}
 	

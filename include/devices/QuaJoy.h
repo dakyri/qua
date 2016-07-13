@@ -27,6 +27,14 @@ typedef uchar	j_stick_t;
 
 class QuaJoy {
 public:
+	inline QuaJoy& set(j_type_t	_type = 0, j_which_t _which = 0, j_stick_t _stick = 0, j_axis_t _axis = 0) {
+		type = _type;
+		which = _which;
+		stick = _stick;
+		spare2 = 0;
+		value.axis = _axis;
+		return *this;
+	}
 	union joy_v {
 		j_axis_t	axis;
 		j_button_t	button;

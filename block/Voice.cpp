@@ -37,7 +37,7 @@ Voice::Voice(std::string nm, Qua *parent):
 {
     Time		zero;
     Note		t;
-    StreamNote	x(&zero, &t);
+    StreamNote	x(zero, t);
     
 //    name = new char[strlen(nm)+1];
 //    strcpy(name, nm);
@@ -238,7 +238,7 @@ Voice::Wake(Instance *i)
 			Time now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
 		    	uberQua, &mainStream,
-		    	wake.block, &now, i, i->sym,
+		    	wake.block, now, i, i->sym,
 		    	i->wakeStack, 1, true);
 			if (i->channel)
 				i->channel->OutputStream(&mainStream);
@@ -273,7 +273,7 @@ Voice::Sleep(Instance *i)
 		    	uberQua,
 				&mainStream,
 		    	sleep.block,
-				&Now,
+				Now,
 				i,
 				i->sym,
 		    	i->sleepStack, 
@@ -330,7 +330,7 @@ Voice::Recv(Stream &s)
 						uberQua,
 						&s,
 						rx.block,
-						&tag_time,
+						tag_time,
 						inst,
 						inst->sym,
 						inst->rxStack,
@@ -605,7 +605,7 @@ VoiceInstance::Run()
     						uberQua,
     						&mainStream,
     						schedulable->mainBlock,
-    						&uberQua->theTime,
+    						uberQua->theTime,
 							this,
 							sym,
     						mainStack, 1,

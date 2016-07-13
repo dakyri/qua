@@ -56,21 +56,22 @@ public:
 class StreamNote: public StreamItem
 {
 public:
-	StreamNote(class Time *tag, Note *tp);
-	StreamNote(class Time *tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
+	StreamNote(Time &tag, Note &tp);
+	StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
     
     Note note;
+	AttributeList attributes;
 };
 
 class StreamCtrl: public StreamItem
 {
 public:
-	StreamCtrl(class Time *tag, Ctrl *cp);
-	StreamCtrl(class Time *tag, cmd_t cmd, ctrl_t ct, amt_t amt);
+	StreamCtrl(class Time &tag, Ctrl &cp);
+	StreamCtrl(class Time &tag, cmd_t cmd, ctrl_t ct, amt_t amt);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -82,8 +83,8 @@ public:
 class StreamBend: public StreamItem
 {
 public:
-	StreamBend(class Time *tag, class Bend *cp);
-	StreamBend(class Time *tag, cmd_t, bend_t);
+	StreamBend(Time &tag, class Bend &cp);
+	StreamBend(Time &tag, cmd_t, bend_t);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -95,8 +96,8 @@ public:
 class StreamProg: public StreamItem
 {
 public:
-	StreamProg(class Time *tag, class Prog *cp);
-	StreamProg(class Time *tag, cmd_t, prg_t, prg_t, prg_t);
+	StreamProg(Time &tag, Prog &cp);
+	StreamProg(Time &tag, cmd_t, prg_t, prg_t, prg_t);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -108,8 +109,8 @@ public:
 class StreamSysC: public StreamItem
 {
 public:
-	StreamSysC(class Time *tag, class SysC *cp);
-	StreamSysC(class Time *tag, int8, int8, int8);
+	StreamSysC(Time &tag, SysC &cp);
+	StreamSysC(Time &tag, int8, int8, int8);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -122,7 +123,7 @@ public:
 class StreamMesg: public StreamItem
 {
 public:
-	StreamMesg(class Time *tag, OSCMessage *mp);
+	StreamMesg(Time &tag, OSCMessage *mp);
 	~StreamMesg();
 	void *operator new(size_t);
 	void operator delete(void *);
@@ -135,7 +136,7 @@ public:
 class StreamValue: public StreamItem
 {
 public:
-	StreamValue(class Time *tag, TypedValue *vp);
+	StreamValue(Time &tag, TypedValue &vp);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -147,7 +148,7 @@ public:
 class StreamSysX: public StreamItem
 {
 public:
-	StreamSysX(class Time *tag, class SysX *cp);
+	StreamSysX(Time &tag, SysX &cp);
 	~StreamSysX();
 	void *operator new(size_t);
 	void operator delete(void *);
@@ -160,8 +161,8 @@ public:
 class StreamJoy: public StreamItem
 {
 public:
-	StreamJoy(class Time *tag, class QuaJoy *cp);
-	StreamJoy(class Time *tag, uchar st, uchar wh, uchar cmd);
+	StreamJoy(Time &tag, class QuaJoy &cp);
+	StreamJoy(Time &tag, uchar st, uchar wh, uchar cmd);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -173,7 +174,7 @@ public:
 class StreamLogEntry: public StreamItem
 {
 public:
-	StreamLogEntry(class Time *tag, class LogEntry *cp);
+	StreamLogEntry(Time &tag, class LogEntry *cp);
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
@@ -197,23 +198,23 @@ public:
 //					~Stream();
 	void			SetProtection(RWLock *);
 
-	StreamJoy		*AddJoyAxisToStream(uchar stick, uchar which, float v,  Time *tag);
-	StreamJoy		*AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time *tag);
-	StreamJoy		*AddJoyButtonToStream(uchar stick, uchar which, bool v,  Time *tag);
-	StreamJoy		*AddToStream(QuaJoy *sp, Time *tag);
+	StreamJoy		*AddJoyAxisToStream(uchar stick, uchar which, float v,  Time &tag);
+	StreamJoy		*AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time &tag);
+	StreamJoy		*AddJoyButtonToStream(uchar stick, uchar which, bool v,  Time &tag);
+	StreamJoy		*AddToStream(QuaJoy &sp, Time &tag);
 
-	void			AddStreamItems(StreamItem *sp, short r, Time *tag);
-	StreamItem		*AddToStream(StreamItem *sp, Time *tag);
-	StreamNote		*AddToStream(Note *tp, Time *tag);
-	StreamCtrl		*AddToStream(Ctrl *sp, Time *tag);
-	StreamBend		*AddToStream(Bend *sp, Time *tag);
-	StreamProg		*AddToStream(Prog *sp, Time *tag);
-	StreamSysX		*AddToStream(SysX *sp, Time *tag);
-	StreamSysC		*AddToStream(SysC *sp, Time *tag);
-	StreamLogEntry	*AddToStream(LogEntry *sp, Time *tag);
-	StreamValue		*AddToStream(TypedValue *sp, Time *tag);
-	void			AddToStream(Stream *S, Time *tag=nullptr);
-	StreamMesg		*AddToStream(OSCMessage *mp, Time *tag);
+	void			AddStreamItems(StreamItem *sp, short r, Time &tag);
+	StreamItem		*AddToStream(StreamItem *sp, Time &tag);
+	StreamNote		*AddToStream(Note &tp, Time &tag);
+	StreamSysX		*AddToStream(SysX &sp, Time &tag);
+	StreamCtrl		*AddToStream(Ctrl &sp, Time &tag);
+	StreamBend		*AddToStream(Bend &sp, Time &tag);
+	StreamProg		*AddToStream(Prog &sp, Time &tag);
+	StreamSysC		*AddToStream(SysC &sp, Time &tag);
+	StreamValue		*AddToStream(TypedValue &sp, Time &tag);
+	StreamLogEntry	*AddToStream(LogEntry *sp, Time &tag);
+	void			AddToStream(Stream *S, Time &tag=Time::zero);
+	StreamMesg		*AddToStream(OSCMessage *mp, Time &tag);
 	void			InsertStream(Stream *B, Time *tag=nullptr);
 	void			AppendStream(Stream *B);
 	void			AppendItem(StreamItem *I);
@@ -222,11 +223,11 @@ public:
 	int				DeleteItem(TypedValueList *L);
 	int				DeleteRefItems(StreamItem *SI);
     int				DeleteItem(StreamItem *SI);
-	int				InsertItem(Time *time, TypedValue *val);
+	int				InsertItem(Time &time, TypedValue &val);
 	StreamItem		*IndexTo(Time &t);
 	
-	void			ItemRefsAt(Time t1, Time t2, class TypedValueList &l);
-	void			ItemRefsBetween(Time t1, Time t2, class TypedValueList &l);
+	void			ItemRefsAt(Time &t1, Time &t2, class TypedValueList &l);
+	void			ItemRefsBetween(Time &t1, Time &t2, class TypedValueList &l);
 	
 	status_t		Split(cmd_t type, Block *condition, Stacker *instance, StabEnt *,
 							QuasiStack *stack, Stream *elseStream);
@@ -242,7 +243,7 @@ public:
 	void			MoveNoteAgglomerate(std::vector<StreamItem*> &, Time &t, pitch_t);
 
 	void			SetDuration(StreamItem *, dur_t);
-	void			ModifyItemTime(StreamItem *I, Time *tag);
+	void			ModifyItemTime(StreamItem *I, Time &tag);
 
 	status_t		SaveSnapshot(FILE *fp);
 

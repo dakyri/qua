@@ -41,12 +41,12 @@ flag
 UpdateActiveBlock(Qua *uberQua,
 				Stream *mainStream,
 				Block *B,
-				Time *updateTime,
+				Time &updateTime,
 				Stacker *stacker,
 				StabEnt *stackCtxt,
 				QuasiStack *stack,
 				short updateRate,
-				bool	generate_on_the_fly)
+				bool generate_on_the_fly)
 {
     flag		ua_complete = BLOCK_COMPLETE;
     
@@ -255,7 +255,7 @@ UpdateActiveBlock(Qua *uberQua,
 							p,
 							mainStream->nItems==0?
 								updateTime:
-								&mainStream->EndTime(),
+								mainStream->EndTime(),
 							stacker,
 							stackCtxt,
 							stack, updateRate,
@@ -421,11 +421,11 @@ UpdateActiveBlock(Qua *uberQua,
 					StreamTake		*take = (StreamTake *)media;
 					Stream			*stream = &take->stream;
 
-					Time			loopTime = (*updateTime-lastLoopStartTime);
+					Time			loopTime = (updateTime-lastLoopStartTime);
 
 					if (loopTime.ticks <= 0 || nextItem == nullptr) {
-						lastLoopStartTime = *updateTime;
-						inf->loopstartVar.SetPointerValue(updateTime, stack);
+						lastLoopStartTime = updateTime;
+						inf->loopstartVar.SetPointerValue(&updateTime, stack);
 						loopTime.ticks = 0;
 						nextItem = stream->IndexTo(clip->start);
 					} else {
@@ -435,8 +435,8 @@ UpdateActiveBlock(Qua *uberQua,
 							if (loop) {	// set a loop end state, and keep chugging
 								state = PLAYSTATE_LOOPEND;
 								loopTime.ticks = 0;
-								lastLoopStartTime = *updateTime;
-								inf->loopstartVar.SetPointerValue(updateTime, stack);
+								lastLoopStartTime = updateTime;
+								inf->loopstartVar.SetPointerValue(&updateTime, stack);
 								nextItem = stream->IndexTo(clip->start);
 							} else { // bug out and fill with zeros
 								state = PLAYSTATE_LOOPEND;
@@ -448,7 +448,7 @@ UpdateActiveBlock(Qua *uberQua,
 					if (nextItem) {
 						loopTime += clip->start;
 						while (nextItem != nullptr && nextItem->time <= loopTime) {
-							mainStream->AddToStream(nextItem, &uberQua->theTime);
+							mainStream->AddToStream(nextItem, uberQua->theTime);
 							nextItem = nextItem->next;
 						}
 					}
@@ -785,7 +785,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ua_complete = UpdateActiveBlock(uberQua,
 					&diverted,
 					 B->crap.divert.block,
-					 &tag, 
+					 tag, 
 					 stacker, 
 					 stackCtxt,
 					 stack,
@@ -1233,104 +1233,55 @@ UpdateActiveBlock(Qua *uberQua,
 			if (val.type == TypedValue::S_LIST) {
 				// todo xxxx this was commented out ... it may be broken, but lets open it up anyway
 				for (TypedValueListItem *p=val.ListValue().head; p != nullptr; p=p->next) {
-					mainStream->AddToStream(&p->value , updateTime);
+					mainStream->AddToStream(p->value , updateTime);
 				}
 				val.ListValue().Clear();
 			} else {
 				switch (val.type) {
-				case TypedValue::S_NOTE: {
-					Note		*tp = val.NoteValue();
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", tp);
-#endif						
-					if (tp) {
-						tp->duration /= updateRate;
-						mainStream->AddToStream(tp, updateTime);
-					}
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-				    	mainStream->PrintStream(stderr);
-#endif						
-				    break;
-				}			
 				case TypedValue::S_MESSAGE: {
 					OSCMessage		*mp = val.MessageValue();
-					
+
 #ifdef QUA_V_DEBUG_CONSOLE
 					if (debug_update)
 						fprintf(stderr, "created %x\n", mp);
 #endif	
-				    mainStream->AddToStream(mp, updateTime);
-				    break;
+					mainStream->AddToStream(mp, updateTime);
+					break;
 				}
-				case TypedValue::S_CTRL: {
-					Ctrl		*mp = val.CtrlValue();
-					
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", mp);
-#endif	
-						
-				    mainStream->AddToStream(mp, updateTime);
+
+				case TypedValue::S_NOTE: {
+					val.NoteValue().duration /= updateRate;
+					mainStream->AddToStream(val.NoteValue(), updateTime);
+					break;
+				}
+
+				case TypedValue::S_SYSX: {
+					mainStream->AddToStream(val.SysXValue(), updateTime);
+					break;
+				}
+
+				case TypedValue::S_CTRL: {				
+				    mainStream->AddToStream(val.CtrlValue(), updateTime);
 				    break;
 				}
 				
-				case TypedValue::S_BEND: {
-					Bend		*mp = val.BendValue();
-					
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", mp);
-#endif	
-						
-				    mainStream->AddToStream(mp, updateTime);
+				case TypedValue::S_BEND: {						
+				    mainStream->AddToStream(val.BendValue(), updateTime);
 				    break;
 				}
 				
 				case TypedValue::S_PROG: {
-					Prog		*mp = val.ProgValue();
-					
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", mp);
-#endif	
-						
-				    mainStream->AddToStream(mp, updateTime);
+				    mainStream->AddToStream(val.ProgValue(), updateTime);
 				    break;
 				}
 				
-				case TypedValue::S_SYSX: {
-					SysX		*mp = val.SysXValue();
-					
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", mp);
-#endif	
-						
-				    mainStream->AddToStream(mp, updateTime);
+				case TypedValue::S_SYSC: {					
+				    mainStream->AddToStream(val.SysCValue(), updateTime);
 				    break;
 				}
 				
-				case TypedValue::S_SYSC: {
-					SysC		*mp = val.SysCValue();
-					
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created %x\n", mp);
-#endif
-						
-				    mainStream->AddToStream(mp, updateTime);
-				    break;
-				}
-				
-				case TypedValue::S_STREAM_ITEM: {
-#ifdef QUA_V_DEBUG_CONSOLE
-					if (debug_update)
-						fprintf(stderr, "created (not) str val %d\n", val.type);
-#endif
-						
-				    mainStream->AddToStream(&val, updateTime);
+				case TypedValue::S_STREAM_ITEM: {					
+				    mainStream->AddToStream(val, updateTime);
 				    break;
 				}
 				

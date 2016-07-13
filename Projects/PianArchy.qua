@@ -1,6 +1,6 @@
 pool qua6_1 {
 	take take1 [
-		note("f#5",	6, 80, "cell start")
+		note("f#5",	6, 80) is(\cellstart)
 		note("e5",	6, 80)
 		note("bb5",	6, 80, "cell start")
 		note("c6",	3, 80)

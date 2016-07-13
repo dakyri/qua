@@ -508,7 +508,7 @@ flag			UpdateActiveBlock(
 						Qua *uberQ,
 						Stream *in,
 						Block  *B,
-						Time *tag_time,
+						Time &tag_time,
 						Stacker *stacker, 
 						StabEnt *stackCtxt,
 						QuasiStack *stack,

@@ -130,76 +130,80 @@ StreamNote::operator delete(void *q)
 	FreeNote.Dealloc(q);
 }
 
-StreamNote::StreamNote(class Time *t, class Note *tp)
+StreamNote::StreamNote(Time &t, Note &tp)
 {
     type = TypedValue::S_NOTE;
-    if (tp) note = *tp;
-    time = *t;
+    note = tp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamNote::StreamNote(class Time *tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur)
+StreamNote::StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur)
 {
     type = TypedValue::S_NOTE;
 	note.cmd = cmd;
 	note.duration = dur;
 	note.dynamic = vel;
 	note.pitch = pitch;
-    time = *tag;
+    time = tag;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamCtrl::StreamCtrl(class Time *tag, cmd_t cmd, ctrl_t ctrlr, amt_t amt)
+StreamCtrl::StreamCtrl(Time &tag, cmd_t cmd, ctrl_t ctrlr, amt_t amt)
 {
     type = TypedValue::S_CTRL;
 	ctrl.cmd = cmd;
 	ctrl.controller = ctrlr;
 	ctrl.amount = amt;
-    time = *tag;
+    time = tag;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamBend::StreamBend(class Time *tag, cmd_t chan, bend_t bendamt)
+StreamBend::StreamBend(Time &tag, cmd_t chan, bend_t bendamt)
 {
     type = TypedValue::S_BEND;
 	bend.bend = bendamt;
 	bend.cmd = chan;
-    time = *tag;
+    time = tag;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamProg::StreamProg(class Time *tag, cmd_t chan, prg_t program, prg_t bank, prg_t subbank)
+StreamProg::StreamProg(Time &tag, cmd_t chan, prg_t program, prg_t bank, prg_t subbank)
 {
     type = TypedValue::S_PROG;
 	prog.cmd = chan;
 	prog.program = program;
 	prog.bank = bank;
 	prog.subbank = subbank;
-    time = *tag;
+    time = tag;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamSysC::StreamSysC(class Time *tag, int8 cmd, int8 data1, int8 data2)
+StreamSysC::StreamSysC(Time &tag, int8 cmd, int8 data1, int8 data2)
 {
     type = TypedValue::S_SYSC;
 	sysC.cmd = cmd;
 	sysC.data1 = data1;
 	sysC.data2 = data2;
-    time = *tag;
+    time = tag;
     next = nullptr;
     prev = nullptr;
 }
 
 
+/*
+* todo xxxx now that the stream item holds the Attributes field, this clone is not going to clone those
+* will that be an issue? currently debating the value of this call anyway
+*/
 StreamItem *
 StreamNote::Clone()
 {
-	return new StreamNote(&time, &note);
+	return new StreamNote(time, note);
 }
 
 status_t
@@ -261,11 +265,11 @@ StreamMesg::operator new(size_t sz)
 	return FreeMesg.Alloc();
 }
 
-StreamMesg::StreamMesg(class Time *t, OSCMessage *mp)
+StreamMesg::StreamMesg(Time &t, OSCMessage *mp)
 {
     type = TypedValue::S_MESSAGE;
     mesg = mp;
-    time = *t;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -279,7 +283,7 @@ StreamMesg::operator delete(void *q)
 StreamItem *
 StreamMesg::Clone()
 {
-	return new StreamMesg(&time, mesg?new OSCMessage(*mesg):nullptr);
+	return new StreamMesg(time, mesg?new OSCMessage(*mesg):nullptr);
 }
 
 
@@ -305,11 +309,11 @@ StreamValue::operator new(size_t sz)
 	return FreeValue.Alloc();
 }
 
-StreamValue::StreamValue(class Time *t, class TypedValue *vp)
+StreamValue::StreamValue(Time &t, TypedValue &vp)
 {
     type = TypedValue::S_VALUE;
-    if (vp) value.Set(vp);
-    time = *t;
+    value = vp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -324,7 +328,7 @@ StreamValue::operator delete(void *q)
 StreamItem *
 StreamValue::Clone()
 {
-	return new StreamValue(&time, &value);
+	return new StreamValue(time, value);
 }
 
 status_t
@@ -347,11 +351,11 @@ StreamCtrl::operator new(size_t sz)
 	return FreeCtrl.Alloc();
 }
 
-StreamCtrl::StreamCtrl(class Time *t, class Ctrl *cp)
+StreamCtrl::StreamCtrl(Time &t, Ctrl &cp)
 {
     type = TypedValue::S_CTRL;
-	if (cp) ctrl = *cp;
-    time = *t;
+	ctrl = cp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -366,7 +370,7 @@ StreamCtrl::operator delete(void *q)
 StreamItem *
 StreamCtrl::Clone()
 {
-	return new StreamCtrl(&time, &ctrl);
+	return new StreamCtrl(time, ctrl);
 }
 
 
@@ -381,6 +385,7 @@ StreamCtrl::SaveSnapshot(FILE *fp)
 
 /*
  * StreamSysX
+ * this owns the sysx data ... we can't be certain of anything else because our SysX wrapper is in a union
  */
 void *
 StreamSysX::operator new(size_t sz)
@@ -388,15 +393,11 @@ StreamSysX::operator new(size_t sz)
 	return FreeSysX.Alloc();
 }
 
-StreamSysX::StreamSysX(class Time *t, class SysX *cp)
+StreamSysX::StreamSysX(Time &t, SysX &cp)
 {
     type = TypedValue::S_SYSX;
-    if (cp) {
-		sysX.length = cp->length;
-		sysX.data = new char[sysX.length];
-		memcpy(sysX.data, cp->data, sysX.length);
-    }
-    time = *t;
+	sysX = cp;
+	time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -411,7 +412,7 @@ StreamSysX::operator delete(void *q)
 StreamItem *
 StreamSysX::Clone()
 {
-	return new StreamSysX(&time, &sysX);
+	return new StreamSysX(time, sysX.clone());
 }
 
 
@@ -423,10 +424,11 @@ StreamSysX::SaveSnapshot(FILE *fp)
 	return B_OK;
 }
 
+/*
+ */
 StreamSysX::~StreamSysX()
 {
-	if (sysX.data)
-		delete [] sysX.data;
+	sysX.clear();
 }
 
 
@@ -439,11 +441,11 @@ StreamSysC::operator new(size_t sz)
 	return FreeSysC.Alloc();
 }
 
-StreamSysC::StreamSysC(class Time *t, class SysC *cp)
+StreamSysC::StreamSysC(Time &t, SysC &cp)
 {
     type = TypedValue::S_SYSC;
-	if (cp) sysC = *cp;
-	time = *t;
+	sysC = cp;
+	time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -458,7 +460,7 @@ StreamSysC::operator delete(void *q)
 StreamItem *
 StreamSysC::Clone()
 {
-	return new StreamSysC(&time, &sysC);
+	return new StreamSysC(time, sysC);
 }
 
 
@@ -479,11 +481,11 @@ StreamBend::operator new(size_t sz)
 	return FreeBend.Alloc();
 }
 
-StreamBend::StreamBend(class Time *t, class Bend *cp)
+StreamBend::StreamBend(Time &t, Bend &cp)
 {
     type = TypedValue::S_BEND;
-	if (cp) bend = *cp;
-    time = *t;
+	bend = cp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -498,7 +500,7 @@ StreamBend::operator delete(void *q)
 StreamItem *
 StreamBend::Clone()
 {
-	return new StreamBend(&time, &bend);
+	return new StreamBend(time, bend);
 }
 
 
@@ -520,11 +522,11 @@ StreamProg::operator new(size_t sz)
 	return FreeProg.Alloc();
 }
 
-StreamProg::StreamProg(class Time *t, class Prog *cp)
+StreamProg::StreamProg(Time &t, Prog &cp)
 {
     type = TypedValue::S_PROG;
-	if (cp) prog = *cp;
-    time = *t;
+	prog = cp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -539,7 +541,7 @@ StreamProg::operator delete(void *q)
 StreamItem *
 StreamProg::Clone()
 {
-	return new StreamProg(&time, &prog);
+	return new StreamProg(time, prog);
 }
 
 
@@ -560,11 +562,11 @@ StreamLogEntry::operator new(size_t sz)
 	return FreeLogEntry.Alloc();
 }
 
-StreamLogEntry::StreamLogEntry(class Time *t, class LogEntry *cp)
+StreamLogEntry::StreamLogEntry(Time &t, class LogEntry *cp)
 {
     type = TypedValue::S_LOG_ENTRY;
 	if (cp) logEntry = *cp;
-    time = *t;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -579,7 +581,7 @@ StreamLogEntry::operator delete(void *q)
 StreamItem *
 StreamLogEntry::Clone()
 {
-	return new StreamLogEntry(&time, &logEntry);
+	return new StreamLogEntry(time, &logEntry);
 }
 
 
@@ -600,23 +602,22 @@ StreamJoy::operator new(size_t sz)
 	return FreeJoy.Alloc();
 }
 
-StreamJoy::StreamJoy(class Time *t, class QuaJoy *cp)
+StreamJoy::StreamJoy(Time &t, QuaJoy &cp)
 {
     type = TypedValue::S_JOY;
-	if (cp)
-		joy = *cp;
-    time = *t;
+	joy = cp;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
 
-StreamJoy::StreamJoy(class Time *t, uchar stick, uchar which, uchar type)
+StreamJoy::StreamJoy(Time &t, uchar stick, uchar which, uchar type)
 {
     type = TypedValue::S_JOY;
 	joy.stick = stick;
 	joy.which = which;
 	joy.type = type;
-    time = *t;
+    time = t;
     next = nullptr;
     prev = nullptr;
 }
@@ -631,7 +632,7 @@ StreamJoy::operator delete(void *q)
 StreamItem *
 StreamJoy::Clone()
 {
-	return new StreamJoy(&time, &joy);
+	return new StreamJoy(time, joy);
 }
 
 

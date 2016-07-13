@@ -315,7 +315,7 @@ Channel::CheckOutBuffers()
 							uberQua,
 							&outStream,
 							tx.block,
-							&tag_time,
+							tag_time,
 							this,
 							sym,
 							txStack,
@@ -388,7 +388,7 @@ Channel::CheckInBuffers()
 								uberQua,
 								&recvStream,
 								rx.block,
-								&tag_time,
+								tag_time,
 								this,
 								sym,
 								rxStack,
@@ -402,7 +402,7 @@ Channel::CheckInBuffers()
 				receivingLock.lock();
 				for (Instance *inst: receivingInstances) {
 					Stream	inthru;
-					inthru.AddToStream(&recvStream, nullptr);
+					inthru.AddToStream(&recvStream);
 					inst->Recv(inthru);
 					if (inst->thruEnabled) {
 						OutputStream(&inthru);
@@ -583,7 +583,7 @@ Channel::CheckRecord(Stream *s)
 						// let's hope this is always a
 						// pool .......
 		Pool *pool = (Pool *) streamRecordInstance->schedulable;
-		pool->recordTake->stream.AddToStream(s, &recordStarted);
+		pool->recordTake->stream.AddToStream(s, recordStarted);
 	}
 }
 

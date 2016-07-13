@@ -243,7 +243,7 @@ Instance::Recv(Stream &s)
 					uberQua,
 					&s,
 					schedulable->rx.block,
-					&tag_time,
+					tag_time,
 					this,
 					sym,
 					rxStack,

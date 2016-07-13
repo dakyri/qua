@@ -303,7 +303,7 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 				case MIDI_NOTE_OFF:
 				case MIDI_NOTE_ON:
 				case MIDI_KEY_PRESS: {
-					static Note		t;
+					Note t;
 					t.dynamic = MMMSG_PARAM2(dwParam1);
 					if (t.dynamic == 0 && cmd == MIDI_NOTE_ON) {
 						cmd = MIDI_NOTE_OFF;
@@ -316,29 +316,26 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 								t.pitch, cmd, MMMSG_CHANNEL(dwParam1), t.dynamic);
 					}
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 					break;
 				}
 
 				case MIDI_CHAN_PRESS: {
-					static Note		t;
-					t.cmd = MMMSG_STATUS(dwParam1);
-					t.pitch = MIDI_NOTE_ALL;
-					t.dynamic = MMMSG_PARAM1(dwParam1);
-					t.duration = 0;
+					Note		t;
+					t.set(MIDI_NOTE_ALL, MMMSG_PARAM1(dwParam1), MMMSG_STATUS(dwParam1));
 					if (debug_midi) {
 						fprintf(stderr, "Midi in: note %d chan %d %x %d\n",
 								t.pitch, MMMSG_CHANNEL(dwParam1), MMMSG_CMD(dwParam1), t.dynamic);
 					}
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 					break;
 				}
 
 				case MIDI_CTRL: {
-					static Ctrl		t;
+					Ctrl t;
 					t.cmd = MMMSG_STATUS(dwParam1);
 					t.controller = MMMSG_PARAM1(dwParam1);
 					t.amount = MMMSG_PARAM2(dwParam1);
@@ -347,13 +344,13 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 								t.controller, MMMSG_CHANNEL(dwParam1), t.amount);
 					}
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 					break;
 				}
 
 				case MIDI_PROG: {
-					static Prog		t;
+					Prog		t;
 					t.bank = NON_PROG;
 					t.subbank = NON_PROG;
 					t.program = MMMSG_PARAM1(dwParam1);
@@ -362,20 +359,20 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 						fprintf(stderr, "Midi in: prog %d %d %d chan %d\n", t.program, t.bank, t.subbank, MMMSG_CHANNEL(dwParam1));
 					}
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 					break;
 				}
 
 				case MIDI_BEND: {
-					static Bend		t;
+					Bend		t;
 					t.bend = (MMMSG_PARAM2(dwParam1)<<8)|MMMSG_PARAM1(dwParam1);
 					t.cmd = MMMSG_STATUS(dwParam1);
 					if (debug_midi) {
 						fprintf(stderr, "Midi in: bend %d chan %d\n", t.bend,  MMMSG_CHANNEL(dwParam1));
 					}
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 					break;
 				}
@@ -428,7 +425,7 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 					case MIDI_CABLE_MSG:
 					case MIDI_TUNE_REQ:
 					case MIDI_SYS_RESET: {
-						static SysC		t;
+						SysC		t;
 						t.cmd = MMMSG_STATUS(dwParam1);
 						t.data1 = MMMSG_PARAM1(dwParam1);
 						t.data2 = MMMSG_PARAM2(dwParam1);
@@ -436,7 +433,7 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 							fprintf(stderr, "Midi in: sys common %x %x %x\n", (uchar)t.cmd, (uchar)t.data1, (uchar)t.data2);
 						}
 						rexMutex.lock();
-						received.AddToStream(&t, &uberQua->theTime);
+						received.AddToStream(t, uberQua->theTime);
 						rexMutex.unlock();
 						break;
 					}
@@ -476,21 +473,25 @@ QuaMidiIn::MMMsgReceived(HMIDIIN handle, UINT uMsg, DWORD dwParam1, DWORD dwTime
 				sysxBuf.push_back(buf);
 				sysxBufLen.push_back(len);
 				if (!sysxFlag) {	// send it
-					static	SysX	t;
 					int		sysxLen = 0;
 					short	i;
 					for (i=0; ((unsigned)i)<sysxBufLen.size(); i++) {
 						sysxLen += (int)sysxBufLen[i];
 					}
-					t.data = new char[sysxLen];
-					char	*p = t.data;
+					char *d = new char[sysxLen];
+					char *p = d;
 					for (i=0; ((unsigned)i)<sysxBufLen.size(); i++) {
 						memcpy(p, (char *)sysxBuf[i], (int)sysxBufLen[i]);
 						p += (int)sysxBufLen[i];
 					}
-					t.length = sysxLen;
+					// !!!! ownership of this buffer will pass down by assignemnt
+					// c++ in VS won't let us make this less painful with a non trivial assign override. 
+					// this data should end up in a StreamSysX item, and that item will be the one doing the deleting
+					SysX t;
+					t.set(d, sysxLen);
+
 					rexMutex.lock();
-					received.AddToStream(&t, &uberQua->theTime);
+					received.AddToStream(t, uberQua->theTime);
 					rexMutex.unlock();
 				}
 
