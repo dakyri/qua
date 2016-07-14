@@ -124,7 +124,7 @@ public:
 
 	QuaMidiPort *midiPortForId(int32);
 
-	virtual QuaPort *findPortByName(string nm, int direction, int nports) override;
+	virtual QuaPort *findPortByName(const string nm, int direction, int nports) override;
 
 	virtual status_t connect(Input *);
 	virtual status_t connect(Output *);

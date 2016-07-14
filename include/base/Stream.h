@@ -2,6 +2,9 @@
 #define _STREAM_H
 
 #include <stdio.h>
+#include <functional>
+
+using namespace std;
 
 #include "qua_version.h"
 
@@ -14,14 +17,16 @@
 #include "Sym.h"
 #include "QuaJoy.h"
 #include "Log.h"
+#include "BaseVal.h"
+#include "Attributes.h"
 
 class ResultValue;
 class List;
-class RWLock;
 
 class StreamItem
 {
 public:
+	StreamItem(Time &_time, short _type=TypedValue::S_UNKNOWN);
 	virtual ~StreamItem() {}
 
 	short				type;
@@ -29,13 +34,13 @@ public:
     StreamItem			*next,
     					*prev;
 
-    StreamItem			*Subsequent(short typ, short cmd, short data);
+    StreamItem *Subsequent(short typ, short cmd, short data);
 //    StreamItem			*Previous(short typ, short cmd, short data); // currently next is ignored?
-    dur_t				Duration();
-	bool				SetMidiParams(int8, int8, int8, bool);
-	
-	virtual StreamItem	*Clone();
-	virtual status_t	SaveSnapshot(FILE *fp)=0;
+    virtual dur_t Duration();
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual bool setAttributes(AttributeList &attribs);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp)=0;
 
 //	void *operator new(size_t);
 	void operator delete(void *);
@@ -58,9 +63,14 @@ class StreamNote: public StreamItem
 public:
 	StreamNote(Time &tag, Note &tp);
 	StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
+
 	void *operator new(size_t);
 	void operator delete(void *);
-    virtual StreamItem *Clone();
+
+	virtual dur_t Duration();
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual bool setAttributes(AttributeList &attribs);
+	virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
     
     Note note;
@@ -72,9 +82,12 @@ class StreamCtrl: public StreamItem
 public:
 	StreamCtrl(class Time &tag, Ctrl &cp);
 	StreamCtrl(class Time &tag, cmd_t cmd, ctrl_t ct, amt_t amt);
+
 	void *operator new(size_t);
 	void operator delete(void *);
-    virtual StreamItem *Clone();
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
 	
  	Ctrl ctrl;
@@ -98,9 +111,12 @@ class StreamProg: public StreamItem
 public:
 	StreamProg(Time &tag, Prog &cp);
 	StreamProg(Time &tag, cmd_t, prg_t, prg_t, prg_t);
+
 	void *operator new(size_t);
 	void operator delete(void *);
-    virtual StreamItem *Clone();
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
 	
  	Prog prog;
@@ -111,9 +127,12 @@ class StreamSysC: public StreamItem
 public:
 	StreamSysC(Time &tag, SysC &cp);
 	StreamSysC(Time &tag, int8, int8, int8);
+
 	void *operator new(size_t);
 	void operator delete(void *);
-    virtual StreamItem *Clone();
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
 	virtual status_t SaveSnapshot(FILE *fp);
 	
  	SysC sysC;
@@ -193,10 +212,9 @@ struct IXMLDOMElement;
 class Stream
 {
 public:
-					Stream();
-					Stream(Stream *S);
-//					~Stream();
-	void			SetProtection(RWLock *);
+	Stream();
+	Stream(Stream *S);
+	~Stream();
 
 	StreamJoy		*AddJoyAxisToStream(uchar stick, uchar which, float v,  Time &tag);
 	StreamJoy		*AddJoyHatToStream(uchar stick, uchar which, uchar v,  Time &tag);
@@ -213,10 +231,10 @@ public:
 	StreamSysC		*AddToStream(SysC &sp, Time &tag);
 	StreamValue		*AddToStream(TypedValue &sp, Time &tag);
 	StreamLogEntry	*AddToStream(LogEntry *sp, Time &tag);
-	void			AddToStream(Stream *S, Time &tag=Time::zero);
+	void			AddToStream(Stream &S, Time &tag=Time::zero);
 	StreamMesg		*AddToStream(OSCMessage *mp, Time &tag);
-	void			InsertStream(Stream *B, Time *tag=nullptr);
-	void			AppendStream(Stream *B);
+	void			InsertStream(Stream &B, Time &tag= Time::zero);
+	void			AppendStream(Stream &B);
 	void			AppendItem(StreamItem *I);
 	void			InsertItem(StreamItem *I);
 	void			ClearStream();
@@ -261,10 +279,11 @@ public:
 	status_t		Save(FILE *, Qua *, short fmt=STR_FMT_RAW);
 	status_t		SetValue(Block *b);
 
-    StreamItem		*head,
-					*tail;
-    int				nItems;
-    RWLock			*condom;
+	void forEach(function<void(StreamItem *i)> op);
+	bool satisfies(function<bool(StreamItem *i)> op);
+
+    StreamItem *head, *tail;
+    int nItems;
 };
 
 #endif

@@ -14,10 +14,14 @@ public:
 	typedef short idcode;
 	typedef union value_u value;
 
-	Attribute(idcode ty, value val);
+	Attribute(string nm, idcode ty, value val);
 	~Attribute();
+
+	Attribute *clone();
+
 	idcode id;
 	value val;
+	string name;
 	Attribute *next=nullptr;
 
 	enum {
@@ -93,33 +97,33 @@ class Block;
 class AttributeList
 {
 public:
+	AttributeList(Attribute *l = nullptr) {
+		items = l;
+	}
+
 	~AttributeList() {
 		if (items != nullptr) {
 			delete items;
 		}
 	}
 	void clear();
-	void add(Attribute::idcode, Attribute::value val=Attribute::value());
+	void add(string nm, Attribute::idcode, Attribute::value val=Attribute::value());
 	void add(Block *b);
 	bool has(Attribute::idcode);
-	Attribute::value &getValue(Attribute::idcode id);
+	bool has(char *pr);
 
-	inline bool
-	has(char *pr)
-	{
-		return has(AttributeId(pr));
-	}
-	
-	inline Attribute::value
-	getValue(char *pr)
-	{
-		return getValue(AttributeId(pr));
-	}
-	
+	Attribute::value &getValue(Attribute::idcode id);
+	AttributeList & operator=(const AttributeList &);
+// TODO XXX this is deleted in a vector
+//	AttributeList & operator=(const AttributeList &&);
+
+	Attribute::value getValue(char *pr);
+	AttributeList & clone();
+
 	inline void
 	add(char *pr, Attribute::value val)
 	{
-		add(AttributeId(pr), val);
+		add(pr, AttributeId(pr), val);
 	}
 	
 	Attribute *items=nullptr;

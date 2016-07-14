@@ -84,8 +84,8 @@ public:
 	Channel(std::string nm, short id, bool authru, bool midithru, short nic, short noc, Qua *q);
 	virtual ~Channel();
 
-	void				OutputStream(Stream *S);
-	void				InputStream(Stream *S);
+	void				OutputStream(Stream &S);
+	void				InputStream(Stream &S);
 	void				CheckOutBuffers();
 	void				ClearOutBuffers(bool Clr);
 	void				CheckInBuffers();
@@ -175,7 +175,7 @@ public:
 	status_t			StartRecording();
 	status_t			StopRecording();
 //	void				UpdateRecordDisplay();
-	void				CheckRecord(Stream *);
+	void				CheckRecord(Stream &);
 	void				UpdateRecordDisplay();
 	void				EnableAudioRecord(SampleInstance *i);
 	void				EnableStreamRecord(Instance *i);

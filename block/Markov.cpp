@@ -76,8 +76,8 @@ GenNextNote(struct MarkovInfo *minf)
 
 	if (!silent) {
 		short last = 0, next_last = 0;
-		for (last=0;last < MAX_GEN_HISTORY-1 &&minf->noteHistory[last].pitch >127; last++);
-		for (next_last=last+1;next_last < MAX_GEN_HISTORY &&minf->noteHistory[next_last].pitch >127; next_last++);
+		for (last=0;last < MAX_GEN_HISTORY-1 && minf->noteHistory[last].pitch >127; last++);
+		for (next_last=last+1; next_last < MAX_GEN_HISTORY && minf->noteHistory[next_last].pitch >127; next_last++);
 
 	    if (minf->attribHistory[last].has(Attribute::PHRASE_END)) { /* first note */
 	    	pitch = select_list(MAX_ABS_NOTE, minf->markov->startNote);
@@ -90,21 +90,18 @@ GenNextNote(struct MarkovInfo *minf)
 			cnt = 0;
 			last_interv = minf->noteHistory[last].pitch -
 								minf->noteHistory[next_last].pitch;
-			chk = select_list(MAX_INTERVALS,
-							minf->markov->intervalMap[
-							int_to_ind(last_interv)]);
+			chk = select_list(MAX_INTERVALS, minf->markov->intervalMap[int_to_ind(last_interv)]);
 			interv = ind_to_int(chk);
 			pitch = minf->noteHistory[last].pitch + interv;
 			if (debug_gen)
-			    fprintf(stderr, "pitch %d %d %d => %d\n", last_interv, chk,
-					interv, pitch);
+			    fprintf(stderr, "pitch %d %d %d => %d\n", last_interv, chk, interv, pitch);
 	    }
 	
 	    if (pitch < minf->minNote || pitch > minf->maxNote) {
 	    	if (debug_gen)
 	    		fprintf(stderr, "out of bounds %d\n", pitch);
 	    	pitch = select_list(MAX_ABS_NOTE, minf->markov->startNote);
-			currentAttribs.add(Attribute::PHRASE_END);
+			currentAttribs.add("", Attribute::PHRASE_END);
 		}
 		
 		noteTo.pitch = pitch;

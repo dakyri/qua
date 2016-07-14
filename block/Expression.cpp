@@ -178,7 +178,7 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
     	Pool	*P = block->crap.call.parameters->crap.sym->PoolValue();
     	Block	*Q = block->crap.call.parameters->next;
 		if (P != nullptr) {
-			ret_val = Find(P->mainStream, Q);
+			ret_val = Find(&P->selectedTakeStream, Q);
 		} else {
 			; // TypedValue::S_UNKNOWN
 			ret_val = ResultValue((int32)0,true); //  blocked
@@ -188,28 +188,31 @@ EvaluateBuiltIn(Block *block, StreamItem *items,  Stacker *stacker, StabEnt *sta
     
     case Block::BUILTIN_DELETE: {
     	Pool	*P = block->crap.call.parameters->crap.sym->PoolValue();
-    	long	deletind = EvaluateExpression(block->crap.call.parameters->next,
-    						items, stacker, stackCtxt, stack).IntValue(stack);
-    	if (block->crap.call.parameters->next) {
-    	} else {
-	    	ret_val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
-	    	ret_val.SetValue(
-	    		(int32)P->mainStream->DeleteRefItems(items));
-	    }
+		if (P != nullptr) {
+			long	deletind = EvaluateExpression(block->crap.call.parameters->next,
+				items, stacker, stackCtxt, stack).IntValue(stack);
+			if (block->crap.call.parameters->next) {
+			} else {
+				ret_val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
+				ret_val.SetValue((int32)P->selectedTakeStream.DeleteRefItems(items));
+			}
+		}
 	    break;
     }
     
     case Block::BUILTIN_INSERT: {
     	Pool	*P = block->crap.call.parameters->crap.sym->PoolValue();
-    	long	clockat = EvaluateExpression(
-    						block->crap.call.parameters->next,
-    						items, stacker, stackCtxt, stack).IntValue(stack);
-    	ResultValue	item = EvaluateExpression(
-    						block->crap.call.parameters->next->next,
-    						items, stacker, stackCtxt, stack);
-    	Time	time(clockat, P->uberQua->metric);
-    	ret_val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
-    	ret_val.SetValue((int32)P->mainStream->InsertItem(time, item));
+		if (P != nullptr) {
+			long	clockat = EvaluateExpression(
+				block->crap.call.parameters->next,
+				items, stacker, stackCtxt, stack).IntValue(stack);
+			ResultValue	item = EvaluateExpression(
+				block->crap.call.parameters->next->next,
+				items, stacker, stackCtxt, stack);
+			Time	time(clockat, P->uberQua->metric);
+			ret_val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
+			ret_val.SetValue((int32)P->selectedTakeStream.InsertItem(time, item));
+		}
     	break;
 	}
 	

@@ -63,6 +63,16 @@ StreamItemCache::Dealloc(void *p)
 	mutex.unlock();
 }
 
+
+StreamItem::StreamItem(Time &_time, short _type)
+	: type(_type)
+	, time(_time)
+	, next(nullptr)
+	, prev(nullptr)
+{
+
+}
+
 StreamItem *
 StreamItem::Clone()
 {
@@ -113,6 +123,43 @@ StreamItem::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
 	return true;
 }
 
+dur_t
+StreamItem::Duration()
+{
+	return 0;
+}
+
+StreamItem *
+StreamItem::Subsequent(short typ, short cmd, short data)
+{
+	StreamItem	*p = next;
+	while (p) {
+		if (p->type == typ) {
+			if (typ == TypedValue::S_NOTE) {
+				StreamNote	*sub = (StreamNote *)p;
+				if (sub->note.cmd == cmd && sub->note.pitch == data) {
+					return sub;
+				}
+			} else if (p->type == TypedValue::S_CTRL) {
+				StreamCtrl	*sub = (StreamCtrl *)p;
+				if ((cmd < 0 || sub->ctrl.cmd == cmd) && data == sub->ctrl.controller) {
+					return sub;
+				}
+			} else {
+				return p;
+			}
+		} else {
+		}
+		p = p->next;
+	}
+	return nullptr;
+}
+
+bool
+StreamItem::setAttributes(AttributeList &attribs) {
+	return false;
+}
+
 /*
  * StreamNote
  */
@@ -131,68 +178,45 @@ StreamNote::operator delete(void *q)
 }
 
 StreamNote::StreamNote(Time &t, Note &tp)
-{
-    type = TypedValue::S_NOTE;
-    note = tp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
+	: StreamItem(t, TypedValue::S_NOTE) {
+	note = tp;
 }
 
 StreamNote::StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur)
-{
-    type = TypedValue::S_NOTE;
+	: StreamItem(tag, TypedValue::S_NOTE) {
 	note.cmd = cmd;
 	note.duration = dur;
 	note.dynamic = vel;
 	note.pitch = pitch;
-    time = tag;
-    next = nullptr;
-    prev = nullptr;
 }
 
 StreamCtrl::StreamCtrl(Time &tag, cmd_t cmd, ctrl_t ctrlr, amt_t amt)
-{
-    type = TypedValue::S_CTRL;
+	: StreamItem(tag, TypedValue::S_NOTE) {
 	ctrl.cmd = cmd;
 	ctrl.controller = ctrlr;
 	ctrl.amount = amt;
-    time = tag;
-    next = nullptr;
-    prev = nullptr;
 }
 
 StreamBend::StreamBend(Time &tag, cmd_t chan, bend_t bendamt)
-{
-    type = TypedValue::S_BEND;
+	: StreamItem(tag, TypedValue::S_BEND) {
 	bend.bend = bendamt;
 	bend.cmd = chan;
-    time = tag;
-    next = nullptr;
-    prev = nullptr;
 }
 
+
 StreamProg::StreamProg(Time &tag, cmd_t chan, prg_t program, prg_t bank, prg_t subbank)
-{
-    type = TypedValue::S_PROG;
+	: StreamItem(tag, TypedValue::S_PROG) {
 	prog.cmd = chan;
 	prog.program = program;
 	prog.bank = bank;
 	prog.subbank = subbank;
-    time = tag;
-    next = nullptr;
-    prev = nullptr;
 }
 
 StreamSysC::StreamSysC(Time &tag, int8 cmd, int8 data1, int8 data2)
-{
-    type = TypedValue::S_SYSC;
+	: StreamItem(tag, TypedValue::S_SYSC) {
 	sysC.cmd = cmd;
 	sysC.data1 = data1;
 	sysC.data2 = data2;
-    time = tag;
-    next = nullptr;
-    prev = nullptr;
 }
 
 
@@ -213,47 +237,32 @@ StreamNote::SaveSnapshot(FILE *fp)
 		time.StringValue(), note.cmd, note.pitch, note.duration, note.dynamic);
 	return B_OK;
 }
-
-StreamItem *
-StreamItem::Subsequent(short typ, short cmd, short data)
+dur_t
+StreamNote::Duration()
 {
-	StreamItem	*p = next;
-	while (p) {
-		if (p->type == typ) {
-			if (typ == TypedValue::S_NOTE) {
-				StreamNote	*sub = (StreamNote *) p;
-				if (sub->note.cmd == cmd && sub->note.pitch == data) {
-					return sub;
-				}
-			} else if (p->type == TypedValue::S_CTRL) {
-				StreamCtrl	*sub = (StreamCtrl *) p;
-				if ((cmd < 0 || sub->ctrl.cmd == cmd) && data == sub->ctrl.controller) {
-					return sub;
-				}
-			} else {
-				return p;
-			}
-		} else {
+	if (note.duration == INFINITE_TICKS) {
+		StreamNote	*sub = (StreamNote *)Subsequent(TypedValue::S_NOTE, MIDI_NOTE_OFF, note.pitch);
+		if (sub) {
+			return (dur_t)(sub->time.ticks - time.ticks);
 		}
-		p = p->next;
 	}
-	return nullptr;
+	return note.duration;
 }
 
-dur_t
-StreamItem::Duration()
+bool
+StreamNote::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
 {
-	if (type == TypedValue::S_NOTE) {
-		StreamNote	*me = (StreamNote *)this;
-		if (me->note.duration == INFINITE_TICKS) {
-			StreamNote	*sub= (StreamNote *)Subsequent(TypedValue::S_NOTE, MIDI_NOTE_OFF, me->note.pitch);
-			if (sub) {
-				return (dur_t)(sub->time.ticks-time.ticks);
-			}
-		}
-		return me->note.duration;
-	}
-	return 0;
+	note.pitch = data1;
+	note.dynamic = data2;
+	note.cmd = cmd;
+	return true;
+}
+
+
+bool
+StreamNote::setAttributes(AttributeList &attribs) {
+	attributes = attribs;
+	return true;
 }
 
 /*
@@ -265,13 +274,9 @@ StreamMesg::operator new(size_t sz)
 	return FreeMesg.Alloc();
 }
 
-StreamMesg::StreamMesg(Time &t, OSCMessage *mp)
-{
-    type = TypedValue::S_MESSAGE;
+StreamMesg::StreamMesg(Time &tag, OSCMessage *mp)
+	: StreamItem(tag, TypedValue::S_MESSAGE) {
     mesg = mp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -309,13 +314,9 @@ StreamValue::operator new(size_t sz)
 	return FreeValue.Alloc();
 }
 
-StreamValue::StreamValue(Time &t, TypedValue &vp)
-{
-    type = TypedValue::S_VALUE;
+StreamValue::StreamValue(Time &tag, TypedValue &vp)
+	: StreamItem(tag, TypedValue::S_VALUE) {
     value = vp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -351,13 +352,9 @@ StreamCtrl::operator new(size_t sz)
 	return FreeCtrl.Alloc();
 }
 
-StreamCtrl::StreamCtrl(Time &t, Ctrl &cp)
-{
-    type = TypedValue::S_CTRL;
+StreamCtrl::StreamCtrl(Time &tag, Ctrl &cp)
+	: StreamItem(tag, TypedValue::S_CTRL) {
 	ctrl = cp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -382,6 +379,14 @@ StreamCtrl::SaveSnapshot(FILE *fp)
 	return B_OK;
 }
 
+bool
+StreamCtrl::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
+{
+	ctrl.controller = data1;
+	ctrl.amount = data2;
+	ctrl.cmd = cmd;
+	return true;
+}
 
 /*
  * StreamSysX
@@ -393,13 +398,9 @@ StreamSysX::operator new(size_t sz)
 	return FreeSysX.Alloc();
 }
 
-StreamSysX::StreamSysX(Time &t, SysX &cp)
-{
-    type = TypedValue::S_SYSX;
+StreamSysX::StreamSysX(Time &tag, SysX &cp)
+	: StreamItem(tag, TypedValue::S_SYSX) {
 	sysX = cp;
-	time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -441,13 +442,9 @@ StreamSysC::operator new(size_t sz)
 	return FreeSysC.Alloc();
 }
 
-StreamSysC::StreamSysC(Time &t, SysC &cp)
-{
-    type = TypedValue::S_SYSC;
+StreamSysC::StreamSysC(Time &tag, SysC &cp)
+	: StreamItem(tag, TypedValue::S_SYSC) {
 	sysC = cp;
-	time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -472,6 +469,15 @@ StreamSysC::SaveSnapshot(FILE *fp)
 	return B_OK;
 }
 
+bool
+StreamSysC::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
+{
+	sysC.data1 = data1;
+	sysC.data2 = data2;
+	sysC.cmd = cmd;
+	return true;
+}
+
 /*
  * StreamBend
  */
@@ -481,13 +487,10 @@ StreamBend::operator new(size_t sz)
 	return FreeBend.Alloc();
 }
 
-StreamBend::StreamBend(Time &t, Bend &cp)
-{
-    type = TypedValue::S_BEND;
+StreamBend::StreamBend(Time &tag, Bend &cp)
+	: StreamItem(tag, TypedValue::S_BEND) {
 	bend = cp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
+
 }
 
 void
@@ -522,13 +525,10 @@ StreamProg::operator new(size_t sz)
 	return FreeProg.Alloc();
 }
 
-StreamProg::StreamProg(Time &t, Prog &cp)
-{
-    type = TypedValue::S_PROG;
+StreamProg::StreamProg(Time &tag, Prog &cp)
+	: StreamItem(tag, TypedValue::S_PROG) {
 	prog = cp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
+
 }
 
 void
@@ -553,6 +553,14 @@ StreamProg::SaveSnapshot(FILE *fp)
 	return B_OK;
 }
 
+bool
+StreamProg::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
+{
+	prog.bank = data2;
+	prog.program = data1;
+	prog.cmd = cmd;
+	return true;
+}
 /*
  * StreamLogEntry
  */
@@ -562,13 +570,9 @@ StreamLogEntry::operator new(size_t sz)
 	return FreeLogEntry.Alloc();
 }
 
-StreamLogEntry::StreamLogEntry(Time &t, class LogEntry *cp)
-{
-    type = TypedValue::S_LOG_ENTRY;
+StreamLogEntry::StreamLogEntry(Time &tag, class LogEntry *cp)
+	: StreamItem(tag, TypedValue::S_LOG_ENTRY) {
 	if (cp) logEntry = *cp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void
@@ -602,24 +606,16 @@ StreamJoy::operator new(size_t sz)
 	return FreeJoy.Alloc();
 }
 
-StreamJoy::StreamJoy(Time &t, QuaJoy &cp)
-{
-    type = TypedValue::S_JOY;
+StreamJoy::StreamJoy(Time &tag, QuaJoy &cp)
+	: StreamItem(tag, TypedValue::S_JOY) {
 	joy = cp;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
-StreamJoy::StreamJoy(Time &t, uchar stick, uchar which, uchar type)
-{
-    type = TypedValue::S_JOY;
+StreamJoy::StreamJoy(Time &tag, uchar stick, uchar which, uchar type)
+	: StreamItem(tag, TypedValue::S_JOY) {
 	joy.stick = stick;
 	joy.which = which;
 	joy.type = type;
-    time = t;
-    next = nullptr;
-    prev = nullptr;
 }
 
 void

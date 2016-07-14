@@ -19,17 +19,16 @@
 #include <iostream>
 
 flag debug_stream=0;
+
 Stream::Stream()
 {
 	head = tail = nullptr;
 	nItems = 0;
-	condom = nullptr;
 }
 
 Stream::Stream(Stream *S)
 {
-	StreamItem	*p = S->head, *q = nullptr,
-				**pp = &head;
+	StreamItem	*p = S->head, *q = nullptr, **pp = &head;
 	*pp = nullptr;
 	nItems = 0;
 	while (p != nullptr) {
@@ -40,7 +39,6 @@ Stream::Stream(Stream *S)
 		p = p->next;
 	}
 	tail = q;
-	condom = nullptr;
 }
 
 status_t
@@ -241,13 +239,6 @@ Stream::LoadSnapshotChildren(tinyxml2::XMLElement *element, std::vector<std::str
 }
 
 
-
-void
-Stream::SetProtection(RWLock *durex)
-{
-	condom = durex;
-}
-
 // remove infinite durations, and midi note offs, so
 // tones in a stream have if possible a sane, fized
 // duration
@@ -342,10 +333,8 @@ Stream::Duration()
 	Time	t(0); // if list is empty return zero in default metric
 	
 	if (head != nullptr && tail != nullptr) {
-		t = (tail->time - head->time); // should now have the right metric
-		if (tail->type == TypedValue::S_NOTE) {
-			t.ticks +=	((StreamNote *)tail)->note.duration;
-		}
+		t = (tail->time - head->time) + tail->Duration(); // should now have the right metric
+//		if (tail->type == TypedValue::S_NOTE) { t.ticks +=	((StreamNote *)tail)->note.duration; }
 	}
 	
 	return t;
@@ -357,8 +346,8 @@ Stream::EndTime()
 	Time	t(0);
 	
 	if (head != nullptr && tail != nullptr) {
-		t = tail->time + (tail->type == TypedValue::S_NOTE?
-						(int32)((StreamNote *)tail)->note.duration:0);
+		t = tail->time + tail->Duration();
+		//(tail->type == TypedValue::S_NOTE? (int32)((StreamNote *)tail)->note.duration:0);
 	}
 	
 	return t;
@@ -528,21 +517,53 @@ Stream::AddToStream(StreamItem *p, Time &tag)
 	return nullptr;
 }
 
+/*
+ * adding from a stream. we take ownership of items of S here
+ */
 void
-Stream::AddToStream(Stream *S, Time &offt)
+Stream::AddToStream(Stream &S, Time &offt)
 {
-	StreamItem	*p;
-    for (p = S->head; p != nullptr; p=p->next) {
+    for (StreamItem	*p = S.head; p != nullptr; p=p->next) {
 		Time	timeat = p->time;
 		if (offt.ticks) timeat -= offt;
     	if (debug_stream)
     		fprintf(stderr, "chan:p = %x %d\n", (unsigned) p, p->type);
 		AddToStream(p, timeat);
-
     }
+	S.head = S.tail = nullptr;
 	if (debug_stream)
 		PrintStream(stderr);
 }
+
+/*
+ * reclaim any stream items that we still have ownership of when we pass out of context
+ */
+Stream::~Stream() {
+	StreamItem *p = head, *q = nullptr;
+	while (p != nullptr) {
+		q = p->next;
+		delete p;
+		p = q;
+	}
+}
+
+void
+Stream::forEach(function<void(StreamItem *i)> op) {
+	for (StreamItem *p = head; p != nullptr; p = p->next) {
+		op(p);
+	}
+}
+
+bool
+Stream::satisfies(function<bool(StreamItem *i)> op) {
+	for (StreamItem *p = head; p != nullptr; p = p->next) {
+		if (!op(p)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 
 void
 Stream::AppendItem(StreamItem *l)
@@ -718,34 +739,30 @@ Stream::IndexTo(Time &t)
  *   inserts stream B into stream A, clearing stream B
  */
 void
-Stream::InsertStream(Stream *B, Time *tag)
+Stream::InsertStream(Stream &B, Time &tag)
 {
-    if (B == nullptr) {
-		internalError("fatal in Insert!\n");
-		exit(1);
-    }
-    if (B->nItems > 0) {
+    if (B.nItems > 0) {
 #ifdef SHORT_IS
-        B->tail->next = A->head;
-        A->head = B->head;
-        A->nItems += B->nItems;
+        B.tail->next = A->head;
+        A->head = B.head;
+        A->nItems += B.nItems;
 
-        B->head = B->tail = nullptr;
-        B->nItems = 0;
+        B.head = B.tail = nullptr;
+        B.nItems = 0;
 #else
 		StreamItem		*headorig, **lastinsertref,
 						 **lastb, *tailinsert;
 		StreamItem		*p, *q;
 	
-		lastb = &B->head;
+		lastb = &B.head;
 		lastinsertref = &head;
 		tailinsert = nullptr;
-		B->tail = nullptr;
+		B.tail = nullptr;
 		headorig = head;
-		p = B->head;
+		p = B.head;
 		
 		while (p != nullptr) {
-		    if (*tag >= p->time) {
+		    if (tag >= p->time) {
 		   		q = p->next;
 		   		
 		   		*lastb = q;
@@ -756,12 +773,12 @@ Stream::InsertStream(Stream *B, Time *tag)
 				tailinsert = p;
 	
 		    	nItems++;
-		    	B->nItems--;
+		    	B.nItems--;
 				p = q;
 		    } else {	/* relink to B */
 				*lastb = p;
 				lastb = &p->next;
-				B->tail = p;
+				B.tail = p;
 				p = p->next;
 		    }
 		}
@@ -774,7 +791,7 @@ Stream::InsertStream(Stream *B, Time *tag)
 #endif
     }  
     if (debug_stream)
-    	fprintf(stderr, "insert stream %d %d\n", nItems, B->nItems);
+    	fprintf(stderr, "insert stream %d %d\n", nItems, B.nItems);
 }
 
 /*
@@ -782,31 +799,26 @@ Stream::InsertStream(Stream *B, Time *tag)
  *   inserts stream B into stream A, clearing stream B
  */
 void
-Stream::AppendStream(Stream *B)
+Stream::AppendStream(Stream &B)
 {
-    if (B == nullptr) {
-		internalError("fatal in Append! null stream!\n");
-		exit(1);
-    }
-
-    if (B->nItems > 0) {
+    if (B.nItems > 0) {
 		if (debug_stream)
 			fprintf(stderr, "head %x tail %x len %d BHead %x Btail %x Blen %d\n", 
-				(unsigned)head, (unsigned)tail, nItems, (unsigned)B->head, (unsigned)B->tail, B->nItems);
+				(unsigned)head, (unsigned)tail, nItems, (unsigned)B.head, (unsigned)B.tail, B.nItems);
         if (nItems > 0) {
-            tail->next = B->head;
+            tail->next = B.head;
         } else {
-	    	head = B->head;
+	    	head = B.head;
         }
 
-        tail = B->tail;
-        nItems += B->nItems;
+        tail = B.tail;
+        nItems += B.nItems;
 
-        B->head = B->tail = nullptr;
-        B->nItems = 0;
+        B.head = B.tail = nullptr;
+        B.nItems = 0;
     }
     if (debug_stream)
-    	fprintf(stderr, "append stream %d %d\n", nItems, B->nItems);
+    	fprintf(stderr, "append stream %d %d\n", nItems, B.nItems);
 }
 
 int
@@ -1328,6 +1340,10 @@ Stream::InsertItem(Time &time, TypedValue &val)
 	return 1;
 }
 
+/*
+TODO XXXX FIXME
+this and its companion should maybe be refactored ... at the very least perhaps though ditched entirely for a less clunky save format.
+*/
 status_t
 Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 {

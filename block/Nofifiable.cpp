@@ -34,7 +34,7 @@ Notifiable::Notification(Block *B, Stacker *i, StabEnt *stackCtxt, QuasiStack *s
 
 		flag ua_complete = UpdateActiveBlock(
 	    					i->uberQua,
-	    					&mainStream,
+	    					mainStream,
 	    					B,
 	    					Now,
 							i,

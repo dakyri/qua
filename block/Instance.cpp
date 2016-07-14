@@ -241,7 +241,7 @@ Instance::Recv(Stream &s)
 	if (s.nItems > 0) {
 		flag	uac = UpdateActiveBlock(
 					uberQua,
-					&s,
+					s,
 					schedulable->rx.block,
 					tag_time,
 					this,
@@ -509,7 +509,7 @@ Instance::StopRecording()
 		Pool *pool = (Pool *) schedulable;
 		((PoolInstance*)this)->loopDuration = 
 				pool->recordTake->duration =
-				pool->duration = pool->mainStream->EndTime();
+				pool->duration = pool->selectedTakeStream.EndTime();
 		break;
 	} 
 	

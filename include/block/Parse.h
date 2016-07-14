@@ -61,6 +61,8 @@ public:
 	Block 			*ParseBExp(StabEnt *V, StabEnt *S, bool);
 	Block 			*ParseAExp(StabEnt *V, StabEnt *S, bool);
 	Block			*ParseExpressionList(StabEnt *V, StabEnt *S, char *type, bool);
+	AttributeList * parseAttributeList(StabEnt *V, StabEnt *S, bool);
+	bool parseAttribute(AttributeList *, StabEnt *V, StabEnt *S, bool);
 	void			ParseSchedulable(Schedulable *S);
 	Block 			*ParseBlockInfo(StabEnt *V, StabEnt *S);
 	void			ParseFormalsList(StabEnt *context, StabEnt *S, bool);

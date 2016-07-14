@@ -178,6 +178,11 @@ struct DivertInfo
 	class Block	*clockExp;
 };
 
+struct AttribInfo {
+	class Block *block;
+	AttributeList *attributes;
+};
+
 struct ArrayRef
 {
 	Block		*base;
@@ -284,6 +289,7 @@ union BlockInfo {
 	OpInfo			op;
 	SleepInfo		sleep;
 	DivertInfo		divert;
+	AttribInfo		setAttrib;
 	RepeatInfo		repeat;
 	ListInfo		list;
 	FluxInfo		flux;
@@ -448,6 +454,7 @@ public:
 		C_WAKE		= 9,
 		C_SUSPEND	= 10,
 		C_INPUT		= 11,
+		C_SET_ATTRIB = 19,
 		C_DIVERT	= 20,
 		C_STATEOF	= 21,		// state machine
 		C_WAIT		= 22,
@@ -506,7 +513,7 @@ bool			Esrap(Block *b, char *buf, long &pos, long len,
 						
 flag			UpdateActiveBlock(
 						Qua *uberQ,
-						Stream *in,
+						Stream &in,
 						Block  *B,
 						Time &tag_time,
 						Stacker *stacker, 

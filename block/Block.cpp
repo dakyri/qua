@@ -479,6 +479,13 @@ Block::~Block()
 //		if (crap.constant.Value.type == TypedValue::S_TIME) {
 //			delete crap.constant.Value.TimeValue();
 //		}
+		break;
+	}
+	case C_SET_ATTRIB: {
+		if (crap.setAttrib.attributes) {
+			delete crap.setAttrib.attributes;
+		}
+		break;
 	}
 	default: {
 	}
@@ -1428,6 +1435,11 @@ Block::Traverse(BlockFnPtr f, void *x, VBlockFnPtr g, void *y, int z)
 		if (crap.divert.block && !crap.divert.block->Traverse(f,x,g,newy,z)) return false;
 		break;
 		
+	case C_SET_ATTRIB:
+		QDBMSG_BLK("Travering diversion\n", 0, 0);
+		if (crap.setAttrib.block && !crap.divert.block->Traverse(f, x, g, newy, z)) return false;
+		break;
+
 	case C_BUILTIN: {
 		QDBMSG_BLK("Travering up builtin call element\n",0,0);
 	    if (crap.call.parameters && !crap.call.parameters->Traverse(f,x,g,newy,z)) return false;

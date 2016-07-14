@@ -52,7 +52,8 @@ public:
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 	
-	Stream				*mainStream;
+	Stream scratchStream;
+	Stream &selectedTakeStream;
 	Time				duration;
 	std::mutex			flock;
 

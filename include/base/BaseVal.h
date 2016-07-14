@@ -8,27 +8,20 @@
 
 #include "Note.h"
 #include "QuaJoy.h"
-//////////////////////////////////////////////////////////////////
-//  base value class
-//  a 64 bit value union. 
-// ???????????????????????????
-// big questions about the way some formerly small structures passed
-// around the stack have grown ...
-// dropping 64 bit quantities from base_val_t ->
-//	base value 8 bytes
-//	typed value 12 bytes
-//	result value 12 bytes
-//	lvalue 16 bytes
-// otherwise base_val_t ->
-//	base value 8 bytes
-//	typed value 16 bytes ... to maintain alignment for 64bit int
-//	result value 16 bytes ... to maintain alignment for 64bit int
-//	lvalue 16 bytes
-
+/*
+ *  base value class
+ *  a 128 bit value union. when this was first written, space was at a premium ... now, not so much ... not even slightly
+ * good not to bloat.
+ * the big issue here now is ownership.
+ * because this is a massive union we can't really use move semantics, or nice constructors on the elements here
+ * at the moment, pointers are either
+ *  - symbolic references to structures elsewhere (qua, pool, voice etc) ... these are basically weak references
+ *  - objects which will end on a stream. the stream item will end up owning these and disposing in its lifecycle
+ */
 #include <stdio.h>
 
 //typedef	int8	base_type_t;
-typedef int8	ref_type_t;
+typedef int8 ref_type_t;
 
 class Voice;
 class Lambda;
@@ -671,6 +664,12 @@ inline Qua *
 TypedValue::QuaValue()
 {
 	return type == S_QUA && refType == REF_VALUE? val.qua: nullptr;
+}
+
+inline OSCMessage *
+TypedValue::MessageValue()
+{
+	return type == S_MESSAGE && refType == REF_VALUE ? val.mesgP : nullptr;
 }
 
 inline SysX &

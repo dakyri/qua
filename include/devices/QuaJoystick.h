@@ -106,7 +106,6 @@ public:
 };
 
 class QuaJoy;
-class RWLock;
 
 class QuaJoystickManager: public QuaPortManager<QuaJoystickPort>
 {

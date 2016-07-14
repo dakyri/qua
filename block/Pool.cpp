@@ -21,6 +21,7 @@ Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
 					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
 		uq,
 		uq->metric)
+	, selectedTakeStream(scratchStream)
 {
 //	if (nm != nullptr) {
 //		name = new char[strlen(nm)+1];
@@ -106,7 +107,7 @@ Pool::SelectTake(StreamTake *take)
 {
 	if (take) {
 		selectedTake = take;
-		mainStream = &take->stream;
+		selectedTakeStream = &take->stream;
 		duration = take->duration;
 	}
 	return B_NO_ERROR;
@@ -156,11 +157,11 @@ Pool::Init()
 		Time		tag_time;
 		
 		tag_time = Time::zero;
-	    mainStream->ClearStream();
+		selectedTakeStream.ClearStream();
 		QuasiStack	initStack(sym, nullptr, nullptr, nullptr, nullptr, uberQua->theStack, uberQua, nullptr);
 		while (!UpdateActiveBlock(
 					uberQua,
-					mainStream,
+					selectedTakeStream,
 					initBlock,
 					tag_time,
 					uberQua,
@@ -168,10 +169,10 @@ Pool::Init()
 					&initStack,
 					1,
 					false)) {
-			tag_time = mainStream->Duration();
+			tag_time = selectedTakeStream.Duration();
 		}
 	}
-	selectedTake->duration = duration = mainStream->Duration();
+	selectedTake->duration = duration = selectedTakeStream.Duration();
 	glob.PopContext(sym);
 	return true;
 err_ex:
@@ -238,7 +239,7 @@ Pool::Wake(Instance *i)
 			Time Now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
 		    	uberQua,
-				&mainStream,
+				mainStream,
 		    	wake.block,
 				Now, 
 				i,
@@ -247,7 +248,7 @@ Pool::Wake(Instance *i)
 				1,
 				true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX
@@ -276,7 +277,7 @@ Pool::Sleep(Instance *i)
 			Time Now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
 		    	uberQua,
-				&mainStream,
+				mainStream,
 		    	sleep.block,
 				Now,
 				i,
@@ -285,7 +286,7 @@ Pool::Sleep(Instance *i)
 				1,
 				true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX
@@ -318,7 +319,7 @@ Pool::Recv(class Stream &s)
 		Instance	*inst = instanceAt(i);
 		flag	uac = UpdateActiveBlock(
 						uberQua,
-						&s,
+						s,
 						rx.block,
 						tag_time,
 						inst,
@@ -516,7 +517,7 @@ PoolInstance::Run()
 		stackLock.lock();
 		flag	uac = UpdateActiveBlock(
 						uberQua,
-						&mainStream,
+						mainStream,
 						schedulable->mainBlock,
 						tag_time,
 						this,
@@ -528,7 +529,7 @@ PoolInstance::Run()
 		////////// readwrite lock on stacks
 
 		if (channel)
-			channel->OutputStream(&mainStream);
+			channel->OutputStream(mainStream);
 		mainStream.ClearStream(); // garbage collect!!
 	}
 	return B_NO_ERROR;

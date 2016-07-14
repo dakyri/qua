@@ -331,7 +331,7 @@ MFCStreamDataEditor::SetStartTimeMidiParams(MFCEditorItemView *iv, Time &at, int
 	if (iv->type == MFCEditorItemView::DISCRETE) {
 		MFCStreamItemView *itv = (MFCStreamItemView *)iv;
 		if (itv->item && stream) {
-			stream->ModifyItemTime(itv->item, &at);
+			stream->ModifyItemTime(itv->item, at);
 			itv->item->SetMidiParams(-1, pitch, -1, true);
 			itv->DrawMove();
 		}
@@ -454,7 +454,7 @@ MFCStreamDataEditor::OnLButtonDown(
 			mouse_item = ItemViewAtPoint(mouse_click, nFlags, hitType, hitIt);
 			if (mouse_item == NULL) {
 				StreamItem		*iv=NULL;
-				iv = new StreamNote(&at_time, 0, at_note, 80, 1);
+				iv = new StreamNote(at_time, 0, at_note, 80, 1);
 				stream->InsertItem(iv);
 				mouse_item = AddStreamItemView(iv, NULL, true);
 			}
@@ -487,12 +487,8 @@ MFCStreamDataEditor::OnLButtonDown(
 							case TypedValue::S_CTRL: {
 								if (stream) {
 									mouse_action = QUA_MOUSE_ACTION_DRAW_EVENT;
-									if ((it=stream->FindItemAtTime(0,
-														at_time,
-										TypedValue::S_CTRL,
-														-1,
-														siv->listitemData1))==NULL) {
-										it = new StreamCtrl(&at_time, 0, siv->listitemData1, 0);
+									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_CTRL, -1, siv->listitemData1)) == NULL) {
+										it = new StreamCtrl(at_time, 0, siv->listitemData1, 0);
 										stream->InsertItem(it);
 									}
 									siv->SetSubItemValue(it, val);
@@ -502,12 +498,8 @@ MFCStreamDataEditor::OnLButtonDown(
 							case TypedValue::S_BEND: {
 								if (stream) {
 									mouse_action = QUA_MOUSE_ACTION_DRAW_EVENT;
-									if ((it=stream->FindItemAtTime(0,
-														at_time,
-										TypedValue::S_BEND,
-														-1,
-														siv->listitemData1))==NULL) {
-										it = new StreamBend(&at_time, 0, 0);
+									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_BEND, -1, siv->listitemData1))==NULL) {
+										it = new StreamBend(at_time, 0, 0);
 										stream->InsertItem(it);
 									}
 									siv->SetSubItemValue(it, val);
@@ -743,7 +735,7 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 		short ctl = ret-ID_STREAMEDITORCONTEXT_ADD_CONTROLLER;
 		if (stream != NULL) {
 			StreamItem		*iv=NULL;
-			iv = new StreamCtrl(&at_time, 0, ctl, 80);
+			iv = new StreamCtrl(at_time, 0, ctl, 80);
 			stream->InsertItem(iv);
 			MFCEditorItemView	*added_item = AddStreamItemView(iv, &itPt, true);
 		}
@@ -761,7 +753,7 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 		short prg = ret-ID_STREAMEDITORCONTEXT_ADD_PROGRAM;
 		if (stream != NULL) {
 			StreamItem		*iv=NULL;
-			iv = new StreamProg(&at_time, 0, prg, NON_PROG, NON_PROG);
+			iv = new StreamProg(at_time, 0, prg, NON_PROG, NON_PROG);
 			stream->InsertItem(iv);
 			MFCEditorItemView	*added_item = AddStreamItemView(iv, &itPt, true);
 		}
@@ -835,7 +827,7 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 	} else if (ret == ID_STREAMEDITORCONTEXT_ADD_BEND) {
 		if (stream != NULL) {
 			StreamItem		*si=NULL;
-			si = new StreamBend(&at_time, 0, 0);
+			si = new StreamBend(at_time, 0, 0);
 			stream->InsertItem(si);
 			MFCEditorItemView	*added_item = AddStreamItemView(si, &itPt, true);
 		}
@@ -1081,7 +1073,7 @@ MFCStreamDataEditor::OnMouseMove(
 											if (ft != NULL && ((StreamCtrl *)ft)->ctrl.amount == actualval) {
 												siv->SetSubItemTime(ft, at_time);
 											} else {
-												it = new StreamCtrl(&at_time, 0, siv->listitemData1, 0);
+												it = new StreamCtrl(at_time, 0, siv->listitemData1, 0);
 												stream->InsertItem(it);
 												siv->SetSubItemValue(it, val);
 											}
@@ -1100,17 +1092,8 @@ MFCStreamDataEditor::OnMouseMove(
 							case TypedValue::S_BEND: {
 								if (stream) {
 									short	actualval = 127*val;
-									pt=stream->FindItemAtTime(-2,
-														at_time,
-										TypedValue::S_BEND,
-														-1,
-														siv->listitemData1);
-									it=stream->FindItemAtTime(0,
-														at_time,
-										TypedValue::S_BEND,
-														-1,
-														siv->listitemData1,
-														pt);
+									pt=stream->FindItemAtTime(-2, at_time, TypedValue::S_BEND, -1, siv->listitemData1);
+									it=stream->FindItemAtTime(0, at_time, TypedValue::S_BEND, -1, siv->listitemData1, pt);
 									if (pt==NULL || ((StreamCtrl*)pt)->ctrl.amount != actualval) {
 										if (it==NULL) {
 											StreamItem	*ft = NULL;
@@ -1120,7 +1103,7 @@ MFCStreamDataEditor::OnMouseMove(
 											if (ft != NULL && ((StreamBend *)ft)->bend.bend == actualval) {
 												siv->SetSubItemTime(ft, at_time);
 											} else {
-												it = new StreamBend(&at_time, 0, 0);
+												it = new StreamBend(at_time, 0, 0);
 												stream->InsertItem(it);
 												siv->SetSubItemValue(it, val);
 											}
@@ -1588,7 +1571,7 @@ MFCStreamItemListView::SetSubItemTime(StreamItem *si, Time &t)
 		if (si->type == TypedValue::S_PROG) {
 			updr.right += 40; // !! by rights the pixel width of the label + 1
 		}
-		sed->stream->ModifyItemTime(si, &tot);
+		sed->stream->ModifyItemTime(si, tot);
 		editor->InvalidateRect(&updr);
 	}
 	return true;

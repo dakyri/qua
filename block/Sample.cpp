@@ -385,7 +385,7 @@ Sample::Wake(Instance *i)
 			Stream	mainStream;
 			Time Now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
-		    	uberQua, &mainStream,
+		    	uberQua, mainStream,
 		    	wake.block,
 				Now,
 				i,
@@ -394,7 +394,7 @@ Sample::Wake(Instance *i)
 				1,
 				true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX
@@ -429,7 +429,7 @@ Sample::Sleep(Instance *i)
 			Time Now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
 		    	uberQua,
-				&mainStream,
+				mainStream,
 		    	sleep.block,
 				Now,
 				i,
@@ -438,7 +438,7 @@ Sample::Sleep(Instance *i)
 				1,
 				true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX
@@ -495,7 +495,7 @@ Sample::Recv(Stream &s)
 		
 		flag	uac = UpdateActiveBlock(
 						uberQua,
-						&s,
+						s,
 						rx.block,
 						tag_time,
 						inst,
@@ -1475,7 +1475,7 @@ SampleInstance::Run()
 		stackLock.lock();
 		flag	uac = UpdateActiveBlock(
 						uberQua,
-						&mainStream,
+						mainStream,
 						schedulable->mainBlock,
 						tag_time,
 						this,
@@ -1487,7 +1487,7 @@ SampleInstance::Run()
 		////////// readwrite lock on stacks
 
 		if (channel)
-			channel->OutputStream(&mainStream);
+			channel->OutputStream(mainStream);
 		mainStream.ClearStream(); // garbage collect!!
 	}
 	return B_NO_ERROR;

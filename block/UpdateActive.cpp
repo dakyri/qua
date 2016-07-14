@@ -39,7 +39,7 @@ flag		debug_update=0;
  */
 flag
 UpdateActiveBlock(Qua *uberQua,
-				Stream *mainStream,
+				Stream &mainStream,
 				Block *B,
 				Time &updateTime,
 				Stacker *stacker,
@@ -59,8 +59,8 @@ UpdateActiveBlock(Qua *uberQua,
 			"UpdateActive (%x type %d)\n\thead %x tail %x count %d stacker %x stack %x\n",
 			B,
 			B?B->type:-1,
-			mainStream->head, mainStream->tail,
-			mainStream->nItems,
+			mainStream.head, mainStream.tail,
+			mainStream.nItems,
 			stacker, stack);
 	}
 #endif
@@ -97,13 +97,13 @@ UpdateActiveBlock(Qua *uberQua,
 				fprintf(stderr, "fluxing at %d for %d : %x %x\n",
 					uberQua->theTime.ticks,
 					nextTP->ticks,
-					mainStream->head,
-					mainStream->tail);
+					mainStream.head,
+					mainStream.tail);
 			}
 #endif			
 			if (B->crap.flux.rateExp) {
 				val = EvaluateExpression(B->crap.flux.rateExp,
-						mainStream->head, stacker, stackCtxt, stack);
+						mainStream.head, stacker, stackCtxt, stack);
 				rate = (short)val.IntValue(stack);
 			}
 
@@ -117,13 +117,13 @@ UpdateActiveBlock(Qua *uberQua,
 	    	if (B->crap.flux.lengthExp) {
 				cv = EvaluateExpression(
 								B->crap.flux.lengthExp,
-								mainStream->head, stacker, stackCtxt, stack);
+								mainStream.head, stacker, stackCtxt, stack);
 				if (!cv.Blocked()) {
 					cycle_len.ticks = cv.IntValue(stack);
 //					cycle_len.Actual = cycle_len.ticks *
 //								uberQua->timeQuanta;
 					ua_complete = UpdateActiveBlock(uberQua,
-										&createdStream,
+										createdStream,
 										B->crap.flux.block,
 										updateTime,
 										stacker,
@@ -137,7 +137,7 @@ UpdateActiveBlock(Qua *uberQua,
 			} else  {
 				// work it out later
 				ua_complete = UpdateActiveBlock(uberQua,
-						&createdStream,
+						createdStream,
 						B->crap.flux.block, updateTime,
 						stacker, stackCtxt, stack,
 						rate, generate_on_the_fly);
@@ -148,7 +148,7 @@ UpdateActiveBlock(Qua *uberQua,
 				    			createdStream.Duration());
 #endif
 			}
-			mainStream->AppendStream(&createdStream);
+			mainStream.AppendStream(createdStream);
 #ifdef QUA_V_DEBUG_CONSOLE
 			if (debug_update >= 2)
 			    fprintf(stderr, "flux next at %d\n", nextTP->ticks);
@@ -253,16 +253,16 @@ UpdateActiveBlock(Qua *uberQua,
 					ua_complete = UpdateActiveBlock(uberQua,
 							mainStream,
 							p,
-							mainStream->nItems==0?
+							mainStream.nItems==0?
 								updateTime:
-								mainStream->EndTime(),
+								mainStream.EndTime(),
 							stacker,
 							stackCtxt,
 							stack, updateRate,
 							generate_on_the_fly);
 #ifdef QUA_V_DEBUG_CONSOLE
 					if (debug_update)
-						fprintf(stderr, "sequential list element %d\n", mainStream->nItems);
+						fprintf(stderr, "sequential list element %d\n", mainStream.nItems);
 #endif
 					if (ua_complete)
 						p = p->next;
@@ -277,10 +277,10 @@ UpdateActiveBlock(Qua *uberQua,
 				p = active;
 						
 				if (p != nullptr) {
-					int			cnt	= mainStream->nItems;
+					int			cnt	= mainStream.nItems;
 					Block		*q = p;
 			
-					while (mainStream->nItems == cnt) {
+					while (mainStream.nItems == cnt) {
 						ua_complete = UpdateActiveBlock(
 											uberQua,
 											mainStream,
@@ -338,7 +338,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ResultValue		the_val;
 			int				npar = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				the_val = EvaluateExpression(bp,mainStream->head,
+				the_val = EvaluateExpression(bp,mainStream.head,
 							stacker, stackCtxt, stack);
 				if (the_val.Blocked()) {
 					return BLOCK_INCOMPLETE;
@@ -349,7 +349,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (ctlsym && bp->type != Block::C_ASSIGN) {
 					LValue		lval;
 					ctlsym->SetLValue(lval,
-									mainStream->head,
+									mainStream.head,
 									stacker,
 									stackCtxt,
 									higherFrame);
@@ -381,7 +381,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ResultValue		the_val;
 			int				npar = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				the_val = EvaluateExpression(bp,mainStream->head,
+				the_val = EvaluateExpression(bp,mainStream.head,
 							stacker, stackCtxt, stack);
 				if (the_val.Blocked()) {
 					return BLOCK_INCOMPLETE;
@@ -393,7 +393,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (ctlsym) {
 					if (bp->type != Block::C_ASSIGN) {
 						LValue		lval;
-						ctlsym->SetLValue(lval,	mainStream->head,
+						ctlsym->SetLValue(lval,	mainStream.head,
 												stacker, stackCtxt,
 												higherFrame);
 						lval.StoreValue(&the_val);
@@ -448,7 +448,7 @@ UpdateActiveBlock(Qua *uberQua,
 					if (nextItem) {
 						loopTime += clip->start;
 						while (nextItem != nullptr && nextItem->time <= loopTime) {
-							mainStream->AddToStream(nextItem, uberQua->theTime);
+							mainStream.AddToStream(nextItem, uberQua->theTime);
 							nextItem = nextItem->next;
 						}
 					}
@@ -483,7 +483,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ResultValue		the_val;
 			int				npar = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				the_val = EvaluateExpression(bp, mainStream->head, stacker, stackCtxt, stack);
+				the_val = EvaluateExpression(bp, mainStream.head, stacker, stackCtxt, stack);
 				if (the_val.Blocked()) {
 					return BLOCK_INCOMPLETE;
 				}
@@ -494,7 +494,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (ctlsym) {
 					if (bp->type != Block::C_ASSIGN) {
 						LValue		lval;
-						ctlsym->SetLValue(lval, mainStream->head,
+						ctlsym->SetLValue(lval, mainStream.head,
 												stacker, stackCtxt,
 												higherFrame);
 						lval.StoreValue(&the_val);
@@ -525,7 +525,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ResultValue		the_val;
 			int				npar = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				the_val = EvaluateExpression(bp, mainStream->head, stacker, stackCtxt, stack);
+				the_val = EvaluateExpression(bp, mainStream.head, stacker, stackCtxt, stack);
 				if (the_val.Blocked()) {
 					return BLOCK_INCOMPLETE;
 				}
@@ -536,7 +536,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (ctlsym) {
 					if (bp->type != Block::C_ASSIGN) {
 						LValue		lval;
-						ctlsym->SetLValue(lval, mainStream->head,
+						ctlsym->SetLValue(lval, mainStream.head,
 												stacker, stackCtxt,
 												higherFrame);
 						lval.StoreValue(&the_val);
@@ -567,7 +567,7 @@ UpdateActiveBlock(Qua *uberQua,
 			ResultValue		the_val;
 			int				npar = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				the_val = EvaluateExpression(bp,mainStream->head,
+				the_val = EvaluateExpression(bp,mainStream.head,
 							stacker, stackCtxt, stack);
 				if (the_val.Blocked()) {
 					return BLOCK_INCOMPLETE;
@@ -579,7 +579,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (ctlsym) {
 					if (bp->type != Block::C_ASSIGN) {
 						LValue		lval;
-						ctlsym->SetLValue(lval, mainStream->head,
+						ctlsym->SetLValue(lval, mainStream.head,
 												stacker, stackCtxt,
 												higherFrame);
 						lval.StoreValue(&the_val);
@@ -616,7 +616,7 @@ UpdateActiveBlock(Qua *uberQua,
 			short positionalParam = 0;
 			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
 				
-				ResultValue v = EvaluateExpression(bp,mainStream->head,
+				ResultValue v = EvaluateExpression(bp,mainStream.head,
 							stacker, stackCtxt, stack);
 				if (bp->type != Block::C_ASSIGN && !v.Blocked()) {
 					afx->setParameter(afx, positionalParam, v.FloatValue(higherFrame));
@@ -673,7 +673,7 @@ UpdateActiveBlock(Qua *uberQua,
 					for (p=B->crap.call.parameters; p!=nullptr; p=p->next) {
 						ResultValue the_val =
 							EvaluateExpression(
-								p,mainStream->head, stacker, stackCtxt, stack);
+								p,mainStream.head, stacker, stackCtxt, stack);
 						if (the_val.Blocked()) {
 #ifdef LOTSALOX
 							S->stackableLock.Unlock();
@@ -687,7 +687,7 @@ UpdateActiveBlock(Qua *uberQua,
 							LValue		lval;
 							ctlsym->SetLValue(
 									lval,
-									mainStream->head,
+									mainStream.head,
 									stacker, stackCtxt,
 									higherFrame);
 							lval.StoreValue(&the_val);
@@ -774,8 +774,7 @@ UpdateActiveBlock(Qua *uberQua,
 	case Block::C_DIVERT: {
 		ResultValue	tag_val;
 	
-		tag_val = EvaluateExpression(B->crap.divert.clockExp,
-							mainStream->head, stacker, stackCtxt, stack);
+		tag_val = EvaluateExpression(B->crap.divert.clockExp, mainStream.head, stacker, stackCtxt, stack);
 		ua_complete = BLOCK_INCOMPLETE;
 		if (!tag_val.Blocked()) {
 			Time	tag(tag_val.IntValue(stack), uberQua->metric);
@@ -783,18 +782,39 @@ UpdateActiveBlock(Qua *uberQua,
 //			StreamItem	*p=nullptr;
 			
 			ua_complete = UpdateActiveBlock(uberQua,
-					&diverted,
-					 B->crap.divert.block,
+					diverted,
+					B->crap.divert.block,
 					 tag, 
 					 stacker, 
 					 stackCtxt,
 					 stack,
 					 updateRate, 
 					 generate_on_the_fly);
-			mainStream->AppendStream(&diverted);
+			mainStream.AppendStream(diverted);
 		}
 		break;
     }
+
+	case Block::C_SET_ATTRIB: {
+		Stream	subStream;
+		ua_complete = UpdateActiveBlock(uberQua,
+			subStream,
+			B->crap.setAttrib.block,
+			updateTime,
+			stacker,
+			stackCtxt,
+			stack,
+			updateRate,
+			generate_on_the_fly);
+		subStream.forEach([B](StreamItem*i) {
+			if (B->crap.setAttrib.attributes) {
+				i->setAttributes(B->crap.setAttrib.attributes->clone());
+			}
+		});
+		mainStream.AppendStream(subStream);
+		break;
+	}
+
 
 #ifdef STATEMENT_ASSIGNEMTS
 //////////////////////////////////////////////////////////////
@@ -808,9 +828,9 @@ UpdateActiveBlock(Qua *uberQua,
 	
 		if (debug_update >= 2)
 		    fprintf(stderr, "assign %x %x str %x %x\n", B, B->next,
-		    				mainStream->head, mainStream->tail);
+		    				mainStream.head, mainStream.tail);
 	
-		p = mainStream->head;
+		p = mainStream.head;
 		
 		LValue		lval = LValueAte(B->crap.assign.atom, p, stacker, stack);
 		if (lval.sym->RefersToStream()) {
@@ -827,7 +847,7 @@ UpdateActiveBlock(Qua *uberQua,
 				}
 			}
 		} else {
-			val = EvaluateExpression(B->crap.assign.exp, mainStream->head, stacker, stack);
+			val = EvaluateExpression(B->crap.assign.exp, mainStream.head, stacker, stack);
 			if (!val.blocked) {
 			    lval.StoreValue(&val);
 				lval.sym->UpdateControllerBridge(updateTime, &val, stack);
@@ -849,7 +869,7 @@ UpdateActiveBlock(Qua *uberQua,
 
 		if (count == 0) {
 			expV = EvaluateExpression(B->crap.repeat.Exp,
-				mainStream->head, stacker, stackCtxt, stack);
+				mainStream.head, stacker, stackCtxt, stack);
 			if (!expV.Blocked()) {
 				B->crap.repeat.boundVar.SetValue(
 										expV.IntValue(stack),
@@ -896,7 +916,7 @@ UpdateActiveBlock(Qua *uberQua,
 		if (	!generate_on_the_fly ||
 				B->crap.iff.doEvalVar.BoolValue(stack)) {
 			ResultValue v	 = EvaluateExpression(B->crap.iff.condition,
-					 mainStream->head, stacker, stackCtxt, stack);
+					 mainStream.head, stacker, stackCtxt, stack);
 			B->crap.iff.condVar.SetValue(v.IntValue(stack),stack);
 			block = v.Blocked();
 		}
@@ -945,7 +965,7 @@ UpdateActiveBlock(Qua *uberQua,
 		Stream		temp;
 
 		if (B->crap.foreach.condition) {
-			for (StreamItem *p=mainStream->head; p!=nullptr; p=p->next) {
+			for (StreamItem *p=mainStream.head; p!=nullptr; p=p->next) {
 				 ResultValue val = EvaluateExpression(
 				    			B->crap.foreach.condition,
 				    			p, stacker, stackCtxt, 
@@ -956,7 +976,7 @@ UpdateActiveBlock(Qua *uberQua,
 					StreamItem	*q = p->next;
 					if (val.BoolValue(stack)) {
 						ua_complete = UpdateActiveBlock(uberQua,
-							&temp,
+							temp,
 							B->crap.foreach.ifBlock,
 							updateTime,
 							stacker,
@@ -966,7 +986,7 @@ UpdateActiveBlock(Qua *uberQua,
 							generate_on_the_fly);
 					} else {
 						ua_complete = UpdateActiveBlock(uberQua,
-							&temp, 
+							temp, 
 							B->crap.foreach.elseBlock,
 							updateTime,
 							stacker, stackCtxt, 
@@ -978,12 +998,12 @@ UpdateActiveBlock(Qua *uberQua,
 				 }
 			}
 		} else {
-			for (StreamItem *p=mainStream->head; p!=nullptr; p=p->next) {
+			for (StreamItem *p=mainStream.head; p!=nullptr; p=p->next) {
 				temp.nItems = 1;
 				temp.head = p;
 				StreamItem	*q = p->next;
 				ua_complete = UpdateActiveBlock(uberQua,
-					&temp,
+					temp,
 					B->crap.foreach.ifBlock,
 					updateTime,
 					stacker,
@@ -1004,7 +1024,7 @@ UpdateActiveBlock(Qua *uberQua,
 #ifdef OLD_WITH
 		Stream		temp;
 
-		for (StreamItem *p=mainStream->head; p!=nullptr; p=p->next) {
+		for (StreamItem *p=mainStream.head; p!=nullptr; p=p->next) {
 			 ResultValue val = EvaluateExpression(
 			    			B->crap.with.condition,
 			    			p, stacker, 
@@ -1035,14 +1055,14 @@ UpdateActiveBlock(Qua *uberQua,
 #else
 		Stream		elseStream;
 
-		if (mainStream->nItems > 0) {
+		if (mainStream.nItems > 0) {
 
-			mainStream->Split(
+			mainStream.Split(
 						(cmd_t)B->crap.with.objectType->type,
 						B->crap.with.condition,
 						stacker, stackCtxt, stack,
 						&elseStream);
-			if (mainStream->nItems > 0 && B->crap.with.withBlock) {
+			if (mainStream.nItems > 0 && B->crap.with.withBlock) {
 				ua_complete = UpdateActiveBlock(uberQua,
 					mainStream,
 					B->crap.with.withBlock,
@@ -1055,7 +1075,7 @@ UpdateActiveBlock(Qua *uberQua,
 			}
 			if (elseStream.nItems > 0 && B->crap.with.withoutBlock) {
 				ua_complete = UpdateActiveBlock(uberQua,
-					&elseStream, 
+					elseStream, 
 					B->crap.with.withoutBlock,
 					updateTime,
 					stacker,
@@ -1065,7 +1085,7 @@ UpdateActiveBlock(Qua *uberQua,
 					generate_on_the_fly);
 			}
 			if (elseStream.nItems > 0) {
-				mainStream->Merge(&elseStream);
+				mainStream.Merge(&elseStream);
 			}
 		}
 			
@@ -1080,7 +1100,7 @@ UpdateActiveBlock(Qua *uberQua,
 	case Block::C_WAIT: {
 		if (generate_on_the_fly) {
 			ResultValue v = EvaluateExpression(B->crap.block,
-					 mainStream->head, stacker, stackCtxt, stack);
+					 mainStream.head, stacker, stackCtxt, stack);
 			ua_complete = (!v.Blocked() && v.BoolValue(stack));
 		} else
 			ua_complete = BLOCK_COMPLETE;
@@ -1098,7 +1118,7 @@ UpdateActiveBlock(Qua *uberQua,
 		bool	block=false;
 		if (!(generate_on_the_fly && !B->crap.guard.doEvalVar.IntValue(stack))) {
 			ResultValue v = EvaluateExpression(B->crap.guard.condition,
-					 mainStream->head,
+					 mainStream.head,
 					 stacker, stackCtxt, stack);
 			block = v.Blocked();
 			B->crap.guard.condVar.SetValue(v.IntValue(stack),stack);
@@ -1165,7 +1185,7 @@ UpdateActiveBlock(Qua *uberQua,
 #ifdef QUA_V_DEBUG_CONSOLE
 		if (debug_update >= 1)
 		    fprintf(stderr, "output %x str %x %d\n", B, 
-						 mainStream->head, mainStream->nItems);
+						 mainStream.head, mainStream.nItems);
 #endif	
 		B->crap.channel->OutputStream(mainStream);
 // ??????????????????????????????????? this will let more
@@ -1182,12 +1202,12 @@ UpdateActiveBlock(Qua *uberQua,
 	case Block::C_INPUT: {
 #ifdef QUA_V_DEBUG_CONSOLE
 		if (debug_update >= 2)
-		    fprintf(stderr, "input %d %d\n", B->crap.constant.value, mainStream->nItems);
+		    fprintf(stderr, "input %d %d\n", B->crap.constant.value, mainStream.nItems);
 #endif	
 		B->crap.channel->InputStream(mainStream);
 #ifdef QUA_V_DEBUG_CONSOLE
 		if (debug_update) {
-		    fprintf(stderr, "\tgot %d\n", mainStream->nItems);
+		    fprintf(stderr, "\tgot %d\n", mainStream.nItems);
 		}
 #endif	
 		ua_complete = BLOCK_COOKED;
@@ -1207,7 +1227,7 @@ UpdateActiveBlock(Qua *uberQua,
 					fprintf(stderr, "sink\n");
 				}
 #endif		
-				mainStream->ClearStream();
+				mainStream.ClearStream();
 				return BLOCK_COMPLETE;
 			}
 		}
@@ -1228,12 +1248,12 @@ UpdateActiveBlock(Qua *uberQua,
 		}
 #endif
 		do {		
-			val = EvaluateExpression(B,	mainStream->head, stacker, stackCtxt, stack);
+			val = EvaluateExpression(B,	mainStream.head, stacker, stackCtxt, stack);
 
 			if (val.type == TypedValue::S_LIST) {
 				// todo xxxx this was commented out ... it may be broken, but lets open it up anyway
 				for (TypedValueListItem *p=val.ListValue().head; p != nullptr; p=p->next) {
-					mainStream->AddToStream(p->value , updateTime);
+					mainStream.AddToStream(p->value , updateTime);
 				}
 				val.ListValue().Clear();
 			} else {
@@ -1245,43 +1265,43 @@ UpdateActiveBlock(Qua *uberQua,
 					if (debug_update)
 						fprintf(stderr, "created %x\n", mp);
 #endif	
-					mainStream->AddToStream(mp, updateTime);
+					mainStream.AddToStream(mp, updateTime);
 					break;
 				}
 
 				case TypedValue::S_NOTE: {
 					val.NoteValue().duration /= updateRate;
-					mainStream->AddToStream(val.NoteValue(), updateTime);
+					mainStream.AddToStream(val.NoteValue(), updateTime);
 					break;
 				}
 
 				case TypedValue::S_SYSX: {
-					mainStream->AddToStream(val.SysXValue(), updateTime);
+					mainStream.AddToStream(val.SysXValue(), updateTime);
 					break;
 				}
 
 				case TypedValue::S_CTRL: {				
-				    mainStream->AddToStream(val.CtrlValue(), updateTime);
+				    mainStream.AddToStream(val.CtrlValue(), updateTime);
 				    break;
 				}
 				
 				case TypedValue::S_BEND: {						
-				    mainStream->AddToStream(val.BendValue(), updateTime);
+				    mainStream.AddToStream(val.BendValue(), updateTime);
 				    break;
 				}
 				
 				case TypedValue::S_PROG: {
-				    mainStream->AddToStream(val.ProgValue(), updateTime);
+				    mainStream.AddToStream(val.ProgValue(), updateTime);
 				    break;
 				}
 				
 				case TypedValue::S_SYSC: {					
-				    mainStream->AddToStream(val.SysCValue(), updateTime);
+				    mainStream.AddToStream(val.SysCValue(), updateTime);
 				    break;
 				}
 				
 				case TypedValue::S_STREAM_ITEM: {					
-				    mainStream->AddToStream(val, updateTime);
+				    mainStream.AddToStream(val, updateTime);
 				    break;
 				}
 				
@@ -1296,7 +1316,7 @@ UpdateActiveBlock(Qua *uberQua,
 
 #ifdef QUA_V_DEBUG_CONSOLE
 	if (debug_update >= 2)
-        fprintf(stderr, "\texit update.1 %x %s %d\n", ua_complete, "", mainStream->nItems);
+        fprintf(stderr, "\texit update.1 %x %s %d\n", ua_complete, "", mainStream.nItems);
 #endif
     return ua_complete;
 }

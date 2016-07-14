@@ -17,7 +17,9 @@ int32 findConstant(const char *s);
 int32 findMidiNote(const char *s);
 int32 findDfltEventType(const char *s);
 int32 findTypeAttribute(const char *s);
+int32 findProperty(const char *s);
 
 string findClipPlayer(int type);
 string findTypeName(int type);
 string findAttributeName(int type);
+string findPropertyName(int type);

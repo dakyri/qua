@@ -277,7 +277,7 @@ Qua::PostCreationInit()
 			
 			bool ua_complete = (UpdateActiveBlock(
 		    					this,
-		    					&mainStream,
+		    					mainStream,
 		    					initBlock,
 		    					theTime,
 		    					this,
@@ -1772,7 +1772,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		}
 		Stream		*newstream = (Stream *)data;
 	
-		take->stream.AppendStream(newstream);
+		take->stream.AppendStream(*newstream);
 		take->duration = take->stream.Duration();
 		
 		delete newstream;

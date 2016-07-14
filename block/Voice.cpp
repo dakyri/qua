@@ -237,11 +237,11 @@ Voice::Wake(Instance *i)
 			Stream	mainStream;
 			Time now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
-		    	uberQua, &mainStream,
+		    	uberQua, mainStream,
 		    	wake.block, now, i, i->sym,
 		    	i->wakeStack, 1, true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX		
@@ -271,7 +271,7 @@ Voice::Sleep(Instance *i)
 			Time Now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
 		    	uberQua,
-				&mainStream,
+				mainStream,
 		    	sleep.block,
 				Now,
 				i,
@@ -280,7 +280,7 @@ Voice::Sleep(Instance *i)
 				1,
 				true);
 			if (i->channel)
-				i->channel->OutputStream(&mainStream);
+				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
 		}
 #ifdef LOTSALOX		
@@ -328,7 +328,7 @@ Voice::Recv(Stream &s)
 		Instance	*inst = instanceAt(i);
 		flag	uac = UpdateActiveBlock(
 						uberQua,
-						&s,
+						s,
 						rx.block,
 						tag_time,
 						inst,
@@ -603,7 +603,7 @@ VoiceInstance::Run()
 
 		flag ua_complete = UpdateActiveBlock(
     						uberQua,
-    						&mainStream,
+    						mainStream,
     						schedulable->mainBlock,
     						uberQua->theTime,
 							this,
@@ -615,7 +615,7 @@ VoiceInstance::Run()
 		////////// readwrite lock on stacks
 
 		if (channel) {
-			channel->OutputStream(&mainStream);
+			channel->OutputStream(mainStream);
 			channel->CheckOutBuffers();
 		}
 		mainStream.ClearStream();

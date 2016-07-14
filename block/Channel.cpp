@@ -268,9 +268,9 @@ Channel::Start()
 
 
 void
-Channel::OutputStream(Stream *S)
+Channel::OutputStream(Stream &S)
 {
-	if (S->nItems > 0 && status == STATUS_RUNNING) {
+	if (S.nItems > 0 && status == STATUS_RUNNING) {
 
 #ifdef ASYNC_CHAN_OUT
 		outMutex.Lock();
@@ -286,13 +286,13 @@ Channel::OutputStream(Stream *S)
 }
 
 void
-Channel::InputStream(Stream *S)
+Channel::InputStream(Stream &S)
 {
 	if (status == STATUS_RUNNING) {
 #ifdef ASYNC_CHAN_IN
 		inMutex.Lock();
 #endif
-	    S->AddToStream(&inStream);
+	    S.AddToStream(inStream);
 #ifdef ASYNC_CHAN_IN
 		inMutex.Unlock();
 #endif
@@ -313,7 +313,7 @@ Channel::CheckOutBuffers()
 			Time	tag_time = uberQua->theTime;
 			flag	uac = UpdateActiveBlock(
 							uberQua,
-							&outStream,
+							outStream,
 							tx.block,
 							tag_time,
 							this,
@@ -386,7 +386,7 @@ Channel::CheckInBuffers()
 				Time	tag_time = uberQua->theTime;
 				flag	uac = UpdateActiveBlock(
 								uberQua,
-								&recvStream,
+								recvStream,
 								rx.block,
 								tag_time,
 								this,
@@ -402,10 +402,10 @@ Channel::CheckInBuffers()
 				receivingLock.lock();
 				for (Instance *inst: receivingInstances) {
 					Stream	inthru;
-					inthru.AddToStream(&recvStream);
+					inthru.AddToStream(recvStream);
 					inst->Recv(inthru);
 					if (inst->thruEnabled) {
-						OutputStream(&inthru);
+						OutputStream(inthru);
 						outalready = true;
 					} else {
 						inthru.ClearStream();
@@ -414,11 +414,11 @@ Channel::CheckInBuffers()
 				receivingLock.unlock();
 			}
 			if (midiThru && ! outalready) {	// copy to output stream
-				OutputStream(&recvStream);
+				OutputStream(recvStream);
 			}
-			CheckRecord(&recvStream);
+			CheckRecord(recvStream);
 
-			inStream.AppendStream(&recvStream);
+			inStream.AppendStream(recvStream);
 		}
 #ifdef ASYNC_CHAN_IN
 		inMutex.Unlock();
@@ -577,7 +577,7 @@ Channel::StartRecording()
 }
 
 void
-Channel::CheckRecord(Stream *s)
+Channel::CheckRecord(Stream &s)
 {
 	if (recordState == RECORD_ING && streamRecordInstance) {	// dump into rec stream
 						// let's hope this is always a

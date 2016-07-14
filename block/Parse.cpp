@@ -274,11 +274,11 @@ QSParser::ShowErrors()
 /*
  * GetToken:
  * v.dodgy lexical analyser.
+ *  xxxx todo strings are a can of worms ownership wise for the moment they will generate an error unless
+ * given hasWorms=true in which case the tokval isn't initialized, it is still kept in the currentToken, a
+ * static memmber
+ * FIXME XXXX TODO WTF
  */
-
-
-
-
 int
 QSParser::GetToken(bool hasWorms)
 {
@@ -761,6 +761,61 @@ QSParser::ParseBlockList(StabEnt *context, StabEnt *schedSym, char *type)
 	}
 	
     return block;
+}
+
+/*
+process a single attribute ... either \word or "string value" ... if this has a match
+in the property idex we'll store that value along with it ... otherwise the name and -1
+we may still be interested in non-system attributes
+eventually
+that was always the plan anyway
+
+currently the system attributes are for 'cellstart' and 'phraseend' used as attributes for
+notes by the markov generator
+*/
+bool
+QSParser::parseAttribute(AttributeList * al, StabEnt *context, StabEnt *schedSym, bool resolve) {
+	if (currentTokenType == TOK_TYPE) {
+		int v = findProperty(currentToken);
+		al->add(currentToken, v); // v could be -1 but it could still be interesting
+		GetToken(true);
+		return true;
+	} else if (currentTokenType == TOK_VAL && currentTokenVal.type == TypedValue::S_STRING) {
+		string attrname(currentToken);
+		int v = findProperty(currentToken);
+		al->add(currentToken, v);
+		GetToken(true);
+		return true;
+	}
+	return false;
+}
+
+/*
+ '(' attr ',' attr ',' ... ')' or just a single attr
+*/
+AttributeList *
+QSParser::parseAttributeList(StabEnt *context, StabEnt *schedSym, bool resolve) {
+	AttributeList *al = new AttributeList();
+
+	if (strcmp(currentToken, "(") == 0) {
+		GetToken(true);
+	} else {
+		parseAttribute(al, context, schedSym, resolve);
+		return al;
+	}
+
+	while (strcmp(currentToken, ")") == 0) {
+		if (!parseAttribute(al, context, schedSym, resolve)) {
+			;
+		}
+		if (strcmp(currentToken, ",") == 0) {
+			GetToken(true);
+		}
+	}
+
+	GetToken();
+
+	return al;
 }
 
 Block *
@@ -2017,9 +2072,12 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		GetToken();
 		block->crap.divert.block = p;
 		block->crap.divert.clockExp = ParseExpression(context, schedSym, true);
-	}
-	if (debug_parse >= 1) {
-//		fprintf(stderr, "done block, returns %x\n", block);
+	} else if (strcmp(currentToken, "set") == 0) {
+		p = block;
+		block = new Block(Block::C_SET_ATTRIB);
+		GetToken(true);
+		block->crap.setAttrib.block = p;
+		block->crap.setAttrib.attributes = parseAttributeList(context, schedSym, true);
 	}
     return block;
 }

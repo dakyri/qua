@@ -9,20 +9,21 @@
 
 #include "Block.h"
 #include "Attributes.h"
+#include "Dictionary.h"
+
+#include <utility>
+using namespace std;
 
 // garbage collection needs to be sorted a bit. notes are the
 // main things with properties, and they don't have a default
 // destructor
+// assignment is always move not copy
 
-std::unordered_map<std::string,int32> propertyIndex = {
-	{"cell start",	Attribute::CELL_START},
-	{"phrase end",	Attribute::PHRASE_END}
-};
-
-Attribute::Attribute(Attribute::idcode ty, Attribute::value v)
+Attribute::Attribute(string nm, Attribute::idcode ty, Attribute::value v)
 {
 	id = ty;
 	val = v;
+	name = nm;
 	next = nullptr;
 }
 
@@ -30,6 +31,14 @@ Attribute::~Attribute()
 {
 	if (next)
 		delete next;
+}
+
+Attribute *
+Attribute::clone()
+{
+	Attribute *n = new Attribute(name, id, val);
+	n->next = next->clone();
+	return n;
 }
 
 void
@@ -41,9 +50,9 @@ AttributeList::clear()
 }
 
 void
-AttributeList::add(Attribute::idcode ty, Attribute::value val)
+AttributeList::add(string nm, Attribute::idcode ty, Attribute::value val)
 {
-	Attribute *p = new Attribute(ty, val);
+	Attribute *p = new Attribute(nm, ty, val);
 	p->next = items;
 	items = p;
 }
@@ -53,9 +62,9 @@ AttributeList::add(Block *b)
 {
 	while (b!=nullptr) {
 		if (b->type == Block::C_VALUE) {
-			auto fi = propertyIndex.find(b->crap.constant.value.StringValue());
-			if (fi != propertyIndex.end()) {
-				add(fi->second);
+			auto fi = findProperty(b->crap.constant.value.StringValue());
+			if (fi != TypedValue::S_UNKNOWN) {
+				add(b->crap.constant.value.StringValue(), fi);
 			} else {
 				fprintf(stderr, "unknown property %s\n", b->crap.constant.value.StringValue());
 			}
@@ -74,6 +83,23 @@ AttributeList::has(Attribute::idcode pid)
 	return false;
 }
 
+bool
+AttributeList::has(char *pr)
+{
+	int v = findProperty(pr);
+	if (v != STATUS_UNKNOWN) {
+		return has(v);
+	}
+	string s(pr);
+	for (Attribute *p = items; p != nullptr; p = p->next) {
+		if (p->name == s) {
+			return true;
+		}
+	}
+	return false;
+
+}
+
 Attribute::value &
 AttributeList::getValue(Attribute::idcode pid)
 {
@@ -82,4 +108,29 @@ AttributeList::getValue(Attribute::idcode pid)
 			return p->val;
 	}
 	return Attribute::value();
+}
+
+AttributeList &
+AttributeList::operator=(const AttributeList &o) {
+	swap(items, const_cast<AttributeList&>(o).items);
+	return *this;
+}
+/*
+AttributeList &
+AttributeList::operator=(AttributeList &&o) {
+	swap(items, o.items);
+	return *this;
+}
+*/
+
+
+inline Attribute::value
+AttributeList::getValue(char *pr)
+{
+	return getValue(AttributeId(pr));
+}
+
+AttributeList &
+AttributeList::clone() {
+	return AttributeList(items->clone());
 }

@@ -299,7 +299,11 @@ std::unordered_map<std::string, int> objectSubTypeIndex = {
 	{ "takes",		Attribute::TAKES },
 	{ "stream",		Attribute::STREAM },
 	{ "sample",		Attribute::SAMPLE }
+};
 
+std::unordered_map<std::string, int> propertyIndex = {
+	{ "cellstart",	 Attribute::CELL_START },
+	{ "phraseend", Attribute::PHRASE_END }
 };
 
 std::unordered_map<std::string, int> dfltEventIndex = {
@@ -405,14 +409,12 @@ std::unordered_map<std::string, int> constantIndex = {
 int32 findType(const char *s)
 {
 	auto v = typeIndex.find(s);
-
 	return v == typeIndex.end() ? TypedValue::S_UNKNOWN : v->second;
 }
 
 int32 findConstant(const char *s)
 {
 	auto v = constantIndex.find(s);
-
 	return v == constantIndex.end() ? INT_MIN : v->second;
 }
 
@@ -420,14 +422,12 @@ int32 findConstant(const char *s)
 int32 findMidiNote(const char *s)
 {
 	auto v = midiNoteIndex.find(s);
-
 	return v == midiNoteIndex.end() ? TypedValue::S_UNKNOWN : v->second;
 }
 
 int32 findDfltEventType(const char *s)
 {
 	auto v = dfltEventIndex.find(s);
-
 	return v == dfltEventIndex.end() ? TypedValue::S_UNKNOWN : v->second;
 }
 
@@ -435,10 +435,15 @@ int32 findDfltEventType(const char *s)
 int32 findTypeAttribute(const char *s)
 {
 	auto v = objectSubTypeIndex.find(s);
-
 	return v == objectSubTypeIndex.end() ? TypedValue::S_UNKNOWN : v->second;
-
 }
+int32 findProperty(const char *s)
+{
+	auto v = propertyIndex.find(s);
+	return v == propertyIndex.end() ? TypedValue::S_UNKNOWN : v->second;
+}
+
+
 /*
 auto it = find_if(typeIndex.begin(), typeIndex.end(),
 [this](pair<string,int> vt) { return vt.second == value.type; }
@@ -448,6 +453,10 @@ auto it = find_if(typeIndex.begin(), typeIndex.end(),
 
 string findTypeName(int type) {
 	return qut::unfind(typeIndex, type);
+}
+
+string findTypePropertyName(int type) {
+	return qut::unfind(propertyIndex, type);
 }
 
 string findAttributeName(int type) {
