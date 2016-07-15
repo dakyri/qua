@@ -1,10 +1,6 @@
 #ifndef _TEMPLATE
 #define _TEMPLATE
 
-#ifdef __INTEL__ 
-#include <InterfaceKit.h>
-#endif
-
 #include <stdio.h>
 
 class Block;

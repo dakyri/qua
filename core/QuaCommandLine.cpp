@@ -238,7 +238,6 @@ QuaCommandLine::loadAsio(int devind, FILE *fp)
 void
 QuaCommandLine::listMidi(FILE *fp)
 {
-#ifdef WIN32
 #ifdef QUA_V_DIRECT_MIDI
 	int32		ni = 0;
 	int32		no = 0;
@@ -260,7 +259,6 @@ QuaCommandLine::listMidi(FILE *fp)
 	}
 	delete icap;
 	delete ocap;
-#endif
 #endif
 }
 

@@ -221,7 +221,7 @@ public:
 	virtual Metric			*QMetric() = 0;
 
 	virtual void parseErrorViewClear() = 0;
-	virtual void parseErrorViewAddLine(std::string) = 0;
+	virtual void parseErrorViewAddLine(std::string, int severity) = 0;
 	virtual void parseErrorViewShow() = 0;
 
 	virtual void tragicError(const char *str, ...) = 0;
@@ -324,7 +324,7 @@ public:
 	virtual Metric *QMetric() { return nullptr; }
 
 	virtual void parseErrorViewClear() { };
-	virtual void parseErrorViewAddLine(std::string) { };
+	virtual void parseErrorViewAddLine(std::string, int severity) { };
 	virtual void parseErrorViewShow() { };
 	virtual void tragicError(const char *str, ...) {};
 	virtual void reportError(const char *str, ...) {};
@@ -431,7 +431,7 @@ public:
 	Qua *qua;
 
 	virtual void parseErrorViewClear() override;
-	virtual void parseErrorViewAddLine(std::string) override;
+	virtual void parseErrorViewAddLine(std::string, int severity) override;
 	virtual void parseErrorViewShow() override;
 	virtual void tragicError(const char *str, ...) override;
 	virtual void reportError(const char *str, ...) override;
@@ -547,7 +547,7 @@ public:
 
 
 	void parseErrorViewClear();
-	void parseErrorViewAddLine(std::string);
+	void parseErrorViewAddLine(std::string, int severity);
 	void parseErrorViewShow();
 	void tragicError(const char *str, ...);
 	void reportError(const char *str, ...);

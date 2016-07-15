@@ -256,14 +256,6 @@ class QuaEnvironment;
 extern QuaEnvironment	environment;
 
 
-// ...oh and some random global variables
-
-#ifdef WIN32
-#ifdef QUA_V_MFC
-extern HINSTANCE		quaAppInstance;
-extern HMODULE			quaAppModule;
-#endif
-#endif
 
 enum {
 	QERR_WRONG_DEVICE=-5000

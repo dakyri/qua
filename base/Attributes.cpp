@@ -37,7 +37,7 @@ Attribute *
 Attribute::clone()
 {
 	Attribute *n = new Attribute(name, id, val);
-	n->next = next->clone();
+	n->next = next != nullptr? next->clone(): nullptr;
 	return n;
 }
 

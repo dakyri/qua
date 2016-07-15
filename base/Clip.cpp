@@ -127,7 +127,7 @@ SampleTake::SampleTake(Sample *s, std::string nm, std::string pathnm):
 
 SampleTake::~SampleTake()
 {
-#ifdef USE_DODGY_PEAK_FILE
+#if QUA_V_SAMPLE_DRAW=='p'
 	ClosePeakCache();
 #endif
 	delete file;

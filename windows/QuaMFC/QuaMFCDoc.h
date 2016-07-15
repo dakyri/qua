@@ -16,7 +16,7 @@ class QuaMFCCCDialog;
 #include "QuaMFCGlobal.h"
 
 class QuaMFCDisplay : public QuaDisplay {
-	virtual void parseErrorViewAddLine(std::string msg) override { ::reportError(msg); }
+	virtual void parseErrorViewAddLine(std::string msg, int severity) override { ::reportError(msg); }
 	virtual void tragicError(const char *str, ...) override;
 	virtual void reportError(const char *str, ...) override;
 };

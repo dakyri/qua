@@ -1,7 +1,7 @@
 #ifndef _QUA_DIRECT
 #define _QUA_DIRECT
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 
 #include <Dinput.h>
 #include <Dinputd.h>

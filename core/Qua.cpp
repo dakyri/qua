@@ -247,7 +247,6 @@ Qua::PostCreationInit()
 		bridge.reportError("main qua block not initialised");
 	}
 
-#define INIT_BY_METHOD
 #ifdef INIT_BY_METHOD
 	StabEnt	*is = glob.findContextSymbol("Init", sym, -1);
 	Lambda	*initMethod = nullptr;
@@ -1350,10 +1349,10 @@ Qua::Main()
 		usecTime = theClock->USecTime();
 		while (usecTime < nextTickTime) {
 
-#if defined(WIN32)
+#ifdef QUA_V_SWITCH_TO_THREAD
 			// works better than sleep(1), which is jittery
 			// and sleep(0) which is too greedy
-//			SwitchToThread();
+			SwitchToThread();
 #endif
 			std::this_thread::sleep_for(std::chrono::milliseconds(0));
 			usecTime = theClock->USecTime();

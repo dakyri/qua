@@ -688,7 +688,6 @@ QuaMidiIn::HasStreamItems()
 
 // maybe should sort into channels on receipt?????????
 bool
-#if defined(WIN32)
 QuaMidiIn::GetStreamItems(uchar channel, Stream *S)
 {
 	if (received.nItems > 0) {
@@ -772,7 +771,6 @@ QuaMidiIn::GetStreamItems(uchar channel, Stream *S)
 	}
 	return false;
 }
-#endif
 
 bool
 QuaMidiOut::ClearStream(Stream *A, uchar chan)
@@ -1257,7 +1255,7 @@ QuaMidiManager::disconnect(Output *s)
 
 
 
-#ifdef WIN32
+#ifdef QUA_V_DIRECT_MIDI
 
 MIDIINCAPS *
 QuaMidiManager::midiInDevices(int32 *nDevicesp)

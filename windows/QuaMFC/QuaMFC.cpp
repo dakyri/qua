@@ -169,7 +169,15 @@ CQuaMFCApp::InitInstance()
 //		"F:/progs/VstPlugins/Native Instruments/Absynth 3.dll"
 //		);
 //	exit(0);
-	environment.Setup();	// some app setup may rely on command line
+	if ((quaAppModule = GetModuleHandle(NULL)) == NULL) {
+		::reportError("Can't find Home...");
+	}
+	char	vuf[1024];
+	int		nc;
+	if ((nc = GetModuleFileName(quaAppModule, vuf, 1024)) == 0) {
+		::reportError("Can't find Home...");
+	}
+	environment.Setup(vuf);	// some app setup may rely on command line
 	environment.SetupDevices();
 ////////////////////////////////////////////////////////
 

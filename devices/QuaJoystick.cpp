@@ -881,10 +881,7 @@ QuaJoystickManager::Update()
 		for (short i=0; i<countPorts(); i++) {
 			Port(i)->Update();
 		}
-#ifdef WIN32
 //		sleep(20);
-#else
-#endif
 	}
 	return B_ERROR;
 }

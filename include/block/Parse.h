@@ -73,7 +73,7 @@ public:
 	long ParseDimentia(uint16 *dim);
 	Block *ParseDefine(StabEnt *context, StabEnt *S);
 
-	void 			ParseError(char *str, ...);
+	void 			ParseError(int severity, char *str, ...);
 	void			ShowErrors();
 	
 	int				lineno;
@@ -138,4 +138,7 @@ public:
 
 string quascript_name(const string & nm);
 
+#define ERROR_ERR 1
+#define ERROR_WARN 0
+#define ERROR_FATAL 2
 #endif

@@ -22,7 +22,7 @@ public:
 	QuaEnvironment(QuaEnvironmentDisplay &d);
 	~QuaEnvironment();
 
-	int Setup();
+	int Setup(string vuf);
 	int SetupDevices();
 	void setDisplay(QuaEnvironmentDisplay &d);
 

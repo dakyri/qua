@@ -672,8 +672,7 @@ UpdateActiveBlock(Qua *uberQua,
 				if (!higherFrame->isActive) {
 					for (p=B->crap.call.parameters; p!=nullptr; p=p->next) {
 						ResultValue the_val =
-							EvaluateExpression(
-								p,mainStream.head, stacker, stackCtxt, stack);
+							EvaluateExpression(p,mainStream.head, stacker, stackCtxt, stack);
 						if (the_val.Blocked()) {
 #ifdef LOTSALOX
 							S->stackableLock.Unlock();
@@ -715,16 +714,9 @@ UpdateActiveBlock(Qua *uberQua,
 				higherFrame->isActive = false;
 				if (B->crap.call.crap.lambda->isOncer) {
 					higherFrame->locusStatus = STATUS_SLEEPING;
-#if defined(QU_V_CONTROLLER_INTERFACE)
-					if (higherFrame->controlPanel) {
-						BMessage	dispMsg(DISPLAY_STATUS);
-						higherFrame->controlPanel->Window()->
-							PostMessage(&dispMsg, higherFrame->controlPanel);
-					}
-#endif
+					uberQua->bridge.DisplayStatus(higherFrame);
 				}
-				stack->UnThunk();
-			// hell does the garbage collection
+				stack->UnThunk(); 	// XXXX the garbage collection is a mess.
 			}
 		}
 		break;
@@ -1249,7 +1241,8 @@ UpdateActiveBlock(Qua *uberQua,
 #endif
 		do {		
 			val = EvaluateExpression(B,	mainStream.head, stacker, stackCtxt, stack);
-
+// TODO XXXX FIXME one of the points where we should think about garbage collecting things like strings which wont be cleaned up in the union
+// every call to evaluate expression would be a weak point if we allow string ops on the current model (desirable) ... 20 or so (yike)
 			if (val.type == TypedValue::S_LIST) {
 				// todo xxxx this was commented out ... it may be broken, but lets open it up anyway
 				for (TypedValueListItem *p=val.ListValue().head; p != nullptr; p=p->next) {

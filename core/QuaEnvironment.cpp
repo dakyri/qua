@@ -9,6 +9,8 @@
 #include "QuaOSC.h"
 #include "QuaEnvironment.h"
 
+#include <iostream>
+
 QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
 	: display(d)
 {
@@ -46,15 +48,15 @@ QuaEnvironment::~QuaEnvironment()
 	delete poolPlayer;
 #endif
 }
+
+
 int
-QuaEnvironment::Setup()
+QuaEnvironment::Setup(string vuf)
 {
-#ifdef WIN32
 #ifdef QUA_V_MULTIMEDIA_TIMER
 	TIMECAPS		tc;
 	timeGetDevCaps(&tc, sizeof(tc));
-	fprintf(stderr, "multimedia timer period min %d max %d\n", tc.wPeriodMin, tc.wPeriodMax);
-#endif
+	cout << "multimedia timer period min " << tc.wPeriodMin << " max " << tc.wPeriodMax << endl;
 #endif
 
 	//	BPath	applicationBaseDirectory;
@@ -66,29 +68,15 @@ QuaEnvironment::Setup()
 	metrix.push_back(&Metric::mSec);
 	metrix.push_back(&Metric::sampleRate);
 
-
 	////////////////////
 	// set up paths
 	////////////////////
-#if defined(WIN32)
-#ifdef QUA_V_APPLICATION
-	if ((quaAppModule = GetModuleHandle(NULL)) == NULL) {
-		tragicError("Can't find Home...");
-	}
-	char	vuf[1024];
-	int		nc;
-	if ((nc = GetModuleFileName(quaAppModule, vuf, 1024)) == 0) {
-		tragicError("Can't find Home...");
-	}
-	appPath.SetTo(vuf);
-	stderr, printf("App path %s\n", appPath.Path());
-	appPath.GetParent(&homePath);
-	configDirectory.SetTo(homePath.Path(), "QuaRC");
-	fprintf(stderr, "App path %s\n", appPath.Path());
-	fprintf(stderr, "App home path %s\n", homePath.Path());
-	fprintf(stderr, "config directory %s\n", configDirectory.Path());
-#endif
-#endif
+	appPath = (vuf);
+	homePath = getParent(appPath);
+	configDirectory = homePath + "/QuaRC";
+	cout << "App path " << appPath << endl;
+	cout << "App home path " << homePath << endl;
+	cout << "config directory " << configDirectory << endl;
 
 	///////////////////////////////
 	// collect up pretty pictures

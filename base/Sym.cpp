@@ -846,10 +846,6 @@ StabEnt::SetVisualParameters(Block *b)
 		case S_LAMBDA:	return val.lambda->interfaceBridge.SetDisplayInfo(b);
 		case S_TEMPLATE:	return val.qTemplate->interfaceBridge.SetDisplayInfo(b);
 		case S_SAMPLE:	return val.sample->interfaceBridge.SetDisplayInfo(b);
-#ifdef Q_APP_HANDLER
-		case S_APPLICATION:	return val.application->interfaceBridge.SetDisplayInfo(b);
-#endif
-
 	}
 	*/
 	return true;

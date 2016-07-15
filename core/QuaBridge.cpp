@@ -289,8 +289,8 @@ QuaBridge::parseErrorViewClear() {
 }
 
 void
-QuaBridge::parseErrorViewAddLine(string s) {
-	return display.parseErrorViewAddLine(s);
+QuaBridge::parseErrorViewAddLine(string s, int severity) {
+	return display.parseErrorViewAddLine(s, severity);
 }
 
 void

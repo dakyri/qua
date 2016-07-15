@@ -65,10 +65,10 @@ extern long currentTool;
 extern LPCTSTR quaPopupClassName;
 
 
-#ifdef WIN32
+// ...oh and some random global variables
+
 extern HINSTANCE quaAppInstance;
 extern HMODULE quaAppModule;
-#endif
 
 #include "QuaMFCGlobal.h"
 /////////////////////////////////////////////////////////////////////////////

@@ -23,9 +23,6 @@
 #include "Envelope.h"
 #include "Qua.h"
 #include "ControllerBridge.h"
-#ifdef QUA_V_APP_HANDLER
-#include "Application.h"
-#endif
 #include "QuaDisplay.h"
 
 void

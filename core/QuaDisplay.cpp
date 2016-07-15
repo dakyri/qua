@@ -1277,7 +1277,7 @@ QuaDisplay::parseErrorViewClear() {
 }
 
 void
-QuaDisplay::parseErrorViewAddLine(string s) {
+QuaDisplay::parseErrorViewAddLine(string s, int sev) {
 }
 
 void

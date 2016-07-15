@@ -245,7 +245,7 @@ QSParser::ClearComment()
 
 #include <stdarg.h>
 void
-QSParser::ParseError(char *msg, ...)
+QSParser::ParseError(int severity, char *msg,  ...)
 {
 	char		buf1[512];
 	char		buf[512];
@@ -259,7 +259,7 @@ QSParser::ParseError(char *msg, ...)
 	    sprintf(buf, "Parse error, line %d: %s", lineno, buf1);
 	}
 	std::string errMsg = buf;
-	uberQua->bridge.parseErrorViewAddLine(errMsg);
+	uberQua->bridge.parseErrorViewAddLine(errMsg, severity);
 	err_cnt++;
 }
 
@@ -473,7 +473,7 @@ check_token:
 				cout << "accepting input " << currentToken << endl;
 			} else {
 				cout << "not accepting input " << currentToken << endl;
-				ParseError("assignment to string... skipping ... worm can bypassing");
+				ParseError(2, "assignment to string... skipping ... worm can bypassing");
 			}
 //		    char *buf = new char[strlen(currentToken)+1];
 //		    strcpy(buf, currentToken);
@@ -492,7 +492,7 @@ check_token:
 		    c = getChar();
 		    while (c != '\'') {
 		    	if (i == 4) {
-		    		ParseError("shonky constant, near '%s'", currentToken);
+		    		ParseError(ERROR_ERR, "shonky constant, near '%s'", currentToken);
 				} else {
 					*p++ = c;
 					*vp++ = c;
@@ -647,7 +647,7 @@ check_token:
 				if ((v = findType(currentToken)) != TypedValue::S_UNKNOWN) {
 				    currentTokenType = TOK_TYPE;
 				} else if ((v = findDfltEventType(currentToken)) != TypedValue::S_UNKNOWN) {
-				    currentTokenType = TOK_TYPE;
+//				    currentTokenType = TOK_TYPE;
 				} else if ((v = findConstant(currentToken)) != INT_MIN) {
 				    currentTokenType = TOK_VAL;
 					if (v == INFINITE_TICKS) {
@@ -658,7 +658,7 @@ check_token:
 					}
 				}
 			} else {
-//			    ParseError("bad character 0x%x\n", c);
+//			    ParseError(ERROR_ERR, "bad character 0x%x\n", c);
 				c = getChar();
 				if (c == '\n') {
 					lineno++;
@@ -725,7 +725,7 @@ QSParser::ParseBlockList(StabEnt *context, StabEnt *schedSym, char *type)
 	if (strcmp(currentToken, Term) == 0) {
     	GetToken();
 	} else {
-    	ParseError(((char *) (
+    	ParseError(ERROR_ERR, ((char *) (
     			subtype == Block::LIST_NORM?"Block list expected } at %s":
     			subtype == Block::LIST_SEQ? "Block list expected ] at %s":
     			subtype == Block::LIST_PAR? "Block list expected } at %s":
@@ -827,7 +827,7 @@ QSParser::ParseActualsList(StabEnt *context, StabEnt *schedSym, bool resolveName
     pp = &p;
 
     if (strcmp(currentToken, "(") != 0) {
-		ParseError("Actuals list, expected ( at %s", currentToken);
+		ParseError(ERROR_ERR, "Actuals list, expected ( at %s", currentToken);
     }
     GetToken();
     while (strcmp(currentToken, ")") != 0 && !atEof()) {
@@ -846,7 +846,7 @@ QSParser::ParseActualsList(StabEnt *context, StabEnt *schedSym, bool resolveName
     if (debug_parse)
     	fprintf(stderr, "end of asctuals list.. %s\n", currentToken);
     if (strcmp(currentToken, ")") != 0) {
-		ParseError("Actuals list, expected ) near '%s'", currentToken);
+		ParseError(ERROR_ERR, "Actuals list, expected ) near '%s'", currentToken);
     }
     return p;
 }
@@ -888,16 +888,16 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 					if (currentTokenType == TOK_VAL) {
 						vstIndex = currentTokenVal.IntValue(nullptr);
 					} else {
-		    			ParseError("expected vstParam index '%s'", currentToken);
+		    			ParseError(ERROR_ERR, "expected vstParam index '%s'", currentToken);
 					}
 					break;
 		    	default:
 		    		type = TypedValue::S_UNKNOWN;
-		    		ParseError("invalid type '%s'", currentToken);
+		    		ParseError(ERROR_ERR, "invalid type '%s'", currentToken);
 		    	}
 		    	GetToken();
 		    } else {
-		    	ParseError("expected type at '%s'", currentToken);
+		    	ParseError(ERROR_ERR, "expected type at '%s'", currentToken);
 		    }
 		    
 	   		while (currentTokenType == TOK_TYPE) {
@@ -911,7 +911,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 					} else
 						neg = false;
 					if (currentTokenType != TOK_VAL) {
-						ParseError("expected constant at '%s'", currentToken);
+						ParseError(ERROR_ERR, "expected constant at '%s'", currentToken);
 						break;
 					}
 					v1 = currentTokenVal;
@@ -924,7 +924,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 					} else
 						neg = false;
 					if (currentTokenType != TOK_VAL) {
-						ParseError("expected constant at '%s'", currentToken);
+						ParseError(ERROR_ERR, "expected constant at '%s'", currentToken);
 						break;
 					}
 					v2 = currentTokenVal;
@@ -933,12 +933,12 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 					break;
 				}
 		    	default:
-		    		ParseError("unexpected subtype '%s'", currentToken);
+		    		ParseError(ERROR_ERR, "unexpected subtype '%s'", currentToken);
 		    	}
 			   	GetToken();
 		    }
 		    if (currentTokenType != TOK_WORD) {
-		    	ParseError("malformed declaration (expects name) at '%s'", currentToken);
+		    	ParseError(ERROR_ERR, "malformed declaration (expects name) at '%s'", currentToken);
 		    	GetToken();
 		    } else {
 		    	StabEnt		*sym=nullptr;
@@ -981,7 +981,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 							sym->SetInit(currentTokenVal);
 						}
 					} else {
-						ParseError("bad initiator '%s'", currentToken);
+						ParseError(ERROR_ERR, "bad initiator '%s'", currentToken);
 					}
 					GetToken();
 				}
@@ -994,7 +994,7 @@ QSParser::ParseFormalsList(StabEnt *context, StabEnt *schedSym, bool doDefine)
 	    if (debug_parse >= 2)
 	    	fprintf(stderr, "end of formals list.. %s\n", currentToken);
 	    if (strcmp(currentToken, ")") != 0) {
-			ParseError("Formals list, expected ) at %s", currentToken);
+			ParseError(ERROR_ERR, "Formals list, expected ) at %s", currentToken);
 	    }
 	    GetToken();
 	}
@@ -1055,7 +1055,7 @@ QSParser::ParseExpressionList(StabEnt *context, StabEnt *schedSym, char *type, b
 	}
 
     if (strcmp(currentToken, Term) != 0) {
-		ParseError(((char *) (
+		ParseError(ERROR_ERR, ((char *) (
 						type[0] == '['?
 							"Expression list, expected ']' at %s":
 							"Expression list, expected '}' at %s")), currentToken);
@@ -1125,7 +1125,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 #ifdef QUA_V_OLD_BUILTIN
 			    case Block::BUILTIN_NOTE: {
 					if (par == nullptr || par->next == nullptr || par->next->next == nullptr) {
-						ParseError("parameter mismatch at '%s'", currentToken);
+						ParseError(ERROR_ERR, "parameter mismatch at '%s'", currentToken);
 					}
 					
 					p->crap.call.parameters = par;
@@ -1196,7 +1196,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 					break;
 				}
 				default: {
-					uberQua->bridge.parseErrorViewAddLine("Unknown builtin function ...");
+					ParseError(ERROR_ERR, "Unknown builtin function ...");
 					varp = p;
 					break;
 				}
@@ -1249,7 +1249,7 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 		}
 		
 		default: {
-			uberQua->bridge.parseErrorViewAddLine("Unknown builtin function ...");
+			ParseError(ERROR_ERR, "Unknown builtin function ...");
 			varp = p;
 		}
 	}
@@ -1336,7 +1336,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		if (currentTokenType == TOK_TYPE ) {
 			int32	type = findType(currentToken);
 			if (type == TypedValue::S_UNKNOWN) {
-				ParseError("%s should be base type", currentToken);
+				ParseError(ERROR_ERR, "%s should be base type", currentToken);
 				GetToken();
 				p = ParseExpression(context, schedSym, resolveNames);
 			}  else {
@@ -1349,7 +1349,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 			p = ParseExpression(context, schedSym, resolveNames);
 		}
 		if (strcmp(currentToken, ")") != 0) {
-	    	ParseError("expected ) at %s", currentToken);
+	    	ParseError(ERROR_ERR, "expected ) at %s", currentToken);
 		}
 		GetToken();
 		varp = p;
@@ -1371,7 +1371,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
     		} else {
 		        if (debug_parse) fprintf(stderr, "\tname %s\n", currentToken);
 		        if (currentTokenType != TOK_WORD) {
-		        	ParseError("expected name at %s", currentToken);
+		        	ParseError(ERROR_ERR, "expected name at %s, current token type %d", currentToken, currentTokenType);
 		        	GetToken();
 		        	return nullptr;
 		        } else {
@@ -1447,7 +1447,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		   			break;
 		   		}
 		   		default: {
-		   			ParseError("unexpected parameter list at '%s'", currentToken);
+		   			ParseError(ERROR_ERR, "unexpected parameter list at '%s'", currentToken);
 		   			p->DeleteAll();
 		   		}}
 			} else { // a name, with no call
@@ -1503,7 +1503,7 @@ QSParser::ParseDExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 	        p->crap.arrayRef.index = ParseExpression(context, schedSym, resolveNames);
 	        p->crap.arrayRef.base = varp;
 	        if (strcmp(currentToken, "]") != 0)
-	        	ParseError("expected ']' near '%s'", currentToken);
+	        	ParseError(ERROR_ERR, "expected ']' near '%s'", currentToken);
 	        GetToken();
 	        varp = p;
 	    } else if (strcmp(currentToken, ".") == 0) {
@@ -1541,7 +1541,7 @@ QSParser::ParseDExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 	        		break;
 				}
 				default:
-	        		ParseError("member expected, near '%s'", name);
+	        		ParseError(ERROR_ERR, "member expected, near '%s'", name.c_str());
 				}
 			}
 			varp = p;
@@ -1576,7 +1576,7 @@ QSParser::ParseCExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		p->crap.op.l = l;
 		p->crap.op.r = r;
 		if (r == nullptr) {
-			ParseError("incomplete expression, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "incomplete expression, near '%s'", currentToken);
 		}
     }
     return p;
@@ -1605,7 +1605,7 @@ QSParser::ParseBExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		p->crap.op.l = l;
 		p->crap.op.r = r;
 		if (r == nullptr) {
-			ParseError("incomplete expression, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "incomplete expression, near '%s'", currentToken);
 		}
     }
     return p;
@@ -1638,7 +1638,7 @@ QSParser::ParseAExp(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		p->crap.op.l = l;
 		p->crap.op.r = r;
 		if (r == nullptr) {
-			ParseError("incomplete expression, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "incomplete expression, near '%s'", currentToken);
 		}
     }
     return p;
@@ -1684,7 +1684,7 @@ QSParser::ParseExpression(StabEnt *context, StabEnt *schedSym, bool resolveNames
 			GetToken();
 			ifb->crap.iff.elseBlock = ParseExpression(context, schedSym, resolveNames);
 		} else {
-			ParseError("Expected ':' near '%s'", currentToken);
+			ParseError(ERROR_ERR, "Expected ':' near '%s'", currentToken);
 		}
 		ifb->crap.iff.condVar.Set(TypedValue::S_BYTE, TypedValue::REF_STACK,	context,
 			(long)AllocStack(context,TypedValue::S_BYTE));
@@ -1737,7 +1737,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		if (uberQua)
 			p->crap.channel = uberQua->channel[chan-1];
 		else {
-			ParseError("midi io command must be defined in sequencer, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "midi io command must be defined in sequencer, near '%s'", currentToken);
 			p->crap.channel = nullptr;
 		}
 		GetToken();
@@ -1787,7 +1787,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		if (uberQua)
 			p->crap.channel = uberQua->channel[chan-1];
 		else {
-			ParseError("midi command must be defined within a particular sequencer, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "midi command must be defined within a particular sequencer, near '%s'", currentToken);
 			p->crap.channel = nullptr;
 		}
 		block = p;
@@ -1798,12 +1798,12 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 	
 		GetToken();
 		if (strcmp(currentToken, "(") != 0) {
-		    ParseError("expected ( at '%s'", currentToken);
+		    ParseError(ERROR_ERR, "expected ( at '%s'", currentToken);
 		}
 		GetToken();
 	    p->crap.repeat.Exp = ParseExpression(context, schedSym, true);
 		if (strcmp(currentToken, ")") != 0) {
-		    ParseError("expected ) at '%s'", currentToken);
+		    ParseError(ERROR_ERR, "expected ) at '%s'", currentToken);
 		}
 		GetToken();
 		p->crap.repeat.block = ParseBlockInfo(context, schedSym);
@@ -1820,12 +1820,12 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 	
 		GetToken();
 		if (strcmp(currentToken, "(") != 0) {
-		    ParseError("expected ( at '%s'", currentToken);
+		    ParseError(ERROR_ERR, "expected ( at '%s'", currentToken);
 		}
 		GetToken();
 		p->crap.iff.condition = ParseExpression(context, schedSym, true);
 		if (strcmp(currentToken, ")") != 0) {
-		    ParseError("expected ) at '%s'", currentToken);
+		    ParseError(ERROR_ERR, "expected ) at '%s'", currentToken);
 		}
 		GetToken();
 		p->crap.iff.ifBlock = ParseBlockInfo(context, schedSym);
@@ -1862,13 +1862,13 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 			GetToken();
 		
 			if (strcmp(currentToken, "(") != 0) {
-			    ParseError("expected ( at '%s'", currentToken);
+			    ParseError(ERROR_ERR, "expected ( at '%s'", currentToken);
 			}
 			GetToken();
 		    p->crap.with.condition = ParseExpression(context, schedSym, true);
 		    
 			if (strcmp(currentToken, ")") != 0) {
-			    ParseError("expected ) at '%s'", currentToken);
+			    ParseError(ERROR_ERR, "expected ) at '%s'", currentToken);
 			}
 			GetToken();
 			
@@ -1902,13 +1902,13 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 			GetToken();
 		
 			if (strcmp(currentToken, "(") != 0) {
-			    ParseError("expected ( at '%s'", currentToken);
+			    ParseError(ERROR_ERR, "expected ( at '%s'", currentToken);
 			}
 			GetToken();
 		    p->crap.foreach.condition = ParseExpression(context, schedSym, true);
 		    
 			if (strcmp(currentToken, ")") != 0) {
-			    ParseError("expected ) at '%s'", currentToken);
+			    ParseError(ERROR_ERR, "expected ) at '%s'", currentToken);
 			}
 			GetToken();
 			
@@ -1951,7 +1951,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		} else if (p->type == Block::C_NAME) {
 			char		*nm = p->crap.name;
 			p->crap.call.crap.name = nm;
-			ParseError("suspend linkage error at '%s'", currentToken);
+			ParseError(ERROR_ERR, "suspend linkage error at '%s'", currentToken);
 		}
 		p->type = Block::C_SUSPEND;
 	
@@ -1969,7 +1969,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		} else if (p->type == Block::C_NAME) {
 			char		*nm = p->crap.name;
 			p->crap.call.crap.name = nm;
-			ParseError("wake linkage error, at '%s'", currentToken);
+			ParseError(ERROR_ERR, "wake linkage error, at '%s'", currentToken);
 		}
 		p->type = Block::C_WAKE;
 	
@@ -2181,7 +2181,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	} else if (strcmp(currentToken, "<") == 0) {
 		type = TypedValue::S_TEMPLATE;
 		if (context && context != nullptr)
-			ParseError("template must be defined in application context, at '%s'", currentToken);
+			ParseError(ERROR_ERR, "template must be defined in application context, at '%s'", currentToken);
 		GetToken();
 		if (currentTokenType == TOK_TYPE) {
 			templateType=findType(currentToken);
@@ -2215,11 +2215,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 				GetToken();
 				break;
 			default:
-	    		ParseError("type '%s' cannot be used in templates", currentToken);
+	    		ParseError(ERROR_ERR, "type '%s' cannot be used in templates", currentToken);
 	    		GetToken();
 	    	}
 	    } else {
-	    	ParseError("expected type for template, near '%s'", currentToken);
+	    	ParseError(ERROR_ERR, "expected type for template, near '%s'", currentToken);
 	    	GetToken();
 	    }
     } else {
@@ -2232,7 +2232,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		Block *b = ParseExpression(context, schedSym, true);
 		ResultValue	v = EvaluateExpression(b, nullptr, nullptr, nullptr);
 		if (v.Blocked()) {
-			ParseError("cannot evaluate dimension, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "cannot evaluate dimension, near '%s'", currentToken);
 			dimensions[ndimensions] = 1;
 		} else {
 			dimensions[ndimensions] = v.IntValue(nullptr);
@@ -2241,7 +2241,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		if (strcmp(currentToken, "]") == 0) {
 			GetToken();
 		} else {
-			ParseError("']' expected for dimension, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "']' expected for dimension, near '%s'", currentToken);
 		}
 	}
 	
@@ -2313,7 +2313,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL) {
 				id32 = (uint32) currentTokenVal.IntValue(nullptr);
 			} else {
-				ParseError("Expected a uint constant for id near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected a uint constant for id near '%s'", currentToken);
 			}
 			GetToken();
     		break;
@@ -2347,7 +2347,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL) {
 				nIns = currentTokenVal.IntValue(nullptr);
 			} else {
-				ParseError("Expected an int constant for id near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected an int constant for id near '%s'", currentToken);
 			}
 			GetToken();
     		break;
@@ -2356,7 +2356,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL) {
 				nOuts = (uint32) currentTokenVal.IntValue(nullptr);
 			} else {
-				ParseError("Expected an int constant for id near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected an int constant for id near '%s'", currentToken);
 			}
 			GetToken();
     		break;
@@ -2365,7 +2365,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL) {
 				nParam = currentTokenVal.IntValue(nullptr);
 			} else {
-				ParseError("Expected an int constant for id near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected an int constant for id near '%s'", currentToken);
 			}
 			GetToken();
     		break;
@@ -2374,7 +2374,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL) {
 				nProgram = currentTokenVal.IntValue(nullptr);
 			} else {
-				ParseError("Expected an int constant for id near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected an int constant for id near '%s'", currentToken);
 			}
 			GetToken();
     		break;
@@ -2448,14 +2448,14 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		case Attribute::RESETTO:
 		   	GetToken();
 		   	if (currentTokenType != TOK_VAL) {
-		   		ParseError("expected constant reset value, near '%s'", currentToken);
+		   		ParseError(ERROR_ERR, "expected constant reset value, near '%s'", currentToken);
 		   	} else {
 		   		resetVal = currentTokenVal;
 		   	}
 		   	GetToken();
 			break;
     	default:
-    		ParseError("unknown type qualifier '%s'", currentToken);
+    		ParseError(ERROR_ERR, "unknown type qualifier '%s'", currentToken);
 		   	GetToken();
     	}
     	first = false;
@@ -2465,11 +2465,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
    		if (strcmp(currentToken, ">") == 0) {
     		GetToken();
     	} else {
-     		ParseError("template: '>' expected near '%s'");
+     		ParseError(ERROR_ERR, "template: '>' expected near '%s'");
    		}
     }
 	if (type != TypedValue::S_EVENT && currentTokenType != TOK_WORD) {
-		ParseError("Expected identifier in definition near '%s'", currentToken);
+		ParseError(ERROR_ERR, "Expected identifier in definition near '%s'", currentToken);
 		if (debug_parse) {
 			cerr << "expect ident: type " << type << " subtype " << subType << " at " << currentToken << " (" << currentTokenType << ")" << endl;
 		}
@@ -2488,7 +2488,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		QuasiStack	*qs = nullptr;
 		if (context) {
 			if (context->type == TypedValue::S_TEMPLATE) {
-				ParseError("fix up template events you nong, near '%s'", currentToken);
+				ParseError(ERROR_ERR, "fix up template events you nong, near '%s'", currentToken);
 				Block		*b = ParseBlockInfo(context, context);
 				b->DeleteAll();
 			} else if ((cha=context->ChannelValue())!=nullptr) {
@@ -2500,7 +2500,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 					*ev = ParseBlockInfo(cha->rx.sym, schedSym);
 					qs->CheckMulchSize();
 				} else {
-					ParseError("event not valid in channel, near '%s'", currentToken);
+					ParseError(ERROR_ERR, "event not valid in channel, near '%s'", currentToken);
 					Block		*b = ParseBlockInfo(context, context);
 					b->DeleteAll();
 				}
@@ -2519,19 +2519,19 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 				if (ev) {
 					*ev = ParseBlockInfo(sch->rx.sym, schedSym);
 				} else {
-					ParseError("event not valid in schedulable, near '%s'", currentToken);
+					ParseError(ERROR_ERR, "event not valid in schedulable, near '%s'", currentToken);
 					Block		*b = ParseBlockInfo(context, context);
 					b->DeleteAll();
 				}
 
 			} else {
-				ParseError("lousy non context for handler, near '%s'", currentToken);
+				ParseError(ERROR_ERR, "lousy non context for handler, near '%s'", currentToken);
 				Block		*b = ParseBlockInfo(context, context);
 				b->DeleteAll();
 			}
 	
 		} else {
-			ParseError("lousy non context for handler, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "lousy non context for handler, near '%s'", currentToken);
 			Block		*b = ParseBlockInfo(context, context);
 			b->DeleteAll();
 		}
@@ -2540,7 +2540,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 	case TypedValue::S_CLIP: {
 		if (!context) {
-			ParseError("Clips must be defined within a context");
+			ParseError(ERROR_ERR, "Clips must be defined within a context");
 		}
 		char	nmbuf[256];
 		strcpy(nmbuf, currentToken);
@@ -2625,12 +2625,12 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			} else  if (schedSym->type == TypedValue::S_POOL) {
 				Pool	*p = schedSym->PoolValue();
 			} else {
-				ParseError("inappropriate context for take data, near '%s'", currentToken);
+				ParseError(ERROR_ERR, "inappropriate context for take data, near '%s'", currentToken);
 				Block		*b = ParseBlockInfo(context, schedSym);
 				b->DeleteAll();
 			}
 		} else {
-			ParseError("inappropriate context for take data, near '%s'", currentToken);
+			ParseError(ERROR_ERR, "inappropriate context for take data, near '%s'", currentToken);
 			Block		*b = ParseBlockInfo(context, schedSym);
 			b->DeleteAll();
 		}
@@ -2680,7 +2680,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 				}
 			}
 		} else {
-			ParseError("lousy context for input, %s", context->name);
+			ParseError(ERROR_ERR, "lousy context for input, %s", context->name);
 			if (strcmp(currentToken, "{") == 0) {
 				Block		*b = ParseBlockInfo(context, schedSym);
 				if (b) {
@@ -2737,7 +2737,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 				}
 			}
 		} else {
-			ParseError("lousy context for input, %s", context->name);
+			ParseError(ERROR_ERR, "lousy context for input, %s", context->name);
 			if (strcmp(currentToken, "{") == 0) {
 				Block		*b = ParseBlockInfo(context, schedSym);
 				if (b) {
@@ -2774,11 +2774,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_INSTANCE: {
 		if (!context) {
-			ParseError("Instances must be defined within a schedulable's context");
+			ParseError(ERROR_ERR, "Instances must be defined within a schedulable's context");
 		}
 		Schedulable	*sch = context->SchedulableValue();
 		if (!sch) {
-			ParseError("Instances must be defined within a schedulable's context");
+			ParseError(ERROR_ERR, "Instances must be defined within a schedulable's context");
 		}
 		char	nmbuf[256];
 		strcpy(nmbuf, currentToken);
@@ -2842,13 +2842,13 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 	case TypedValue::S_VOICE: {
 		if (ndimensions != 0) {
-			ParseError("voice should be undimensioned");
+			ParseError(ERROR_ERR, "voice should be undimensioned");
 		}
 
     	Voice		*V;
     	
 		if (!uberQua || context != uberQua->sym)
-			ParseError("voice must be in outer context");
+			ParseError(ERROR_ERR, "voice must be in outer context");
 	    V = new Voice(currentToken, uberQua);
 	    sym = V->sym;
 	    V->next = schedulees;
@@ -2871,12 +2871,12 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 	case TypedValue::S_PORT: {
 		if (ndimensions != 0) {
-			ParseError("port should be undimensioned");
+			ParseError(ERROR_ERR, "port should be undimensioned");
 		}
 
 		QuaPort		*P;
 		if (!uberQua || context != uberQua->sym)
-			ParseError("port must be in outer context.");
+			ParseError(ERROR_ERR, "port must be in outer context.");
 		P = findQuaPort(-1, currentToken, QUA_PORT_IO);
 		if (P == nullptr) {
 			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
@@ -2904,11 +2904,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_SAMPLE: {
 		if (ndimensions != 0) {
-			ParseError("sample should be undimensioned");
+			ParseError(ERROR_ERR, "sample should be undimensioned");
 		}
 		Sample *S;
 		if (!uberQua || context != uberQua->sym)
-			ParseError("sample must be in outer context.");
+			ParseError(ERROR_ERR, "sample must be in outer context.");
 
 //		entry_ref	fileRef;
 	
@@ -2929,7 +2929,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_POOL: {
 		if (ndimensions != 0) {
-			ParseError("pool should be undimensioned");
+			ParseError(ERROR_ERR, "pool should be undimensioned");
 		}
 
 	    Pool	*S;
@@ -2952,7 +2952,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			cerr << "define channel " << currentToken << " in " << nIns << ", " << nOuts << " thrue " << audioThru << "," << midiThru << endl;
 		}
 		if (ndimensions != 0) {
-			ParseError("channel should be undimensioned");
+			ParseError(ERROR_ERR, "channel should be undimensioned");
 		}
 		string nm = currentToken;
 		GetToken();
@@ -2964,7 +2964,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		}
 		Channel	*c = nullptr;
 		if (!uberQua)
-			ParseError("channel must be defined in top context");
+			ParseError(ERROR_ERR, "channel must be defined in top context");
 		else {
 			c = uberQua->AddChannel(
 						nm,	(short)((chDstIndex >= 0)?chDstIndex:uberQua->nChannel),
@@ -2991,7 +2991,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_VST_PLUGIN: {
 		if (ndimensions != 0) {
-			ParseError("vst plugin should be undimensioned");
+			ParseError(ERROR_ERR, "vst plugin should be undimensioned");
 		}
 	    VstPlugin	*vstp;
 		vstp = new VstPlugin(dataPath, currentToken, doLoadPlugin, mapVstParams, isSynthPlugin, nIns, nOuts, nParam, nProgram);
@@ -3004,7 +3004,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_LAMBDA: {
 		if (ndimensions != 0) {
-			ParseError("lambda should be undimensioned");
+			ParseError(ERROR_ERR, "lambda should be undimensioned");
 		}
 	    Lambda	*lambda;
 	    lambda = new Lambda(currentToken, context,
@@ -3039,7 +3039,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 //	    glob.PushContext(sym);
 //	    Block *X = ParseBlockInfo(sym);
 //		if (X)
-//			ParseError("malformed struct");
+//			ParseError(ERROR_ERR, "malformed struct");
 //		glob.PopContext();
 		break;
 	}
@@ -3069,7 +3069,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    GetToken();
 	    Block *X = ParseBlockInfo(sym, schedSym);
 		if (X) {
-			ParseError("structures may not define a code block");
+			ParseError(ERROR_ERR, "structures may not define a code block");
 		}
 		glob.PopContext(sym);
 		EndStructureAllocation(sym);
@@ -3111,7 +3111,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	}
 	
 	default:
-		ParseError("unimplimented type %d, near '%s'", type, currentToken);
+		ParseError(ERROR_ERR, "unimplimented type %d, near '%s'", type, currentToken);
 	}
 	if (dataPath) delete dataPath;
 	if (mime) delete mime;
@@ -3164,10 +3164,10 @@ QSParser::ParseQua()
 				fprintf(stderr, "doin it\n");
 				uberQua->mainBlock = ParseBlockInfo(uberQua->sym, nullptr);
 			} else {
-				ParseError("Expected qua definition near '%s'", currentToken);
+				ParseError(ERROR_ERR, "Expected qua definition near '%s'", currentToken);
 			}
 		} else {
-			ParseError("Expected definition near '%s'", currentToken);
+			ParseError(ERROR_ERR, "Expected definition near '%s'", currentToken);
 		}
     }
     if (err_cnt != 0 && uberQua != nullptr) {
@@ -3236,14 +3236,14 @@ QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &
 			if (port == nullptr) {
 				string portTypeName = findAttributeName(deviceType);
 				string directionName = portDirectionName(direction);
-				ParseError("match for %s port '%s'/%s/%d not found", portTypeName.c_str(), portName.c_str(), directionName.c_str(), m);
+				ParseError(ERROR_ERR, "match for %s port '%s'/%s/%d not found", portTypeName.c_str(), portName.c_str(), directionName.c_str(), m);
 				return false;
 			}
 		} else {
 			parseChannelId(chans);
 		}
 	} else {
-		ParseError("Expect a port identifier near '%s'", currentToken);
+		ParseError(ERROR_ERR, "Expect a port identifier near '%s'", currentToken);
 		return false;
 	}
 
