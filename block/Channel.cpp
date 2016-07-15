@@ -1062,15 +1062,15 @@ Channel::Enable(Input *s, bool en)
 #ifdef QUA_V_JOYSTICK
 		case QUA_DEV_JOYSTICK: {
 			if (en) {
-				if ((err=getJoystickManager()->Connect(s)) == B_OK) {
+				if ((err=getJoyManager().connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
 				} else {
-					reportError("failed to open joy input %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
+					uberQua->bridge.reportError("failed to open joy input %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
 					return false;
 				}
 			} else {
 				activeStreamInputs.Del(s);
-				getJoystickManager()->Disconnect(s);
+				getJoyManager().disconnect(s);
 			}
 			break;
 		}
@@ -1126,15 +1126,15 @@ Channel::Enable(Output *s, bool en)
 #ifdef QUA_V_JOYSTICK
 		case QUA_DEV_JOYSTICK: {
 			if (en) {
-				if ((err=getJoystickManager()->Connect(s)) == B_OK) {
+				if ((err=getJoyManager().connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
 				} else {
-					reportError("failed to open joy output %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
+					uberQua->bridge.reportError("failed to open joy output %s\n", s->Name(NMFMT_NAME,NMFMT_NUM));
 					return false;
 				}
 			} else {
 				activeStreamOutputs.Del(s);
-				getJoystickManager()->Disconnect(s);
+				getJoyManager().disconnect(s);
 			}
 			break;
 		}

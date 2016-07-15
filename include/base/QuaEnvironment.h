@@ -8,6 +8,7 @@ using namespace std;
 #include "QuaParallel.h"
 #include "QuaOSC.h"
 #include "QuaMidi.h"
+#include "QuaJoystick.h"
 
 class Qua;
 class QuaMidiManager;

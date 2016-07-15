@@ -3,6 +3,7 @@
 #include "Qua.h"
 #include "QuaMidi.h"
 #include "QuaAudio.h"
+#include "QuaJoystick.h"
 #include "QuaCommandLine.h"
 
 

@@ -119,12 +119,9 @@ public:
 	bool isControllable();
 	bool isMultiSchedulable();
 	
-//	inline PortObject	*PortObjectView() { return (PortObject *)representation; }
-	
 	short deviceType;
 	short deviceSubType;
 	short mode;
-
 };
 
 inline const string

@@ -12,6 +12,7 @@
 #include "Destination.h"
 #include "Channel.h"
 #include "Qua.h"
+#include "QuaEnvironment.h"
 
 #ifdef QUA_V_JOYSTICK_DX
 #include "QuaDirect.h"
@@ -46,12 +47,12 @@ joy_cap::joy_cap(GUID gui, char *nm, bool hf)
 	subType = QUA_JOY_DX;
 	hasFeedback = hf;
 	guid = guid;
-	strcpy(name, nm);
+	if (nm != nullptr) name = nm;
 }
 
 joy_channel::joy_channel(char *nm, long oi, long fl, bool iff)
 {
-	strcpy(name, nm);
+	if (nm != nullptr) name = nm;
 	flags = fl;
 	id = oi;
 	isFeedback = iff;
@@ -60,7 +61,7 @@ joy_channel::joy_channel(char *nm, long oi, long fl, bool iff)
 
 #endif
 
-QuaJoystickPort::QuaJoystickPort(char *devnm, QuaJoystickManager *qj, short subt,
+QuaJoystickPort::QuaJoystickPort(const string &devnm, QuaJoystickManager *qj, short subt,
 		 bool hf
 #ifdef QUA_V_JOYSTICK_MMC
 		, int32 jid
@@ -87,17 +88,15 @@ QuaJoystickPort::QuaJoystickPort(char *devnm, QuaJoystickManager *qj, short subt
 	AddInsert("Joy!", 0, OUTPUT_INSERT, 1, 0);	
 }
 
-char *
-QuaJoystickPort::Name(uchar)
+const char *
+QuaJoystickPort::name(uchar)
 {
-	return sym->name;
+	return sym->name.c_str();
 }
 
 #ifdef QUA_V_JOYSTICK_DX
 BOOL CALLBACK
-QuaJoystickPort::DXEnumDeviceObjects(
-					LPCDIDEVICEOBJECTINSTANCE oi
-			)
+QuaJoystickPort::DXEnumDeviceObjects(LPCDIDEVICEOBJECTINSTANCE oi)
 {
 	HRESULT	err;
 	if (oi->dwType & DIDFT_AXIS) {
@@ -116,7 +115,7 @@ QuaJoystickPort::DXEnumDeviceObjects(
 		}
 	}
 	if (oi->dwType & (DIDFT_AXIS|DIDFT_BUTTON|DIDFT_POV|DIDFT_FFACTUATOR)) {
-		dxObjects.AddItem(new joy_channel(
+		dxObjects.push_back(joy_channel(
 			(char *)oi->tszName, DIDFT_GETINSTANCE(oi->dwType),
 			(oi->dwType)&0xff, (oi->dwType&DIDFT_FFACTUATOR)!=0 ));
 	}
@@ -135,11 +134,7 @@ QuaJoystickPort::DXEnumDeviceObjectsCallback(
 void
 QuaJoystickPort::ClearDXObjects()
 {
-	for (short i=0; i<dxObjects.CountItems(); i++) {
-		joy_channel *p = (joy_channel *)dxObjects.ItemAt(i);
-		delete p;
-	}
-	dxObjects.MakeEmpty();
+	dxObjects.clear();
 }
 
 #elif defined(QUA_V_JOYSTICK_MMC)
@@ -316,7 +311,7 @@ QuaJoystickPort::GetStreamItems(Stream *S)
 		while (p!=nullptr) {
 			bool	add_this = FALSE;
 			switch (p->type) {
-			case S_JOY: {
+			case TypedValue::S_JOY: {
 				add_this = TRUE;
 			    break;
 			}
@@ -387,37 +382,37 @@ QuaJoystickPort::Update()
 		if (i < nAxes) {
 			if (joyState.lX != lastJoyState.lX) {
 				float	axisv = ((float)joyState.lX)/QUA_JOY_AXIS_AMBIT;
-				upd_stream.AddJoyAxisToStream(0,0,axisv,&t);
+				upd_stream.AddJoyAxisToStream(0,0,axisv,t);
 			}
 			i++;
 			if (i < nAxes) {
 				if (joyState.lY != lastJoyState.lY) {
 					float	axisv = ((float)joyState.lY)/QUA_JOY_AXIS_AMBIT;
-					upd_stream.AddJoyAxisToStream(0,1,axisv,&t);
+					upd_stream.AddJoyAxisToStream(0, 1, axisv, t);
 				}
 				i++;
 				if (i < nAxes) {
 					if (joyState.lZ != lastJoyState.lZ) {
 						float	axisv = ((float)joyState.lZ)/QUA_JOY_AXIS_AMBIT;
-						upd_stream.AddJoyAxisToStream(0,2,axisv,&t);
+						upd_stream.AddJoyAxisToStream(0, 2, axisv, t);
 					}
 					i++;
 					if (i < nAxes) {
 						if (joyState.lRx != lastJoyState.lRx) {
-							float	axisv = ((float)joyState.lRx)/QUA_JOY_AXIS_AMBIT;
-							upd_stream.AddJoyAxisToStream(0,3,axisv,&t);
+							float	axisv = ((float)joyState.lRx) / QUA_JOY_AXIS_AMBIT;
+							upd_stream.AddJoyAxisToStream(0, 3, axisv, t);
 						}
 						i++;
 						if (i < nAxes) {
 							if (joyState.lRy != lastJoyState.lRy) {
-								float	axisv = ((float)joyState.lRy)/QUA_JOY_AXIS_AMBIT;
-								upd_stream.AddJoyAxisToStream(0,4,axisv,&t);
+								float	axisv = ((float)joyState.lRy) / QUA_JOY_AXIS_AMBIT;
+								upd_stream.AddJoyAxisToStream(0, 4, axisv, t);
 							}
 							i++;
 							if (i < nAxes) {
 								if (joyState.lRz != lastJoyState.lRz) {
 									float	axisv = ((float)joyState.lRz)/QUA_JOY_AXIS_AMBIT;
-									upd_stream.AddJoyAxisToStream(0,5,axisv,&t);
+									upd_stream.AddJoyAxisToStream(0, 5, axisv, t);
 								}
 								i++;
 							}
@@ -434,12 +429,12 @@ QuaJoystickPort::Update()
 				} else {
 					hatval = (hatval/36000)+1;
 				}
-				upd_stream.AddJoyHatToStream(0,i,hatval,&t);
+				upd_stream.AddJoyHatToStream(0, i, hatval, t);
 			}
 		}
 		for (i=0; i<nButtons; i++) {
 			if (joyState.rgbButtons[i] != lastJoyState.rgbButtons[i]) {
-				upd_stream.AddJoyButtonToStream(0,i, joyState.rgbButtons[i] != 0,&t);
+				upd_stream.AddJoyButtonToStream(0, i, joyState.rgbButtons[i] != 0, t);
 			}
 		}
 		lastJoyState = joyState;
@@ -456,37 +451,37 @@ QuaJoystickPort::Update()
 		if (i < nAxes) {
 			if (joyState.dwXpos != lastJoyState.dwXpos) {
 				float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-				upd_stream.AddJoyAxisToStream(0,0,axisv,&t);
+				upd_stream.AddJoyAxisToStream(0,0,axisv,t);
 			}
 			i++;
 			if (i < nAxes) {
 				if (joyState.dwXpos != lastJoyState.dwXpos) {
 					float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-					upd_stream.AddJoyAxisToStream(0,1,axisv,&t);
+					upd_stream.AddJoyAxisToStream(0,1,axisv,t);
 				}
 				i++;
 				if (i < nAxes) {
 					if (joyState.dwXpos != lastJoyState.dwXpos) {
 						float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-						upd_stream.AddJoyAxisToStream(0,2,axisv,&t);
+						upd_stream.AddJoyAxisToStream(0,2,axisv,t);
 					}
 					i++;
 					if (i < nAxes) {
 						if (joyState.dwXpos != lastJoyState.dwXpos) {
 							float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-							upd_stream.AddJoyAxisToStream(0,3,axisv,&t);
+							upd_stream.AddJoyAxisToStream(0,3,axisv,t);
 						}
 						i++;
 						if (i < nAxes) {
 							if (joyState.dwXpos != lastJoyState.dwXpos) {
 								float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-								upd_stream.AddJoyAxisToStream(0,4,axisv,&t);
+								upd_stream.AddJoyAxisToStream(0,4,axisv,t);
 							}
 							i++;
 							if (i < nAxes) {
 								if (joyState.dwXpos != lastJoyState.dwXpos) {
 									float	axisv = ((float)joyState.dwXpos)/QUA_JOY_AXIS_AMBIT;
-									upd_stream.AddJoyAxisToStream(0,5,axisv,&t);
+									upd_stream.AddJoyAxisToStream(0,5,axisv,t);
 								}
 								i++;
 							}
@@ -503,12 +498,12 @@ QuaJoystickPort::Update()
 				} else {
 					hatval = (hatval/36000)+1;
 				}
-				upd_stream.AddJoyHatToStream(0,i,hatval,&t);
+				upd_stream.AddJoyHatToStream(0,i,hatval,t);
 			}
 		}
 		for (i=0; i<nButtons; i++) {
 			if ((joyState.dwButtons&(1<<i)) != (lastJoyState.dwButtons&(1<<i))) {
-				upd_stream.AddJoyButtonToStream(0,i, (joyState.dwButtons&(1<<i)) != 0,&t);
+				upd_stream.AddJoyButtonToStream(0,i, (joyState.dwButtons&(1<<i)) != 0, t);
 			}
 		}
 		lastJoyState = joyState;
@@ -518,7 +513,7 @@ QuaJoystickPort::Update()
 #endif
 		if (upd_stream.nItems > 0) {
 			schlock.lock();
-			recv.AppendStream(&upd_stream);
+			recv.AppendStream(upd_stream);
 			schlock.unlock();
 		}
 	}
@@ -529,7 +524,7 @@ bool
 QuaJoystickPort::CheckPortOpen(Qua *q)
 {
 	bool open=(Open(q)==B_OK);
-	resume_thread(quaJoystick->updateThread);
+	getJoyManager().resumeUpdater();
 	return open;
 }
 
@@ -606,7 +601,7 @@ QuaJoystickPort::OutputStream(Time TC, Stream *A, short chan)
 		    break;
 		}
 */		
-		case S_JOY: {
+		case TypedValue::S_JOY: {
 			StreamJoy	*q = (StreamJoy *)p;
 // need to look at duration, force, envelopes maybe, direction
 //  because were a sequencer maybe not delay
@@ -684,8 +679,7 @@ QuaJoystickPort::OutputStream(Time TC, Stream *A, short chan)
 
 
 
-QuaJoystickManager::QuaJoystickManager(Qua &q)
-	: QuaPortManager(q)
+QuaJoystickManager::QuaJoystickManager()
 {
 
 #if defined(WIN32)
@@ -694,24 +688,17 @@ QuaJoystickManager::QuaJoystickManager(Qua &q)
 	direct_setup();
 	FetchDIJoysticks();
 
-	for (short i=0; i<diJoystix.CountItems(); i++) {
-		joy_cap		*p = (joy_cap *)diJoystix.ItemAt(i);
+	for (short i=0; i<diJoystix.size(); i++) {
+		joy_cap &p = diJoystix[i];
 		
-		QuaJoystickPort *jp = new QuaJoystickPort(
-			p->name, this,
-			QUA_JOY_DX,
-			p->hasFeedback
-			, quapp->joySmallIcon, quapp->joyBigIcon
-			);
-		jp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);
-		ports.AddItem(jp);
+		QuaJoystickPort *jp = new QuaJoystickPort(p.name, this, QUA_JOY_DX, p.hasFeedback);
+		ports.push_back(jp);
 	}
 #endif
 
 #endif
 	readerRunning = false;
-    updateThread = spawn_thread(UpdateWrapper, "joystick reader", B_NORMAL_PRIORITY, this);
-	resume_thread(updateThread);
+	updateThread = std::thread(UpdateWrapper, this);
 }
 
 QuaJoystickManager::~QuaJoystickManager()
@@ -719,8 +706,8 @@ QuaJoystickManager::~QuaJoystickManager()
 	status_t	exit_val;
 	
 	readerRunning = false;
-	resume_thread(updateThread);
-	wait_for_thread(updateThread, &exit_val);
+	resumeUpdater();
+	updateThread.join();
 
 	int nd = countPorts();
 	for (short i=0; i<nd; i++) {
@@ -733,7 +720,7 @@ QuaJoystickManager::~QuaJoystickManager()
 
 
 QuaPort *
-QuaJoystickManager::findPortByName(string name) {
+QuaJoystickManager::findPortByName(string name, int direction, int nports) {
 	return ports.size() > 0 ? ports[0] : nullptr;
 }
 
@@ -751,11 +738,7 @@ QuaJoystickManager::FetchDIJoysticks()
 void
 QuaJoystickManager::ClearDIJoysticks()
 {
-	for (short i=0; i<diJoystix.CountItems(); i++) {
-		joy_cap *p = (joy_cap *)diJoystix.ItemAt(i);
-		delete p;
-	}
-	diJoystix.MakeEmpty();
+	diJoystix.clear();
 }
 
 BOOL CALLBACK 
@@ -781,7 +764,7 @@ QuaJoystickManager::EnumJoysticks(const DIDEVICEINSTANCE*pdidInstance)
 		}
 		joystick->Unacquire();
 		joystick->Release();
-		diJoystix.AddItem(new joy_cap(pdidInstance->guidInstance, nullptr, true));
+		diJoystix.push_back(joy_cap(pdidInstance->guidInstance, nullptr, true));
 	} else {
 		fprintf(stderr, "DI Enum error: %s\n", direct_error_string(err));
 	}
@@ -859,8 +842,17 @@ QuaJoystickManager::GetJoyCaps(int32 *nJoyP)
 #endif
 
 
+void
+QuaJoystickManager::resumeUpdater() {
+	{
+		std::lock_guard<std::mutex> lk(updateMux);
+		//		ready = true;
+	}
+	updateCV.notify_all();
+}
+
 int32
-QuaJoystickManager::UpdateWrapper( void* userData)
+QuaJoystickManager::UpdateWrapper(void* userData)
 {
 	return ((QuaJoystickManager*)userData)->Update();
 }
@@ -876,12 +868,13 @@ QuaJoystickManager::Update()
 				nothinDoin = false;
 		}
 		if (nothinDoin) {
-			suspend_thread(updateThread);
+			std::unique_lock<std::mutex> lk(updateMux);
+			updateCV.wait(lk /*, []{return ready;}*/);
 		}
 		for (short i=0; i<countPorts(); i++) {
 			Port(i)->Update();
 		}
-//		sleep(20);
+		std::this_thread::sleep_for(std::chrono::milliseconds(0));
 	}
 	return B_ERROR;
 }
@@ -902,7 +895,7 @@ QuaJoystickManager::OpenOutput(Qua *q, QuaJoystickPort *p)
 }
 
 status_t
-QuaJoystickManager::Connect(Input *s)
+QuaJoystickManager::connect(Input *s)
 {
 	s->src.joy = OpenInput(s->channel->uberQua, (QuaJoystickPort *)s->device);
 	if (s->src.midi != nullptr) {
@@ -915,7 +908,7 @@ QuaJoystickManager::Connect(Input *s)
 }
 
 status_t
-QuaJoystickManager::Connect(Output *s)
+QuaJoystickManager::connect(Output *s)
 {
 	s->dst.joy = OpenOutput(s->channel->uberQua, (QuaJoystickPort *)s->device);
 	if (s->dst.midi != nullptr) {
@@ -928,7 +921,7 @@ QuaJoystickManager::Connect(Output *s)
 }
 
 status_t
-QuaJoystickManager::Disconnect(Input *s)
+QuaJoystickManager::disconnect(Input *s)
 {
 	s->enabled = false;
 	if (s->src.joy) {
@@ -939,7 +932,7 @@ QuaJoystickManager::Disconnect(Input *s)
 }
 
 status_t
-QuaJoystickManager::Disconnect(Output *s)
+QuaJoystickManager::disconnect(Output *s)
 {
 	s->enabled = false;
 	if (s->dst.joy) {

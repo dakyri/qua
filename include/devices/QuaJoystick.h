@@ -17,7 +17,8 @@ class QuaJoystickManager;
 #endif
 
 #endif
-
+#include <vector>
+using namespace std;
 
 
 struct joy_channel
@@ -25,22 +26,34 @@ struct joy_channel
 	joy_channel(char *, long, long, bool);
 
 	string name;
-	long		id;
-	long		flags;
-	bool		isFeedback;
+	long id;
+	long flags;
+	bool isFeedback;
+};
+
+
+struct joy_cap {
+#ifdef QUA_V_JOYSTICK_DX
+	joy_cap(GUID gui, char *nm, bool hf);
+#endif
+	short subType;
+	string name;
+	bool hasFeedback;
+#ifdef QUA_V_JOYSTICK_DX
+	GUID guid;
+#endif
 };
 
 class QuaJoystickPort: public QuaPort {
 public:
-						QuaJoystickPort(char *nm, QuaJoystickManager *, short subt,
-							bool hf
+	QuaJoystickPort(const string &nm, QuaJoystickManager *, short subt, bool hf
 #if defined(QUA_V_JOYSTICK_MMC)
 							, int32 id
 #endif
 							);
-	status_t			Open(Qua *);
-	status_t			Close();
-	virtual char *		Name(uchar);
+	status_t Open(Qua *);
+	status_t Close();
+	virtual const char * name(uchar) override;
 	
 	bool				CheckPortOpen(Qua *q);
 	bool				CheckPortClose();
@@ -83,7 +96,7 @@ public:
 #ifdef QUA_V_JOYSTICK_DX
 	LPDIRECTINPUTDEVICE8 dxStick;
 	GUID				dxGuid;
-	BList				dxObjects;
+	vector<joy_channel> dxObjects;
 	DIJOYSTATE			joyState;
 	DIJOYSTATE			lastJoyState;
 
@@ -115,10 +128,10 @@ public:
 
 	 virtual QuaPort *findPortByName(const string nm, int direction, int nports) override;
 
-	virtual status_t Connect(Input *);
-	virtual status_t Connect(Output *);
-	virtual status_t Disconnect(Input *);
-	virtual status_t Disconnect(Output *);
+	virtual status_t connect(Input *) override;
+	virtual status_t connect(Output *) override;
+	virtual status_t disconnect(Input *) override;
+	virtual status_t disconnect(Output *) override;
 
 	QuaJoystickPort *OpenInput(Qua *, QuaJoystickPort*);
 	QuaJoystickPort *OpenOutput(Qua *, QuaJoystickPort*);
@@ -132,11 +145,14 @@ public:
 
 	bool readerRunning;
 	std::thread	updateThread;
+	mutex updateMux;
+	condition_variable updateCV;
+	void resumeUpdater();
 
 #ifdef QUA_V_JOYSTICK_DX
 	void FetchDIJoysticks();
 	void ClearDIJoysticks();
-	BList diJoystix;
+	vector<joy_cap> diJoystix;
 	static BOOL CALLBACK EnumJoysticksCallback(
 								const DIDEVICEINSTANCE* pdidInstance,
 								VOID* pContext);
@@ -145,22 +161,6 @@ public:
 	static JOYCAPS *GetJoyCaps(int32 *);
 #endif
 
-};
-
-
-struct joy_cap {
-#ifdef QUA_V_JOYSTICK_DX
-							joy_cap(GUID gui,
-									char *nm,
-									bool hf);
-#endif
-
-	short					subType;
-	string name;
-	bool					hasFeedback;
-#ifdef QUA_V_JOYSTICK_DX
-	GUID					guid;
-#endif
 };
 
 

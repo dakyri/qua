@@ -453,12 +453,12 @@ PortPopup::JoyMenu(bool isInput)
 	CMenu	*menu = new CMenu;
 	menu->CreatePopupMenu();
 #ifdef QUA_V_JOYSTICK
-	short n_p = environment.quaJoystick->CountPorts();
+	short n_p = environment.quaJoystick.countPorts();
 	for (short i=0; i<n_p; i++) {
-		QuaJoystickPort *p = environment.quaJoystick->Port(i);
+		QuaJoystickPort *p = environment.quaJoystick.port(i);
 		CMenu	*chmenu = new CMenu;
 		chmenu->CreatePopupMenu();
-		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->Name(NMFMT_NAME));
+		menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->name(NMFMT_NAME));
 	}
 #endif
 	return menu;

@@ -6,8 +6,8 @@
 #define QUA_V_AUDIO
 #undef QUA_V_AUDIO_ASIO
 #define QUA_V_DIRECT_MIDI
-#undef QUA_V_JOYSTICK
-#undef QUA_V_JOYSTICK_DX
+#define QUA_V_JOYSTICK
+#define QUA_V_JOYSTICK_DX // windows direct input joystick ... preferred to mm device
 #undef QUA_V_JOYSTICK_MMC
 #undef QUA_V_VST
 #undef QUA_V_VST_HOST

@@ -176,7 +176,7 @@ QuaEnvironment::Setup(string vuf)
 QuaAudioManager &getAudioManager() { return environment.quaAudio; }
 QuaMidiManager &getMidiManager() { return environment.quaMidi; }
 #ifdef QUA_V_JOYSTICK
-QuaJoystickManager &getJoyManager() { return environment.quaJoy; }
+QuaJoystickManager &getJoyManager() { return environment.quaJoystick; }
 #endif
 QuaParallelManager &getParallelManager() { return environment.quaParallel; }
 QuaOSCManager &getOSCManager() { return environment.quaOSC; }

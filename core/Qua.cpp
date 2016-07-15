@@ -2077,7 +2077,7 @@ findQuaPort(int deviceType, const string &nm, int direction, int nports)
 		break;
 	case Attribute::DEVICE_JOYSTICK:
 #ifdef QUA_V_JOYSTICK
-		p = environment.quaJoystick->findPortByName(nm, direction, nports);
+		p = environment.quaJoystick.findPortByName(nm, direction, nports);
 #endif
 		break;
 	case Attribute::DEVICE_PARALLEL:

@@ -5,9 +5,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-
 #include "Qua.h"
 #include "QuaDirect.h"
+
+#include <initguid.h>
 
 LPDIRECTINPUT8	directInput=nullptr;
 
@@ -29,6 +30,8 @@ direct_error_string(HRESULT res)
 	}
 	return "Unknown error";
 }
+
+extern HINSTANCE quaAppInstance;
 
 void
 direct_setup()
