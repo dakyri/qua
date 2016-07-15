@@ -22,7 +22,218 @@ using namespace std;
 
 class ResultValue;
 class List;
+#define NEW_STREAM_ITEM
+#ifdef NEW_STREAM_ITEM
 
+/*
+ * simple thread safe cache for allocating objects of type C ...
+ * in general, this version won't quite be useful on subclasses of C ... only allocations < sizeof C are pulled from cache
+ * but I'm confident that the various StreamItem subclasses won't themselves be subclassed
+ */
+template <typename C>
+class StreamItemCache {
+public:
+	StreamItemCache<typename C>() {
+		free = nullptr;
+	}
+	~StreamItemCache<typename C>() {
+	}
+	void *alloc(size_t s) {
+		void *p;
+		mutex.lock();
+		if (free != nullptr && s <= sizeof(C)) {
+			p = (void *)free;
+			free = static_cast<C *>(free->next);
+		} else {
+			p = malloc(s/*sizeof(C)*/);
+		}
+		mutex.unlock();
+		return p;
+	}
+	void dealloc(void *p) {
+		mutex.lock();
+		C *q = static_cast<C *>(p);
+		q->next = free;
+		free = q;
+		mutex.unlock();
+	}
+	std::mutex mutex;
+	C *free;
+};
+
+class StreamItem
+{
+public:
+	StreamItem(Time &_time, short _type = TypedValue::S_UNKNOWN);
+	virtual ~StreamItem() {}
+
+	short				type;
+	Time				time;
+	StreamItem			*next,
+		*prev;
+
+	StreamItem *Subsequent(short typ, short cmd, short data);
+	//    StreamItem			*Previous(short typ, short cmd, short data); // currently next is ignored?
+	virtual dur_t Duration();
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual bool setAttributes(AttributeList &attribs);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp) = 0;
+
+	//	void *operator new(size_t);
+	void operator delete(void *);
+};
+
+/*
+ * StreamItemImpl<C>
+ * base for the actual implementations of StreamItem ... maintains a cache for items of type C which are used for re-allocations
+ */
+template <typename C>
+class StreamItemImpl : public StreamItem {
+public:
+	StreamItemImpl<C>(Time &_time, short _type = TypedValue::S_UNKNOWN)
+		: StreamItem(time, _type)
+	{ }
+protected:
+	static StreamItemCache<C> cache;
+public:
+	void *operator new(size_t s) {
+		return cache.alloc(s);
+	}
+	void operator delete(void *q) {
+		cache.dealloc(q);
+	}
+};
+template <typename C>
+StreamItemCache<C> StreamItemImpl<C>::cache;
+
+class StreamNote : public StreamItemImpl<StreamNote>
+{
+public:
+	StreamNote(Time &tag, Note &tp);
+	StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
+
+	virtual dur_t Duration();
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual bool setAttributes(AttributeList &attribs);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	Note note;
+	AttributeList attributes;
+};
+
+class StreamCtrl : public StreamItemImpl<StreamCtrl>
+{
+public:
+	StreamCtrl(class Time &tag, Ctrl &cp);
+	StreamCtrl(class Time &tag, cmd_t cmd, ctrl_t ct, amt_t amt);
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	Ctrl ctrl;
+};
+
+class StreamBend : public StreamItemImpl<StreamBend>
+{
+public:
+	StreamBend(Time &tag, class Bend &cp);
+	StreamBend(Time &tag, cmd_t, bend_t);
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	Bend bend;
+};
+
+class StreamProg : public StreamItemImpl<StreamProg>
+{
+public:
+	StreamProg(Time &tag, Prog &cp);
+	StreamProg(Time &tag, cmd_t, prg_t, prg_t, prg_t);
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	Prog prog;
+};
+
+class StreamSysC : public StreamItemImpl<StreamSysC>
+{
+public:
+	StreamSysC(Time &tag, SysC &cp);
+	StreamSysC(Time &tag, int8, int8, int8);
+
+	virtual bool SetMidiParams(int8, int8, int8, bool);
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	SysC sysC;
+};
+
+
+class StreamMesg : public StreamItemImpl<StreamMesg>
+{
+public:
+	StreamMesg(Time &tag, OSCMessage *mp);
+	~StreamMesg();
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	OSCMessage *mesg;
+};
+
+class StreamValue : public StreamItemImpl<StreamValue>
+{
+public:
+	StreamValue(Time &tag, TypedValue &vp);
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	TypedValue value;
+};
+
+class StreamSysX : public StreamItemImpl<StreamSysX>
+{
+public:
+	StreamSysX(Time &tag, SysX &cp);
+	~StreamSysX();
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	SysX sysX;
+};
+
+class StreamJoy : public StreamItemImpl<StreamJoy>
+{
+public:
+	StreamJoy(Time &tag, class QuaJoy &cp);
+	StreamJoy(Time &tag, uchar st, uchar wh, uchar cmd);
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	QuaJoy joy;
+};
+
+class StreamLogEntry : public StreamItemImpl<StreamLogEntry>
+{
+public:
+	StreamLogEntry(Time &tag, class LogEntry *cp);
+
+	virtual StreamItem *Clone();
+	virtual status_t SaveSnapshot(FILE *fp);
+
+	LogEntry logEntry;
+};
+
+#else
 class StreamItem
 {
 public:
@@ -201,7 +412,7 @@ public:
 	
  	LogEntry logEntry;
 };
-
+#endif
 enum {
 	STR_FMT_RAW = 0,
 	STR_FMT_TEXT = 1

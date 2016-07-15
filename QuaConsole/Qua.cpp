@@ -10,6 +10,9 @@
 #include "QuaCommandLine.h"
 
 #include <iostream>
+
+#if defined(WIN32)
+#endif
 int main(char **argv, int argc)
 {
 	define_global_symbols();
@@ -18,7 +21,19 @@ int main(char **argv, int argc)
 	//		"F:/progs/VstPlugins/Native Instruments/Absynth 3.dll"
 	//		);
 	//	exit(0);
-	environment.Setup();	// some app setup may rely on command line
+	string homePath(argv[0]);
+#if defined(WIN32)
+	HMODULE quaAppModule = NULL;
+	if ((quaAppModule = GetModuleHandle(NULL)) == NULL) {
+		cerr << "Can't find Home..." << endl;
+	}
+	char	vuf[1024];
+	int		nc;
+	if ((nc = GetModuleFileNameA(quaAppModule, vuf, 1024)) == 0) {
+		cerr << "Can't find Home..." << endl;
+	}
+#endif
+	environment.Setup(homePath);	// some app setup may rely on command line
 	environment.SetupDevices();
 	QuaCommandLine cmd;
 	cmd.processCommandLine(argc, argv);

@@ -15,6 +15,7 @@
 
 #include "Dictionary.h"
 
+#ifndef NEW_STREAM_ITEM
 StreamItemCache		FreeNote(sizeof(StreamNote));
 StreamItemCache		FreeMesg(sizeof(StreamMesg));
 StreamItemCache		FreeValue(sizeof(StreamValue));
@@ -62,7 +63,7 @@ StreamItemCache::Dealloc(void *p)
     free = q;
 	mutex.unlock();
 }
-
+#endif
 
 StreamItem::StreamItem(Time &_time, short _type)
 	: type(_type)
@@ -95,8 +96,7 @@ StreamItem::operator delete(void *q)
 	case TypedValue::S_LOG_ENTRY: 	delete (StreamLogEntry *)q; break;
 	case TypedValue::S_JOY:		 	delete (StreamJoy *)q; break;
 	default:
-		internalError("delete: Unexpected stream object %d",
-			((StreamItem *)q)->type);
+		internalError("delete: Unexpected stream object %d", ((StreamItem *)q)->type);
 	}
 }
 
@@ -163,6 +163,7 @@ StreamItem::setAttributes(AttributeList &attribs) {
 /*
  * StreamNote
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamNote::operator new(size_t sz)
 {
@@ -176,14 +177,14 @@ StreamNote::operator delete(void *q)
 //	fprintf(stderr, "delete tone %x\n", q);
 	FreeNote.Dealloc(q);
 }
-
+#endif
 StreamNote::StreamNote(Time &t, Note &tp)
-	: StreamItem(t, TypedValue::S_NOTE) {
+	: StreamItemImpl<StreamNote>(t, TypedValue::S_NOTE) {
 	note = tp;
 }
 
 StreamNote::StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur)
-	: StreamItem(tag, TypedValue::S_NOTE) {
+	: StreamItemImpl<StreamNote>(tag, TypedValue::S_NOTE) {
 	note.cmd = cmd;
 	note.duration = dur;
 	note.dynamic = vel;
@@ -191,21 +192,21 @@ StreamNote::StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur
 }
 
 StreamCtrl::StreamCtrl(Time &tag, cmd_t cmd, ctrl_t ctrlr, amt_t amt)
-	: StreamItem(tag, TypedValue::S_NOTE) {
+	: StreamItemImpl<StreamCtrl>(tag, TypedValue::S_NOTE) {
 	ctrl.cmd = cmd;
 	ctrl.controller = ctrlr;
 	ctrl.amount = amt;
 }
 
 StreamBend::StreamBend(Time &tag, cmd_t chan, bend_t bendamt)
-	: StreamItem(tag, TypedValue::S_BEND) {
+	: StreamItemImpl<StreamBend>(tag, TypedValue::S_BEND) {
 	bend.bend = bendamt;
 	bend.cmd = chan;
 }
 
 
 StreamProg::StreamProg(Time &tag, cmd_t chan, prg_t program, prg_t bank, prg_t subbank)
-	: StreamItem(tag, TypedValue::S_PROG) {
+	: StreamItemImpl<StreamProg>(tag, TypedValue::S_PROG) {
 	prog.cmd = chan;
 	prog.program = program;
 	prog.bank = bank;
@@ -213,7 +214,7 @@ StreamProg::StreamProg(Time &tag, cmd_t chan, prg_t program, prg_t bank, prg_t s
 }
 
 StreamSysC::StreamSysC(Time &tag, int8 cmd, int8 data1, int8 data2)
-	: StreamItem(tag, TypedValue::S_SYSC) {
+	: StreamItemImpl<StreamSysC>(tag, TypedValue::S_SYSC) {
 	sysC.cmd = cmd;
 	sysC.data1 = data1;
 	sysC.data2 = data2;
@@ -268,21 +269,23 @@ StreamNote::setAttributes(AttributeList &attribs) {
 /*
  * StreamMesg
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamMesg::operator new(size_t sz)
 {
 	return FreeMesg.Alloc();
 }
 
-StreamMesg::StreamMesg(Time &tag, OSCMessage *mp)
-	: StreamItem(tag, TypedValue::S_MESSAGE) {
-    mesg = mp;
-}
-
 void
 StreamMesg::operator delete(void *q)
 {
-    FreeMesg.Dealloc(q);
+	FreeMesg.Dealloc(q);
+}
+
+#endif
+StreamMesg::StreamMesg(Time &tag, OSCMessage *mp)
+	: StreamItemImpl<StreamMesg>(tag, TypedValue::S_MESSAGE) {
+    mesg = mp;
 }
 
 StreamItem *
@@ -308,23 +311,24 @@ StreamMesg::~StreamMesg()
 /*
  * StreamValue
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamValue::operator new(size_t sz)
 {
 	return FreeValue.Alloc();
 }
 
-StreamValue::StreamValue(Time &tag, TypedValue &vp)
-	: StreamItem(tag, TypedValue::S_VALUE) {
-    value = vp;
-}
-
 void
 StreamValue::operator delete(void *q)
 {
-    FreeValue.Dealloc(q);
+	FreeValue.Dealloc(q);
 }
+#endif
 
+StreamValue::StreamValue(Time &tag, TypedValue &vp)
+	: StreamItemImpl<StreamValue>(tag, TypedValue::S_VALUE) {
+    value = vp;
+}
 
 StreamItem *
 StreamValue::Clone()
@@ -346,21 +350,23 @@ StreamValue::SaveSnapshot(FILE *fp)
 /*
  * StreamCtrl
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamCtrl::operator new(size_t sz)
 {
 	return FreeCtrl.Alloc();
 }
 
-StreamCtrl::StreamCtrl(Time &tag, Ctrl &cp)
-	: StreamItem(tag, TypedValue::S_CTRL) {
-	ctrl = cp;
-}
-
 void
 StreamCtrl::operator delete(void *q)
 {
-    FreeCtrl.Dealloc(q);
+	FreeCtrl.Dealloc(q);
+}
+
+#endif
+StreamCtrl::StreamCtrl(Time &tag, Ctrl &cp)
+	: StreamItemImpl<StreamCtrl>(tag, TypedValue::S_CTRL) {
+	ctrl = cp;
 }
 
 
@@ -392,15 +398,11 @@ StreamCtrl::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
  * StreamSysX
  * this owns the sysx data ... we can't be certain of anything else because our SysX wrapper is in a union
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamSysX::operator new(size_t sz)
 {
 	return FreeSysX.Alloc();
-}
-
-StreamSysX::StreamSysX(Time &tag, SysX &cp)
-	: StreamItem(tag, TypedValue::S_SYSX) {
-	sysX = cp;
 }
 
 void
@@ -408,7 +410,12 @@ StreamSysX::operator delete(void *q)
 {
 	FreeSysX.Dealloc(q);
 }
+#endif
 
+StreamSysX::StreamSysX(Time &tag, SysX &cp)
+	: StreamItemImpl<StreamSysX>(tag, TypedValue::S_SYSX) {
+	sysX = cp;
+}
 
 StreamItem *
 StreamSysX::Clone()
@@ -421,7 +428,7 @@ status_t
 StreamSysX::SaveSnapshot(FILE *fp)
 {
 	fprintf(fp, "<sysx time=\"%s\">\n", time.StringValue());
-	fprintf(fp, "</sysx>\n", time.StringValue());
+	fprintf(fp, "</sysx>\n");
 	return B_OK;
 }
 
@@ -436,21 +443,22 @@ StreamSysX::~StreamSysX()
 /*
  * StreamSysC
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamSysC::operator new(size_t sz)
 {
 	return FreeSysC.Alloc();
 }
-
-StreamSysC::StreamSysC(Time &tag, SysC &cp)
-	: StreamItem(tag, TypedValue::S_SYSC) {
-	sysC = cp;
-}
-
 void
 StreamSysC::operator delete(void *q)
 {
-    FreeSysC.Dealloc(q);
+	FreeSysC.Dealloc(q);
+}
+#endif
+
+StreamSysC::StreamSysC(Time &tag, SysC &cp)
+	: StreamItemImpl<StreamSysC>(tag, TypedValue::S_SYSC) {
+	sysC = cp;
 }
 
 
@@ -481,22 +489,23 @@ StreamSysC::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
 /*
  * StreamBend
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamBend::operator new(size_t sz)
 {
 	return FreeBend.Alloc();
 }
 
-StreamBend::StreamBend(Time &tag, Bend &cp)
-	: StreamItem(tag, TypedValue::S_BEND) {
-	bend = cp;
-
-}
-
 void
 StreamBend::operator delete(void *q)
 {
-    FreeBend.Dealloc(q);
+	FreeBend.Dealloc(q);
+}
+#endif
+StreamBend::StreamBend(Time &tag, Bend &cp)
+	: StreamItemImpl<StreamBend>(tag, TypedValue::S_BEND) {
+	bend = cp;
+
 }
 
 
@@ -519,23 +528,25 @@ StreamBend::SaveSnapshot(FILE *fp)
 /*
  * StreamProg
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamProg::operator new(size_t sz)
 {
 	return FreeProg.Alloc();
 }
 
+void
+StreamProg::operator delete(void *q)
+{
+	FreeProg.Dealloc(q);
+}
+#endif
 StreamProg::StreamProg(Time &tag, Prog &cp)
-	: StreamItem(tag, TypedValue::S_PROG) {
+	: StreamItemImpl<StreamProg>(tag, TypedValue::S_PROG) {
 	prog = cp;
 
 }
 
-void
-StreamProg::operator delete(void *q)
-{
-    FreeProg.Dealloc(q);
-}
 
 
 StreamItem *
@@ -564,21 +575,22 @@ StreamProg::SetMidiParams(int8 cmd, int8 data1, int8 data2, bool force)
 /*
  * StreamLogEntry
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamLogEntry::operator new(size_t sz)
 {
 	return FreeLogEntry.Alloc();
 }
-
-StreamLogEntry::StreamLogEntry(Time &tag, class LogEntry *cp)
-	: StreamItem(tag, TypedValue::S_LOG_ENTRY) {
-	if (cp) logEntry = *cp;
-}
-
 void
 StreamLogEntry::operator delete(void *q)
 {
-    FreeLogEntry.Dealloc(q);
+	FreeLogEntry.Dealloc(q);
+}
+#endif
+
+StreamLogEntry::StreamLogEntry(Time &tag, class LogEntry *cp)
+	: StreamItemImpl<StreamLogEntry>(tag, TypedValue::S_LOG_ENTRY) {
+	if (cp) logEntry = *cp;
 }
 
 
@@ -600,28 +612,29 @@ StreamLogEntry::SaveSnapshot(FILE *fp)
 /*
  * StreamJoy
  */
+#ifndef NEW_STREAM_ITEM
 void *
 StreamJoy::operator new(size_t sz)
 {
 	return FreeJoy.Alloc();
 }
 
+void
+StreamJoy::operator delete(void *q)
+{
+	FreeJoy.Dealloc(q);
+}
+#endif
 StreamJoy::StreamJoy(Time &tag, QuaJoy &cp)
-	: StreamItem(tag, TypedValue::S_JOY) {
+	: StreamItemImpl<StreamJoy>(tag, TypedValue::S_JOY) {
 	joy = cp;
 }
 
 StreamJoy::StreamJoy(Time &tag, uchar stick, uchar which, uchar type)
-	: StreamItem(tag, TypedValue::S_JOY) {
+	: StreamItemImpl<StreamJoy>(tag, TypedValue::S_JOY) {
 	joy.stick = stick;
 	joy.which = which;
 	joy.type = type;
-}
-
-void
-StreamJoy::operator delete(void *q)
-{
-    FreeJoy.Dealloc(q);
 }
 
 
