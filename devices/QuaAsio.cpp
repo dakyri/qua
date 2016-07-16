@@ -15,6 +15,8 @@
 #include "Qua.h"
 #include "Clock.h"
 
+#include <iostream>
+
 long			QuaAsio::bufSize;
 long			QuaAsio::minBufSize;
 long			QuaAsio::maxBufSize;
@@ -135,7 +137,7 @@ QuaAsio::Load()
 char *
 QuaAsio::CurrentDriver()
 {
-	static char buf[64];
+	static char buf[MAXDRVNAMELEN];
 	if (drivers.getCurrentDriverName(buf)) {
 		return buf;
 	}
@@ -189,10 +191,10 @@ QuaAsio::LoadDriver(char *name)
 		}
 	} 
 	if (found < 0) {
-		fprintf(stderr, "driver %s unknown\n", name);
+		cerr << "driver "<< name <<" unknown" << endl;
 		return -1;
 	}
-	fprintf(stderr, "Asio: loading driver %s\n", name);
+	cerr << "Asio: loading driver " << name << endl;
 	if (loaded) {
 		UnloadDriver();
 	}
@@ -212,35 +214,35 @@ QuaAsio::LoadDriver(char *name)
 // ASE_NotPresent
 // ASE_HWMalfunction
 // ASE_NoMemory
-			fprintf(stderr, "err initializing ...\n");
+			cerr << "err initializing ..." << endl;
 			return err;
 		}
 		if ((err=ASIOGetChannels(&nInputChannels, &nOutputChannels)) != ASE_OK) {
-			fprintf(stderr, "err getting channels ...\n");
+			cerr << "err getting channels ..." << endl;
 			return err;
 		}
 		if ((err=ASIOGetLatencies(&inputLatency, &outputLatency)) != ASE_OK) {
-			fprintf(stderr, "err getting latencies ...\n");
+			cerr << "err getting latencies ..." << endl;
 			return err;
 		}
 		if ((err=ASIOGetBufferSize(
 					&minBufSize, &maxBufSize,
 					&preferredBufSize, &bufSizeGranularity)) != ASE_OK) {
-			fprintf(stderr, "err getting buf size ...\n");
+			cerr << "err getting buf size ..." << endl;
 			return err;
 		}
 		bufSize = preferredBufSize;
 
-		fprintf(stderr, "loaded %s, %d ins %d outs %d\n", name, nInputChannels, nOutputChannels);
-		fprintf(stderr, "input latence %d output latency %d\n", inputLatency, outputLatency);
-		fprintf(stderr, "min buf %d max buf %d pref buf %d\n", minBufSize, maxBufSize, preferredBufSize);
+		cerr << "loaded " << name << ", " << nInputChannels << " ins " << nOutputChannels << " outs " <<  endl;
+		cerr << "input latence " << inputLatency << " output latency " << outputLatency << endl;
+		cerr << "min buf "<< minBufSize <<" max buf " << maxBufSize << " pref buf " << preferredBufSize << endl;
 
 		ASIOSampleRate	sampleRate;
 		// get the currently selected sample rate
 		if((err=ASIOGetSampleRate(&sampleRate)) != ASE_OK) {
-			fprintf(stderr, "Can't get sample rate\n");
+			cerr << "Can't get sample rate" << endl;
 		}
-		fprintf(stderr, "ASIOGetSampleRate (sampleRate: %f);\n", sampleRate);
+		cerr << "ASIOGetSampleRate (sampleRate: " << sampleRate << ")" << endl;
 					// Driver does not store it's internal sample rate, so set it to a know one.
 					// Usually you should check beforehand, that the selected sample rate is valid
 					// with ASIOCanSampleRate().
@@ -248,7 +250,7 @@ QuaAsio::LoadDriver(char *name)
 //						;
 //					}
 //						if(ASIOGetSampleRate(&asioDriverInfo->sampleRate) == ASE_OK)
-//							printf ("ASIOGetSampleRate (sampleRate: %f);\n", asioDriverInfo->sampleRate);
+//							printf ("ASIOGetSampleRate (sampleRate: %f);" << endl, asioDriverInfo->sampleRate);
 
 				// check wether the driver requires the ASIOOutputReady() optimization
 				// (can be used by the driver to reduce output latency by one block)
@@ -256,7 +258,7 @@ QuaAsio::LoadDriver(char *name)
 			outputReady = true;
 		else
 			outputReady = false;
-		fprintf(stderr, "Output ready call %s\n", outputReady?"needed":"not needed");
+		cerr << "Output ready call "  << (outputReady?"needed":"not needed") << endl;
 
 		ASIOChannelInfo info;
 		info.isInput = ASIOTrue;
@@ -265,14 +267,14 @@ QuaAsio::LoadDriver(char *name)
 		for (i=0; i<nInputChannels; i++) {
 			info.channel = i;
 			if ((err=ASIOGetChannelInfo(&info)) != ASE_OK) {
-				fprintf(stderr, "err retrieving input...\n");
+				cerr << "err retrieving input..." << endl;
 				chanerr = err;
 				input[i] = nullptr;
 			} else {
 				input[i] = new QuaAudioIn(nullptr, nullptr,
 									info.channel, info.channelGroup,
 									info.name, info.type, 1);
-				fprintf(stderr, "input %s, ch %d grp %d typ %d\n", info.name, info.channel, info.channelGroup, info.type);
+				cerr << "input "<< info.name <<", ch " << info.channel << " grp " << info.channelGroup << " typ " << info.type << endl;
 			}
 		}
 		info.isInput = ASIOFalse;
@@ -280,14 +282,14 @@ QuaAsio::LoadDriver(char *name)
 		for (i=0; i<nOutputChannels; i++) {
 			info.channel = i;
 			if ((err=ASIOGetChannelInfo(&info)) != ASE_OK) {
-				fprintf(stderr, "err retrieving output...\n");
+				cerr << "err retrieving output..." << endl;
 				chanerr = err;
 				output[i] = nullptr;
 			} else {
 				output[i] = new QuaAudioOut(nullptr, nullptr,
 									info.channel, info.channelGroup,
 									info.name, info.type, 1);
-				fprintf(stderr, "output %s, ch %d grp %d typ %d\n", info.name, info.channel, info.channelGroup, info.type);
+				cerr << "output " << info.name << ", ch " << info.channel << " grp " << info.channelGroup << " typ " << info.type << endl;
 			}
 		}
 
@@ -297,7 +299,7 @@ QuaAsio::LoadDriver(char *name)
 
 		return B_OK; //AllocateBuffers();
 	} else {
-		fprintf(stderr, "loaded ok\n");
+		cerr << "loaded ok" << endl;
 		return ASE_NotPresent;
 	}
 	return ASE_OK;
@@ -313,7 +315,7 @@ QuaAsio::SetBufSize(long bs)
 status_t
 QuaAsio::AllocateBuffers()
 {
-	fprintf(stderr, "Asio:AllocateBuffers()\n");
+	cerr << "Asio:AllocateBuffers()" << endl;
 	ASIOError	err;
 	if (running) {
 		err = ASIOStop();
@@ -322,19 +324,19 @@ QuaAsio::AllocateBuffers()
 	}
 
 	if (buffers) {
-		fprintf(stderr, "Asio: disposing old buffers\n");
+		cerr << "Asio: disposing old buffers" << endl;
 		ASIODisposeBuffers();
 		delete buffers;
 		buffers = nullptr;
 	}
 	nActiveInput = nActiveOutput = 0;
-	fprintf(stderr, "Asio: checking %d input channels\n", nInputChannels);
+	cerr << "Asio: checking "<< nInputChannels <<" input channels" << endl;
 	for (short i=0; i<nInputChannels; i++) {
 		if (input[i] && input[i]->enabled) {
 			nActiveInput++;
 		}
 	}
-	fprintf(stderr, "Asio: checking %d output channels\n", nOutputChannels);
+	cerr << "Asio: checking " << nOutputChannels << " output channels" << endl;
 	for (short i=0; i<nOutputChannels; i++) {
 		if (output[i] && output[i]->enabled) {
 			nActiveOutput++;
@@ -343,7 +345,7 @@ QuaAsio::AllocateBuffers()
 	if (nActiveInput+nActiveOutput == 0) {
 		return B_OK;
 	}
-	fprintf(stderr, "Asio: allocating new buffers\n");
+	cerr << "Asio: allocating new buffers" << endl;
 	buffers = new ASIOBufferInfo[nActiveInput+nActiveOutput];
 	long ind = 0;
 	int i=0;
@@ -366,16 +368,16 @@ QuaAsio::AllocateBuffers()
 	callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
 	callbacks.sampleRateDidChange = &sampleRateChanged;
 
-	fprintf(stderr, "Asio: creating %d buffers, size %d\n", nActiveInput+nActiveOutput, bufSize);
+	cerr << "Asio: creating "<< (nActiveInput + nActiveOutput) <<" buffers, size " << bufSize << endl;
 	err = ASIOCreateBuffers(buffers, nActiveInput+nActiveOutput, bufSize, &callbacks); 
 	if (err == ASE_OK && (err=ASIOGetLatencies(&inputLatency, &outputLatency)) != ASE_OK) {
-		fprintf(stderr, "err getting latencies ...\n");
+		cerr <<"err getting latencies ..." << endl;
 		return err;
 	}
-	fprintf(stderr, "Asio: new buffer set allocated. alloc err = %d latencies %d %d\n", err, inputLatency, outputLatency);
+	cerr << "Asio: new buffer set allocated. alloc err = " << err << " latencies " << inputLatency << "" << outputLatency << "" << endl;
 	if (err == ASE_OK && running) {
 		err = ASIOStart();
-		fprintf(stderr, "Asio: starting ... err %d\n", err);
+		cerr << "Asio: starting ... err " << err << endl;
 	}
 	return err;
 }
@@ -405,7 +407,7 @@ QuaAsio::EnableOutput(Qua *q, long id)
 		op->enabled = true;
 		if (op->outbuf == nullptr) {
 			op->outbuf = new float[bufSize];
-		fprintf(stderr, "enable %d %x\n", bufSize, op->outbuf);
+			cerr << "enable "<< bufSize <<" "<< op->outbuf <<"" << endl;
 		}
 		return op;
 	}
@@ -452,7 +454,7 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 {
 	short i;
 	if (debug_asio) {
-		fprintf(stderr, "ASIO:bufferSwitch called %d %d\n", doubleBufferIndex, directProcess);
+		cerr << "ASIO:bufferSwitch called "<< doubleBufferIndex <<" " << directProcess << "" << endl;
 	}
 	for (i=0; i<nActiveInput; i++) {
 		QuaAudioIn	*ip = input[buffers[i].channelNum];
@@ -545,7 +547,7 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 		}
 	}
 	if (debug_asio >= 2)
-		fprintf(stderr, "ASIO:bufferSwitch sorting inputs\n");
+		cerr << "ASIO:bufferSwitch sorting inputs" << endl;
 	//uberQua->objectsBlockStack.ReadLock();
 	for (short i=0; i<audio->channels.size(); i++) {
 		Channel	*c = audio->channels[i];
@@ -560,11 +562,11 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 		if (yp && yp->data) yp->data->Take(bufSize*yp->nChannel);
 	}
 	if (debug_asio >= 2)
-		fprintf(stderr, "ASIO:bufferSwitch calling generate\n");
+		cerr << "ASIO:bufferSwitch calling generate" << endl;
 	audio->Generate(bufSize);
 
 	if (debug_asio >= 2)
-		fprintf(stderr, "ASIO:bufferSwitch copying to asio buffs\n");
+		cerr << "ASIO:bufferSwitch copying to asio buffs" << endl;
 	//uberQua->objectsBlockStack.ReadUnlock();
 	short ind = nActiveInput;
 	for (short i=0; i<nActiveOutput; i++) {
@@ -573,7 +575,7 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 			void		*buf = buffers[ind].buffers[doubleBufferIndex];
 			float		*s = op->outbuf+op->offset;
 			long		nFrames = bufSize / op->nChannel;
-//			fprintf(stderr, "out fmt %d %d chans %d frames on %d offset %d buf %x %x %g\n", op->sampleFormat, op->nChannel, nFrames, buffers[ind].channelNum, op->offset, s, op->outbuf, *s);
+//			fprintf(stderr, "out fmt %d %d chans %d frames on %d offset %d buf %x %x %g" << endl, op->sampleFormat, op->nChannel, nFrames, buffers[ind].channelNum, op->offset, s, op->outbuf, *s);
 			switch (op->sampleFormat) {
 ////////////////////// PPC/Motorola (MSB) Byte order /////////////////////				
 				case ASIOSTInt16MSB: {
@@ -670,7 +672,7 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 	}
 */
 	if (debug_asio >= 2)
-		fprintf(stderr, "ASIO:bufferSwitch done\n");
+		cerr << "ASIO:bufferSwitch done" << endl;
 }
 
 ASIOTime*
@@ -679,7 +681,7 @@ QuaAsio::bufferSwitchTimeInfo(
 				long doubleBufferIndex,
 				ASIOBool directProcess)
 {
-	fprintf(stderr, "ASIO:bufferSwitchTimeInfo\n");
+	cerr << "ASIO:bufferSwitchTimeInfo" << endl;
 	bufferSwitch(doubleBufferIndex, directProcess);
 	return nullptr;
 }
@@ -711,11 +713,11 @@ QuaAsio::asioMessages(long selector, long value, void* message, double* opt)
 				|| value == kAsioSupportsTimeCode
 				|| value == kAsioSupportsInputMonitor)
 						ret = 1L;
-				fprintf(stderr, "Asio::asioMessages(kAsioSelectorSupported)\n");
+				cerr << "Asio::asioMessages(kAsioSelectorSupported)" << endl;
 				break;
 			    
 		case kAsioBufferSizeChange:
-				fprintf(stderr, "Asio::asioMessages(kAsioBufferSizeChange)\n");
+				cerr << "Asio::asioMessages(kAsioBufferSizeChange)" << endl;
 				break;
 			    
 		case kAsioResetRequest:
@@ -724,7 +726,7 @@ QuaAsio::asioMessages(long selector, long value, void* message, double* opt)
 				// Reset the driver is done by completely destruct is. I.e. ASIOStop(), ASIODisposeBuffers(), Destruction
 				// Afterwards you initialize the driver again.
 //				asioDriverInfo.stopped;  // In this sample the processing will just stop
-				fprintf(stderr, "Asio::asioMessages(kAsioResetRequest) \n");
+				cerr << "Asio::asioMessages(kAsioResetRequest) " << endl;
 				ret = 1L;
 				break;
 		case kAsioResyncRequest:
@@ -734,7 +736,7 @@ QuaAsio::asioMessages(long selector, long value, void* message, double* opt)
 				// Windows Multimedia system, which could loose data because the Mutex was hold too long
 				// by another thread.
 				// However a driver can issue it in other situations, too.
-				fprintf(stderr, "Asio::asioMessages(kAsioResyncRequest) \n");
+				cerr << "Asio::asioMessages(kAsioResyncRequest) " << endl;
 				ret = 1L;
 				break;
 		case kAsioLatenciesChanged:
@@ -742,13 +744,13 @@ QuaAsio::asioMessages(long selector, long value, void* message, double* opt)
 				// Beware, it this does not mean that the buffer sizes have changed!
 				// You might need to update internal delay data.
 				ret = 1L;
-				fprintf(stderr, "Asio::asioMessages(kAsioLatenciesChanged) \n");
+				cerr << "Asio::asioMessages(kAsioLatenciesChanged) " << endl;
 				break;
 		case kAsioEngineVersion:
 				// return the supported ASIO version of the host application
 				// If a host applications does not implement this selector, ASIO 1.0 is assumed
 				// by the driver
-				fprintf(stderr, "Asio::asioMessages(kAsioEngineVersion) \n");
+				cerr << "Asio::asioMessages(kAsioEngineVersion) " << endl;
 				ret = 2L;
 				break;
 		case kAsioSupportsTimeInfo:
@@ -756,18 +758,18 @@ QuaAsio::asioMessages(long selector, long value, void* message, double* opt)
 				// is supported.
 				// For compatibility with ASIO 1.0 drivers the host application should always support
 				// the "old" bufferSwitch method, too.
-				fprintf(stderr, "Asio::asioMessages(kAsioSupportsTimeInfo) \n");
+				cerr << "Asio::asioMessages(kAsioSupportsTimeInfo) " << endl;
 				ret = 0;
 				break;
 		case kAsioSupportsTimeCode:
 				// informs the driver wether application is interested in time code info.
 				// If an application does not need to know about time code, the driver has less work
 				// to do.
-				fprintf(stderr, "Asio::asioMessages(kAsioSupportsTimeCode) \n");
+				cerr << "Asio::asioMessages(kAsioSupportsTimeCode) " << endl;
 				ret = 0;
 				break;
 		default:
-				fprintf(stderr, "Asio::asioMessages(unimp %d) \n", selector);
+				cerr << "Asio::asioMessages(unimp %d) " << endl;
 			break;
 	}
 	return ret;
