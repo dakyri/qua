@@ -61,6 +61,12 @@ public:
 	C *free;
 };
 
+/**
+ * StreamItem
+ * base class for the various Items, provides default implementation of virtuals and general purpose functions
+ * provides an override delete operator so caching on subclasses works ok
+ * streams are in general intermixed with various types of stream item
+ */
 class StreamItem
 {
 public:
@@ -107,128 +113,161 @@ public:
 template <typename C>
 StreamItemCache<C> StreamItemImpl<C>::cache;
 
+/**
+ * stream item for note objects
+ */
 class StreamNote : public StreamItemImpl<StreamNote>
 {
 public:
 	StreamNote(Time &tag, Note &tp);
 	StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur);
 
-	virtual dur_t Duration();
-	virtual bool SetMidiParams(int8, int8, int8, bool);
-	virtual bool setAttributes(AttributeList &attribs);
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual dur_t Duration() override;
+	virtual bool SetMidiParams(int8, int8, int8, bool) override;
+	virtual bool setAttributes(AttributeList &attribs) override;
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	Note note;
 	AttributeList attributes;
 };
 
+/**
+* stream item for ctrl objects
+*/
 class StreamCtrl : public StreamItemImpl<StreamCtrl>
 {
 public:
 	StreamCtrl(class Time &tag, Ctrl &cp);
 	StreamCtrl(class Time &tag, cmd_t cmd, ctrl_t ct, amt_t amt);
 
-	virtual bool SetMidiParams(int8, int8, int8, bool);
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual bool SetMidiParams(int8, int8, int8, bool) override;
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	Ctrl ctrl;
 };
 
+/**
+* stream item for bend objects
+*/
 class StreamBend : public StreamItemImpl<StreamBend>
 {
 public:
 	StreamBend(Time &tag, class Bend &cp);
 	StreamBend(Time &tag, cmd_t, bend_t);
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	Bend bend;
 };
 
+/**
+* stream item for prog objects
+*/
 class StreamProg : public StreamItemImpl<StreamProg>
 {
 public:
 	StreamProg(Time &tag, Prog &cp);
 	StreamProg(Time &tag, cmd_t, prg_t, prg_t, prg_t);
 
-	virtual bool SetMidiParams(int8, int8, int8, bool);
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual bool SetMidiParams(int8, int8, int8, bool) override;
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	Prog prog;
 };
 
+/**
+* stream item for sys common objects
+*/
 class StreamSysC : public StreamItemImpl<StreamSysC>
 {
 public:
 	StreamSysC(Time &tag, SysC &cp);
 	StreamSysC(Time &tag, int8, int8, int8);
 
-	virtual bool SetMidiParams(int8, int8, int8, bool);
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual bool SetMidiParams(int8, int8, int8, bool) override;
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	SysC sysC;
 };
 
 
+/**
+* stream item for note objects
+*/
 class StreamMesg : public StreamItemImpl<StreamMesg>
 {
 public:
 	StreamMesg(Time &tag, OSCMessage *mp);
 	~StreamMesg();
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	OSCMessage *mesg;
 };
 
+/**
+* stream item for value objects
+*/
 class StreamValue : public StreamItemImpl<StreamValue>
 {
 public:
 	StreamValue(Time &tag, TypedValue &vp);
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	TypedValue value;
 };
 
+
+/**
+* stream item for sys x objects
+*/
 class StreamSysX : public StreamItemImpl<StreamSysX>
 {
 public:
 	StreamSysX(Time &tag, SysX &cp);
 	~StreamSysX();
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	SysX sysX;
 };
 
+
+/**
+* stream item for JOY objects
+*/
 class StreamJoy : public StreamItemImpl<StreamJoy>
 {
 public:
 	StreamJoy(Time &tag, class QuaJoy &cp);
 	StreamJoy(Time &tag, uchar st, uchar wh, uchar cmd);
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	QuaJoy joy;
 };
 
+
+/**
+* stream item for log objects
+*/
 class StreamLogEntry : public StreamItemImpl<StreamLogEntry>
 {
 public:
 	StreamLogEntry(Time &tag, class LogEntry *cp);
 
-	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual StreamItem *Clone() override;
+	virtual status_t SaveSnapshot(FILE *fp) override;
 
 	LogEntry logEntry;
 };
@@ -413,6 +452,11 @@ public:
  	LogEntry logEntry;
 };
 #endif
+
+/**
+ * constants for alternate save modes for streams. some streams, input in scripts we'd like to keep as ascii scripts
+ * recorded midi, perhaps not
+ */
 enum {
 	STR_FMT_RAW = 0,
 	STR_FMT_TEXT = 1
@@ -420,6 +464,9 @@ enum {
 
 struct IXMLDOMElement;
 
+/**
+ * Stream
+ */
 class Stream
 {
 public:

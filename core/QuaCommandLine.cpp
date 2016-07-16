@@ -224,11 +224,11 @@ QuaCommandLine::loadAsio(int devind, FILE *fp)
 	);
 	for (j = 0; j<QuaAudioManager::asio.nInputChannels; j++) {
 		QuaAudioIn	*inp = QuaAudioManager::asio.input[j];
-		fprintf(fp, "input %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::SampleFormatName(inp->sampleFormat));
+		fprintf(fp, "input %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::sampleFormatName(inp->sampleFormat));
 	}
 	for (j = 0; j<QuaAudioManager::asio.nOutputChannels; j++) {
 		QuaAudioOut	*inp = QuaAudioManager::asio.output[j];
-		fprintf(fp, "output %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::SampleFormatName(inp->sampleFormat));
+		fprintf(fp, "output %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::sampleFormatName(inp->sampleFormat));
 	}
 	QuaAudioManager::asio.UnloadDriver();
 #else

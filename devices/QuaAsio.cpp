@@ -30,7 +30,7 @@ QuaAudioManager	*QuaAsio::audio;
 bool			QuaAsio::outputReady;
 ASIOCallbacks	QuaAsio::callbacks;
 
-flag			debug_asio = 0;
+flag debug_asio = 0;
 
 QuaAsio::QuaAsio()
 {
@@ -346,8 +346,8 @@ QuaAsio::AllocateBuffers()
 	fprintf(stderr, "Asio: allocating new buffers\n");
 	buffers = new ASIOBufferInfo[nActiveInput+nActiveOutput];
 	long ind = 0;
-	i=0;
-	while (ind<nActiveInput) {
+	int i=0;
+	while (ind < nActiveInput) {
 		buffers[ind].isInput = true;
 		buffers[ind].channelNum = i++;
 		buffers[ind].buffers[0] = buffers[ind].buffers[1] = nullptr;
@@ -547,8 +547,8 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 	if (debug_asio >= 2)
 		fprintf(stderr, "ASIO:bufferSwitch sorting inputs\n");
 	//uberQua->objectsBlockStack.ReadLock();
-	for (short i=0; i<audio->channels.CountItems(); i++) {
-		Channel	*c = (Channel *)audio->channels.ItemAt(i);
+	for (short i=0; i<audio->channels.size(); i++) {
+		Channel	*c = audio->channels[i];
 		bool	recording = (c->recordState == RECORD_ING);
 
 		if (c->audioThru || recording) {

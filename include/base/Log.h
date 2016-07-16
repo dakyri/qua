@@ -10,7 +10,12 @@ enum {
 	ACTION_FILE		= 2
 };
 
-
+/**
+ * LogEntry ... an otherwise unclassifiable action
+ * initially this existed as a placeholder to simulate patch loading from files into various external apps
+ * that was a very BeOS-ish quirk, and maybe XXXX TODO FIXME this should dissappear as this functionaliity
+ * gets subsumed by OSC
+ */
 class LogEntry
 {
 public:

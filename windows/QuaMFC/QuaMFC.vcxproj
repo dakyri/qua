@@ -75,12 +75,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;D:\src\cpp\library\ASIO\asiosdk2.3\common;D:\src\cpp\library\ASIO\asiosdk2.3\host\pc;D:\src\cpp\library\ASIO\asiosdk2.3\host;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>Qua.lib;Dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\src\cpp\Qua\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qua.lib;Dinput8.lib;dxguid.lib;ASIO2.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\src\cpp\library\ASIO\ASIO_2_3_Lib\Debug;D:\src\cpp\Qua\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

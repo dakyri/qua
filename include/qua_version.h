@@ -4,7 +4,7 @@
 #if defined(WIN32)
 
 #define QUA_V_AUDIO
-#undef QUA_V_AUDIO_ASIO
+#define QUA_V_AUDIO_ASIO
 #define QUA_V_DIRECT_MIDI
 #define QUA_V_JOYSTICK
 #define QUA_V_JOYSTICK_DX // windows direct input joystick ... preferred to mm device

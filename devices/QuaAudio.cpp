@@ -260,7 +260,7 @@ QuaAudioManager::QuaAudioManager()
 	if (dfltOutput == nullptr) {
 		dfltOutput = mp;
 	}
-	ports.AddItem(mp);
+	ports.push_back(mp);
 /*
 	int32		na = 0;
 	char		**devnm = QuaAudioManager::asio.DeviceNames(&na);
