@@ -73,7 +73,7 @@ class Qua:
 	public Executable, public Stacker, public TimeKeeper
 {
 public:
-							Qua(string nm, QuaPerceptualSet &display=defaultDisplay, bool chan_add=true);							
+							Qua(string nm, QuaReflection &display=defaultDisplay, bool chan_add=true);							
 							~Qua();
 
 	status_t				OnCreationInit(bool chan_add);
@@ -91,8 +91,6 @@ public:
 
 	static string getVersionString();
 	static string getCapabilityString();
-
-	void setDisplay(QuaPerceptualSet &d);
 
 	void					SequencerIteration();
 #ifdef QUA_V_MULTIMEDIA_TIMER
@@ -150,7 +148,7 @@ public:
 	static std::string		identifyFile(std::string);
 	static std::string		nameFromLeaf(std::string);
 
-	static Qua *			loadScriptFile(const char *path, QuaPerceptualSet &display);
+	static Qua *			loadScriptFile(const char *path, QuaReflection &display);
 	status_t				loadSnapshotFile(const char *path);
 	status_t				loadSnapshotElement(tinyxml2::XMLElement *element);
 	status_t				loadSnapshotChildren(tinyxml2::XMLElement *element);
@@ -162,7 +160,7 @@ public:
 
 	class QuasiStack		*theStack;
 
-	QuaBridge bridge;
+	QuaReflection &bridge;
 
 	Lambda *methods;
 	Schedulable *schedulees;

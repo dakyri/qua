@@ -282,6 +282,9 @@
     <ClInclude Include="..\include\base\OSCMessage.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\base\DisplayStub.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">
@@ -291,9 +294,6 @@
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\core\QuaQuaQua.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\core\QuaBridge.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\core\QuaDisplay.cpp">

@@ -29,10 +29,10 @@ QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
  * for direct input joysticks to work (and not explode)
  */
 int
-QuaEnvironment::setupDevices()
+QuaEnvironment::setupDevices(void *instance)
 {
 #ifdef QUA_V_JOYSTICK
-	quaJoystick.setup();
+	quaJoystick.setup(instance);
 #endif
 	return B_OK;
 }

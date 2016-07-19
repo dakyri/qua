@@ -3126,7 +3126,8 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	if (mime) delete mime;
 
 	if (sym && foundDisplayParameters && uberQua) {
-		uberQua->bridge.SetDisplayParameters(sym);
+	// TODO XXXX FIXME placeholder for the moment ... not quite sure how this is best implemented ... originally very be-specific ... now, maybe json?
+		uberQua->bridge.SetDisplayParameters(sym, nullptr);
 	}
 	return nullptr;
 }

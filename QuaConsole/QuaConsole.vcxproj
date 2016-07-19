@@ -90,7 +90,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\src\cpp\Qua\include;D:\src\cpp\Qua\include\base;D:\src\cpp\Qua\include\block;D:\src\cpp\Qua\include\audio;D:\src\cpp\Qua\include\devices;D:\src\cpp\Qua\windows\globals;D:\src\cpp\library\ASIO\asiosdk2.3\common;D:\src\cpp\library\ASIO\asiosdk2.3\host\pc;D:\src\cpp\library\ASIO\asiosdk2.3\host;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\library\boost\boost_1_61_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

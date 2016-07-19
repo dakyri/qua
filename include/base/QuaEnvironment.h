@@ -25,7 +25,7 @@ public:
 	~QuaEnvironment();
 
 	int setup(string vuf, bool loadRC);
-	int setupDevices();
+	int setupDevices(void *);
 	void setDisplay(QuaEnvironmentDisplay &d);
 
 	bool SetVstPluginDir(char *path, bool add, bool reload);

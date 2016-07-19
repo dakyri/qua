@@ -66,7 +66,7 @@ Schedulable::SetName(char *nm)
 		if (sym) {
 			glob.rename(sym, nm);
 		}
-		uberQua->bridge.Rename(sym, nm);			
+//		uberQua->bridge.Rename(sym, nm);			
 	}
 }
 

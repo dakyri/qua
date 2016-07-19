@@ -33,11 +33,11 @@ direct_error_string(HRESULT res)
 	return "Unknown error";
 }
 
-extern HINSTANCE quaAppInstance;
 
 void
-direct_setup()
+direct_setup(void *instance)
 {
+	HINSTANCE quaAppInstance = (HINSTANCE) instance;
 #if defined(QUA_V_JOYSTICK_DX)
 	if (directInput == nullptr) {
 		HRESULT err = DirectInput8Create(

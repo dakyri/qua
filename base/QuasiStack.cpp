@@ -297,7 +297,7 @@ QuasiStack::Trigger()
 	}
 
 	if (stacker) {
-		stacker->uberQua->bridge.DisplayStatus(this);
+		stacker->uberQua->bridge.DisplayStatus(this, STATUS_RUNNING);
 	}
 	return true;
 }
@@ -306,7 +306,7 @@ bool
 QuasiStack::UnTrigger()
 {
 	locusStatus = STATUS_SLEEPING;
-	stacker->uberQua->bridge.DisplayStatus(this);
+	stacker->uberQua->bridge.DisplayStatus(this, STATUS_SLEEPING);
 	return true;
 }
 
@@ -772,7 +772,7 @@ bool
 QuasiStack::RemoveHigherFrameRepresentations()
 {
 	if (stacker && stacker->uberQua) {
-		stacker->uberQua->bridge.RemoveHigherFrameRepresentations(this);
+		stacker->uberQua->bridge.RemoveHigherFrameRepresentations(stackerSym, this);
 		return true;
 	}
 	return false;
@@ -782,7 +782,7 @@ bool
 QuasiStack::PopHigherFrameRepresentations()
 {
 	if (stacker && stacker->uberQua) {
-		stacker->uberQua->bridge.PopHigherFrameRepresentations(this);
+		stacker->uberQua->bridge.PopHigherFrameRepresentations(stackerSym, this);
 		return true;
 	}
 	return false;

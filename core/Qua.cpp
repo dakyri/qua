@@ -81,15 +81,15 @@ Qua::Qua(std::string path, bool chan_add):
 
 QuaDisplayStub defaultDisplay;
 
-Qua::Qua(string nm, QuaPerceptualSet &display, bool chan_add):
+Qua::Qua(string nm, QuaReflection &display, bool chan_add) :
 	Executable(
-		DefineSymbol(
-			(nm.size()?nm: string("New")), TypedValue::S_QUA, 0,
-			this, nullptr,	TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT)),
+		DefineSymbol((nm.size() ? nm : string("New")), TypedValue::S_QUA, 0,
+			this, nullptr, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT)),
 	Stacker(this),
 	TimeKeeper(&Metric::std),
-	bridge(*this, display)
+	bridge(display)
 {
+	bridge.setup(this);
 	OnCreationInit(chan_add);
 }
 
@@ -189,7 +189,7 @@ Qua::OnCreationInit(bool chan_add)
 #if defined(QUA_V_POOLPLAYER)
     poolPlayer = new PoolPlayer(this);
 #endif
-	bridge.Spawn();
+	bridge.spawn();
 
 	if (chan_add) {	
 	    for (short i=0; i<16; i++) {
@@ -510,7 +510,7 @@ Qua::~Qua()
  	fprintf(stderr, "%s::~Qua(). Deleting symbols...\n", sym->name.c_str());
 	glob.DeleteSymbol(sym, true);
 
-	bridge.Cleanup();
+	bridge.cleanup();
 
 	fprintf(stderr, "~Qua: deleting devices!\n");
 
@@ -881,7 +881,7 @@ Qua::loadFile(std::string path)
 
 
 Qua *
-Qua::loadScriptFile(const char *path, QuaPerceptualSet &display)
+Qua::loadScriptFile(const char *path, QuaReflection &display)
 {
 	std::string	thePath = path;
 	FILE		*theFile = fopen(path, "r");
@@ -1294,7 +1294,7 @@ Qua::SequencerIteration()
 						}
 					}
 				}
-				bridge.UpdateSequencerTimeDisplay(true);
+				bridge.DisplayGlobalTime(theTime, true);
 				lastTickTime = nextTickTime;
 				nextTickTime = nextTickTime + (bigtime_t)(1000000.0 * secsPerTick);
 			}
@@ -1939,7 +1939,7 @@ Qua::ToPreviousMarker()
 	}
 	if (cued) {
 		Cue(cute);
-		bridge.UpdateSequencerTimeDisplay(false);
+		bridge.DisplayGlobalTime(theTime, true);
 	}
 	return B_OK;
 }
@@ -1963,7 +1963,7 @@ Qua::ToNextMarker()
 	}
 	if (gotClip != nullptr) {
 		Cue(gotClip->start);
-		bridge.UpdateSequencerTimeDisplay(false);
+		bridge.DisplayGlobalTime(theTime, true);
 	}
 	return B_OK;
 }
@@ -1977,7 +1977,7 @@ Qua::GotoStartOfClip(StabEnt *clipSym)
 	Clip	*c = clipSym->ClipValue(nullptr);
 	if (c) {
 		Cue(c->start);
-		bridge.UpdateSequencerTimeDisplay(false);
+		bridge.DisplayGlobalTime(theTime, true);
 	}
 }
 
@@ -1991,7 +1991,7 @@ Qua::GotoEndOfClip(StabEnt *clipSym)
 	if (c) {
 		Time t = c->start + c->duration;
 		Cue(t);
-		bridge.UpdateSequencerTimeDisplay(false);
+		bridge.DisplayGlobalTime(theTime, true);
 	}
 }
 

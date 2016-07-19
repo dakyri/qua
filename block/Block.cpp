@@ -875,7 +875,7 @@ Block::DoReset(void *V, void *B, int x)
 //		if (crap.call.crap.lambda->isInit) {
 		    if (higherFrame) {
    	 			crap.call.crap.lambda->mainBlock->Reset(higherFrame);
-				higherFrame->stacker->uberQua->bridge.DisplayStatus(higherFrame);
+				higherFrame->stacker->uberQua->bridge.DisplayStatus(higherFrame, higherFrame->locusStatus);
 		    }
 //		}
 

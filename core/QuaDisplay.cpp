@@ -1,7 +1,12 @@
 #include "qua_version.h"
 
-
-
+/**
+ * collections of classes that abstract the idea of a display for the sequencer so that we migh encompass
+ * anything from a command line to a few different interface styles on the same platform and of course
+ * multiple platforms
+ * original Beos interface was entangled with the operational code ... I've captured the functionality of that original
+ * interface so it;s conceivable that it could be backported ... though afics the platform is consigned to the garbage dump of history
+ */
 #include <vector>
 #include <string>
 #include <iostream>
@@ -36,16 +41,26 @@ QuaPerceptualSet::PopFrameRepresentations(StabEnt *stackerSym, QuasiStack *qs, f
 	;
 }
 #else
+/* TODO XXXX FIXME this and its companion may well be superfluous slate for deprectation */
+/*
+
 void
 QuaPerceptualSet::PopFrameRepresentations(StabEnt *stackerSym, QuasiStack *qs)
 {
 	;
 }
+*/
 #endif
 
-
+/**
+ * QuaDisplay
+ * the base class of a full cubase/ableton style local interface. not so much the display per se, though
+ * some components of it will map onto interface components directly .. more like a protocol bridge between the sequencer and the components
+ *
+ * the current MFC interface uses this largely as-is. but makes a lot of use of the public 'qua' reference ... it would be great to 
+ */
 void
-QuaPerceptualSet::DisplayGlobalTime(Time &t, bool async)
+QuaDisplay::DisplayGlobalTime(Time &t, bool async)
 {
 	for (short i=0; i<NArranger(); i++) {
 		if (Arranger(i) != nullptr) {
@@ -60,7 +75,7 @@ QuaPerceptualSet::DisplayGlobalTime(Time &t, bool async)
 }
 
 void
-QuaPerceptualSet::DisplayTempo(float t, bool async)
+QuaDisplay::DisplayTempo(float t, bool async)
 {
 	for (short i=0; i<NArranger(); i++) {
 		if (Arranger(i) != nullptr) {
@@ -171,6 +186,14 @@ status_t
 QuaDisplay::WriteDisplayParameters(FILE *fp, StabEnt *)
 {
 	return B_OK;
+}
+void*
+QuaDisplay::ReadDisplayParameters(FILE *) {
+	return nullptr;
+}
+
+void
+QuaDisplay::SetDisplayParameters(StabEnt *, void*) {
 }
 
 /*
@@ -317,15 +340,85 @@ QuaDisplay::FindExecutableRepresentation(StabEnt *S)
 }
 */
 
+
+// should also check for presence in object lists
+void
+QuaDisplay::AddSchedulableRepresentation(Schedulable *s)
+{
+	for (short i = 0; i<NIndexer(); i++) {
+		QuaIndexPerspective	*crv = Indexer(i);
+		crv->addToSymbolIndex(s->sym);
+	}
+}
+
+void
+QuaDisplay::AddLambdaRepresentation(Lambda *m)
+{
+	for (short i = 0; i<NIndexer(); i++) {
+		QuaIndexPerspective	*crv = Indexer(i);
+		crv->addToSymbolIndex(m->sym);
+	}
+}
+
+void
+QuaDisplay::AddDestinationRepresentations(Channel *c)
+{
+	for (short i = 0; i<NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->AddDestinationRepresentations();
+			}
+		}
+	}
+}
+
+void
+QuaDisplay::RemoveDestinationRepresentation(Channel *c, Input *s)
+{
+	for (short i = 0; i<NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->RemoveInputRepresentation(s);
+			}
+		}
+	}
+}
+
+void
+QuaDisplay::RemoveDestinationRepresentation(Channel *c, Output *s)
+{
+	for (short i = 0; i<NChannelRack(); i++) {
+		QuaChannelRackPerspective	*crv = ChannelRack(i);
+		if (crv != nullptr) {
+			QuaChannelRepresentation	*cv = crv->ChannelRepresentationFor(c);
+			if (cv != nullptr) {
+				cv->RemoveOutputRepresentation(s);
+			}
+		}
+	}
+}
+
+
 bool
-QuaDisplay::Spawn()
+QuaDisplay::setup(Qua *q)
+{
+	qua = q;
+	return true;
+}
+
+bool
+QuaDisplay::spawn()
 {
 	return true;
 }
 
 
 bool
-QuaDisplay::Cleanup()
+QuaDisplay::cleanup()
 {
 	return true;
 }
@@ -613,15 +706,9 @@ QuaDisplay::MoveInstance(StabEnt *instSym, short chan, Time *at_t, Time *dur_t)
 		for (i=0; i<NArranger(); i++) {
 			Arranger(i)->MoveInstanceRepresentation(inst);
 		}
-		UpdateControllerDisplay(
-			inst->sym, inst->mainStack,
-			inst->schedulable->chanSym);
-		UpdateControllerDisplay(
-			inst->sym, inst->mainStack,
-			inst->schedulable->starttSym);
-		UpdateControllerDisplay(
-			inst->sym, inst->mainStack,
-			inst->schedulable->durSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->chanSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->starttSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->durSym);
 	}
 }
 
@@ -880,8 +967,7 @@ QuaDisplay::Rename(StabEnt *sym, const string &nm)
 {
 	glob.rename(sym, nm);
 	for (short i=0; i<NObjectRack(); i++) {
-		QuaObjectRepresentation *or =
-			ObjectRack(i)->RepresentationFor(sym);
+		QuaObjectRepresentation *or = ObjectRack(i)->RepresentationFor(sym);
 		if (or) {
 			or->SetName();
 		}
@@ -1084,6 +1170,41 @@ QuaDisplay::ControllerChanged(
 	// made this change from
 	UpdateControllerDisplay(qs->stackerSym, qs, sym, srctype,src);
 }
+
+void
+QuaDisplay::DisplayStatus(Instance *, qua_status) {
+}
+
+void
+QuaDisplay::DisplayStatus(QuasiStack *, qua_status) {
+};
+
+
+void
+QuaDisplay::AddQuaNexion(QuaInsert *i, QuaInsert *di)
+{
+	;
+}
+
+void
+QuaDisplay::RemoveQuaNexion(QuaInsert *di)
+{
+	;
+}
+
+void
+QuaDisplay::RemoveControlVariables(QuasiStack *qs)
+{
+	;
+}
+
+
+void
+QuaDisplay::AddControlVariables(QuasiStack *qs)
+{
+	;
+}
+
 
 // called by interface to do all the appropriate bits and pieces
 // compiling a block of code in the given symbol space
@@ -1294,6 +1415,27 @@ QuaDisplay::reportError(const char *str, ...) {
 
 }
 
+void
+QuaDisplay::DisplayDuration(Instance *) {
+}
+
+void
+QuaDisplay::DisplayChannel(Instance *) {
+}
+
+void
+QuaDisplay::DisplayStartTime(Instance *) {
+}
+
+void
+QuaDisplay::DisplayWake(Instance *) {
+}
+
+void
+QuaDisplay::DisplaySleep(Instance *) {
+}
+
+
 
 //////////////////////////////////////////////
 // QuaEnvironmentDisplay
@@ -1352,39 +1494,6 @@ QuaEnvironmentDisplay::RemovePortBridge(QuaPort *)
 	;
 }
 
-void
-QuaEnvironmentDisplay::parseErrorViewClear() {
-}
-
-void
-QuaEnvironmentDisplay::parseErrorViewAddLine(string s, int sev) {
-	cout << "Parse error, severity " << sev << ", " << s << endl;
-}
-
-void
-QuaEnvironmentDisplay::parseErrorViewShow() {
-}
-
-void
-QuaEnvironmentDisplay::tragicError(const char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	va_end(args);
-
-	cout << buf << endl;
-}
-void
-QuaEnvironmentDisplay::reportError(const char *str, ...) {
-	char		buf[180];
-	va_list		args;
-	va_start(args, str);
-	vsprintf(buf, str, args);
-	va_end(args);
-
-	cout << buf << endl;
-}
 
 
 void
@@ -2085,6 +2194,44 @@ QuaIndexPerspective::~QuaIndexPerspective()
 {
 	;
 }
+
+//////////////////////////////////////////////
+// default error handler implementation 
+/////////////////////////////////////////////
+void
+ErrorHandler::parseErrorViewClear() {
+}
+
+void
+ErrorHandler::parseErrorViewAddLine(string s, int sev) {
+	cout << "Parse error, severity " << sev << ", " << s << endl;
+}
+
+void
+ErrorHandler::parseErrorViewShow() {
+}
+
+void
+ErrorHandler::tragicError(const char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	va_end(args);
+
+	cout << buf << endl;
+}
+void
+ErrorHandler::reportError(const char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	va_end(args);
+
+	cout << buf << endl;
+}
+
 
 /*
  remnant beos code ...

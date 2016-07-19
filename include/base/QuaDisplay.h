@@ -75,61 +75,326 @@ enum qua_perpective_type {
 
 class QuaPort;
 
+/*
+ * an entity that can represent error messages
+ * the default implementation prints to the console
+ */
 class ErrorHandler {
 public:
-	virtual void parseErrorViewClear() = 0;
-	virtual void parseErrorViewAddLine(std::string, int severity) = 0;
-	virtual void parseErrorViewShow() = 0;
-	virtual void tragicError(const char *str, ...) = 0;
-	virtual void reportError(const char *str, ...) = 0;
+	virtual void parseErrorViewClear();
+	virtual void parseErrorViewAddLine(std::string, int severity);
+	virtual void parseErrorViewShow();
+	virtual void tragicError(const char *str, ...);
+	virtual void reportError(const char *str, ...);
 };
 
-// attempt to create a generic interface layer so I can jump to something
-// a bit more baroque like gl from standard widget or a http network interface
 
-// perceptual set .... some way of grouping a set of perspectives and their
-// bits and pieces for appropriate hot plugging e.g. a particular QuaPerceptualSet
-// might correspond to a local display, or a remote quaLink to a distant qua, or even a simultaneous 3d
-// view
+/*
+ * the basic requirements that a sequencer has or would like to have from a display or display-like entity
+ * it's ok if these are all stubs
+ */
+class QuaReflection: public ErrorHandler {
+public:
+	virtual bool setup(Qua *) /** basic setup called on creation */{
+		return true;
+	}
+	virtual bool spawn() { /** called when local init and setup is complete*/
+		return true;
+	}
+	virtual bool cleanup() { /** called as we're being deleted */
+		return true;
+	}
 
-class QuaPerceptualSet: public ErrorHandler
+	virtual void AddSchedulableRepresentation(Schedulable *) = 0;
+	virtual void AddLambdaRepresentation(Lambda *) = 0;
+
+	virtual void AddDestinationRepresentations(Channel *) = 0;
+	virtual void RemoveDestinationRepresentation(Channel *, Input *) = 0;
+	virtual void RemoveDestinationRepresentation(Channel *, Output *) = 0;
+
+	virtual void RemoveSchedulableRepresentations(StabEnt *) = 0;
+	virtual void RemoveMethodRepresentations(StabEnt *) = 0;
+	virtual void RemoveChannelRepresentations(StabEnt *) = 0;
+	virtual void RemoveInstanceRepresentations(StabEnt *) = 0;
+
+	virtual void UpdateTakeIndexDisplay(StabEnt *sym) = 0;
+	virtual void updateClipIndexDisplay(StabEnt *sym) = 0;
+	virtual void UpdateVariableIndexDisplay(StabEnt *sym) = 0;
+
+	virtual bool HasDisplayParameters(StabEnt *) = 0;
+	virtual char *DisplayParameterId() = 0;
+	virtual status_t WriteDisplayParameters(FILE *, StabEnt *) = 0;
+	virtual void* ReadDisplayParameters(FILE *) = 0;
+	virtual void SetDisplayParameters(StabEnt *, void*) = 0;
+
+	virtual void displayArrangementTitle(const char *) = 0;
+
+	// display the current master tempo/master time ... 
+	virtual void DisplayTempo(float tempo, bool async) = 0;
+	virtual void DisplayGlobalTime(Time &t, bool async) = 0;
+
+	virtual void DisplayDuration(Instance *) = 0;
+	virtual void DisplayChannel(Instance *) = 0;
+	virtual void DisplayStartTime(Instance *) = 0;
+	virtual void DisplayWake(Instance *) = 0;
+	virtual void DisplaySleep(Instance *) = 0;
+
+	virtual void RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) = 0;
+#ifdef Q_FRAME_MAP
+#else
+	virtual void PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) = 0;
+#endif
+
+	virtual void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) = 0;
+	virtual void ControllerChanged(StabEnt *sym, QuasiStack *, TypedValue &t,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) = 0;
+
+	virtual void DisplayStatus(Instance *, qua_status) = 0;
+	virtual void DisplayStatus(QuasiStack *, qua_status) = 0;
+
+	virtual void RemoveQuaNexion(QuaInsert *) = 0;
+	virtual void AddQuaNexion(QuaInsert *, QuaInsert *) = 0;
+
+	virtual void RemoveControlVariables(QuasiStack *) = 0;
+	virtual void AddControlVariables(QuasiStack *) = 0;
+};
+
+
+class PerspectiveHolder {
+public:
+	virtual void AddChannelRack(QuaChannelRackPerspective *i) = 0;
+	virtual void RemoveChannelRack(long i) = 0;
+	virtual int NChannelRack() = 0;
+	virtual QuaChannelRackPerspective *ChannelRack(long i) = 0;
+	virtual void AddArranger(QuaArrangerPerspective *i) = 0;
+	virtual void RemoveArranger(long i) = 0;
+	virtual int NArranger() = 0;
+	virtual QuaArrangerPerspective *Arranger(long i) = 0;
+	virtual void AddIndexer(QuaIndexPerspective *i) = 0;
+	virtual void RemoveIndexer(long i) = 0;
+	virtual int NIndexer() = 0;
+	virtual QuaIndexPerspective *Indexer(long i) = 0;
+	virtual void AddObjectRack(QuaObjectRackPerspective *i) = 0;
+	virtual void RemoveObjectRack(long i) = 0;
+	virtual int NObjectRack() = 0;
+	virtual QuaObjectRackPerspective *ObjectRack(long i) = 0;
+	virtual void AddTransporter(QuaTransportPerspective *i) = 0;
+	virtual void RemoveTransporter(long i) = 0;
+	virtual int NTransporter() = 0;
+	virtual QuaTransportPerspective *Transporter(long i) = 0;
+};
+
+/*
+ * attempt to create a generic interface layer so I can jump to something
+ * a bit more baroque like gl from standard widget or a http network interface
+ *  perceptual set .... some way of grouping a set of perspectives and their
+ *  bits and pieces for appropriate hot plugging e.g. a particular QuaPerceptualSet
+ * might correspond to a local display, or a remote quaLink to a distant qua, or even a simultaneous 3d  view
+ * 
+ * - core display hook for a running sequencer to do things to an interface
+ * - an idealized set of methods for the interface to manipulate the sequencer
+ * - a collection of different perspectives for doing more detailed display
+ */
+class QuaPerceptualSet: public PerspectiveHolder, public QuaReflection
 {
 public:
-	inline void	AddChannelRack(QuaChannelRackPerspective *i) { channelRacks.push_back(i); }
-	inline void	RemoveChannelRack(long i) { channelRacks.erase(channelRacks.begin() + i); }
-	inline int NChannelRack() { return channelRacks.size(); }
-	inline QuaChannelRackPerspective *ChannelRack(long i) {
+	virtual void AddChannelRepresentations(QuaChannelRackPerspective *i) = 0;
+	virtual void AddChannelRepresentations() = 0;
+
+	virtual void ShowObjectRepresentation(StabEnt *) = 0;
+	virtual void HideObjectRepresentation(StabEnt *) = 0;
+	virtual void RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) = 0;
+	virtual void RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack) = 0;
+#ifdef Q_FRAME_MAP
+	virtual void PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long)=0;
+	virtual void HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack)=0;
+	virtual void RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack)=0;
+#else
+	virtual void PopFrameRepresentation(StabEnt *rootSym, QuasiStack *stack)=0;
+//	void PopFrameRepresentations(StabEnt *, QuasiStack *);
+#endif
+	virtual void HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) = 0;
+	virtual void RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) = 0;
+
+	virtual void Rename(StabEnt *, const string &)=0;
+
+	//////////////////////////////////////////////////////////////////
+	// calls from this display to interrogate the source sequence
+	//////////////////////////////////////////////////////////////////
+	virtual long NChannel() = 0;
+	virtual StabEnt *QuaSym() = 0;
+	virtual StabEnt *ChannelSym(short i) = 0;
+	virtual std::vector<StabEnt*> SchedulableSyms() = 0;
+	virtual std::vector<StabEnt*> MethodSyms(StabEnt *) = 0;
+	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) = 0;
+	virtual std::vector<StabEnt*> ClipSyms(short) = 0;
+
+	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) = 0;
+
+	virtual Metric *QMetric() = 0;
+
+	//////////////////////////////////////////////////////////////////
+	// calls from this display to make changes to the source sequencer
+	//////////////////////////////////////////////////////////////////
+	virtual void GotoStartOfClip(StabEnt *) = 0;
+	virtual void GotoEndOfClip(StabEnt *) = 0;
+	virtual void SelectRegion(StabEnt *) = 0;
+
+	virtual StabEnt * CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
+	virtual StabEnt * CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
+	virtual StabEnt * CreateChannel(
+		char *nm = nullptr, short c = -1,
+		uchar nin = 2, uchar nout = 2,
+		bool add_dflt_au_in = false,
+		bool add_dflt_au_out = false,
+		bool add_dflt_str_in = false,
+		bool add_dflt_str_out = false
+	) = 0;
+	virtual StabEnt	* CreateMethod(std::string nm, StabEnt *p = nullptr) = 0;
+	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) = 0;
+
+	// callbacks from the interface to create and manipulate instances of schedulables
+	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) = 0;
+	virtual void MoveInstance(StabEnt *, short, Time *, Time *) = 0;
+	virtual void DeleteInstance(StabEnt *) = 0;
+
+	virtual void CreateStreamTake(StabEnt *) = 0;
+	virtual void LoadSampleTake(StabEnt *, std::string) = 0;
+
+	virtual void DeleteObject(StabEnt *) = 0;
+
+	virtual short CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) = 0;
+	virtual short ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) = 0;
+
+	// tempo or time is changed from the interface ... updates these in the interface ... also calls the respective DisplayXXX function
+	virtual void UpdateTempo(float tempo) = 0;
+	virtual void UpdateGlobalTime(Time &t) = 0;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
+/**
+* QuaDisplayStub
+* a default, do nothing display. absolute minimal instantiable base
+*/
+class QuaDisplayStub : public QuaReflection
+{
+public:
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	virtual void AddSchedulableRepresentation(Schedulable *) override { };
+	virtual void AddLambdaRepresentation(Lambda *) override { };
+
+	virtual void AddDestinationRepresentations(Channel *) override { };
+	virtual void RemoveDestinationRepresentation(Channel *, Input *) override { };
+	virtual void RemoveDestinationRepresentation(Channel *, Output *) override { };
+
+	virtual void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) override { };
+	virtual void ControllerChanged(StabEnt *sym, QuasiStack *, TypedValue &t,
+		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) override { };
+
+	virtual void DisplayStatus(Instance *, qua_status) override {};
+	virtual void DisplayStatus(QuasiStack *, qua_status) override {};
+
+	virtual void UpdateTakeIndexDisplay(StabEnt *sym) override { };
+	virtual void updateClipIndexDisplay(StabEnt *sym) override { };
+	virtual void UpdateVariableIndexDisplay(StabEnt *sym) override { };
+
+	// display the current master tempo/master time ... 
+	virtual void DisplayTempo(float tempo, bool async) override {};
+	virtual void DisplayGlobalTime(Time &t, bool async) override {};
+
+#ifdef Q_FRAME_MAP
+	virtual void PopFrameRepresentations(StabEnt *, QuasiStack *, frame_map_hdr *, long) override {}
+#else
+	virtual void PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent)override  { };
+#endif
+	virtual void RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent)override { };
+
+
+	virtual void RemoveSchedulableRepresentations(StabEnt *) override { };
+	virtual void RemoveMethodRepresentations(StabEnt *) override { };
+	virtual void RemoveChannelRepresentations(StabEnt *) override { };
+	virtual void RemoveInstanceRepresentations(StabEnt *) override { };
+
+	virtual void displayArrangementTitle(const char *) override { };
+
+	virtual void DisplayDuration(Instance *) override { }
+	virtual void DisplayChannel(Instance *) override { }
+	virtual void DisplayStartTime(Instance *) override { }
+	virtual void DisplayWake(Instance *) override { }
+	virtual void DisplaySleep(Instance *) override { }
+
+	virtual bool HasDisplayParameters(StabEnt *) override { return false; }
+	virtual char *DisplayParameterId() override { return ""; }
+	virtual status_t WriteDisplayParameters(FILE *, StabEnt *)override { return B_OK; }
+	virtual void* ReadDisplayParameters(FILE *) override { return nullptr; }
+	virtual void SetDisplayParameters(StabEnt *, void*) override { };
+
+	virtual void RemoveQuaNexion(QuaInsert *) override { };
+	virtual void AddQuaNexion(QuaInsert *, QuaInsert *) override { };
+
+	virtual void RemoveControlVariables(QuasiStack *) override { };
+	virtual void AddControlVariables(QuasiStack *) override { };
+
+};
+
+extern QuaDisplayStub defaultDisplay;
+
+class QSParser;
+
+//////////////////////////////////////////////////////////////////////////
+
+/**
+ * QuaDisplay
+ * local display with different windows
+ */
+class QuaDisplay: public QuaPerceptualSet
+{
+public:
+	QuaDisplay();
+	~QuaDisplay();
+
+	////////////////////////////////////////////////////////////////////
+	// collections of perspectives belonging to this representation
+	////////////////////////////////////////////////////////////////////
+	virtual void AddChannelRack(QuaChannelRackPerspective *i) { channelRacks.push_back(i); }
+	virtual void RemoveChannelRack(long i) { channelRacks.erase(channelRacks.begin() + i); }
+	virtual int NChannelRack() { return channelRacks.size(); }
+	virtual QuaChannelRackPerspective *ChannelRack(long i) {
 		return i >= 0 && ((size_t)i)<channelRacks.size() ? channelRacks[i] : nullptr;
 	}
 
-	inline void	AddArranger(QuaArrangerPerspective *i) { arrangers.push_back(i); }
-	inline void	RemoveArranger(long i) { arrangers.erase(arrangers.begin() + i); }
-	inline int NArranger() { return arrangers.size(); }
-	inline QuaArrangerPerspective *Arranger(long i) {
+	virtual void AddArranger(QuaArrangerPerspective *i) { arrangers.push_back(i); }
+	virtual void RemoveArranger(long i) { arrangers.erase(arrangers.begin() + i); }
+	virtual int NArranger() { return arrangers.size(); }
+	virtual QuaArrangerPerspective *Arranger(long i) {
 		return i >= 0 && ((size_t)i) < arrangers.size() ? arrangers[i] : nullptr;
 	}
 
-	inline void	AddIndexer(QuaIndexPerspective *i) { indexers.push_back(i); }
-	inline void	RemoveIndexer(long i) { indexers.erase(indexers.begin() + i); }
-	inline int NIndexer() { return indexers.size(); }
-	inline QuaIndexPerspective *Indexer(long i) {
+	virtual void AddIndexer(QuaIndexPerspective *i) { indexers.push_back(i); }
+	virtual void RemoveIndexer(long i) { indexers.erase(indexers.begin() + i); }
+	virtual int NIndexer() { return indexers.size(); }
+	virtual QuaIndexPerspective *Indexer(long i) {
 		return i >= 0 && ((size_t)i) < indexers.size() ? indexers[i] : nullptr;
 	}
 
-	inline void	AddObjectRack(QuaObjectRackPerspective *i) { objectRacks.push_back(i); }
-	inline void	RemoveObjectRack(long i) {
-		objectRacks.erase(objectRacks.begin()+i);
+	virtual void AddObjectRack(QuaObjectRackPerspective *i) { objectRacks.push_back(i); }
+	virtual void RemoveObjectRack(long i) {
+		objectRacks.erase(objectRacks.begin() + i);
 	}
-	inline int NObjectRack() { return objectRacks.size(); }
-	inline QuaObjectRackPerspective *ObjectRack(long i) {
+	virtual int NObjectRack() { return objectRacks.size(); }
+	virtual QuaObjectRackPerspective *ObjectRack(long i) {
 		return i >= 0 && ((size_t)i) < objectRacks.size() ? objectRacks[i] : nullptr;
 	}
 
-	inline void	AddTransporter(QuaTransportPerspective *i) { transporters.push_back(i); }
-	inline void	RemoveTransporter(long i) { objectRacks.erase(objectRacks.begin() + i); }
-	inline int NTransporter() { return transporters.size(); }
-	inline QuaTransportPerspective *Transporter(long i) {
-		return i>=0 && ((size_t)i) < transporters.size()? transporters[i] : nullptr;
+	virtual void AddTransporter(QuaTransportPerspective *i) { transporters.push_back(i); }
+	virtual void RemoveTransporter(long i) { objectRacks.erase(objectRacks.begin() + i); }
+	virtual int NTransporter() { return transporters.size(); }
+	virtual QuaTransportPerspective *Transporter(long i) {
+		return i >= 0 && ((size_t)i) < transporters.size() ? transporters[i] : nullptr;
 	}
 
 	std::vector<QuaChannelRackPerspective *> channelRacks;
@@ -138,239 +403,113 @@ public:
 	std::vector<QuaObjectRackPerspective *> objectRacks;
 	std::vector<QuaTransportPerspective *> transporters;
 
-	virtual void			AddChannelRepresentations(QuaChannelRackPerspective *i) = 0;
-	virtual void			AddChannelRepresentations() = 0;
+//////////////////////////////////////////////////////////////////////////////
+// variouos virutals
+/////////////////////////////////////////////////////////////////////////////
 
-	virtual StabEnt *		CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
-	virtual StabEnt *		CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr)  = 0;
-	virtual StabEnt *		CreateChannel(
-									char *nm=nullptr, short c=-1,
-									uchar nin=2, uchar nout=2,
-									bool add_dflt_au_in=false,
-									bool add_dflt_au_out=false,
-									bool add_dflt_str_in=false,
-									bool add_dflt_str_out=false
-								)=0;
-	virtual StabEnt	*		CreateMethod(std::string nm, StabEnt *p=nullptr)=0;
-	virtual StabEnt	*		CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) = 0;
-	virtual StabEnt *		CreateInstance(StabEnt *, short, Time *, Time *)=0;
-	virtual void			MoveInstance(StabEnt *, short, Time *, Time *)=0;
-	virtual void			DeleteInstance(StabEnt *) = 0;
-	virtual void			DeleteObject(StabEnt *) = 0;
-	virtual void			ShowObjectRepresentation(StabEnt *) = 0;
-	virtual void			HideObjectRepresentation(StabEnt *) = 0;
-	virtual short			CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen)=0;
-	virtual short			ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen)=0;
-
-	virtual void			UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
-								qua_perpective_type srctype=QUAPSCV_NOT,QuaPerspective *src=nullptr)=0;
-	virtual void			ControllerChanged(StabEnt *sym, QuasiStack *, TypedValue &t,
-								qua_perpective_type srctype=QUAPSCV_NOT,QuaPerspective *src=nullptr)=0;
-
-	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) = 0;
-
-	virtual void			GotoStartOfClip(StabEnt *)=0;
-	virtual void			GotoEndOfClip(StabEnt *)=0;
-	virtual void			SelectRegion(StabEnt *)=0;
-
-	virtual void			CreateStreamTake(StabEnt *) = 0;
-	virtual void			LoadSampleTake(StabEnt *, std::string) = 0;
-	virtual void			UpdateTakeIndexDisplay(StabEnt *sym) = 0;
-	virtual void			updateClipIndexDisplay(StabEnt *sym)= 0;
-	virtual void			UpdateVariableIndexDisplay(StabEnt *sym)= 0;
-
-	void					DisplayTempo(float tempo, bool async);
-	void					DisplayGlobalTime(Time &t, bool async);
-
-// tempo or time is changed from the interface
-	virtual void			UpdateTempo(float tempo)=0;
-	virtual void			UpdateGlobalTime(Time &t)=0;
-
-#ifdef Q_FRAME_MAP
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children)=0;
-	virtual void			PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long)=0;
-	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack)=0;
-	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
-	virtual void			RequestRemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
-
-	void					PopFrameRepresentations(StabEnt *, QuasiStack *, frame_map_hdr *, long);
-#else
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children)=0;
-	virtual void			PopFrameRepresentation(StabEnt *rootSym, QuasiStack *stack)=0;
-	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack)=0;
-	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack)=0;
-	virtual void			RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack)=0;
-	virtual void			PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent)=0;
-
-	void					PopFrameRepresentations(StabEnt *, QuasiStack *);
-#endif
-	virtual void			RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent)=0;
-	virtual void			Rename(StabEnt *, const string &)=0;
-
-	virtual void			RemoveSchedulableRepresentations(StabEnt *)=0;
-	virtual void			RemoveMethodRepresentations(StabEnt *)=0;
-	virtual void			RemoveChannelRepresentations(StabEnt *)=0;
-	virtual void			RemoveInstanceRepresentations(StabEnt *)=0;
-
-	virtual void			displayArrangementTitle(const char *)=0;
-
-	virtual bool			HasDisplayParameters(StabEnt *)=0;
-	virtual char			*DisplayParameterId()=0;
-	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *)=0;
-
-	virtual long			NChannel() = 0;
-	virtual StabEnt			*QuaSym() = 0;
-	virtual StabEnt			*ChannelSym(short i) = 0;
-	virtual std::vector<StabEnt*> SchedulableSyms() = 0;
-	virtual std::vector<StabEnt*> MethodSyms(StabEnt *) = 0;
-	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) = 0;
-	virtual std::vector<StabEnt*> ClipSyms(short) = 0;
-
-	virtual Metric			*QMetric() = 0;
-
-	virtual void setTo(Qua *) { }
-
-};
-
-class QuaDisplayStub : public QuaPerceptualSet
-{
-public:
-	virtual void			AddChannelRepresentations(QuaChannelRackPerspective *i) { };
-	virtual void			AddChannelRepresentations() { };
-
-	virtual StabEnt *		CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) { return nullptr; }
-	virtual StabEnt *		CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) { return nullptr; }
-	virtual StabEnt *		CreateChannel(
-		char *nm = nullptr, short c = -1,
-		uchar nin = 2, uchar nout = 2,
-		bool add_dflt_au_in = false,
-		bool add_dflt_au_out = false,
-		bool add_dflt_str_in = false,
-		bool add_dflt_str_out = false
-	) {
-		return nullptr;
-	}
-	virtual StabEnt	*		CreateMethod(std::string nm, StabEnt *p = nullptr) { return nullptr; }
-	virtual StabEnt	*		CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) { return nullptr; }
-	virtual StabEnt *		CreateInstance(StabEnt *, short, Time *, Time *) { return nullptr; }
-	virtual void			MoveInstance(StabEnt *, short, Time *, Time *) { };
-	virtual void			DeleteInstance(StabEnt *) { };
-	virtual void			DeleteObject(StabEnt *) { };
-	virtual void			ShowObjectRepresentation(StabEnt *) { };
-	virtual void			HideObjectRepresentation(StabEnt *) { };
-	virtual short			CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) { return 0; }
-	virtual short			ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) { return 0; }
-
-	virtual void			UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
-		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { };
-	virtual void			ControllerChanged(StabEnt *sym, QuasiStack *, TypedValue &t,
-		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { };
-
-	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) { return std::vector<Envelope *>(); }
-
-	virtual void			GotoStartOfClip(StabEnt *) { };
-	virtual void			GotoEndOfClip(StabEnt *) { };
-	virtual void			SelectRegion(StabEnt *) { };
-
-	virtual void			CreateStreamTake(StabEnt *) { };
-	virtual void			LoadSampleTake(StabEnt *, std::string) { };
-	virtual void			UpdateTakeIndexDisplay(StabEnt *sym) { };
-	virtual void			updateClipIndexDisplay(StabEnt *sym) { };
-	virtual void			UpdateVariableIndexDisplay(StabEnt *sym) { };
-
-	// tempo or time is changed from the interface
-	virtual void			UpdateTempo(float tempo) { };
-	virtual void			UpdateGlobalTime(Time &t) { };
-
-#ifdef Q_FRAME_MAP
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) { };
-	virtual void			PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long) { };
-	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
-	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
-	virtual void			RequestRemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
-
-	void					PopFrameRepresentations(StabEnt *, QuasiStack *, frame_map_hdr *, long);
-#else
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) { };
-	virtual void			PopFrameRepresentation(StabEnt *rootSym, QuasiStack *stack) { };
-	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
-	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) { };
-	virtual void			RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack) { };
-	virtual void			PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) { };
-
-	void					PopFrameRepresentations(StabEnt *, QuasiStack *);
-#endif
-	virtual void			RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) { };
-	virtual void			Rename(StabEnt *, const string &) { };
-
-	virtual void			RemoveSchedulableRepresentations(StabEnt *) { };
-	virtual void			RemoveMethodRepresentations(StabEnt *) { };
-	virtual void			RemoveChannelRepresentations(StabEnt *) { };
-	virtual void			RemoveInstanceRepresentations(StabEnt *) { };
-
-	virtual void			displayArrangementTitle(const char *) { };
-
-	virtual bool			HasDisplayParameters(StabEnt *) { return false; }
-	virtual char			*DisplayParameterId() { return ""; }
-	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *) { return B_OK; }
-
-	virtual long NChannel() { return 0; }
-	virtual StabEnt *QuaSym() { return nullptr; }
-	virtual StabEnt *ChannelSym(short i) { return nullptr; }
-	virtual std::vector<StabEnt*> SchedulableSyms() { return vector<StabEnt *>(); };
-	virtual std::vector<StabEnt*> MethodSyms(StabEnt *) { return vector<StabEnt *>(); };
-	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) { return vector<StabEnt *>(); };
-	virtual std::vector<StabEnt*> ClipSyms(short) { return vector<StabEnt *>(); };
-
-	virtual Metric *QMetric() { return nullptr; }
-
-	virtual void parseErrorViewClear() { };
-	virtual void parseErrorViewAddLine(std::string, int severity) { };
-	virtual void parseErrorViewShow() { };
-	virtual void tragicError(const char *str, ...) {};
-	virtual void reportError(const char *str, ...) {};
-
-};
-
-extern QuaDisplayStub defaultDisplay;
-class QSParser;
-
-// local display
-class QuaDisplay: public QuaPerceptualSet
-{
-public:
-	QuaDisplay();
-	~QuaDisplay();
-
-	virtual void			displayArrangementTitle(const char *);
+	virtual void displayArrangementTitle(const char *) override;
+	virtual bool setup(Qua *q) override;
+	virtual bool spawn() override;
+	virtual bool cleanup() override;
 
 //	QuaSymbolBridge			*FindExecutableRepresentation(StabEnt *S);
 
-	bool					Spawn();
-	bool					Cleanup();
+	virtual void AddChannelRepresentations(QuaChannelRackPerspective *i);
+	virtual void AddChannelRepresentations();
 
-	virtual void			AddChannelRepresentations(QuaChannelRackPerspective *i);
-	virtual void			AddChannelRepresentations();
 
-	virtual long			NChannel() override;
-	virtual StabEnt			*QuaSym() override;
-	virtual StabEnt			*ChannelSym(short i) override;
+	virtual void UpdateTakeIndexDisplay(StabEnt *sym) override;
+	virtual void updateClipIndexDisplay(StabEnt *sym) override;
+	virtual void UpdateVariableIndexDisplay(StabEnt *sym) override;
+
+	// display the current master tempo/master time ... 
+	virtual void DisplayTempo(float tempo, bool async) override;
+	virtual void DisplayGlobalTime(Time &t, bool async) override;
+
+	virtual void UpdateControllerDisplay(StabEnt *stackersym, QuasiStack *stack, StabEnt *sym,
+				qua_perpective_type srctype=QUAPSCV_NOT, QuaPerspective *src = nullptr) override;
+	virtual void ControllerChanged(StabEnt *sym, QuasiStack *stack, TypedValue &t,
+				qua_perpective_type srctype=QUAPSCV_NOT, QuaPerspective *src = nullptr) override;
+
+	virtual void DisplayStatus(Instance *, qua_status) override;
+	virtual void DisplayStatus(QuasiStack *, qua_status) override;
+	
+	// called by interface to pop the stack frame, given a map of it at a particular level
+#ifdef Q_FRAME_MAP
+	virtual void RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children);
+	virtual void PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long) override;
+#else
+	virtual void RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym,
+		QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) override;
+	virtual void PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) override;
+#endif
+	virtual void RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
+	virtual void RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack) override;
+	virtual void HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) override;
+	virtual void RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) override;
+	virtual void PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) override;
+
+	virtual void AddSchedulableRepresentation(Schedulable *) override;
+	virtual void AddLambdaRepresentation(Lambda *) override;
+
+	virtual void AddDestinationRepresentations(Channel *) override;
+	virtual void RemoveDestinationRepresentation(Channel *, Input *) override;
+	virtual void RemoveDestinationRepresentation(Channel *, Output *) override;
+
+
+	virtual void RemoveSchedulableRepresentations(StabEnt *) override;
+	virtual void RemoveMethodRepresentations(StabEnt *) override;
+	virtual void RemoveChannelRepresentations(StabEnt *) override;
+	virtual void RemoveInstanceRepresentations(StabEnt *) override;
+
+	virtual bool HasDisplayParameters(StabEnt *sym) override;
+	virtual char *DisplayParameterId() override;
+	virtual status_t WriteDisplayParameters(FILE *, StabEnt *) override;
+	virtual void* ReadDisplayParameters(FILE *) override;
+	virtual void SetDisplayParameters(StabEnt *, void*) override;
+
+	virtual void DisplayDuration(Instance *) override;
+	virtual void DisplayChannel(Instance *) override;
+	virtual void DisplayStartTime(Instance *) override;
+	virtual void DisplayWake(Instance *) override;
+	virtual void DisplaySleep(Instance *) override;
+
+	virtual void RemoveQuaNexion(QuaInsert *) override;
+	virtual void AddQuaNexion(QuaInsert *, QuaInsert *) override;
+
+	virtual void RemoveControlVariables(QuasiStack *) override;
+	virtual void AddControlVariables(QuasiStack *) override;
+
+/////////////////////////////////////////////////////////////////////////////////
+
+	virtual long NChannel() override;
+	virtual StabEnt *QuaSym() override;
+	virtual StabEnt *ChannelSym(short i) override;
 	virtual std::vector<StabEnt*> SchedulableSyms() override;
 	virtual std::vector<StabEnt*> MethodSyms(StabEnt *) override;
 	virtual std::vector<StabEnt*> InstanceSyms(StabEnt *) override;
 	virtual std::vector<StabEnt*> ClipSyms(short) override;
 
 	virtual Metric *QMetric() override;
+
+	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) override;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	virtual void GotoStartOfClip(StabEnt *) override;
+	virtual void GotoEndOfClip(StabEnt *) override;
+	virtual void SelectRegion(StabEnt *) override;
+
 	virtual StabEnt * CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
 	virtual StabEnt * CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
 	virtual StabEnt * CreateChannel(
-									char *nm=nullptr, short c=-1,
-									uchar nin=2, uchar nout=2,
-									bool add_dflt_au_in=false,
-									bool add_dflt_au_out=false,
-									bool add_dflt_str_in=false,
-									bool add_dflt_str_out=false
-									) override;
+		char *nm = nullptr, short c = -1,
+		uchar nin = 2, uchar nout = 2,
+		bool add_dflt_au_in = false,
+		bool add_dflt_au_out = false,
+		bool add_dflt_str_in = false,
+		bool add_dflt_str_out = false
+	) override;
 	virtual StabEnt * CreateMethod(std::string nm, StabEnt *p = nullptr) override;
 	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) override;
 	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) override;
@@ -381,63 +520,23 @@ public:
 	virtual void HideObjectRepresentation(StabEnt *) override;
 	virtual short CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
 	virtual short ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) override;
-
-	virtual std::vector<Envelope*> ListEnvelopesFor(StabEnt *stacker) override;
-
 	virtual void CreateStreamTake(StabEnt *) override;
-	virtual void LoadSampleTake(StabEnt *, std::string ) override;
-	virtual void UpdateTakeIndexDisplay(StabEnt *sym) override;
-	virtual void updateClipIndexDisplay(StabEnt *sym) override;
-	virtual void UpdateVariableIndexDisplay(StabEnt *sym) override;
+	virtual void LoadSampleTake(StabEnt *, std::string) override;
+
+	virtual void Rename(StabEnt *sym, const string &nm) override;
 
 	virtual void UpdateTempo(float tempo) override;
 	virtual void UpdateGlobalTime(Time &t) override;
 
-	virtual void GotoStartOfClip(StabEnt *) override;
-	virtual void GotoEndOfClip(StabEnt *) override;
-	virtual void SelectRegion(StabEnt *) override;
-
-	virtual void UpdateControllerDisplay(StabEnt *stackersym, QuasiStack *stack, StabEnt *sym,
-								qua_perpective_type srctype=QUAPSCV_NOT,
-								QuaPerspective *src = nullptr) override;
-	virtual void ControllerChanged(StabEnt *sym, QuasiStack *stack, TypedValue &t,
-								qua_perpective_type srctype=QUAPSCV_NOT,
-								QuaPerspective *src = nullptr) override;
-// called by interface to pop the stack frame, given a map of it at a particular level
-#ifdef Q_FRAME_MAP
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym, QuasiStack *parent, QuasiStack *stack, bool show, bool add_children);
-	virtual void			PopFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *, long) override;
-#else
-	virtual void			RequestPopFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *rootSym,
-		QuasiStack *parent, QuasiStack *stack, bool show, bool add_children) override;
-	virtual void			PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) override;
-#endif
-	virtual void			RemoveFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack);
-	virtual void			RequestRemoveFrameRepresentation(QuaInstanceObjectRepresentation *ir, StabEnt *stackerSym, QuasiStack *stack) override;
-	virtual void			HideFrameRepresentation(StabEnt *stackerSym, QuasiStack *stack) override;
-	virtual void			RemoveHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) override;
-	virtual void			PopHigherFrameRepresentations(StabEnt *frame, QuasiStack *parent) override;
-
-	virtual void			RemoveSchedulableRepresentations(StabEnt *) override;
-	virtual void			RemoveMethodRepresentations(StabEnt *) override;
-	virtual void			RemoveChannelRepresentations(StabEnt *) override;
-	virtual void			RemoveInstanceRepresentations(StabEnt *) override;
-
-	virtual void			Rename(StabEnt *sym, const string &nm) override;
-
-	virtual bool			HasDisplayParameters(StabEnt *sym) override;
-	virtual char			*DisplayParameterId() override;
-	virtual status_t		WriteDisplayParameters(FILE *, StabEnt *) override;
-
-	Qua *qua;
-
+	///////////////////////////////////////////////////////////////////////////
 	virtual void parseErrorViewClear() override;
 	virtual void parseErrorViewAddLine(std::string, int severity) override;
 	virtual void parseErrorViewShow() override;
 	virtual void tragicError(const char *str, ...) override;
 	virtual void reportError(const char *str, ...) override;
 
-	virtual void setTo(Qua *q) { qua = q;  }
+	///////////////////////////////////////////////////////////////////////////
+	Qua *qua=nullptr;
 };
 
 
@@ -468,100 +567,27 @@ public:
 	std::vector<QuaGlobalIndexPerspective*> globindexers;
 	std::vector<QuaEnvironmentPerspective*>	environments;
 
-	void			CreatePortBridge(QuaPort *);
-	void			RemovePortBridge(QuaPort *);
-	void			CreateTemplateBridge(Template *);
-	void			RemoveTemplateBridge(Template *);
-	void			CreateMethodBridge(Lambda *);
-	void			RemoveMethodBridge(Lambda *);
-	void			CreateVstPluginBridge(VstPlugin *);
-	void			RemoveVstPluginBridge(VstPlugin *);
+	void CreatePortBridge(QuaPort *);
+	void RemovePortBridge(QuaPort *);
+	void CreateTemplateBridge(Template *);
+	void RemoveTemplateBridge(Template *);
+	void CreateMethodBridge(Lambda *);
+	void RemoveMethodBridge(Lambda *);
+	void CreateVstPluginBridge(VstPlugin *);
+	void RemoveVstPluginBridge(VstPlugin *);
 
-	virtual void parseErrorViewClear() override;
-	virtual void parseErrorViewAddLine(std::string, int severity) override;
-	virtual void parseErrorViewShow() override;
-	virtual void tragicError(const char *str, ...) override;
-	virtual void reportError(const char *str, ...) override;
 };
 
 
 /**
  * QuaBridge: this bridge between the main qua object and the display, which is the View in an MVC sense
- *possibly a networked app will have lots of interfaces, 
+ * possibly a networked app will have lots of interfaces, 
  *  [a local display] or not? and a set of networked interfaces
  */
-class QuaBridge: public ErrorHandler
+class QuaBridge: public QuaReflection
 {
 public:
 	QuaBridge(Qua &q, QuaPerceptualSet &d);
-	virtual ~QuaBridge();
-
-	bool Spawn();
-	bool Cleanup();
-
-	void displayArrangementTitle(const char *);
-
-	void PopHigherFrameRepresentations(QuasiStack *);
-	void RemoveHigherFrameRepresentations(QuasiStack *);
-
-	void AddDestinationRepresentations(Channel *);
-	void RemoveDestinationRepresentation(Channel *, Input *);
-	void RemoveDestinationRepresentation(Channel *, Output *);
-
-	void AddSchedulableRepresentation(Schedulable *);
-	void AddMethodRepresentation(Lambda *);
-
-	void RemoveSchedulableRepresentations(StabEnt *);
-	void RemoveMethodRepresentations(StabEnt *);
-	void RemoveChannelRepresentations(StabEnt *);
-	void RemoveInstanceRepresentations(StabEnt *);
-
-	void					UpdateTakeIndexDisplay(StabEnt *sym);
-	void					updateClipIndexDisplay(StabEnt *sym);
-	void					UpdateVariableIndexDisplay(StabEnt *sym);
-
-	void					UpdateSequencerTimeDisplay(bool async);
-
-	void					RemoveQuaNexion(QuaInsert *);
-	void					AddQuaNexion(QuaInsert *, QuaInsert *);
-	void					DisplayStatus(Instance *);
-	void					DisplayStatus(QuasiStack *);
-	void					RemoveControlVariables(QuasiStack *);
-	void					AddControlVariables(QuasiStack *);
-
-	void					DisplayTempo(float t, bool async);
-	void					DisplayCurrentTime(Time &t, bool async);
-
-	void					DisplayDuration(Instance *);
-	void					DisplayChannel(Instance *);
-	void					DisplayStartTime(Instance *);
-	void					DisplayWake(Instance *);
-	void					DisplaySleep(Instance *);
-
-	void					Rename(StabEnt *, const string &);	// calls to symbol table rename
-	void					Delete(StabEnt *);	// calls to symbol table delete
-
-	bool					HasDisplayParameters(StabEnt *);
-	char					*DisplayParameterId();
-	status_t				WriteDisplayParameters(FILE *, StabEnt *);
-
-	bool ParseDisplayParameters(class QSParser *);
-	void SetDisplayParameters(StabEnt *);
-
-	void UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym, qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) { 
-		display.UpdateControllerDisplay(stackerSym, stack, sym, srctype, src);
-	};
-
-	virtual void parseErrorViewClear() override;
-	virtual void parseErrorViewAddLine(std::string, int severity) override;
-	virtual void parseErrorViewShow() override;
-	virtual void tragicError(const char *str, ...) override;
-	virtual void reportError(const char *str, ...) override;
-
-	void setDisplay(QuaPerceptualSet &d);
-protected:
-	QuaPerceptualSet &display;
-	Qua &uberQua;
 };
 
 
@@ -890,10 +916,10 @@ public:
 	virtual void				ChildNameChanged(StabEnt *)=0;
 	void						Delete();	// calls to symbol table delete
 
-	void						Populate();
-	virtual void				ChildPopulate(StabEnt *sym)=0;
-	virtual void				AttributePopulate()=0;
-	virtual QuaObjectRepresentation	*	AddChildRepresentation(StabEnt *c)=0;
+	void Populate();
+	virtual void ChildPopulate(StabEnt *sym)=0;
+	virtual void AttributePopulate()=0;
+	virtual QuaObjectRepresentation	* AddChildRepresentation(StabEnt *c)=0;
 
 	std::vector<QuaObjectRepresentation*> childRepresentations;
 	inline long	NCOR() { return childRepresentations.size(); }

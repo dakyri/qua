@@ -178,7 +178,7 @@ CQuaMFCApp::InitInstance()
 		::reportError("Can't find Home...");
 	}
 	environment.setup(vuf, true);	// some app setup may rely on command line
-	environment.setupDevices();
+	environment.setupDevices(quaAppInstance);
 ////////////////////////////////////////////////////////
 
 #ifdef QUA_V_GDI_PLUS

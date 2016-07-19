@@ -705,13 +705,13 @@ QuaJoystickManager::~QuaJoystickManager()
 }
 
 void
-QuaJoystickManager::setup() {
+QuaJoystickManager::setup(void *instance) {
 
 #if defined(WIN32)
 
 #ifdef QUA_V_JOYSTICK_DX
 	cout << "QuaJoystickManager: setting up dx devices" << endl;
-	direct_setup();
+	direct_setup(instance);
 	FetchDIJoysticks();
 
 	for (short i = 0; i<diJoystix.size(); i++) {

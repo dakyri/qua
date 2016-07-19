@@ -491,7 +491,7 @@ Instance::StartRecording()
 {
 	schedulable->status = STATUS_RECORDING;
 	status = STATUS_RECORDING;
-	uberQua->bridge.DisplayStatus(this);
+	uberQua->bridge.DisplayStatus(this, status);
 }
 
 void

@@ -714,7 +714,7 @@ UpdateActiveBlock(Qua *uberQua,
 				higherFrame->isActive = false;
 				if (B->crap.call.crap.lambda->isOncer) {
 					higherFrame->locusStatus = STATUS_SLEEPING;
-					uberQua->bridge.DisplayStatus(higherFrame);
+					uberQua->bridge.DisplayStatus(higherFrame, STATUS_SLEEPING);
 				}
 				stack->UnThunk(); 	// XXXX the garbage collection is a mess.
 			}

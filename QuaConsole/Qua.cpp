@@ -33,8 +33,8 @@ int main(char **argv, int argc)
 		cout << "Can't find Home..." << endl;
 	}
 #endif
-	environment.Setup(homePath);	// some app setup may rely on command line
-	environment.SetupDevices();
+	environment.setup(homePath, false);	// some app setup may rely on command line
+	environment.setupDevices(quaAppModule);
 	QuaCommandLine cmd;
 	cmd.processCommandLine(argc, argv);
 //	setup_application_globals();	// some app setup may rely on command line, but probably not these days

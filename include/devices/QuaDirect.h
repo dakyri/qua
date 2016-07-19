@@ -7,7 +7,7 @@
 #include <Dinputd.h>
 
 char	*direct_error_string(HRESULT);
-void	direct_setup();
+void	direct_setup(void *instance);
 void	direct_finish();
 
 extern LPDIRECTINPUT8	directInput;
