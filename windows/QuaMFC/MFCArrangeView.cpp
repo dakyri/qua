@@ -4,7 +4,6 @@
 //#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
-
 #include "qua_version.h"
 
 #include "StdDefs.h"
@@ -719,7 +718,7 @@ MFCArrangeView::OnDrop(
 			CPoint point 
 		)
 {
-	cerr << "MFCArrangeView::on drop\n";
+	cout << "MFCArrangeView::on drop\n";
 	point += GetScrollPosition();
 	switch (dragon.type) {
 		case QuaDrop::FILES:
@@ -739,7 +738,7 @@ MFCArrangeView::OnDrop(
 			for (i=0; ((unsigned)i)<dragon.data.filePathList->size(); i++) {
 				string	mime_t = Qua::identifyFile(dragon.data.filePathList->at(i));
 				if (mime_t.size() > 0) {
-					cerr << "drop " << dragon.data.filePathList->at(i) << ", " << mime_t << endl;
+					cout << "drop " << dragon.data.filePathList->at(i) << ", " << mime_t << endl;
 					if (mime_t == "audio/x-midi") {
 						drop_midi_file = true;
 						break;

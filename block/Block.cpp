@@ -1127,7 +1127,7 @@ Block::DoReset(void *V, void *B, int x)
 #if defined(QUA_V_VST_HOST)
 	case C_VST: {
 		QDBMSG_BLK("Reset vst element\n",0,0);
-		QuasiStack	*higherFrame = stack->FrameAt(crap.call.frameIndex);
+		QuasiStack	*higherFrame = stack->frameAt(crap.call.frameIndex);
 		AEffect	*afx = higherFrame->stk.afx;
 // ?????????????????? reset to what and how ???????????
 // default param vals will be held in the plugin

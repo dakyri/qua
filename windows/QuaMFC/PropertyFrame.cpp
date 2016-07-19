@@ -1,8 +1,9 @@
-#include "qua_version.h"
 // PropertyFrame.cpp : implementation file
 //
 //#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
+
 #include "resource.h"
 #include "PropertyFrame.h"
 

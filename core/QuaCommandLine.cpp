@@ -5,6 +5,7 @@
 #include "QuaAudio.h"
 #include "QuaJoystick.h"
 #include "QuaCommandLine.h"
+#include "VstPlugin.h"
 
 
 char			*QuaCommandLine::usage_str = "\
@@ -75,8 +76,8 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 			return true;
 		} else if (arg =="listvst") {
 #ifdef QUA_V_VST_HOST
-			for (short i = 0; i<vstList.CountItems(); i++) {
-				VstPlugin::ScanFile((char *)vstList.ItemAt(i), NULL, listFile, true);
+			for (short i = 0; i<vstList.size(); i++) {
+				VstPlugin::ScanFile(vstList[i], NULL, listFile, true);
 			}
 #endif
 			return true;
@@ -224,11 +225,11 @@ QuaCommandLine::loadAsio(int devind, FILE *fp)
 	);
 	for (j = 0; j<QuaAudioManager::asio.nInputChannels; j++) {
 		QuaAudioIn	*inp = QuaAudioManager::asio.input[j];
-		fprintf(fp, "input %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::sampleFormatName(inp->sampleFormat));
+		fprintf(fp, "input %d: %s, sample type %s\n", j, inp->insertName.c_str(), QuaAudioManager::sampleFormatName(inp->sampleFormat));
 	}
 	for (j = 0; j<QuaAudioManager::asio.nOutputChannels; j++) {
 		QuaAudioOut	*inp = QuaAudioManager::asio.output[j];
-		fprintf(fp, "output %d: %s, sample type %s\n", j, inp->insertName, QuaAudioManager::sampleFormatName(inp->sampleFormat));
+		fprintf(fp, "output %d: %s, sample type %s\n", j, inp->insertName.c_str(), QuaAudioManager::sampleFormatName(inp->sampleFormat));
 	}
 	QuaAudioManager::asio.UnloadDriver();
 #else
@@ -247,12 +248,12 @@ QuaCommandLine::listMidi(FILE *fp)
 	short j;
 	fprintf(fp, "%d input ports and %d output ports\n", ni, no);
 	for (j = 0; j<ni; j++) {
-		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, wc2string(icap[j].szPname).c_str(),
+		fprintf(fp, "In %u: \"%s\", product %d/%d driver %d/%d\n", j, string(icap[j].szPname).c_str(),
 			icap[j].wMid, icap[j].wPid,
 			icap[j].vDriverVersion & 0xFF, (icap[j].vDriverVersion & 0xFF00) >> 8);
 	}
 	for (j = 0; j<no; j++) {
-		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, wc2string(ocap[j].szPname).c_str(),
+		fprintf(fp, "Out %u: \"%s\", product %d/%d driver %d/%d: %s\n", j, string(ocap[j].szPname).c_str(),
 			ocap[j].wMid, ocap[j].wPid,
 			ocap[j].vDriverVersion & 0xFF, (ocap[j].vDriverVersion & 0xFF00) >> 8,
 			//					ocap[j].wTechnology);

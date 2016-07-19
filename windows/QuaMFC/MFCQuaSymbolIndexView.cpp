@@ -1,10 +1,10 @@
-#include "qua_version.h"
 // MFCArrangeView.cpp : implementation file
 //
 //#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE
 #include "stdafx.h"
+#include "qua_version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +23,8 @@
 #include "Sample.h"
 #include "Voice.h"
 #include "Lambda.h"
+
+#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -899,13 +901,17 @@ void
 MFCQuaSymbolIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	CTreeCtrl& ctl = (CTreeCtrl&) GetTreeCtrl();
-	fprintf(stderr, "on right click\n");
+	cout << "on right click\n";
 
 	UINT nFlags;
 	CPoint curPoint;
 	GetCursorPos(&curPoint);
 	ScreenToClient(&curPoint);
 	selectedItem = ctl.HitTest(curPoint, &nFlags);
+	if (selectedItem == nullptr) {
+		cout << "symbol index view right click but null selection " << endl;
+		return;
+	}
 	ctl.Select(selectedItem, TVGN_CARET);
 
 	if (selectedItem == channels) {

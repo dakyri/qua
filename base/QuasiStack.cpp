@@ -131,12 +131,12 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 				VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
 				if (vst) {
 					if (vst->status != VST_PLUG_LOADED) {
-						vst->Load();
+						vst->Load(stacker->uberQua->bridge);
 					}
 					if (vst->status == VST_PLUG_LOADED) {
 						stk.afx = vst->AEffectInstance();
 						if (stk.afx == nullptr) {
-							reportError("Can't instantiate %s", vst->sym->name.c_str());
+							stacker->uberQua->bridge.reportError("Can't instantiate %s", vst->sym->name.c_str());
 						} else {
 							vst->Open(stk.afx);
 							vst->MainsOn(stk.afx);
@@ -146,7 +146,7 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 							QDBMSG_STK("QuasiStack::creating vst %s -> %x\n", vst->sym->name, stk.afx);
 						}
 					} else {
-						reportError("can't load vst plugin");
+						stacker->uberQua->bridge.reportError("can't load vst plugin");
 					}
 				}
 				SetAudio(vst->isSynth?AUDIO_HAS_PLAYER:AUDIO_HAS_FX);

@@ -607,7 +607,7 @@ UpdateActiveBlock(Qua *uberQua,
 #endif
 		ua_complete = true;
 		stack->Thunk();
-		QuasiStack	*higherFrame = stack->FrameAt(B->crap.call.frameIndex);
+		QuasiStack	*higherFrame = stack->frameAt(B->crap.call.frameIndex);
 
 		AEffect	*afx = higherFrame->stk.afx;
 		Stackable *stackable = B->crap.call.crap.vstplugin;

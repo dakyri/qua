@@ -42,58 +42,58 @@ public:
 	Instance(Schedulable *s, std::string nm, Time t, Time d, Channel *c);
 	virtual ~Instance();
 
-	virtual Time		RelativeTime(Time &t);
+	virtual Time RelativeTime(Time &t);
 	
-	virtual bool		Init();
-	virtual void		Reset();
-	virtual status_t	Save(FILE *fp, short indent);
-	status_t			SaveStackInfo(FILE *fp, short indent);
-	status_t			SaveSnapshot(FILE *fp);
+	virtual bool Init();
+	virtual void Reset();
+	virtual status_t Save(FILE *fp, short indent);
+	status_t SaveStackInfo(FILE *fp, short indent);
+	status_t SaveSnapshot(FILE *fp);
 
-	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
-	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
+	status_t LoadSnapshotElement(tinyxml2::XMLElement *);
+	status_t LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	virtual void		Cue(Time &t);
-	virtual void		Recv(Stream &stream);
+	virtual void Cue(Time &t);
+	virtual void Recv(Stream &stream);
 
-	virtual void		StartRecording();
-	virtual void		StopRecording();
+	virtual void StartRecording();
+	virtual void StopRecording();
 
-	virtual status_t	SetChannel(Channel *, bool);
-	virtual status_t	SetDuration(Time &t, bool);
-	virtual status_t	SetStartTime(Time &t, bool);
-	virtual bool		Move(short ch_idx, Time *startt, Time *dur, bool disp);
+	virtual status_t SetChannel(Channel *, bool);
+	virtual status_t SetDuration(Time &t, bool);
+	virtual status_t SetStartTime(Time &t, bool);
+	virtual bool Move(short ch_idx, Time *startt, Time *dur, bool disp);
 
-	virtual size_t		Generate(float **bufs, long nf, short nc);	// add to out buf
-	virtual status_t	Run();
+	virtual size_t Generate(float **bufs, long nf, short nc);	// add to out buf
+	virtual status_t Run();
 
-	bool				SetStacks();
-	bool				SetValue(Block *b);
-	bool				ResetStacks();
-	bool				DestroyStacks();
+	bool SetStacks();
+	bool SetValue(Block *b);
+	bool ResetStacks();
+	bool DestroyStacks();
 
-	Qua					*uberQua;
+	Qua *uberQua;
 
-	Time				startTime;
-	Time				duration;
+	Time startTime;
+	Time duration;
 
-	Channel				*channel;
-	Schedulable			*schedulable;
+	Channel *channel;
+	Schedulable *schedulable;
 	
-	QuasiStack			*mainStack;
-	QuasiStack			*wakeStack;
-	QuasiStack			*sleepStack;
-	QuasiStack			*cueStack;
-	QuasiStack			*rxStack;
+	QuasiStack *mainStack;
+	QuasiStack *wakeStack;
+	QuasiStack *sleepStack;
+	QuasiStack *cueStack;
+	QuasiStack *rxStack;
 	
-    Time				wokenAt;
-    Time				wakeDuration;
+    Time wokenAt;
+    Time wakeDuration;
     
-    StabEnt				*sym;
+    StabEnt *sym;
     
-    bool				thruEnabled;
+    bool thruEnabled;
     
-    Block				*initBlock;
+    Block *initBlock;
 };
 
 #endif

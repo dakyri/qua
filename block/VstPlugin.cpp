@@ -4,12 +4,14 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <stdafx.h>
-
-#include <stdio.h>
-
-
+#include <afxwin.h>
 #endif
 
+#include <string>
+#include <iostream>
+using namespace std;
+#include <boost/filesystem.hpp>
+using namespace boost;
 
 #ifdef QUA_V_VST_HOST
 #include "aeffectx.h"
@@ -29,7 +31,6 @@
 #include "QuasiStack.h"
 #include "QuaAudio.h"
 
-
 // bogus avoidance of a messy issue of the
 // HostCallback knowing which of the hostside
 // VstPlugin objects it belongs to ... maybe
@@ -38,9 +39,7 @@
 flag debug_vst = 0;
 
 VstPlugin::VstPlugin(char *plugin, char *nm, bool doLoad, bool doMap, bool isasyn, int32 ni, int32 no, int32 npar, int32 nprog):
-	Stackable(DefineSymbol(nm, TypedValue::S_VST_PLUGIN, 0,
-					this, nullptr,
-					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
+	Stackable(DefineSymbol(nm, TypedValue::S_VST_PLUGIN, 0, this, nullptr, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
 	mapParams = doMap;
 	loadPlugin = doLoad;
@@ -59,7 +58,7 @@ VstPlugin::VstPlugin(char *plugin, char *nm, bool doLoad, bool doMap, bool isasy
 	SetPluginPath(plugin);
 	name = sym->name;
 //	interfaceBridge.SetSymbol(sym);
-//	fprintf(stderr, "path %s\n", pluginExecutable.Path());
+//	cout << "path %s\n", pluginExecutable.Path());
 //	afxVar.Set(TypedValue::S_STRANGE_POINTER, TypedValue::REF_STACK, sym,
 //			(long)AllocStack(sym, TypedValue::S_STRANGE_POINTER, 1));
 }
@@ -81,7 +80,7 @@ VstPlugin::Init()
 AEffect *
 VstPlugin::AEffectInstance()
 {
-	fprintf(stderr, "aeffect factory %x\n", aEffectFactory);
+	cout << "aeffect factory " << (unsigned) aEffectFactory << endl;
 	if (aEffectFactory != nullptr) {
 		return aEffectFactory(HostCallback);
 	}
@@ -89,26 +88,26 @@ VstPlugin::AEffectInstance()
 }
 
 status_t
-VstPlugin::Load()
+VstPlugin::Load(ErrorHandler & display)
 {
 	if (status == VST_PLUG_LOADED) {
 		return B_OK;
 	}
-	libhandle=AfxLoadLibrary(pluginExecutable.Path());
+	libhandle=AfxLoadLibrary(pluginExecutablePath.c_str());
 	if (libhandle!=nullptr) {
-		fprintf(stderr, "loading %s from %s ...\n", sym->name, pluginExecutable.Path(), libhandle);
+		std::cout << "loading "<< sym->name <<" from "<< pluginExecutablePath <<" ...\n";
 
-		aEffectFactory=(AEffect*(__cdecl*)(audioMasterCallback))GetProcAddress(libhandle, "main");
-		fprintf(stderr, "aeffect f %x\n", aEffectFactory);
+		aEffectFactory=(AEffect*(__cdecl*)(audioMasterCallback))GetProcAddress((HMODULE)libhandle, "main");
+		std::cout << "aeffect f " << aEffectFactory << endl;
 		AEffect	*plugin = AEffectInstance();
 
 		if (plugin == nullptr) {
-			reportError("can't create plugin instance");
+			display.reportError("can't create plugin instance");
 			status = VST_PLUG_UNLOADED;
 			return B_ERROR;
 		}
 		if (plugin->magic != kEffectMagic) {
-			reportError("plugin instance not a vst plugin");
+			display.reportError("plugin instance not a vst plugin");
 			status = VST_PLUG_UNLOADED;
 			return B_ERROR;
 		}
@@ -166,7 +165,7 @@ VstPlugin::Load()
 					for (i=0; i<numInputs; i++) {
 						if (plugin->dispatcher(plugin,effGetInputProperties,
 								i,0,inputPinProperties+i,0.0f)==1) {
-							fprintf(stderr, "plugin input %d flags = %x\n", i, /*inputPinProperties[i].label,*/ inputPinProperties[i].flags);
+							cout << "plugin input "<< i <<" flags = " << inputPinProperties[i].flags << "\n"/*inputPinProperties[i].label,*/ ;
 						}
 					}
 				}
@@ -181,7 +180,7 @@ VstPlugin::Load()
 					for (i=0; i<numOutputs; i++) {
 						if (plugin->dispatcher(plugin,effGetOutputProperties,
 								i,0,outputPinProperties+i,0.0f)==1) {
-							fprintf(stderr, "plugin output %d flags = %x\n", i, /*outputPinProperties[i].label,*/ outputPinProperties[i].flags);
+							cout << "plugin output "<< i <<" flags = "<< outputPinProperties[i].flags<<"\n" /*outputPinProperties[i].label,*/ ;
 						}
 					}
 				}
@@ -205,28 +204,26 @@ VstPlugin::Load()
 		}
 
 		DefineSymbol("program",
-			TypedValue::S_VST_PROGRAM, 0,
-			0, sym,
+			TypedValue::S_VST_PROGRAM, 0, 0, sym,
 			TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 
 		if (true) {//mapParams) {			// define symbols for params
 			for (i=0; i<numParams; i++) {
-				char	*p = GetParameterName(plugin, i);//paramProperties[i].shortLabel,
-				if (p) {
-					DefineSymbol(p, 
-						TypedValue::S_VST_PARAM, 0,
-						((void*)i), sym,
+				string p = getParameterName(plugin, i);//paramProperties[i].shortLabel,
+				if (p.size()) {
+					DefineSymbol(p,
+						TypedValue::S_VST_PARAM, 0, ((void*)i), sym,
 						TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 				}
 			}
 		}
 //		MainsOn(plugin);
-		TestDrive(plugin);
+		TestDrive(plugin, display);
 //		MainsOff(plugin);
 		Close(plugin);
 		status = VST_PLUG_LOADED;
 	} else { // can't load the dll, what next?
-		reportError("load of vst plugin %s at %s fails", sym->name.c_str(), pluginExecutable.Path());
+		display.reportError("load of vst plugin %s at %s fails", sym->name.c_str(), pluginExecutablePath.c_str());
 		return B_ERROR;
 	}
 
@@ -238,7 +235,7 @@ VstPlugin::Unload()
 {
 	if (libhandle!=nullptr) {
 		aEffectFactory = nullptr;
-		AfxFreeLibrary(libhandle);
+		AfxFreeLibrary((HINSTANCE)libhandle);
 		libhandle = nullptr;
 	}
 	status = VST_PLUG_UNLOADED;
@@ -272,11 +269,11 @@ VstPlugin::~VstPlugin()
 
 #ifdef QUA_V_VST_HOST
 void
-VstPlugin::LoadTest(char *plugpath)
+VstPlugin::LoadTest(char *plugpath, ErrorHandler & display)
 {
-	HINSTANCE libhandle=LoadLibrary(plugpath);
-	if (libhandle!=nullptr) {
-		fprintf(stderr, "loading from %s %x...\n", plugpath, libhandle);
+	HINSTANCE libhandle=AfxLoadLibrary(plugpath);
+	if (libhandle != nullptr) {
+		cout << "loading from " << plugpath << " " << libhandle << "...\n";
 
 		AEffect*			(__cdecl* aEffectFactory)(audioMasterCallback);
 		aEffectFactory=(AEffect*(__cdecl*)(audioMasterCallback))GetProcAddress(libhandle, "main");
@@ -284,11 +281,11 @@ VstPlugin::LoadTest(char *plugpath)
 		AEffect	*plugin = aEffectFactory(HostCallback);
 
 		if (plugin == nullptr) {
-			reportError("can't create plugin instance");
+			display.reportError("can't create plugin instance");
 			return;
 		}
 		if (plugin->magic != kEffectMagic) {
-			reportError("plugin instance not a vst plugin");
+			display.reportError("plugin instance not a vst plugin");
 			return;
 		}
 		long	vstVersion = plugin->dispatcher(plugin,effGetVstVersion,0,0,nullptr,0.0f);
@@ -323,7 +320,7 @@ VstPlugin::LoadTest(char *plugpath)
 		char strProgramName[48];
 		plugin->dispatcher(plugin,effGetProgramName,0,0,strProgramName,0.0f);
 
-		fprintf(stderr,  "Set plug to program zero, name is %s %d\n", strProgramName, strlen(strProgramName));
+		cout <<  "Set plug to program zero, name is "<< strProgramName << " " << strlen(strProgramName) << "\n";
 
 	//get the parameter strings
 		char strName[24];
@@ -331,21 +328,21 @@ VstPlugin::LoadTest(char *plugpath)
 		char strLabel[24];
 
 		plugin->dispatcher(plugin,effGetParamName,0,0,strName,0.0f);
-		fprintf(stderr, "Parameter name is %s\n", strName);
+		cout << "Parameter name is " << strName << "\n";
 
 		plugin->dispatcher(plugin,effGetParamLabel,0,0,strLabel,0.0f);
-		fprintf(stderr, "Parameter label is %s\n", strLabel);
+		cout << "Parameter label is " << strLabel << "\n";
 
 		plugin->dispatcher(plugin,effGetParamDisplay,0,0,strDisplay,0.0f);
-		fprintf(stderr, "Parameter display is %s\n", strDisplay);
+		cout << "Parameter display is " << strDisplay << "\n";
 
 	//call the set and get parameter functions
 		plugin->setParameter(plugin,0,0.7071f);
 		float newval=plugin->getParameter(plugin,0);
 
-		fprintf(stderr, "Parameter 0 was changed to %g\n", newval);
+		cout << "Parameter 0 was changed to " << newval << "\n";
 		plugin->dispatcher(plugin,effGetParamDisplay,0,0,strDisplay,0.0f);
-		fprintf(stderr, "Parameter display is now %s\n", strDisplay);
+		cout << "Parameter display is now " << strDisplay << "\n";
 
 		VstEvent* ptrEvents=nullptr;
 		char* ptrEventBuffer=nullptr;
@@ -353,8 +350,7 @@ VstPlugin::LoadTest(char *plugpath)
 
 		if ((plugin->dispatcher(plugin,effGetVstVersion,0,0,nullptr,0.0f)==2) &&
 			((plugin->flags & effFlagsIsSynth) ||
-			 (plugin->dispatcher(plugin,effCanDo,0,0,"receiveVstEvents",0.0f)>0)))
-		{
+			 (plugin->dispatcher(plugin,effCanDo,0,0,"receiveVstEvents",0.0f)>0))) {
 			//create some MIDI messages to send to the plug if it is a synth or can
 			//receive MIDI messages
 
@@ -508,18 +504,18 @@ VstPlugin::LoadTest(char *plugpath)
 	// problem with legacy cell
 			if (plugin->dispatcher(plugin,effProcessEvents,0,0,(VstEvents*)ptrEventBuffer,0.0f)==1)
 			{
-				fprintf(stderr, "plug processed events OK and wants more\n");
+				cout << "plug processed events OK and wants more" << endl;
 			}
 			else
 			{
-				fprintf(stderr, "plug does not want any more events\n" );
+				cout << "plug does not want any more events\n";
 			}
 		}
 
 		//process (replacing)
 		if (plugin->flags & effFlagsCanReplacing)
 		{
-			fprintf(stderr,  "Process (replacing)\n");
+			cout <<  "Process (replacing)" << endl;
 			plugin->processReplacing(plugin,ptrInputBuffers,ptrOutputBuffers,blocksize);
 		}
 	/*
@@ -533,7 +529,7 @@ VstPlugin::LoadTest(char *plugpath)
 		{
 			for (int j=0;j<blocksize;j++)
 			{
-				fprintf(stderr, "%d %d %g\n", i, j, *(ptrOutputBuffers[i]+j));
+				cout << " " << i << " " << j << " " << *(ptrOutputBuffers[i] + j) << "\n";
 			}
 		}
 		////////////////////////////////////////////////////////////////////////////
@@ -544,24 +540,24 @@ VstPlugin::LoadTest(char *plugpath)
 
 
 void
-VstPlugin::TestDrive(AEffect *plugin)
+VstPlugin::TestDrive(AEffect *plugin, ErrorHandler & display)
 {
 	long i;
 	int	blocksize=512;
-	fprintf(stderr, "!!!!!!!!!!!! VST test drive !!!!!!!!!!!!!!!!!\n");
-	fprintf(stderr, "%d inputs %d outputs\n", plugin->numInputs, plugin->numOutputs);
+	cout << "!!!!!!!!!!!! VST test drive !!!!!!!!!!!!!!!!!" << endl;
+	cout << "" << plugin->numInputs << " inputs " << plugin->numOutputs << " outputs\n";
 #define VST_TEST_MOD
 #if defined(VST_TEST_MOD)
 //	if (inputPinProperties)
 //		for (i=0; i<plugin->numInputs; i++) {
-//			fprintf(stderr, "plugin input %d flags = %x\n", i, inputPinProperties[i].flags);
+//			cout << "plugin input %d flags = %x\n", i, inputPinProperties[i].flags);
 //		}
 //	if (inputPinProperties)
 //		for (i=0; i<plugin->numOutputs; i++) {
-//			fprintf(stderr, "plugin output %d flags = %x\n", i, outputPinProperties[i].flags);
+//			cout << "plugin output %d flags = %x\n", i, outputPinProperties[i].flags);
 //		}
 //	for (short i=0; i<numPrograms; i++) {
-//		fprintf(stderr, "prog %s\n", GetProgramName(plugin, i));
+//		cout << "prog %s\n", GetProgramName(plugin, i));
 //	}
 	Open(plugin);
 	MainsOff(plugin);
@@ -575,8 +571,8 @@ VstPlugin::TestDrive(AEffect *plugin)
 		SetProgram(plugin,0);
 
 	for (short i=0; i<plugin->numParams; i++) {
-		fprintf(stderr, "getting ");
-		fprintf(stderr, "par %d is %g\n", i, plugin->getParameter(plugin, i));
+		cout << "getting ";
+		cout << "par " << i << " is " << plugin->getParameter(plugin, i) << "\n";
 	}
 
 
@@ -635,9 +631,9 @@ VstPlugin::TestDrive(AEffect *plugin)
 	ev->numEvents=nEvents;
 	ev->reserved=0L;
 	if (plugin->dispatcher(plugin,effProcessEvents,0,0,ev,0.0f)==1)	{
-		fprintf(stderr, "More ev\n");
+		cout << "More ev" << endl;
 	} else {
-		fprintf(stderr, "No more ev\n");
+		cout << "No more ev" << endl;
 	}
 	float **inTmp, **outTmp;
 	outTmp = sample_buf_alloc(plugin->numOutputs, blocksize);
@@ -658,22 +654,22 @@ VstPlugin::TestDrive(AEffect *plugin)
 					outTmp[j][i] = .42;
 				}
 			}
-			fprintf(stderr, "processReplacing\n");
+			cout << "processReplacing" << endl;
 			plugin->processReplacing(plugin, inTmp, outTmp, blocksize);
 		} else {
-			fprintf(stderr, "process\n");
+			cout << "process" << endl;
 			sample_buf_zero(outTmp, plugin->numOutputs, blocksize);
 			plugin->process(plugin, inTmp, outTmp, blocksize);
 		}
 //		for (short i=0; i<blocksize; i++) {
-//			if (i %8 == 0) fprintf(stderr, "\n");
-//			fprintf(stderr, "<%g %g ", inTmp[0][i], inTmp[1][i]);
+//			if (i %8 == 0) cout << "" << endl;
+//			cout << "<%g %g ", inTmp[0][i], inTmp[1][i]);
 //		}
 #ifdef TESTDRIVE_VST
-		fprintf(stderr, "\n");
+		cout << "" << endl;
 		for (short i=0; i<blocksize; i++) {
-			if (i %8 == 0) fprintf(stderr, "\n");
-			fprintf(stderr, ">%g %g ", outTmp[0][i], outTmp[1][i]);
+			if (i %8 == 0) cout << "" << endl;
+			cout << ">" << << " " << << " ", outTmp[0][i], outTmp[1][i]);
 		}
 #endif
 	}
@@ -695,7 +691,7 @@ VstPlugin::TestDrive(AEffect *plugin)
 //		char strProgramName[24+2];
 //		plugin->dispatcher(plugin,effGetProgramName,0,0,strProgramName,0.0f);
 
-//		fprintf(stderr, "Set plug to program zero, name is %s\n", strProgramName);
+//		cout << "Set plug to program zero, name is %s\n", strProgramName);
 
 	//get the parameter strings
 		char strName[24];
@@ -703,21 +699,21 @@ VstPlugin::TestDrive(AEffect *plugin)
 		char strLabel[24];
 
 		plugin->dispatcher(plugin,effGetParamName,0,0,strName,0.0f);
-		fprintf(stderr, "Parameter name is %s\n", strName);
+		cout << "Parameter name is " << << "\n", strName);
 
 		plugin->dispatcher(plugin,effGetParamLabel,0,0,strLabel,0.0f);
-		fprintf(stderr, "Parameter label is %s\n", strLabel);
+		cout << "Parameter label is " << << "\n", strLabel);
 
 		plugin->dispatcher(plugin,effGetParamDisplay,0,0,strDisplay,0.0f);
-		fprintf(stderr, "Parameter display is %s\n", strDisplay);
+		cout << "Parameter display is " << << "\n", strDisplay);
 
 	//call the set and get parameter functions
 		plugin->setParameter(plugin,0,0.7071f);
 		float newval=plugin->getParameter(plugin,0);
 
-		fprintf(stderr, "Parameter 0 was changed to %g\n", newval);
+		cout << "Parameter 0 was changed to " << << "\n", newval);
 		plugin->dispatcher(plugin,effGetParamDisplay,0,0,strDisplay,0.0f);
-		fprintf(stderr, "Parameter display is now %s\n", strDisplay);
+		cout << "Parameter display is now " << << "\n", strDisplay);
 
 		VstEvent* ptrEvents=nullptr;
 		char* ptrEventBuffer=nullptr;
@@ -834,18 +830,18 @@ VstPlugin::TestDrive(AEffect *plugin)
 	// problem with legacy cell
 			if (plugin->dispatcher(plugin,effProcessEvents,0,0,(VstEvents*)ptrEventBuffer,0.0f)==1)
 			{
-				fprintf(stderr, "plug processed events OK and wants more\n");
+				cout << "plug processed events OK and wants more" << endl;
 			}
 			else
 			{
-				fprintf(stderr, "plug does not want any more events\n" );
+				cout << "plug does not want any more events\n";
 			}
 		}
 
 		//process (replacing)
 		if (plugin->flags & effFlagsCanReplacing)
 		{
-			fprintf(stderr,  "Process (replacing)\n");
+			cout <<  "Process (replacing)" << endl;
 			plugin->processReplacing(plugin,ptrInputBuffers,ptrOutputBuffers,blocksize);
 		}
 	/*
@@ -859,7 +855,7 @@ VstPlugin::TestDrive(AEffect *plugin)
 		{
 			for (int j=0;j<blocksize;j++)
 			{
-				fprintf(stderr, "%d %d %g\n", i, j, *(ptrOutputBuffers[i]+j));
+				cout << "" << << " " << << " " << << "\n", i, j, *(ptrOutputBuffers[i]+j));
 			}
 		}
 		////////////////////////////////////////////////////////////////////////////
@@ -983,35 +979,35 @@ VstPlugin::SetProgramName(AEffect *plugin, long ind, char *nm)
 	return err;
 }
 
-char *
-VstPlugin::GetParameterName(AEffect *plugin, long ind)
+string
+VstPlugin::getParameterName(AEffect *plugin, long ind)
 {
-	static char nm[1024]; // todo xxxx vst says this is up to 8 chars
-	string nnm;
+	char nm[24]; // todo xxxx vst says this is up to 8 chars
 	nm[0] = 0;
+	string nnm;
+
 	plugin->dispatcher(plugin,effGetParamName,ind,0,nm,0.0f);
-	if ((nnm=SymTab::MakeValidSymbolName(nm, nnm)).size() == 0) {
-		sprintf(nnm, "param%d", ind);
-		nnm = "param";
+	if ((nnm=SymTab::MakeValidSymbolName(nm)).size() == 0) {
+
 		nnm += to_string(ind);
 	}
 
 	return nnm;
 }
 
-char *
-VstPlugin::GetParameterLabel(AEffect *plugin, long ind)
+string
+VstPlugin::getParameterLabel(AEffect *plugin, long ind)
 {
-	static char nm[24];
+	char nm[24];
 	nm[0] = 0;
 	plugin->dispatcher(plugin,effGetParamLabel,ind,0,nm,0.0f);
 	return nm;
 }
 
-char *
-VstPlugin::GetParameterDisplay(AEffect *plugin, long ind)
+string
+VstPlugin::getParameterDisplay(AEffect *plugin, long ind)
 {
-	static char nm[24];
+	char nm[24];
 	plugin->dispatcher(plugin,effGetParamDisplay,ind,0,nm,0.0f);
 	return nm;
 }
@@ -1157,11 +1153,11 @@ VstPlugin::EditorClose(AEffect *afx)
 // sys commons? maybe these should be executed as ctrls timing etc on
 // plugin direct
 void
-VstPlugin::OutputStream(AEffect *plugin, Stream *S)
+VstPlugin::OutputStream(AEffect *plugin, Stream &S)
 {
-//	fprintf(stderr, "output stream to vst, vers %d issynth=%d send=%d/%d %d\n", vstVersion, isSynth, sendVstEvents, sendVstMidiEvent, S->nItems);
-	if ((sendVstMidiEvent || isSynth) && S->nItems > 0) {
-		int	nEvents = S->nItems;
+//	cout << "output stream to vst, vers %d issynth=%d send=%d/%d %d\n", vstVersion, isSynth, sendVstEvents, sendVstMidiEvent, S->nItems);
+	if ((sendVstMidiEvent || isSynth) && S.nItems > 0) {
+		int	nEvents = S.nItems;
 // VstEvent has space for two events. ie if 1 event 
 		int bufferSize=sizeof(VstEvents)-(sizeof(VstEvent*)*(nEvents-2));
 		char *eventBuffer=new char[bufferSize];
@@ -1170,9 +1166,9 @@ VstPlugin::OutputStream(AEffect *plugin, Stream *S)
 		//now, create some memory for the events themselves
 		VstMidiEvent* midievents=new VstMidiEvent[nEvents];
 		VstMidiEvent* ep=midievents;
-		StreamItem	*item = S->head;
+		StreamItem	*item = S.head;
 		long	delta=0;
-		for (i=0; i<S->nItems; i++) {
+		for (i=0; i<S.nItems; i++) {
 			ep->type=kVstMidiType;
 			ep->byteSize=24L;
 			ep->deltaFrames=0; 
@@ -1195,8 +1191,7 @@ VstPlugin::OutputStream(AEffect *plugin, Stream *S)
 					ep->midiData[1]=(char)q->note.pitch;	//MIDI byte #2
 					ep->midiData[2]=(char)q->note.dynamic;	//MIDI byte #3
 					if (debug_vst) {
-						fprintf(stderr, "note cmd %x %x %x\n",
-							(uchar)ep->midiData[0], (uchar)ep->midiData[1], (uchar)ep->midiData[2]);
+						cout << "note cmd " << (uchar)ep->midiData[0] << " " << (uchar)ep->midiData[1] << " " << (uchar)ep->midiData[2] << "\n";
 					}
 					if (q->note.duration >0 && q->note.duration < INFINITE_TICKS) {
 						;
@@ -1262,12 +1257,12 @@ VstPlugin::OutputStream(AEffect *plugin, Stream *S)
 		ev->numEvents=nEvents;
 		ev->reserved=0L;
 		if (debug_vst) {
-			fprintf(stderr, "%d events\n", ev->numEvents);
+			cout << "" << ev->numEvents << " events\n";
 		}
 		if (plugin->dispatcher(plugin,effProcessEvents,0,0,(VstEvents*)eventBuffer,0.0f)==1) {
-//			fprintf(stderr, "Vstplugin::Output Stream dispatcher liked that\n");
+//			cout << "Vstplugin::Output Stream dispatcher liked that" << endl;
 		} else {
-//			fprintf(stderr, "Vstplugin::Output Stream didn't like that\n");
+//			cout << "Vstplugin::Output Stream didn't like that" << endl;
 		}
 		delete eventBuffer;
 		delete midievents;
@@ -1275,7 +1270,7 @@ VstPlugin::OutputStream(AEffect *plugin, Stream *S)
 }
 
 void
-VstPlugin::InputStream(AEffect *plugin, Stream *S)
+VstPlugin::InputStream(AEffect *plugin, Stream &S)
 {
 	;
 }
@@ -1294,7 +1289,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 	switch (opcode)	{
 		//VST 1.0 opcodes
 		case audioMasterVersion:
-			fprintf(stderr, "Vst callback audioMasterVersion\n");
+			cout << "Vst callback audioMasterVersion" << endl;
 			//Input values:	none
 			// Return Value:
 			//	0 or 1 for old version
@@ -1303,7 +1298,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterAutomate:
-			fprintf(stderr, "Vst callback audioMasterAutomate plug id %x, param %d <- %g\n", effect->magic, index, opt);
+			cout << "Vst callback audioMasterAutomate plug id " << effect->magic << ", param " << index << " <- " << opt << "\n";
 			//Input values:
 			//	<index> parameter that has changed
 			//<opt> new value
@@ -1314,7 +1309,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterCurrentId:
-			fprintf(stderr, "Vst callback audioMasterCurrentId\n");
+			cout << "Vst callback audioMasterCurrentId" << endl;
 			//Input values:none
 			//Return Value
 			//the unique id of a plug that's currently loading
@@ -1322,7 +1317,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterIdle:
-			fprintf(stderr, "Vst callback audioMasterIdle\n");
+			cout << "Vst callback audioMasterIdle" << endl;
 			//Input values: none
 			//Return Value
 			//not tested, always return 0
@@ -1331,7 +1326,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterPinConnected:
-			fprintf(stderr, "Vst callback audioMasterPinConnected\n");
+			cout << "Vst callback audioMasterPinConnected" << endl;
 			//Input values:
 			//	<index> pin to be checked
 			//	<value> 0=input pin, non-zero value=output pin
@@ -1342,7 +1337,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 
 		//VST 2.0 opcodes
 		case audioMasterWantMidi:
-			fprintf(stderr, "Vst callback audioMasterWantMidi %x\n", value);
+			cout << "Vst callback audioMasterWantMidi "<< value <<"\n";
 			//Input Values:
 			//	<value> filter flags (which is currently ignored, no defined flags?)
 			//Return Value:
@@ -1350,7 +1345,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetTime: {
-			fprintf(stderr, "Vst callback audioMasterGetTime\n");
+			cout << "Vst callback audioMasterGetTime" << endl;
 			//Input Values:
 			//	<value> should contain a mask indicating which fields are required
 			//	...from the following list?
@@ -1358,46 +1353,46 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			the_time.sampleRate = 44100;		// double 
 			the_time.flags = 0;					// see below
 			if (value & kVstNanosValid) {
-				fprintf(stderr, "kVstNanosValid\n");
+				cout << "kVstNanosValid" << endl;
 				the_time.nanoSeconds = 0;			// double, system time
 				the_time.flags |= kVstNanosValid;
 			}
 			if (value & kVstPpqPosValid) {
-				fprintf(stderr, "kVstPpqPosValid\n");
+				cout << "kVstPpqPosValid" << endl;
 				the_time.ppqPos=0;				// double, 1 ppq
 				the_time.flags |= kVstPpqPosValid;
 			}
 			if (value & kVstTempoValid) {
-				fprintf(stderr, "kVstTempoValid\n");
+				cout << "kVstTempoValid" << endl;
 				the_time.tempo=120;				// double, in bpm
 				the_time.flags |= kVstTempoValid;
 			}
 			if (value & kVstBarsValid) {
-				fprintf(stderr, "kVstBarsValid\n");
+				cout << "kVstBarsValid" << endl;
 				the_time.barStartPos = 0;			// double last bar start, in 1 ppq
 				the_time.flags |= kVstBarsValid;
 			}
 			if (value & kVstCyclePosValid) {
-				fprintf(stderr, "kVstCyclePosValid\n");
+				cout << "kVstCyclePosValid" << endl;
 				the_time.cycleStartPos=0;		// double, 1 ppq
 				the_time.cycleEndPos=16;			// double, 1 ppq
 				the_time.flags |= kVstNanosValid;
 			}
 			if (value & kVstTimeSigValid) {
-				fprintf(stderr, "kVstTimeSigValid\n");
+				cout << "kVstTimeSigValid" << endl;
 				the_time.timeSigNumerator = 4;		// long, time signature
 				the_time.timeSigDenominator = 4;
 				the_time.flags |= kVstTimeSigValid;
 			}
 			if (value & kVstSmpteValid) {
-				fprintf(stderr, "kVstSmpteValid\n");
+				cout << "kVstSmpteValid" << endl;
 				the_time.smpteOffset = 0;			// long, smpte offset
 				the_time.smpteFrameRate = 0;		// long, 0:24, 1:25, 2:29.97, 3:30, 4:29.97 df, 5:30 df
 				the_time.flags |= kVstSmpteValid;
 			}
 			if (value & kVstClockValid) {
 				the_time.samplesToNextClock=24;	// long, midi clock resolution (24 ppq), can be negative
-				fprintf(stderr, "kVstClockValid\n");
+				cout << "kVstClockValid" << endl;
 				the_time.flags |= kVstClockValid;
 			}
 			//Return Value:
@@ -1409,7 +1404,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 		}
 
 		case audioMasterProcessEvents:
-			fprintf(stderr, "Vst callback audioMasterProcessEvents\n");
+			cout << "Vst callback audioMasterProcessEvents" << endl;
 			//Input Values:
 			//	<ptr> Pointer to a populated VstEvents structure
 
@@ -1419,12 +1414,12 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterSetTime:
-			fprintf(stderr, "Vst callback audioMasterSetTime\n");
+			cout << "Vst callback audioMasterSetTime" << endl;
 			//IGNORE!
 			break;
 
 		case audioMasterTempoAt:
-			fprintf(stderr, "Vst callback audioMasterTempoAt\n");
+			cout << "Vst callback audioMasterTempoAt" << endl;
 			//Input Values:
 			//	<value> sample frame location to be checked
 			//Return Value:
@@ -1432,7 +1427,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetNumAutomatableParameters:
-			fprintf(stderr, "Vst callback audioMasterGetNumAutomatableParameters\n");
+			cout << "Vst callback audioMasterGetNumAutomatableParameters" << endl;
 			//Input Values:
 			//	None
 			//Return Value:
@@ -1443,7 +1438,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetParameterQuantization:
-			fprintf(stderr, "Vst callback audioMasterGetParameterQuantization\n");
+			cout << "Vst callback audioMasterGetParameterQuantization" << endl;
 			//Input Values:
 			//	None
 			//Return Value:
@@ -1456,7 +1451,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterIOChanged:
-			fprintf(stderr, "Vst callback audioMasterIOChanged\n");
+			cout << "Vst callback audioMasterIOChanged" << endl;
 			//Input Values:
 			//	None
 			//Return Value:
@@ -1465,7 +1460,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterNeedIdle:
-			fprintf(stderr, "Vst callback audioMasterNeedIdle\n");
+			cout << "Vst callback audioMasterNeedIdle" << endl;
 			//Input Values:None
 			//Return Value:
 			//	0 if error
@@ -1478,7 +1473,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterSizeWindow:
-			fprintf(stderr, "Vst callback audioMasterSizeWindow\n");
+			cout << "Vst callback audioMasterSizeWindow" << endl;
 			//Input Values:
 			//	<index> width
 			//	<value> height
@@ -1488,7 +1483,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetSampleRate:
-			fprintf(stderr, "Vst callback audioMasterGetSampleRate\n");
+			cout << "Vst callback audioMasterGetSampleRate" << endl;
 			//Input Values:None
 			//Return Value:
 			//	not tested, always return 0
@@ -1499,7 +1494,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetBlockSize:
-			fprintf(stderr, "Vst callback audioMasterGetBlockSize\n");
+			cout << "Vst callback audioMasterGetBlockSize" << endl;
 			//Input Values:None
 			//Return Value:
 			// not tested, always return 0
@@ -1510,21 +1505,21 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetInputLatency:
-			fprintf(stderr, "Vst callback audioMasterGetInputLatency\n");
+			cout << "Vst callback audioMasterGetInputLatency" << endl;
 			//Input Values:None
 			//Return Value:
 			//	input latency (in sampleframes?)
 			break;
 
 		case audioMasterGetOutputLatency:
-			fprintf(stderr, "Vst callback audioMasterGetOutputLatency\n");
+			cout << "Vst callback audioMasterGetOutputLatency" << endl;
 			//Input Values:None
 			//Return Value:
 			//	output latency (in sampleframes?)
 			break;
 
 		case audioMasterGetPreviousPlug:
-			fprintf(stderr, "Vst callback audioMasterGetPreviousPlug\n");
+			cout << "Vst callback audioMasterGetPreviousPlug" << endl;
 			//Input Values:None
 			//Return Value:
 			//	pointer to AEffect structure or nullptr if not known?
@@ -1534,7 +1529,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetNextPlug:
-			fprintf(stderr, "Vst callback audioMasterGetNextPlug\n");
+			cout << "Vst callback audioMasterGetNextPlug" << endl;
 			//Input Values:None
 			//Return Value:
 			//	pointer to AEffect structure or nullptr if not known?
@@ -1544,7 +1539,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterWillReplaceOrAccumulate:
-			fprintf(stderr, "Vst callback audioMasterWillReplaceOrAccumulate\n");
+			cout << "Vst callback audioMasterWillReplaceOrAccumulate" << endl;
 			//Input Values:None
 			//Return Value:
 			//0: not supported
@@ -1553,7 +1548,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetCurrentProcessLevel:
-			fprintf(stderr, "Vst callback audioMasterGetCurrentProcessLevel\n");
+			cout << "Vst callback audioMasterGetCurrentProcessLevel" << endl;
 			//Input Values:None
 			//Return Value:
 			//0: not supported,
@@ -1565,7 +1560,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetAutomationState:
-			fprintf(stderr, "Vst callback audioMasterGetAutomationState\n");
+			cout << "Vst callback audioMasterGetAutomationState" << endl;
 			//Input Values:None
 			//Return Value:
 			//0: not supported
@@ -1576,7 +1571,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetVendorString:
-			fprintf(stderr, "Vst callback audioMasterGetVendorString\n");
+			cout << "Vst callback audioMasterGetVendorString" << endl;
 			//Input Values:
 			//	<ptr> string (max 64 chars) to be populated
 			//Return Value:
@@ -1585,7 +1580,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetProductString:
-			fprintf(stderr, "Vst callback audioMasterGetProductString\n");
+			cout << "Vst callback audioMasterGetProductString" << endl;
 			//Input Values:
 			//	<ptr> string (max 64 chars) to be populated
 
@@ -1595,14 +1590,14 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetVendorVersion:
-			fprintf(stderr, "Vst callback audioMasterGetVendorVersion\n");
+			cout << "Vst callback audioMasterGetVendorVersion" << endl;
 			//Input Values:None
 			//Return Value:
 			//Vendor specific host version as integer
 			break;
 
 		case audioMasterVendorSpecific:
-			fprintf(stderr, "Vst callback audioMasterVendorSpecific\n");
+			cout << "Vst callback audioMasterVendorSpecific" << endl;
 			//Input Values:
 			//<index> lArg1
 			//<value> lArg2
@@ -1613,12 +1608,12 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterSetIcon:
-			fprintf(stderr, "Vst callback audioMasterSetIcon\n");
+			cout << "Vst callback audioMasterSetIcon" << endl;
 			//IGNORE
 			break;
 
 		case audioMasterCanDo:
-			fprintf(stderr, "Vst callback audioMasterCanDo '%s'\n", (char*)ptr);
+			cout << "Vst callback audioMasterCanDo '"<< (char*)ptr <<"'\n";
 			//Input Values:
 			//	<ptr> predefined "canDo" string
 			//Return Value:
@@ -1654,7 +1649,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterGetLanguage:
-			fprintf(stderr, "Vst callback audioMasterGetLanguage\n");
+			cout << "Vst callback audioMasterGetLanguage" << endl;
 			//Input Values:None
 			//Return Value:
 			//	kVstLangEnglish
@@ -1676,7 +1671,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			//Return Value:
 			//0 if error
 			//else platform specific ptr
-			fprintf(stderr, "Vst callback audioMasterOpenWindow");
+			cout << "Vst callback audioMasterOpenWindow" << endl;
 			break;
 
 		case audioMasterCloseWindow:
@@ -1686,11 +1681,11 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			//Return Value:
 			//0 if error
 			//Non-zero value if OK
-			fprintf(stderr, "Vst callback audioMasterCloseWindow");
+			cout << "Vst callback audioMasterCloseWindow" << endl;
 			break;
 
 		case audioMasterGetDirectory:
-			fprintf(stderr, "Vst callback audioMasterGetDirectory\n");
+			cout << "Vst callback audioMasterGetDirectory" << endl;
 			//Input Values:None
 			//Return Value:
 			//	0 if error
@@ -1699,26 +1694,26 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			break;
 
 		case audioMasterUpdateDisplay:
-			fprintf(stderr, "Vst callback audioMasterUpdateDisplay\n");
+			cout << "Vst callback audioMasterUpdateDisplay" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
 			break;
 	//---from here VST 2.1 extension opcodes------------------------------------------------------
 		case audioMasterBeginEdit:               // begin of automation session (when mouse down), parameter index in <index>
-			fprintf(stderr, "Vst callback audioMasterBeginEdit\n");
+			cout << "Vst callback audioMasterBeginEdit" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
 			break;
 		case audioMasterEndEdit:                 // end of automation session (when mouse up),     parameter index in <index>
-			fprintf(stderr, "Vst callback audioMasterEndEdit\n");
+			cout << "Vst callback audioMasterEndEdit" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
 			break;
 		case audioMasterOpenFileSelector:		// open a fileselector window with VstFileSelect* in <ptr>
-			fprintf(stderr, "Vst callback audioMasterOpenFileSelector\n");
+			cout << "Vst callback audioMasterOpenFileSelector" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
@@ -1726,19 +1721,19 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 	
 	//---from here VST 2.2 extension opcodes------------------------------------------------------
 		case audioMasterCloseFileSelector:		// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
-			fprintf(stderr, "Vst callback audioMasterCloseFileSelector\n");
+			cout << "Vst callback audioMasterCloseFileSelector" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
 			break;
 		case audioMasterEditFile:				// open an editor for audio (defined by XML text in ptr)
-			fprintf(stderr, "Vst callback audioMasterEditFile\n");
+			cout << "Vst callback audioMasterEditFile" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
 			break;
 		case audioMasterGetChunkFile:			// get the native path of currently loading bank or project (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec))
-			fprintf(stderr, "Vst callback audioMasterGetChunkFile\n");
+			cout << "Vst callback audioMasterGetChunkFile" << endl;
 			//Input Values:None
 			//Return Value:
 			//	Unknown
@@ -1746,69 +1741,67 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 
 	//---from here VST 2.3 extension opcodes------------------------------------------------------
 		case audioMasterGetInputSpeakerArrangement:	// result a VstSpeakerArrangement in ret
-			fprintf(stderr, "Vst callback audioMasterGetInputSpeakerArrangement\n");
+			cout << "Vst callback audioMasterGetInputSpeakerArrangement" << endl;
 			break;
 		default:
-			fprintf(stderr, "Vst callback unrecognised %d\n", opcode);
+			cout << "Vst callback unrecognised "<< opcode <<"\n";
 			break;
 	}
 
 	return retval;
 };
 
-
-
 void
-VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
+VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
 {
 //	path = "f:/progs/vstplugins/korg legacy collection/legacycell.dll";
 //	lfp = stderr;
-	char	*ext = extension(path);
-	if (ext != nullptr && strcmp(ext, "dll") == 0) {
+	string ext = getExt(vstpath);
+	if (ext == "dll") {
 		if (lfp) {
-			fprintf(lfp, "try loading %s ...\n", path);
+			fprintf(lfp, "try loading %s ...\n", vstpath);
 		}
-		HINSTANCE libhandle=AfxLoadLibrary(path);
+		HINSTANCE libhandle=AfxLoadLibrary(vstpath.c_str());
 		if (libhandle == nullptr) {
 			if (lfp) {
-				fprintf(stderr, "libhandle null in %s\n", path);
+				cout << "libhandle null in " << vstpath << endl;
 			}
 			return;
 		}
 		AEffect*	(__cdecl* fxFactory)(audioMasterCallback);
 		fxFactory=(AEffect*(__cdecl*)(audioMasterCallback))
 									GetProcAddress(libhandle, "main");
-		fprintf(stderr, "fx factory %x\n", fxFactory);
+		cout << "fx factory " << (unsigned) fxFactory << endl;
 		if (fxFactory == nullptr) {
 			if (lfp) {
-				fprintf(lfp, "'main' null from %s\n", path);
+				fprintf(lfp, "'main' null from %s\n", vstpath);
 			}
 			if (!AfxFreeLibrary(libhandle)) {
-				fprintf(stderr, "afx free library fails\n");
+				cout << "afx free library fails\n";
 			}
 			return;
 		}
 		AEffect	*afx = fxFactory(HostCallback);
 		if (afx == nullptr) {
 			if (lfp) {
-                fprintf(lfp, "failed to create afx from %s\n", path);
+                fprintf(lfp, "failed to create afx from %s\n", vstpath);
 			}
 			if (!AfxFreeLibrary(libhandle)) {
-				fprintf(stderr, "afx free library fails\n");
+				cout << "afx free library fails\n";
 			}
 			return;
 		}
 		if (afx->magic != kEffectMagic) {
-			fprintf(stderr, "%s is not magic enougfh for vst\n", path);
+			cout << vstpath  << "is not magic enougfh for vst\n";
 			if (!AfxFreeLibrary(libhandle)) {
-				fprintf(stderr, "afx free library fails\n");
+				cout << "afx free library fails\n";
 			}
 			return;
 		}
 		bool asynth = (afx->flags & effFlagsIsSynth)!=0;
 		if (lfp) {
 			fprintf(lfp, "Effect '%s' by %s\n", GetEffectName(afx), GetVendorName(afx));
-			fprintf(lfp, "\tFull path: %s\n", path);
+			fprintf(lfp, "\tFull path: %s\n", vstpath);
 			fprintf(lfp, "\t%d inputs, %d outputs, \n", afx->numInputs, afx->numOutputs);
 			fprintf(lfp, "\t%d parameters:\n", afx->numParams);
 			for (short j=0; j<afx->numParams; j++) {/*
@@ -1836,19 +1829,19 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 //					fprintf(lfp, "program %d: %s\n", k, GetProgramName(afx, k));
 				}
 
-				fprintf(lfp, "\n");*/
+				fprintf(lfp, "" << endl;*/
 			}
 		}
 		if (scriptFile) {
-			string	fpath(path);
-			string dnm = Base(fpath);
+			string	fpath(vstpath);
+			string dnm = getBase(fpath);
 			string qnm;
 			string bnm = dnm;
 			qnm = quascript_name(bnm);
 			if (qnm.size() == 0) {
 				qnm = "vstfx";
 			}
-			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n", path, uintstr(afx->uniqueID).c_str());
+			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n", vstpath, uintstr(afx->uniqueID).c_str());
 			fprintf(scriptFile, "\t\\noload\n");
 			if (asynth) {
 				fprintf(scriptFile, "\t\\synth\n");
@@ -1868,19 +1861,17 @@ VstPlugin::ScanFile(char *path, FILE *scriptFile, FILE *lfp, bool recursive)
 			}
 			fprintf(scriptFile, "\t)\n");
 		}
-		fprintf(stderr, "unloading library...");
+		cout << "unloading library..." << endl;
 		if (!AfxFreeLibrary(libhandle)) {
-			fprintf(stderr, "fails\n");
+			cout << "fails\n";
 		} else {
-			fprintf(stderr, "succeeds\n");
+			cout << "succeeds\n";
 		}
 	} else {	// not a dll, maybe it's a dir of dll
-		DDirectory	dir(path);
-		if (dir.isValid) {
-			while (dir.NextFile() != nullptr) {
-				if (strcmp(dir.result.name, ".") != 0 && strcmp(dir.result.name, "..") != 0) {
-					ScanFile((char *)dir.result.path.Path(), scriptFile, lfp, recursive);
-				}
+		filesystem::path dir(vstpath);
+		if (filesystem::exists(dir) && filesystem::is_directory(dir) && recursive) {
+			for (filesystem::directory_entry& file : filesystem::directory_iterator(dir)) {
+				ScanFile(file.path().string(), scriptFile, lfp, recursive);
 			}
 		}
 	}
@@ -1894,10 +1885,10 @@ VstPluginList::VstPluginList()
 }
 
 VstPlugin *
-VstPluginList::ItemForPath(char *path)
+VstPluginList::item4Path(char *path)
 {
 	for (short i=0; ((unsigned)i)<size(); i++) {
-		VstPlugin	*p = ItemAt(i);
+		VstPlugin	*p = itemAt(i);
 		if (p->pluginExecutablePath == path) {
 			return p;
 		}
@@ -1906,10 +1897,10 @@ VstPluginList::ItemForPath(char *path)
 }
 
 VstPlugin *
-VstPluginList::ItemForName(char *nm)
+VstPluginList::item4Name(char *nm)
 {
 	for (short i=0; ((unsigned)i)<size(); i++) {
-		VstPlugin	*p = ItemAt(i);
+		VstPlugin	*p = itemAt(i);
 		if (p->sym != nullptr && strcmp(p->sym->name.c_str(), nm) == 0) {
 			return p;
 		}

@@ -64,8 +64,8 @@ string quascript_name(const string &nm)
  
 // class QSParser....
 
-Parser::Parser(FILE *fp, std::string fnm, Qua *q):
-	QSParser(q, getBase(fnm))
+Parser::Parser(FILE *fp, std::string fnm, ErrorHandler &_display, Qua *q):
+	QSParser(q, _display, getBase(fnm))
 {
 	fseek(fp, 0, SEEK_END);
 	size = ftell(fp);
@@ -123,7 +123,7 @@ Parser::position()
 void
 Parser::rewind()
 {
-	uberQua->bridge.parseErrorViewClear();
+	display.parseErrorViewClear();
 	err_cnt = 0;
 	text_buf_ind = 0;
 }
@@ -134,9 +134,11 @@ Parser::seek(off_t ind)
 	text_buf_ind = ind;
 }
 
-
+/*
+ * TODO FIXME XXXX assuming here, q != nullptr ... is that going to be ok?
+ */
 TxtParser::TxtParser(char *txt, long len, const char *srcnm, Qua *q):
-	QSParser(q, srcnm)
+	QSParser(q, q->bridge, srcnm)
 {
 	if (len >= 0) {
 		size = len;
@@ -180,7 +182,7 @@ TxtParser::getChar()
 void
 TxtParser::rewind()
 {
-	uberQua->bridge.parseErrorViewClear();
+	display.parseErrorViewClear();
 	err_cnt = 0;
 	text_buf_ind = 0;
 }
@@ -200,7 +202,8 @@ TxtParser::seek(off_t ind)
 
 
 
-QSParser::QSParser(Qua *q, const std::string srcnm)
+QSParser::QSParser(Qua *q, ErrorHandler &_display, const std::string srcnm)
+	: display(_display)
 {
 	uberQua = q;
 	methods = nullptr;
@@ -208,7 +211,7 @@ QSParser::QSParser(Qua *q, const std::string srcnm)
 	schedulees = nullptr;
 	currentTokenType = TOK_NOT;
 	lineno = 1;
-	uberQua->bridge.parseErrorViewClear();
+	display.parseErrorViewClear();
 	err_cnt = 0;
 
 	comment = "";
@@ -259,7 +262,7 @@ QSParser::ParseError(int severity, char *msg,  ...)
 	    sprintf(buf, "Parse error, line %d: %s", lineno, buf1);
 	}
 	std::string errMsg = buf;
-	uberQua->bridge.parseErrorViewAddLine(errMsg, severity);
+	display.parseErrorViewAddLine(errMsg, severity);
 	err_cnt++;
 }
 
@@ -267,7 +270,7 @@ void
 QSParser::ShowErrors()
 {
 	if (err_cnt > 0) {
-		uberQua->bridge.parseErrorViewShow();
+		display.parseErrorViewShow();
 	}
 }
 
@@ -1090,14 +1093,14 @@ QSParser::ParseBuiltin(StabEnt *context, StabEnt *schedSym)
 		if (schedSym->type == TypedValue::S_SAMPLE) {
 			builtinSym = findBuiltin("sampleplay");
 			if (builtinSym == nullptr) {
-				uberQua->bridge.reportError("Sample player not found... oops");
+				display.reportError("Sample player not found... oops");
 				return nullptr;
 			}
 			curFunk = builtinSym->BuiltinValue()->type;
 		} else if (schedSym->type == TypedValue::S_VOICE || schedSym->type == TypedValue::S_POOL) {
 			builtinSym = findBuiltin("streamplay");
 			if (builtinSym == nullptr) {
-				uberQua->bridge.reportError("Stream player not found... oops");
+				display.reportError("Stream player not found... oops");
 				return nullptr;
 			}
 			curFunk = builtinSym->BuiltinValue()->type;
@@ -1725,7 +1728,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		block = nullptr;
     } else if (strcmp(currentToken, "define") == 0 || currentTokenType == TOK_TYPE) {
 		if (debug_parse) {
-			cerr << "processing a define at " << currentToken << " type " << currentTokenType << endl;
+			cout << "processing a define at " << currentToken << " type " << currentTokenType << endl;
 		}
        	Block *b =ParseDefine(	context, schedSym);
       	block = b;
@@ -2264,7 +2267,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	while (currentTokenType == TOK_TYPE) {
 		subType = findTypeAttribute(currentToken);
 		if (debug_parse) {
-			cerr << "subtype " <<  subType << " at " << currentToken << endl;
+			cout << "subtype " <<  subType << " at " << currentToken << endl;
 		}
     	switch (subType) {
     	
@@ -2471,7 +2474,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	if (type != TypedValue::S_EVENT && currentTokenType != TOK_WORD) {
 		ParseError(ERROR_ERR, "Expected identifier in definition near '%s'", currentToken);
 		if (debug_parse) {
-			cerr << "expect ident: type " << type << " subtype " << subType << " at " << currentToken << " (" << currentTokenType << ")" << endl;
+			cout << "expect ident: type " << type << " subtype " << subType << " at " << currentToken << " (" << currentTokenType << ")" << endl;
 		}
 		if (dataPath) delete dataPath;
 		if (mime) delete mime;
@@ -2547,7 +2550,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		GetToken();
 		Block *acts = ParseActualsList(context, context, true);
 		GetToken();
-		if (context) {
+		if (context && uberQua) {
 			Time	at_t;
 			Time	dur_t;
 			at_t.Set("0:0.0");
@@ -2593,7 +2596,10 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			} else if (context->type == TypedValue::S_QUA) {
 				Qua *q = context->QuaValue();
 			}
+		} else {
+			display.reportError("expected non null context at clip");
 		}
+
 		break;
 	}
 
@@ -2639,7 +2645,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_INPUT: {
 		string nm;
-		cerr << "defining an input" << endl;
+		cout << "defining an input" << endl;
 		if (currentTokenType == TOK_WORD) {
 			nm = currentToken;
 			GetToken(true);
@@ -2695,7 +2701,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_OUTPUT: {
 		string nm;
-		cerr << "defining an oputput" << endl;
+		cout << "defining an oputput" << endl;
 
 		if (currentTokenType == TOK_WORD) {
 			nm = currentToken;
@@ -2785,7 +2791,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		GetToken();
 		Block *acts = ParseActualsList(context, context, true);
 		GetToken();
-		if (sch) {
+		if (sch && uberQua) {
 			Time	at_t;
 			Time	dur_t;
 			short	chan_id;
@@ -2836,6 +2842,8 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 //					Arranger(i)->AddInstanceRepresentation(instance);
 //				}
 			}
+		} else {
+			display.reportError("expected non null context at instance");
 		}
 		break;
 	}
@@ -2932,7 +2940,10 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			ParseError(ERROR_ERR, "pool should be undimensioned");
 		}
 
-	    Pool	*S;
+		if (!uberQua || context != uberQua->sym)
+			ParseError(ERROR_ERR, "pool must be in outer context.");
+
+		Pool	*S;
 
 	    S = new Pool(currentToken, uberQua, context, true);
 	    S->next = schedulees;
@@ -2949,7 +2960,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	
 	case TypedValue::S_CHANNEL: {
 		if (debug_parse) {
-			cerr << "define channel " << currentToken << " in " << nIns << ", " << nOuts << " thrue " << audioThru << "," << midiThru << endl;
+			cout << "define channel " << currentToken << " in " << nIns << ", " << nOuts << " thrue " << audioThru << "," << midiThru << endl;
 		}
 		if (ndimensions != 0) {
 			ParseError(ERROR_ERR, "channel should be undimensioned");
@@ -2998,7 +3009,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    GetToken();
 	    ParseFormalsList(vstp->sym, schedSym, doLoadPlugin);
 	    sym = vstp->sym;
-		vstplugins.AddItem(vstp);
+		vstplugins.add(vstp);
 	    break;
 	}
 	
@@ -3007,9 +3018,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			ParseError(ERROR_ERR, "lambda should be undimensioned");
 		}
 	    Lambda	*lambda;
-	    lambda = new Lambda(currentToken, context,
-	    			uberQua, isLocus, isModal, isOncer,
-	    			isFixed, isHeld, isInit);
+	    lambda = new Lambda(currentToken, context, isLocus, isModal, isOncer, isFixed, isHeld, isInit);
 		lambda->resetVal = resetVal;
 	    lambda->next = methods;
 	    methods = lambda;
@@ -3116,7 +3125,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	if (dataPath) delete dataPath;
 	if (mime) delete mime;
 
-	if (sym && foundDisplayParameters) {
+	if (sym && foundDisplayParameters && uberQua) {
 		uberQua->bridge.SetDisplayParameters(sym);
 	}
 	return nullptr;
@@ -3156,13 +3165,15 @@ QSParser::ParseQua()
 			int type = findType(currentToken);
 			if (type == TypedValue::S_QUA) {
 				GetToken();
-				glob.rename(uberQua->sym, currentToken);
-//				q->sequencerWindow->Hide();
-//				q->mixerWindow->Hide();
-				GetToken();
+				if (uberQua == nullptr) {
+					display.reportError("defining qua for null object");
+				} else {
+					glob.rename(uberQua->sym, currentToken);
+					GetToken();
 
-				fprintf(stderr, "doin it\n");
-				uberQua->mainBlock = ParseBlockInfo(uberQua->sym, nullptr);
+					fprintf(stderr, "doin it\n");
+					uberQua->mainBlock = ParseBlockInfo(uberQua->sym, nullptr);
+				}
 			} else {
 				ParseError(ERROR_ERR, "Expected qua definition near '%s'", currentToken);
 			}
@@ -3213,7 +3224,7 @@ using namespace std;
 bool
 QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &sym, int direction, vector<int> &chans)
 {
-	cerr << "parsing port " << portName << endl;
+	cout << "parsing port " << portName << endl;
 	port = nullptr;
 	sym = nullptr;
 	if (currentTokenType == TOK_WORD) {	// this would be a symbol .. a vst or a channel or another input

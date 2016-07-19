@@ -8,8 +8,14 @@
 #include "QuaJoy.h"
 #include "QuaOSC.h"
 #include "QuaEnvironment.h"
+#include "Template.h"
+#include "Lambda.h"
+#include "Parse.h"
 
 #include <iostream>
+#include <boost/filesystem.hpp>
+
+using namespace boost::filesystem;
 
 QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
 	: display(d)
@@ -17,9 +23,17 @@ QuaEnvironment::QuaEnvironment(QuaEnvironmentDisplay &d)
 	version = Qua::getVersionString();
 }
 
+/*
+ * this should be guaranteed to be called after primary app setup is done.
+ * necessary for some devices ... in particular, we need to have the app instance
+ * for direct input joysticks to work (and not explode)
+ */
 int
-QuaEnvironment::SetupDevices()
+QuaEnvironment::setupDevices()
 {
+#ifdef QUA_V_JOYSTICK
+	quaJoystick.setup();
+#endif
 	return B_OK;
 }
 
@@ -51,7 +65,7 @@ QuaEnvironment::~QuaEnvironment()
 
 
 int
-QuaEnvironment::Setup(string vuf)
+QuaEnvironment::setup(string appExecutablePath, bool loadRC)
 {
 #ifdef QUA_V_MULTIMEDIA_TIMER
 	TIMECAPS		tc;
@@ -71,106 +85,98 @@ QuaEnvironment::Setup(string vuf)
 	////////////////////
 	// set up paths
 	////////////////////
-	appPath = (vuf);
-	homePath = getParent(appPath);
-	configDirectory = homePath + "/QuaRC";
+	appPath = appExecutablePath;
+	path rcPath(appPath);
+	rcPath = rcPath.parent_path();
+	homePath = rcPath.string();
+	rcPath += "/QuaRC";
+	configDirectory = rcPath.string();
+
 	cout << "App path " << appPath << endl;
 	cout << "App home path " << homePath << endl;
 	cout << "config directory " << configDirectory << endl;
 
-	///////////////////////////////
-	// collect up pretty pictures
-	///////////////////////////////
-	// mostly for windows or max these would be compiled resources?? maybe not linux?
-	//	quaBigIcon->SetBits(quaiconbits, 1024, 0, B_CMAP8);
-	//	quaSmallIcon->SetBits(quasiconbits, 256, 0, B_CMAP8);
-	//	backgroundPattern = GetBitmapForImage(((char *)imgPath.Path()));
-	//	midiSmallIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	joySmallIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioSmallIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioInSmallIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioOutSmallIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	midiBigIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	joyBigIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioBigIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioInBigIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioOutBigIcon = GetBitmapForImage(((char *)imgPath.Path()));
-	//	audioCtrlIcon = GetBitmapForImage(((char *)imgPath.Path()));
-
-
 	//////////////////////////////////
 	// load global stuff
 	//////////////////////////////////
-#ifdef QUA_V_RC_INIT
-	std::string	rcPath;
-	if (!configDirectory.isValid) {
-		configDirectory.Create();
-	}
-	while ((rcPath = configDirectory.NextFile()) != NULL) {
-		FILE		*theFile;
-
-		theFile = fopen(rcPath->Path(), "r");
-		if (theFile != NULL) {
-			char	*leaf = (char *)rcPath->Leaf();
-			char	*ex = extension(leaf);
-			if (leaf && ex) {
-				if (strcmp(ex, "qs") == 0) {
-					fprintf(stderr, "loading inititialization script from %s...\n", rcPath->Path());
-					Parser		*p = new Parser(theFile, rcPath->Leaf(), NULL);
-					if (p->ParseProgFile()) {
-
-						fprintf(stderr, "parsed...\n");
-						//				toolboxWindow->Lock();
-						vstPlugins.AddList(&p->vstplugins);
-						Lambda		*nextm, *m;
-						for (m = p->methods; m != NULL; m = nextm) {
-							nextm = m->next;
-							if (m->sym->context == NULL) {
-								if (m->Init()) {
-									display.CreateMethodBridge(m);
-									//					    	S->next = methods;
-									//					    	methods = S;
-								}
-							}
-						}
-
-						Template	*t, *nextt;
-						for (t = p->templates; t != NULL; t = nextt) {
-							nextt = t->next;
-							if (t->sym->context == NULL) {
-								if (t->Init()) {
-									display.CreateTemplateBridge(t);
-									//								F->next = templates;
-									//								templates = F;
-								}
-							}
-						}
-
-						if (p->schedulees) {
-							fprintf(stderr,
-								"schedulable objects cannot be defined in null context");
-						}
-						//   				toolboxWindow->Unlock();
-
-					}
-				}
-				fclose(theFile);
-			}
+	if (loadRC) {
+		if (exists(rcPath)) {
+			loadInitScript(rcPath);
+		} else {
+			create_directories(rcPath);
 		}
-	}
 
 #ifdef QUA_V_VST_HOST
-	for (int i = 0; i<vstPlugins.CountItems(); i++) {
-		display.CreateVstPluginBridge(vstPlugins.ItemAt(i));
-		if (vstPlugins.ItemAt(i)->loadPlugin) {
-			if (vstPlugins.ItemAt(i)->Load() != B_OK) {
-				//				reportError("Load of %s failed\n", vstPlugins.ItemAt(i)->sym->name);
+		for (int i = 0; i < vstPlugins.size(); i++) {
+			display.CreateVstPluginBridge(vstPlugins.itemAt(i));
+			if (vstPlugins.itemAt(i)->loadPlugin) {
+				if (vstPlugins.itemAt(i)->Load(display) != B_OK) {
+				}
 			}
 		}
+#endif
 	}
-#endif
-#endif
 	return B_OK;
+}
+
+
+bool
+QuaEnvironment::loadInitScript(const path &rcPath) {
+	try {
+		if (!exists(rcPath)) {
+			return false;
+		}
+		if (!is_directory(rcPath)) {
+			for (directory_entry& file : directory_iterator(rcPath)) {
+				bool succ = loadInitScript(file.path());
+			}
+		} else {
+			
+			string ex = rcPath.extension().string();
+			if (ex == "qs" || ex == "qua") {
+				string basename = rcPath.stem().string();
+				cout << "loading inititialization script from " << rcPath << ", " << basename << "...\n";
+				//
+				// TODO XXX FIXME  this is a problem we won't need a context for a lot of things defined here, 
+				// but we do need a qua context for the display aspects of the context ie error reporting etc.
+				FILE *theFile = fopen(rcPath.string().c_str(), "r");
+				Parser *p = new Parser(theFile, basename, display, nullptr);
+				if (p->ParseProgFile()) {
+					vstPlugins.add(p->vstplugins);
+					Lambda		*nextm, *m;
+					for (m = p->methods; m != nullptr; m = nextm) {
+						nextm = m->next;
+						if (m->sym->context == nullptr) {
+							if (m->Init()) {
+								display.CreateMethodBridge(m);
+								//					    	S->next = methods;
+								//					    	methods = S;
+							}
+						}
+					}
+
+					Template *t, *nextt;
+					for (t = p->templates; t != nullptr; t = nextt) {
+						nextt = t->next;
+						if (t->sym->context == nullptr) {
+							if (t->initialize()) {
+								display.CreateTemplateBridge(t);
+								//								F->next = templates;
+								//								templates = F;
+							}
+						}
+					}
+
+					if (p->schedulees) {
+						cout << "schedulable objects cannot be defined in null context" << endl;
+					}
+				}
+			}
+		}
+	} catch (const filesystem_error& ex) {
+		return false;
+	}
+	return true;
 }
 
 QuaAudioManager &getAudioManager() { return environment.quaAudio; }

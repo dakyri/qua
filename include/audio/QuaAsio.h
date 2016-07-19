@@ -9,6 +9,9 @@
 #include "asio.h"
 #include "asiodrivers.h"
 
+#include <string>
+using namespace std;
+
 class QuaAudioIn;
 class QuaAudioOut;
 class Qua;
@@ -37,7 +40,7 @@ public:
 
 	char **installedDrivers;
 	long nDrivers;
-	char *preferredDriver;
+	string preferredDriver;
 
 // standard asio callbacks
 	static void sampleRateChanged(ASIOSampleRate sRate);
@@ -72,8 +75,8 @@ public:
 	static long bufSize;
 	static bool outputReady;
 
-	static QuaAudioIn	**input;
-	static QuaAudioOut	**output;
+	static vector<QuaAudioIn*>input;
+	static vector<QuaAudioOut*>output;
 
 	QuaAudioIn *EnableInput(Qua *q, long id);
 	bool DisableInput(long id);
@@ -88,7 +91,7 @@ public:
 	static ASIOBufferInfo *buffers;
 
 //	static Qua				*uberQua;
-	static QuaAudioManager	*audio;
+	static QuaAudioManager	&audio;
 };
 
 #endif

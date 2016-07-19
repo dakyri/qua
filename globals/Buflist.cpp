@@ -1,6 +1,8 @@
 #include "Buflist.h"
 #include <stdio.h>
 #include <cstring>
+#include <string>
+using namespace std;
 
 Buflist::Buflist(short max)
 {
@@ -8,43 +10,35 @@ Buflist::Buflist(short max)
 		maxitem = max;
 	else
 		maxitem = MAX_BUFLIST;
-	nitems = 0;
 }
 
 void
 Buflist::MakeEmpty()
 {
-	nitems = 0;
+	items.clear();
 }
 
 bool
 Buflist::Add(SampleTake *src, int val)
 {
 	short i;
-	if (nitems == maxitem)
+	if (items.size() == maxitem)
 		return false;
-	for (i=0; i<nitems; i++) {
+	for (i=0; i<items.size(); i++) {
 		if (items[i].src == src && items[i].val == val) {
 			return true;
 		} else if (items[i].val > val) {
 			break;
 		}
 	}
-	for (short j=nitems; j>=i; j--) {
-		items[j+1] = items[j];
-	}
-
-	items[i].val = val;
-	items[i].src = src;
-	
-	nitems++;
+	items.insert(items.begin() + i, buflist_item(src, val));
 	return true;
 }
 
 int
 Buflist::CountItems()
 {
-	return nitems;
+	return items.size();
 }
 
 buflist_item &
@@ -56,7 +50,7 @@ Buflist::ItemAt(int i)
 bool
 Buflist::Has(SampleTake *src, int val)
 {
-	for (short i=0; i<nitems; i++) {
+	for (short i=0; i<items.size(); i++) {
 		if (items[i].val > val)
 			return false;
 		else if (items[i].val == val)
@@ -65,20 +59,18 @@ Buflist::Has(SampleTake *src, int val)
 	return false;
 }
 
-char *
+string
 Buflist::PrintString()
 {
-	static char		buf[1024];
-	char			*p = buf;
+	string buf;
 
-	strcpy(p,"<");
-	p++;
-	for (short i=0; i<nitems; i++) {
+	buf = "<";
+	for (short i=0; i<items.size(); i++) {
 		if (i > 0)
-			*p++ = ' ';
-		p += sprintf(p, "%d", items[i].val);
+			buf += " ";
+		buf += to_string(items[i].val);
 	}
-	strcpy(p,">");
+	buf += ">";
 
 	return buf;
 }
@@ -86,9 +78,9 @@ Buflist::PrintString()
 bool
 Buflist::operator == (Buflist &x)
 {
-	if (nitems != x.nitems)
+	if (items.size() != x.items.size())
 		return false;
-	for (short i=0; i<nitems; i++) {
+	for (short i=0; i<items.size(); i++) {
 		if (items[i] != x.items[i])
 			return false;
 	}
@@ -98,9 +90,9 @@ Buflist::operator == (Buflist &x)
 bool
 Buflist::operator != (Buflist &x)
 {
-	if (nitems != x.nitems)
+	if (items.size() != x.items.size())
 		return true;
-	for (short i=0; i<nitems; i++) {
+	for (short i=0; i<items.size(); i++) {
 		if (items[i] != x.items[i])
 			return true;
 	}

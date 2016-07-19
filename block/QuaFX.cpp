@@ -376,14 +376,14 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
     case Block::C_VST: {
 #ifdef QUA_V_VST_HOST
 		stack->Thunk();
-		QuasiStack	*higherFrame = stack->FrameAt(fxBlock->crap.call.frameIndex);
+		QuasiStack	*higherFrame = stack->frameAt(fxBlock->crap.call.frameIndex);
 		if (higherFrame->locusStatus == STATUS_RUNNING) {
 			VstPlugin	*vst = fxBlock->crap.call.crap.vstplugin;
 			if (vst->status == VST_PLUG_LOADED) {
 				AEffect	*afx = higherFrame->stk.afx;
 				if (debug_quafx) {
 					fprintf(stderr, "Applying vst plugin %s cookie %x %d frames %d chan\n",
-							fxBlock->crap.call.crap.vstplugin->sym->name,
+							fxBlock->crap.call.crap.vstplugin->sym->name.c_str(),
 							afx, nFrames, nChan);
 				}
 // currently I think a synth that takes inputs should filter rather than

@@ -33,7 +33,7 @@ QuaInsert::QuaInsert(
 	type = t;
 	width = w;
 	format = fmt;
-	cerr << "new insert " << (unsigned)this << " in " << (unsigned)object<< " <" << name << "> " << id << endl;
+	cout << "new insert " << (unsigned)this << " in " << (unsigned)object<< " <" << name << "> " << id << endl;
 }
 
 QuaInsert::	QuaInsert()
@@ -217,7 +217,7 @@ Insertable::RemoveInsert(short ind)
 {
 	QuaInsert	*i = inserts[ind];
 	inserts.erase(inserts.begin()+ind);
-	cerr << "remove insert " << (unsigned)i << " " << (unsigned)i->quanexion << " " << (unsigned)(i->quanexion ? i->quanexion->parent : nullptr)<< endl;
+	cout << "remove insert " << (unsigned)i << " " << (unsigned)i->quanexion << " " << (unsigned)(i->quanexion ? i->quanexion->parent : nullptr)<< endl;
 	if (i->quanexion && i->quanexion->parent) {
 		if (i->quanexion->from == i)
 			i->quanexion->to->quanexion = nullptr;

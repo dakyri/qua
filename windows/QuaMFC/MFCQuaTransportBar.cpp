@@ -1,8 +1,8 @@
-#include "qua_version.h"
 // MFCQuaTransportBar.cpp : implementation file
 //
 //#define _AFXDLL
 #include "stdafx.h"
+#include "qua_version.h"
 
 #include "StdDefs.h"
 #include "Colors.h"

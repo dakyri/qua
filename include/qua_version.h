@@ -9,8 +9,8 @@
 #define QUA_V_JOYSTICK
 #define QUA_V_JOYSTICK_DX // windows direct input joystick ... preferred to mm device
 #undef QUA_V_JOYSTICK_MMC
-#undef QUA_V_VST
-#undef QUA_V_VST_HOST
+#define QUA_V_VST
+#define QUA_V_VST_HOST
 #undef QUA_V_VST_HOST_GUI
 #undef QUA_V_RAM_LOCKED_BUFFERS
 #define QUA_V_GDI_PLUS

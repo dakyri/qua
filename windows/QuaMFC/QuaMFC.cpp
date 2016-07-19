@@ -177,8 +177,8 @@ CQuaMFCApp::InitInstance()
 	if ((nc = GetModuleFileName(quaAppModule, vuf, 1024)) == 0) {
 		::reportError("Can't find Home...");
 	}
-	environment.Setup(vuf);	// some app setup may rely on command line
-	environment.SetupDevices();
+	environment.setup(vuf, true);	// some app setup may rely on command line
+	environment.setupDevices();
 ////////////////////////////////////////////////////////
 
 #ifdef QUA_V_GDI_PLUS

@@ -1,10 +1,8 @@
 
 // MFCChannelView.cpp : implementation file
-//
-//#define _AFXDLL
+
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
-
 #include "qua_version.h"
 
 #include "QuaMFC.h"
@@ -136,7 +134,7 @@ MFCChannelView::OnMove(int x, int y)
 	}
 #endif
 	frame.MoveToXY(x,y);
-	cerr << "channel view " << (channel ? channel->sym->name.c_str() : "?") << " move " << x << " " << y << " " << frame.left << " " << frame.top << endl;
+	cout << "channel view " << (channel ? channel->sym->name.c_str() : "?") << " move " << x << " " << y << " " << frame.left << " " << frame.top << endl;
 }
 
 void
@@ -155,7 +153,7 @@ MFCChannelView::OnSize(UINT nType, int cx, int cy)
 		MFCOutputView	*ov = (MFCOutputView *)OutR(i);
 		ov->SetWindowPos(&wndTop, 0, 0, bounds.right-16, ov->bounds.bottom, SWP_NOMOVE);
 	}
-	cerr << "channel view " << (channel ? channel->sym->name.c_str() : "?") << " size "  << frame.left << " " << frame.top << endl;
+	cout << "channel view " << (channel ? channel->sym->name.c_str() : "?") << " size "  << frame.left << " " << frame.top << endl;
 }
 
 void
@@ -176,7 +174,7 @@ MFCChannelView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 	frame.right = frame.left+bounds.right; 
 	frame.bottom = frame.top+bounds.bottom; 
 
-	cerr << "channel view create "<< frame.left<<","<<frame.top<<endl;
+	cout << "channel view create "<< frame.left<<","<<frame.top<<endl;
 	return CView::OnCreate(lpCreateStruct);
 }
 
@@ -202,7 +200,7 @@ MFCChannelView::OnMouseMove(UINT nFlags, CPoint point)
 void
 MFCChannelView::ChannelMenu(CPoint popPt)
 {
-	cerr << "channel menu\n";
+	cout << "channel menu\n";
 	ClientToScreen(&popPt);
 	QuaPort			*selPort;
 	port_chan_id	selChannel;
@@ -224,12 +222,12 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 	short	i;
 	char	buf[128];
 	for (i=0; i<channel->inputs.size(); i++) {
-		cerr << "input menu item" << i << endl;
+		cout << "input menu item" << i << endl;
 		sprintf(buf, "input %d (%s)", i+1, channel->inputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
 		chInputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 3), buf);
 	}
 	for (i=0; i<channel->outputs.size(); i++) {
-		cerr << "output menu item" << i << endl;
+		cout << "output menu item" << i << endl;
 		sprintf(buf, "output %d (%s)", i+1, channel->outputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
 		chOutputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 2), buf);
 	}
@@ -242,7 +240,7 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 	short ret = deviceMenu->TrackPopupMenuEx(
 						TPM_LEFTALIGN|TPM_LEFTBUTTON|TPM_RETURNCMD,
 						popPt.x, popPt.y, this, NULL);
-	cerr << "Channel Menu::device Menu ... popup returns " << ret << endl;
+	cout << "Channel Menu::device Menu ... popup returns " << ret << endl;
 	delete deviceMenu;
 
 	if (ret == 0) {	// cancel
@@ -290,7 +288,7 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 void
 MFCChannelView::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	cerr << "lb down!\n";
+	cout << "lb down!\n";
 //	ChannelMenu(point);
 } //End of OnLButtonDown
 
@@ -350,7 +348,7 @@ MFCChannelView::RemoveOutputRepresentation(Output *d)
 void
 MFCChannelView::ArrangeChildren()
 {
-	cerr << "cv: arrange children()\n";
+	cout << "cv: arrange children()\n";
 	long	atY = 12;
 	for (short i=0; i<NInR(); i++) {
 		MFCInputView	*iv = (MFCInputView *)InR(i);
@@ -559,7 +557,7 @@ PortPopup::DoPopup(CWnd *wnd, CPoint &scrPt, QuaPort *&port, port_chan_id &chan,
 	short ret = deviceMenu->TrackPopupMenuEx(
 						TPM_LEFTALIGN|TPM_LEFTBUTTON|TPM_RETURNCMD,
 						scrPt.x, scrPt.y, wnd, NULL);
-	cerr << "PortPopup::DoPopup:: track popup returns " << ret << endl;
+	cout << "PortPopup::DoPopup:: track popup returns " << ret << endl;
 	delete deviceMenu;
 
 	if (ret == 0) {	// cancel

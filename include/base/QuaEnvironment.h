@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-using namespace std;
+#include <boost/filesystem.hpp>
 
 #include "QuaJoy.h"
 #include "QuaAudio.h"
@@ -9,6 +9,7 @@ using namespace std;
 #include "QuaOSC.h"
 #include "QuaMidi.h"
 #include "QuaJoystick.h"
+#include "VstPlugin.h"
 
 class Qua;
 class QuaMidiManager;
@@ -23,8 +24,8 @@ public:
 	QuaEnvironment(QuaEnvironmentDisplay &d);
 	~QuaEnvironment();
 
-	int Setup(string vuf);
-	int SetupDevices();
+	int setup(string vuf, bool loadRC);
+	int setupDevices();
 	void setDisplay(QuaEnvironmentDisplay &d);
 
 	bool SetVstPluginDir(char *path, bool add, bool reload);
@@ -51,6 +52,9 @@ public:
 	QuaOSCManager quaOSC;
 
 	QuaEnvironmentDisplay &display;
+
+protected:
+	bool loadInitScript(const boost::filesystem::path &rcPath);
 };
 
 QuaAudioManager &getAudioManager();

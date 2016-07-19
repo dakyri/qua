@@ -195,7 +195,7 @@ Stream::LoadSnapshotElement(tinyxml2::XMLElement *element)
 	} else if (namestr == "mesg") {
 		OSCMessage *msg = nullptr;
 		AddToStream(msg, atTime);
-		cerr << "XXXXXXX" << " message snapshot not implemented" << endl;
+		cout << "XXXXXXX" << " message snapshot not implemented" << endl;
 	} else if (namestr == "prog") {
 		AddToStream(Prog().set(program, bank, subBank, hasCommand ? cmd : MIDI_PROG), atTime);
 	} else if (namestr == "sysc") {

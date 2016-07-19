@@ -10,6 +10,8 @@
 #include <vector>
 #include <iterator>
 #include <unordered_map>
+#include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -66,9 +68,6 @@ std::string getBase(const std::string &path);
 std::string getExt(const std::string &path);
 std::string getSupertype(const std::string &path);  // of a mime type
 
-using namespace std;
-#include <limits>
-#include <algorithm>
 
 namespace qut {
 	template<typename T> bool del(vector<T> &a, T &i) {
@@ -103,7 +102,6 @@ namespace qut {
 #define	B_OK 0
 #define	B_NO_ERROR 0
 
-#include <string>
 
 std::string errorStr(int no);
 // general erorrs

@@ -1030,7 +1030,7 @@ QuaMidiManager::QuaMidiManager()
 	mic = midiInDevices(&nInDevices);
 
 	for (i=0; i<nOutDevices; i++) {
-		QuaMidiPort *mp = new QuaMidiPort(wc2string(moc[i].szPname), wc2string(moc[i].szPname), this, QUA_PORT_OUT, i);
+		QuaMidiPort *mp = new QuaMidiPort(string(moc[i].szPname), string(moc[i].szPname), this, QUA_PORT_OUT, i);
 		/* mp->representation->SetDisplayMode(OBJECT_DISPLAY_SMALL);*/
 		ports.push_back(mp);
 		if (dfltOutput == nullptr) {
@@ -1039,7 +1039,7 @@ QuaMidiManager::QuaMidiManager()
 	}
 
 	for (i=0; i<nInDevices; i++) {
-		QuaMidiPort *mp = new QuaMidiPort(wc2string(mic[i].szPname), wc2string(mic[i].szPname), this, QUA_PORT_IN, i);
+		QuaMidiPort *mp = new QuaMidiPort(string(mic[i].szPname), string(mic[i].szPname), this, QUA_PORT_IN, i);
 		ports.push_back(mp);
 		if (dfltInput == nullptr) {
 			dfltInput = mp;

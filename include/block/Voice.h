@@ -66,8 +66,9 @@ public:
 class VoiceInstance: public Instance
 {
 public:
-						VoiceInstance(Voice *s, std::string, Time t, Time d, Channel * c);
-						~VoiceInstance();
+	VoiceInstance(Voice *s, std::string, Time t, Time d, Channel * c);
+	virtual ~VoiceInstance();
+
 	virtual size_t		Generate(float **bufs, long nf, short nc);	// add to out buf
 	virtual status_t	Run();
 };

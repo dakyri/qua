@@ -81,8 +81,8 @@ QuaAudioPort::name(uchar dfmt)
 		if (deviceSubType == QUA_AUDIO_ASIO) {
 			if (quaAudio->asio.loaded) {
 				return quaAudio->asio.CurrentDriver();
-			} else if (quaAudio->asio.preferredDriver) {
-				return quaAudio->asio.preferredDriver;
+			} else if (quaAudio->asio.preferredDriver.c_str()) {
+				return quaAudio->asio.preferredDriver.c_str();
 			} else {
 				return "asio";
 			}
@@ -251,7 +251,7 @@ QuaAudioManager::QuaAudioManager()
 	dfltOutput = nullptr;
 
 #ifdef QUA_V_AUDIO_ASIO
-	asio.audio = this;
+//	asio.audio = *this;
 
 	QuaAudioPort *mp = new QuaAudioPort("asio", this, QUA_AUDIO_ASIO);
 	if (dfltInput == nullptr) {

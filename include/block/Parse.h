@@ -17,6 +17,7 @@ class VstPluginList;
 
 #include "VstPlugin.h"
 #include "BaseVal.h"
+#include "QuaDisplay.h"
 
 #define TOK_NOT		-1
 #define TOK_EOF		0
@@ -32,7 +33,7 @@ class VstPluginList;
 class QSParser
 {
 public:
-					QSParser(Qua *, std::string scrname);
+					QSParser(Qua *, ErrorHandler &_display, std::string scrname);
 					~QSParser();
 					
 	virtual void	unGetChar() = 0;
@@ -91,9 +92,10 @@ public:
 	Lambda			*methods;
 	Template		*templates;
 
-	VstPluginList	vstplugins;
+	VstPluginList vstplugins;
+	ErrorHandler &display;
 	
-	Qua				*uberQua;
+	Qua *uberQua;
 
 	std::vector<Block*> blocks;
 		// any stray block we may pick up and want to keep.
@@ -121,7 +123,7 @@ public:
 class Parser: public QSParser
 {
 public:
-					Parser(FILE *fp, std::string s, Qua *q);
+					Parser(FILE *fp, std::string s, ErrorHandler &_display, Qua *q);
 					~Parser();
 	
 	virtual void	unGetChar();

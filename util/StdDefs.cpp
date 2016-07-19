@@ -331,7 +331,7 @@ string getBase(const string &path) {
 string getExt(const string &path) {
 	string s = getLeaf(path);
 	auto it = s.rfind('.');
-	cerr << s << " .. " << it << endl;
+	cout << s << " .. " << it << endl;
 	if (it != string::npos) {
 		s.erase(s.begin(), s.begin() + it + 1);
 	} else {

@@ -73,9 +73,16 @@ enum qua_perpective_type {
 	QUAPSCV_ENVIRON = 6
 };
 
-#include "Parse.h"
-
 class QuaPort;
+
+class ErrorHandler {
+public:
+	virtual void parseErrorViewClear() = 0;
+	virtual void parseErrorViewAddLine(std::string, int severity) = 0;
+	virtual void parseErrorViewShow() = 0;
+	virtual void tragicError(const char *str, ...) = 0;
+	virtual void reportError(const char *str, ...) = 0;
+};
 
 // attempt to create a generic interface layer so I can jump to something
 // a bit more baroque like gl from standard widget or a http network interface
@@ -84,7 +91,8 @@ class QuaPort;
 // bits and pieces for appropriate hot plugging e.g. a particular QuaPerceptualSet
 // might correspond to a local display, or a remote quaLink to a distant qua, or even a simultaneous 3d
 // view
-class QuaPerceptualSet
+
+class QuaPerceptualSet: public ErrorHandler
 {
 public:
 	inline void	AddChannelRack(QuaChannelRackPerspective *i) { channelRacks.push_back(i); }
@@ -219,13 +227,6 @@ public:
 	virtual std::vector<StabEnt*> ClipSyms(short) = 0;
 
 	virtual Metric			*QMetric() = 0;
-
-	virtual void parseErrorViewClear() = 0;
-	virtual void parseErrorViewAddLine(std::string, int severity) = 0;
-	virtual void parseErrorViewShow() = 0;
-
-	virtual void tragicError(const char *str, ...) = 0;
-	virtual void reportError(const char *str, ...) = 0;
 
 	virtual void setTo(Qua *) { }
 
@@ -440,7 +441,7 @@ public:
 };
 
 
-class QuaEnvironmentDisplay {
+class QuaEnvironmentDisplay: public ErrorHandler {
 public:
 	QuaEnvironmentDisplay();
 	virtual ~QuaEnvironmentDisplay();
@@ -475,6 +476,12 @@ public:
 	void			RemoveMethodBridge(Lambda *);
 	void			CreateVstPluginBridge(VstPlugin *);
 	void			RemoveVstPluginBridge(VstPlugin *);
+
+	virtual void parseErrorViewClear() override;
+	virtual void parseErrorViewAddLine(std::string, int severity) override;
+	virtual void parseErrorViewShow() override;
+	virtual void tragicError(const char *str, ...) override;
+	virtual void reportError(const char *str, ...) override;
 };
 
 
@@ -483,7 +490,7 @@ public:
  *possibly a networked app will have lots of interfaces, 
  *  [a local display] or not? and a set of networked interfaces
  */
-class QuaBridge
+class QuaBridge: public ErrorHandler
 {
 public:
 	QuaBridge(Qua &q, QuaPerceptualSet &d);
@@ -545,12 +552,11 @@ public:
 		display.UpdateControllerDisplay(stackerSym, stack, sym, srctype, src);
 	};
 
-
-	void parseErrorViewClear();
-	void parseErrorViewAddLine(std::string, int severity);
-	void parseErrorViewShow();
-	void tragicError(const char *str, ...);
-	void reportError(const char *str, ...);
+	virtual void parseErrorViewClear() override;
+	virtual void parseErrorViewAddLine(std::string, int severity) override;
+	virtual void parseErrorViewShow() override;
+	virtual void tragicError(const char *str, ...) override;
+	virtual void reportError(const char *str, ...) override;
 
 	void setDisplay(QuaPerceptualSet &d);
 protected:

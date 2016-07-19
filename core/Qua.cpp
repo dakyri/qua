@@ -840,7 +840,7 @@ Qua::loadFile(std::string path)
 //			} else {
 				FILE	*fp = fopen(path.c_str(), "r");
 				if (fp != nullptr) {
-					Parser	*parser = new Parser(fp, getBase(path), this);
+					Parser	*parser = new Parser(fp, getBase(path), bridge, this);
 			    	if (  !parser->ParseProgFile() ||
 			    		  !ParsePass2(parser, nullptr)) {
 			    	} else {
@@ -861,7 +861,7 @@ Qua::loadFile(std::string path)
 // should now be treated as "audio/QuaScript"		
 		FILE	*fp = fopen(path.c_str(), "r");
 		if (fp != nullptr) {
-			Parser	*prog = new Parser(fp, getBase(path), this);
+			Parser	*prog = new Parser(fp, getBase(path), bridge, this);
 	    	if (  !prog->ParseProgFile() ||
 	    		  !ParsePass2(prog, &newObj)) {
 	    	} else {
@@ -897,7 +897,7 @@ Qua::loadScriptFile(const char *path, QuaPerceptualSet &display)
 //		}
 		string sourcename = quascript_name(getBase(thePath));
 		q = new Qua(sourcename, display, false);
-		Parser		*p = new Parser(theFile, sourcename, q);
+		Parser		*p = new Parser(theFile, sourcename, q->bridge, q);
 		q = p->ParseQua();
 		p->ShowErrors();
 		if (q != nullptr && p->err_cnt == 0) {

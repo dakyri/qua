@@ -40,22 +40,20 @@ public:
 	virtual	status_t	Sleep(Instance *i) override;
 	virtual status_t	Recv(Stream &stream) override;
 
-	StreamItem			*UpForGrabs(Stream *s, StreamItem *pos,
-									Time &now);
-	Time				UpForGrabs(Stream *s, Time &last,
-									Time &now);
-	StreamItem			*IndexTo(Time &t);
+	StreamItem *UpForGrabs(Stream *s, StreamItem *pos, Time &now);
+	Time UpForGrabs(Stream *s, Time &last, Time &now);
+	StreamItem *IndexTo(Time &t);
 
-	status_t			Save(FILE *fp, short indent);
-	status_t			SaveSnapshot(FILE *fp);
+	status_t Save(FILE *fp, short indent);
+	status_t SaveSnapshot(FILE *fp);
 
-	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
-	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
+	status_t LoadSnapshotElement(tinyxml2::XMLElement *);
+	status_t LoadSnapshotChildren(tinyxml2::XMLElement *element);
 	
 	Stream scratchStream;
 	Stream &selectedTakeStream;
-	Time				duration;
-	std::mutex			flock;
+	Time duration;
+	std::mutex flock;
 
 	bool				SetRecordTake();
 	StreamTake			*recordTake;
@@ -72,8 +70,8 @@ public:
 class PoolInstance: public Instance
 {
 public:
-						PoolInstance(Pool *s, std::string nm, Time t, Time d, Channel * c);
-						~PoolInstance();
+	 PoolInstance(Pool *s, std::string nm, Time t, Time d, Channel * c);
+	 virtual ~PoolInstance();
 
 	virtual void		Reset();
 	virtual void		Cue(Time &t);

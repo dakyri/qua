@@ -12,12 +12,13 @@ class Qua;
 class Stackable
 {
 public:
-						Stackable(StabEnt *S);
-						~Stackable();
-	void				ReplaceBlock(Block *&, Block *);
-	void				ReAllocateChildren();
-	void				AllocateDataStacks(StabEnt *s);
-	void				ResizeStacks(short);
+	Stackable(StabEnt *S);
+	virtual ~Stackable();
+
+	void ReplaceBlock(Block *&, Block *);
+	void ReAllocateChildren();
+	void AllocateDataStacks(StabEnt *s);
+	void ResizeStacks(short);
 	
 	inline void addController(StabEnt *sym) { controllers.push_back(sym); }
 	inline bool removeController(StabEnt *sym) {

@@ -880,20 +880,14 @@ Channel::Generate(size_t nFrames)
 //	data->Take(nsample);
 // add sample buffers to channel queue	
 	for (Instance *inst: audioInstances) {
-		int nf = inst->Generate(
-							instSig,
-							nFrames,
-							nAudioOuts
-					);
+		int nf = inst->Generate( instSig, nFrames, nAudioOuts );
 		sample_buf_add(outSig, instSig, nAudioOuts, nFrames);
 	}
 #ifdef LOTSALOX
 	stackableLock.Lock();
 #endif
 	if (tx.block && txStack->locusStatus == STATUS_RUNNING) {
-		ApplyQuaFX(txStack, tx.block,
-					outSig,
-					nFrames, nAudioOuts);
+		ApplyQuaFX(txStack, tx.block, outSig, nFrames, nAudioOuts);
 	}	
 #ifdef LOTSALOX
 	stackableLock.Unlock();

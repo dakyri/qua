@@ -13,7 +13,6 @@ using namespace std;
 
 #include "QuaDisplay.h"
 
-
 #include "BaseVal.h"
 #include "Stackable.h"
 
@@ -45,16 +44,13 @@ public:
 	
 	status_t			SetPluginPath(char *);
 
-	status_t			Load();
+	status_t			Load(ErrorHandler &display);
 	status_t			Unload();
 #ifdef QUA_V_VST_HOST
-	static void			LoadTest(char *);
-	static void			TestDrive(AEffect *);
+	static void			LoadTest(char *, ErrorHandler & display );
+	static void			TestDrive(AEffect *, ErrorHandler & display);
 
 	AEffect				*AEffectInstance();
-
-	static status_t		LoadVstDirectories(BList *dirs, BList *vstlist);
-	static status_t		LoadPlugins(BList *vstlist);
 
 	static long __cdecl HostCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 #endif
@@ -64,13 +60,11 @@ public:
 
 	status_t status;
 #ifdef QUA_V_VST_HOST
-	AEffect*			(__cdecl* aEffectFactory)(audioMasterCallback);
+	AEffect* (__cdecl* aEffectFactory)(audioMasterCallback);
 
-#if defined(WIN32)
-	HINSTANCE			libhandle;
+	void* libhandle;
 #endif
-#endif
-	static void			ScanFile(char *path, FILE *scriptFile, FILE *lstfile, bool recurse);
+	static void ScanFile(string path, FILE *scriptFile, FILE *lstfile, bool recurse);
 
 // plugin properties, so we can know beforehand
 	char				effectName[32];	// original effect name. may be different to the qua name. qua names don't have spaces or odd characters.
@@ -151,15 +145,15 @@ public:
 	static char *			GetProgramName(AEffect *, long);
 	static void				SetParameter(AEffect *, long, float);
 	static float			GetParameter(AEffect *, long);
-	static char *			GetParameterName(AEffect *, long ind);
-	static char *			GetParameterLabel(AEffect *, long ind);
-	static char *			GetParameterDisplay(AEffect *, long ind);
+	static string getParameterName(AEffect *, long ind);
+	static string getParameterLabel(AEffect *, long ind);
+	static string getParameterDisplay(AEffect *, long ind);
 	static VstPinProperties	*GetOutputProperties(AEffect *, long ind);
 	static VstPinProperties	*GetInputProperties(AEffect *, long ind);
 	static VstParameterProperties	*GetParamProperties(AEffect *, long ind);
 
-	void					OutputStream(AEffect *, Stream *S);
-	void					InputStream(AEffect *, Stream *S);
+	void					OutputStream(AEffect *, Stream &S);
+	void					InputStream(AEffect *, Stream &S);
 #endif
 #ifdef QUA_V_VST_HOST_GUI
 	static	long			EditorGetRect(AEffect *afx, CRect &r);
@@ -173,20 +167,21 @@ class VstPluginList: public std::vector<VstPlugin *>
 {
 public:
 	VstPluginList();
-	inline VstPlugin *ItemAt(int i) {
+	inline VstPlugin *itemAt(int i) {
 		return at(i);
 	}
-	inline void AddItem(VstPlugin *v) {
+	inline void add(VstPlugin *v) {
 		push_back(v);
 	}
-	inline bool AddList(VstPluginList &vl) {
+	inline bool add(VstPluginList &vl) {
 		for (auto v : vl) {
 			push_back(v);
 		}
+		return true;
 	}
 
-	VstPlugin *ItemForPath(char *);
-	VstPlugin *ItemForName(char *);
+	VstPlugin *item4Path(char *);
+	VstPlugin *item4Name(char *);
 };
 
 #endif

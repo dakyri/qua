@@ -18,7 +18,7 @@ class Lambda: public Executable
 public:					
 	status_t Save(FILE *fp, short indent);
 
-	Lambda(std::string nm, StabEnt *S, Qua* q, bool f1=false,
+	Lambda(std::string nm, StabEnt *S, bool f1=false,
 		bool f2 = false,
 		bool f3 = false,
 		bool f4 = false,

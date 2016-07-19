@@ -11,6 +11,7 @@
 #include "Qua.h"
 #include "Template.h"
 #include "Channel.h"
+#include "VstPlugin.h"
 
 /*
 TODO XXXX todo xxxx possibly need to add proper constructor and destructor

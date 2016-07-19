@@ -25,12 +25,12 @@ int main(char **argv, int argc)
 #if defined(WIN32)
 	HMODULE quaAppModule = NULL;
 	if ((quaAppModule = GetModuleHandle(NULL)) == NULL) {
-		cerr << "Can't find Home..." << endl;
+		cout << "Can't find Home..." << endl;
 	}
 	char	vuf[1024];
 	int		nc;
 	if ((nc = GetModuleFileNameA(quaAppModule, vuf, 1024)) == 0) {
-		cerr << "Can't find Home..." << endl;
+		cout << "Can't find Home..." << endl;
 	}
 #endif
 	environment.Setup(homePath);	// some app setup may rely on command line

@@ -12,17 +12,19 @@ class Executable: public Stackable
 public:
 	Executable(StabEnt *S);
 	virtual ~Executable();
-    Block 				*mainBlock;
+
+    Block *mainBlock;
 };
 
 class Event: public Stackable
 {
 public:
-						Event(char *nm, StabEnt *ctxt);
-						~Event();
-	void 				operator=(Event&s);
-	void 				operator=(Block *);
-	Block				*block;
+	Event(char *nm, StabEnt *ctxt);
+	virtual ~Event();
+
+	void operator=(Event&s);
+	void operator=(Block *);
+	Block *block;
 };
 
 #endif

@@ -4,7 +4,8 @@
 
 #include <vector>
 #include <string>
-
+#include <iostream>
+#include <stdarg.h>
 using namespace std;
 
 #include <stdio.h>
@@ -1295,7 +1296,7 @@ QuaDisplay::reportError(const char *str, ...) {
 
 
 //////////////////////////////////////////////
-// QuaContextDisplay
+// QuaEnvironmentDisplay
 //////////////////////////////////////////////
 
 QuaEnvironmentDisplay::QuaEnvironmentDisplay()
@@ -1350,6 +1351,41 @@ QuaEnvironmentDisplay::RemovePortBridge(QuaPort *)
 {
 	;
 }
+
+void
+QuaEnvironmentDisplay::parseErrorViewClear() {
+}
+
+void
+QuaEnvironmentDisplay::parseErrorViewAddLine(string s, int sev) {
+	cout << "Parse error, severity " << sev << ", " << s << endl;
+}
+
+void
+QuaEnvironmentDisplay::parseErrorViewShow() {
+}
+
+void
+QuaEnvironmentDisplay::tragicError(const char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	va_end(args);
+
+	cout << buf << endl;
+}
+void
+QuaEnvironmentDisplay::reportError(const char *str, ...) {
+	char		buf[180];
+	va_list		args;
+	va_start(args, str);
+	vsprintf(buf, str, args);
+	va_end(args);
+
+	cout << buf << endl;
+}
+
 
 void
 QuaEnvironmentDisplay::RemoveTemplateBridge(Template *)

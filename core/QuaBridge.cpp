@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "StdDefs.h"
-
 #include "Sym.h"
 #include "Qua.h"
 #include "Executable.h"

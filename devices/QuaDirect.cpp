@@ -10,6 +10,8 @@
 
 #include <initguid.h>
 
+#include <iostream>
+
 LPDIRECTINPUT8	directInput=nullptr;
 
 char *
@@ -39,16 +41,20 @@ direct_setup()
 #if defined(QUA_V_JOYSTICK_DX)
 	if (directInput == nullptr) {
 		HRESULT err = DirectInput8Create(
-						quaAppInstance, 
-						DIRECTINPUT_VERSION, 
-						IID_IDirectInput8,	// REFIID riidltf,
-						(LPVOID*)&directInput,  
-						nullptr				// LPUNKNOWN punkOuter
-					);
+			quaAppInstance,
+			DIRECTINPUT_VERSION,
+			IID_IDirectInput8,	// REFIID riidltf,
+			(LPVOID*)&directInput,
+			nullptr				// LPUNKNOWN punkOuter
+		);
 		if (err != DI_OK) {
-			fprintf(stderr, "Error %s\n", direct_error_string(err));
+			cout << "Error " << direct_error_string(err) << endl;
 			directInput = nullptr;	// just in case
+		} else {
+			cout << "Got direct input ok" << endl;
 		}
+	} else {
+		cout << "Already got direct input, maybe" << endl;
 	}
 #endif
 }

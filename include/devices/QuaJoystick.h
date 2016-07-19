@@ -143,6 +143,8 @@ public:
 		return (QuaJoystickPort *)QuaPortManager::port(i);
 	}
 
+	void setup();
+
 	bool readerRunning;
 	std::thread	updateThread;
 	mutex updateMux;

@@ -38,33 +38,26 @@ Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
     PoolInstance	*i = 0;
     StabEnt			*sfs, *efs, *lcs;
     
-	DefineSymbol("duration", TypedValue::S_TIME, 0,
-					&duration, sym,
+	DefineSymbol("duration", TypedValue::S_TIME, 0, &duration, sym,
 					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_NOT);
-	DefineSymbol("mute", TypedValue::S_BOOL, 0,
-					&i->mute, sym,
+	DefineSymbol("mute", TypedValue::S_BOOL, 0, &i->mute, sym,
 					TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_CTL);
 
-	sfs=DefineSymbol("loopstart", TypedValue::S_TIME, 0,
-						&i->loopStart, sym,
+	sfs=DefineSymbol("loopstart", TypedValue::S_TIME, 0, &i->loopStart, sym,
 						TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_CTL);
-	efs=DefineSymbol("loopduration", TypedValue::S_TIME, 0,
-						&i->loopDuration, sym,
+	efs=DefineSymbol("loopduration", TypedValue::S_TIME, 0, &i->loopDuration, sym,
 						TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_CTL);
-	lcs=DefineSymbol("loopcondition", TypedValue::S_EXPRESSION, 0,
-						&i->loopCondition, sym,
+	lcs=DefineSymbol("loopcondition", TypedValue::S_EXPRESSION, 0, &i->loopCondition, sym,
 						TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_CTL);
 
 //	sfs->SetInit(IntBaseVal(0));
 //	efs->SetInit(IntBaseVal(nFrames));
 	
 // totally stupid hack to pass necasary context dependent stuff to parser
-	lcs->SetBounds(TypedValue::Float(0.0),
-				TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, &i->stackLock));
+	lcs->SetBounds(TypedValue::Float(0.0), TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, &i->stackLock));
 	lcs->SetInit(TypedValue::Pointer(TypedValue::S_STRANGE_POINTER, sym));
 
-	DefineSymbol("loopcount", TypedValue::S_INT, 0,
-					&i->loopCount, sym,
+	DefineSymbol("loopcount", TypedValue::S_INT, 0, &i->loopCount, sym,
 					TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_NOT);
 	recordTake = nullptr;
 }

@@ -114,13 +114,13 @@ Clock::WakeMeAfter(bigtime_t alm, bigtime_t timeout)
 	if (theTime < alarmTime) {
 		alarmOn = true;
 		if (debug_clock)
-			cerr << "Waiting on alarm clock till "<< alm / 1000.0 << "ms @ "<< Count2MSec(theTime) <<"ms\n" << endl;
+			cout << "Waiting on alarm clock till "<< alm / 1000.0 << "ms @ "<< Count2MSec(theTime) <<"ms\n" << endl;
 		status_t	err;
 
 		spring.wait(underTheSheets);
 	} else {
 		if (debug_clock)
-			cerr << "The wait time is now: " << alm / 1000.0 << "ms @ " << Count2MSec(theTime) << "ms\n" << endl;
+			cout << "The wait time is now: " << alm / 1000.0 << "ms @ " << Count2MSec(theTime) << "ms\n" << endl;
 	}
 	return theTime*usecsPerCount;
 }
@@ -137,7 +137,7 @@ Clock::Tick()
 {
 	theTime = CounterTime();
 	if (debug_clock)
-		cerr << "tick "<< Count2MSec(theTime) << "ms" << endl;
+		cout << "tick "<< Count2MSec(theTime) << "ms" << endl;
 	if (alarmOn && theTime >= (alarmTime-timingError)) {
 		alarmOn = false;
 	}

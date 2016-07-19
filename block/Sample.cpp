@@ -40,7 +40,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	buffer = new SampleBuffer*[maxbuf];
 	request = new long[maxreq];
 	requestedTake = new SampleTake*[maxreq];
-	fileBuffer = (char *)malloc(fileBufferLength);
+	fileBuffer = (char *)malloc(fileBufferLength); // !!!
 	
 //	AddClip("clip");
 
@@ -57,30 +57,17 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	}
 	
 	SampleInstance	*i = 0;
-//	StabEnt		*ams, *lcs, *pms, *sms, *ems;
-//
-//	DefineSymbol("Mute", S_BOOL, 0,
-//				&i->mute, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
-//	ampSym=DefineSymbol("Amp", S_FLOAT, 0,
-//				&i->amp, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_ENV);
-//	panSym=DefineSymbol("Pan", S_FLOAT, 0,
-//				&i->pan, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_ENV);
-//	sfrSym=DefineSymbol("StartFrame", S_TIME, 0,
-//				&i->startFrame, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
-//	efrSym=DefineSymbol("EndFrame", S_TIME, 0,
-//				&i->endFrame, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
-////	sms=DefineSymbol("StartFrame", S_EXPRESSION, &i->sFrameExp, REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
-////	ems=DefineSymbol("EndFrame", S_EXPRESSION, &i->eFrameExp, REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
-//	lcs=DefineSymbol("Loop", S_EXPRESSION, 0,
-//				&i->loopCondition, sym,
-//				REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
+	StabEnt		*ams, *lcs, *pms, *sms, *ems;
 
-	TypedValue v1, v2;
+	DefineSymbol("Mute", TypedValue::S_BOOL, 0, &i->mute, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_CTL);
+	ampSym=DefineSymbol("Amp", TypedValue::S_FLOAT, 0, &i->amp, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_ENV);
+	panSym=DefineSymbol("Pan", TypedValue::S_FLOAT, 0, &i->pan, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_ENV);
+	sfrSym=DefineSymbol("StartFrame", TypedValue::S_TIME, 0, &i->startFrame, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_CTL);
+	efrSym=DefineSymbol("EndFrame", TypedValue::S_TIME, 0, &i->endFrame, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_CTL);
+//	sms=DefineSymbol("StartFrame", S_EXPRESSION, &i->sFrameExp, REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
+//	ems=DefineSymbol("EndFrame", S_EXPRESSION, &i->eFrameExp, REF_INSTANCE, StabEnt::ATTR_NONE, true, StabEnt::DISPLAY_CTL);
+	lcs = DefineSymbol("loopcondition", TypedValue::S_EXPRESSION, 0, &i->loopCondition, sym, TypedValue::REF_INSTANCE, false, true, StabEnt::DISPLAY_CTL);
+//	TypedValue v1, v2;
 //	v1 = TypedValue::Float(0.0); v2 = TypedValue::Float(1.0);
 //	ampSym->SetBounds(v1, v2);
 //	v1 = TypedValue::Float(-1.0); v2 = TypedValue::Float(1.0);
@@ -108,9 +95,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 
 // reference to the default clip selection of this sample
 
-	DefineSymbol("loopCount", TypedValue::S_INT, 0,
-					&i->loopCount, sym,
-					TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_NOT);
+	DefineSymbol("loopCount", TypedValue::S_INT, 0, &i->loopCount, sym, TypedValue::REF_INSTANCE, false, false, StabEnt::DISPLAY_NOT);
 	status = STATUS_RUNNING;
 	for (short i=0; i<maxRequests; i++) {
 		request[i] = SAMPLE_DATA_REQUEST_NOTHING;
@@ -225,8 +210,7 @@ Sample::AddSampleTake(std::string nm, std::string path, bool disp)
 	takes.push_back(take);
 	if (take->status == STATUS_LOADED &&
 			(sampleClip(0) != nullptr &&
-				(sampleClip(0)->media == nullptr ||
-				 sampleClip(0)->media->status == STATUS_UNLOADED)
+				(sampleClip(0)->media == nullptr || sampleClip(0)->media->status == STATUS_UNLOADED)
 			) ) {
 		SelectTake(take, false);
 	}
@@ -383,16 +367,7 @@ Sample::Wake(Instance *i)
 #endif
 		if (wake.block) {
 			Stream	mainStream;
-			Time Now = uberQua->theTime;
-		    flag ua = UpdateActiveBlock(
-		    	uberQua, mainStream,
-		    	wake.block,
-				Now,
-				i,
-				i->sym,
-		    	i->wakeStack,
-				1,
-				true);
+		    flag ua = UpdateActiveBlock(uberQua, mainStream, wake.block, uberQua->theTime, i, i->sym, i->wakeStack, 1, true);
 			if (i->channel)
 				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
@@ -426,17 +401,7 @@ Sample::Sleep(Instance *i)
 #endif
 		if (sleep.block) {
 			Stream	mainStream;
-			Time Now = uberQua->theTime;
-		    flag ua = UpdateActiveBlock(
-		    	uberQua,
-				mainStream,
-		    	sleep.block,
-				Now,
-				i,
-				i->sym,
-		    	i->sleepStack,
-				1,
-				true);
+		    flag ua = UpdateActiveBlock( uberQua, mainStream, sleep.block, uberQua->theTime, i, i->sym, i->sleepStack, 1, true);
 			if (i->channel)
 				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
@@ -493,16 +458,7 @@ Sample::Recv(Stream &s)
 		stackableLock.Lock();
 #endif
 		
-		flag	uac = UpdateActiveBlock(
-						uberQua,
-						s,
-						rx.block,
-						tag_time,
-						inst,
-						inst->sym,
-						inst->rxStack,
-						1,
-						true);
+		flag	uac = UpdateActiveBlock( uberQua, s, rx.block, tag_time, inst, inst->sym, inst->rxStack, 1, true);
 #ifdef LOTSALOX
 		stackableLock.Unlock();
 #endif

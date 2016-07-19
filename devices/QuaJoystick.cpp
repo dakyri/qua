@@ -18,7 +18,7 @@
 #include "QuaDirect.h"
 #endif
 
-
+#include <iostream>
 
 #define AXIS_NOISE 10
 #define ZERO_DRIFT 0.10
@@ -154,6 +154,10 @@ QuaJoystickPort::Open(Qua *q)
 #if defined(WIN32)
 
 #if defined(QUA_V_JOYSTICK_DX)
+	if (directInput == nullptr) {
+		fprintf(stderr, "direct input null while openning joystick port\n");
+		return B_ERROR;
+	}
     HRESULT	err = directInput->CreateDevice(dxGuid, &dxStick, nullptr);
 	if (err != DI_OK) {
 		fprintf(stderr, "Open CreateDevice() error %s\n", direct_error_string(err));
@@ -681,24 +685,6 @@ QuaJoystickPort::OutputStream(Time TC, Stream *A, short chan)
 
 QuaJoystickManager::QuaJoystickManager()
 {
-
-#if defined(WIN32)
-
-#ifdef QUA_V_JOYSTICK_DX
-	direct_setup();
-	FetchDIJoysticks();
-
-	for (short i=0; i<diJoystix.size(); i++) {
-		joy_cap &p = diJoystix[i];
-		
-		QuaJoystickPort *jp = new QuaJoystickPort(p.name, this, QUA_JOY_DX, p.hasFeedback);
-		ports.push_back(jp);
-	}
-#endif
-
-#endif
-	readerRunning = false;
-	updateThread = std::thread(UpdateWrapper, this);
 }
 
 QuaJoystickManager::~QuaJoystickManager()
@@ -718,6 +704,30 @@ QuaJoystickManager::~QuaJoystickManager()
 	fprintf(stderr, "deleted joystick manager\n");
 }
 
+void
+QuaJoystickManager::setup() {
+
+#if defined(WIN32)
+
+#ifdef QUA_V_JOYSTICK_DX
+	cout << "QuaJoystickManager: setting up dx devices" << endl;
+	direct_setup();
+	FetchDIJoysticks();
+
+	for (short i = 0; i<diJoystix.size(); i++) {
+		joy_cap &p = diJoystix[i];
+
+		QuaJoystickPort *jp = new QuaJoystickPort(p.name, this, QUA_JOY_DX, p.hasFeedback);
+		ports.push_back(jp);
+	}
+#endif
+
+#endif
+	readerRunning = false;
+	updateThread = std::thread(UpdateWrapper, this);
+
+}
+
 
 QuaPort *
 QuaJoystickManager::findPortByName(string name, int direction, int nports) {
@@ -731,8 +741,8 @@ void
 QuaJoystickManager::FetchDIJoysticks()
 {
 	ClearDIJoysticks();
-	directInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback,
-                       nullptr, DIEDFL_ATTACHEDONLY);
+	if (directInput != nullptr) 
+		directInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, nullptr, DIEDFL_ATTACHEDONLY);
 }
 
 void
@@ -751,22 +761,24 @@ QuaJoystickManager::EnumJoysticksCallback(
 BOOL CALLBACK
 QuaJoystickManager::EnumJoysticks(const DIDEVICEINSTANCE*pdidInstance)
 {
-	LPDIRECTINPUTDEVICE8 joystick;
-    HRESULT	err = directInput->CreateDevice(pdidInstance->guidInstance,  
-                                &joystick, nullptr);
-	if (err == DI_OK) {
-		DIDEVCAPS	caps;
-		caps.dwSize = sizeof(caps);
-		err = joystick->GetCapabilities(&caps);
+	if (directInput != nullptr) {
+		LPDIRECTINPUTDEVICE8 joystick;
+		HRESULT	err = directInput->CreateDevice(pdidInstance->guidInstance, &joystick, nullptr);
 		if (err == DI_OK) {
-		} else {
-			fprintf(stderr, "DI Enum get cap error: %s\n", direct_error_string(err));
+			DIDEVCAPS	caps;
+			caps.dwSize = sizeof(caps);
+			err = joystick->GetCapabilities(&caps);
+			if (err == DI_OK) {
+			} else {
+				fprintf(stderr, "DI Enum get cap error: %s\n", direct_error_string(err));
+			}
+			joystick->Unacquire();
+			joystick->Release();
+			diJoystix.push_back(joy_cap(pdidInstance->guidInstance, nullptr, true));
 		}
-		joystick->Unacquire();
-		joystick->Release();
-		diJoystix.push_back(joy_cap(pdidInstance->guidInstance, nullptr, true));
-	} else {
-		fprintf(stderr, "DI Enum error: %s\n", direct_error_string(err));
+		else {
+			fprintf(stderr, "DI Enum error: %s\n", direct_error_string(err));
+		}
 	}
 	return DIENUM_CONTINUE;
 }
