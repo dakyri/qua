@@ -32,7 +32,7 @@ public:
 						~Pool();
 						
 						virtual bool		Init() override;
-	virtual Instance	*addInstance(std::string, Time startt, Time dur, Channel * chan) override;
+	virtual Instance	*addInstance(const std::string &, const Time &startt, const Time &dur, Channel * chan) override;
 	virtual void		removeInstance(Instance *i, bool display) override;
 
 	virtual void		Cue(Time &t) override;
@@ -53,7 +53,6 @@ public:
 	Stream scratchStream;
 	Stream &selectedTakeStream;
 	Time duration;
-	std::mutex flock;
 
 	bool				SetRecordTake();
 	StreamTake			*recordTake;
@@ -72,7 +71,7 @@ public:
 class PoolInstance: public Instance
 {
 public:
-	 PoolInstance(Pool *s, std::string nm, Time t, Time d, Channel * c);
+	 PoolInstance(Pool &s, const std::string & nm, const Time &t, const Time &d, Channel * const c);
 	 virtual ~PoolInstance();
 
 	virtual void		Reset();

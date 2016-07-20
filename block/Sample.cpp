@@ -283,48 +283,44 @@ Sample::DeleteTake(SampleTake *take, bool disp)
 }
 
 Instance *
-Sample::addInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
+Sample::addInstance(const std::string &nm, const short chan_id, const Time &t, const  Time &d,  const bool disp)
 {
-	Time	at_t;
-	Time	dur_t;
+	Time	dur;
 	Channel	*c;
-	if (t == nullptr) {
-		return nullptr;
-	}
-	at_t = *t;
-	if (d == nullptr) {
+
+	if (!d) {
 		Clip	*dfc = sampleClip(0);
 		SampleTake	*dft = take(0);
 		if (dfc != nullptr) {
-			dur_t = dfc->duration;
+			dur = dfc->duration;
 		} else if (dft != nullptr && dft->status == STATUS_LOADED && dft->file != nullptr) {
-			dur_t.Set(dft->file->nFrames, &Metric::sampleRate);
+			dur.Set(dft->file->nFrames, &Metric::sampleRate);
 		} else {
-			dur_t = Time::infinity;
+			dur = Time::infinity;
 		}
 	} else {
-		dur_t = *d;
+		dur = d;
 	}
 	if (chan_id >= uberQua->nChannel || chan_id < 0) {
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return addInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, t, dur, c);
 }
 
 Instance *
-Sample::addInstance(std::string nm, Time t, Time d, Channel * chan)
+Sample::addInstance(const string &nm, const Time &t, const Time &d, Channel * const chan)
 {
 // duration in sec: ((float)sample->selectedNFrames)/kSamplingRate,
 //		Time(((float)nFrames)/(kSamplingRate*tv->uberQua->timeQuanta), tv->metric),
-	SampleInstance *i = new SampleInstance(this, nm, t, d, chan);
+	SampleInstance *i = new SampleInstance(*this, nm, t, d, chan);
 	addInstToList(i);
 	fprintf(stderr, "added sample instance\n");
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
-		uberQua->AddToSchedule(i);
+		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
 		fprintf(stderr, "Sample: unexpected null while committing to schedule");
@@ -714,7 +710,7 @@ Sample::Stash(float **inBuf, short nChannel, long nFrames)
 {
 	long			stashedFrame = 0;
 //fprintf(stderr, "stash %d\n", nFrames);
-	recordbufLock.lock();
+	recordbufferLock.lock();
 	while (stashedFrame < nFrames) {
 // find somewhere to put stuff!
 		if (  currentRecordBuffer &&
@@ -772,7 +768,7 @@ Sample::Stash(float **inBuf, short nChannel, long nFrames)
 		currentRecordBuffer->nFrames += framesToFit;
 
 	}
-	recordbufLock.unlock();
+	recordbufferLock.unlock();
 	return nFrames;
 }
 
@@ -785,7 +781,7 @@ Sample::FlushRecordBuffers(bool finalflush)
 //	fprintf(stderr, "fluush\n");
 	bool		flushing = finalflush;
 	do {
-		recordbufLock.lock();
+		recordbufferLock.lock();
 		SampleBuffer		*wb = pendingRecordBuffers;
 		if (wb != nullptr) {
 			pendingRecordBuffers = wb->next;
@@ -801,7 +797,7 @@ Sample::FlushRecordBuffers(bool finalflush)
 			}
 		}
 	
-		recordbufLock.unlock();
+		recordbufferLock.unlock();
 		if (wb != nullptr) {		// write it!
 			long	toWrite = wb->nFrames*recordTake->file->nChannels*recordTake->file->sampleSize;
 			recordTake->file->NormalizeOutput(((float *)wb->data), wb->nFrames);
@@ -810,20 +806,20 @@ Sample::FlushRecordBuffers(bool finalflush)
 				uberQua->bridge.reportError("Write error in sampler");
 				break;
 			}
-			recordbufLock.lock();
+			recordbufferLock.lock();
 			wb->next = freeRecordBuffers;
 			freeRecordBuffers = wb;
-			recordbufLock.unlock();
+			recordbufferLock.unlock();
 		}
 	} while (flushing);
 	
 	if (finalflush) {
 //		nFrames = recordTake->file->Frame();
 		fprintf(stderr, "nf %d\n", recordTake->file->Frame());
-		recordbufLock.lock();
+		recordbufferLock.lock();
 		delete freeRecordBuffers;
 		freeRecordBuffers = nullptr;
-		recordbufLock.unlock();
+		recordbufferLock.unlock();
 		if (recordTake->file->Finalize() != B_NO_ERROR) {
 			uberQua->bridge.reportError(recordTake->file->lastError);
 		}
@@ -1342,10 +1338,12 @@ Sample::PlayPitched(float **outSig, short nAudioChannels, long nFramesReqd,
 //////////////////////////////////////////////////////////////////////////////////
 // sample instance
 //////////////////////////////////////////////////////////////////////////////////
-SampleInstance::SampleInstance(class Sample *s, std::string nm, Time t, Time d, Channel *c):
-	Instance(s, nm, t, d, c),
-	startFrame(0,&Metric::sampleRate),
-	endFrame(0,&Metric::sampleRate)
+SampleInstance::SampleInstance(Sample &s, const std::string &nm, const Time &t, const Time &d, Channel * const c)
+	: Instance(s, nm, t, d, c)
+	, sample(s)
+	, startFrame(0, &Metric::sampleRate)
+	, endFrame(0, &Metric::sampleRate)
+
 {
 	mute = false;
 //	currentFrame = 0;
@@ -1380,15 +1378,15 @@ SampleInstance::Init()
 		return false;
 	glob.PushContext(sym);	
 	if (  loopCondition &&
-		  !loopCondition->Init(schedulable) &&
+		  !loopCondition->Init(&schedulable) &&
 		  !loopCondition->Reset(mainStack))
 		goto err_ex;
 	if (  sFrameExp &&
-		  !sFrameExp->Init(schedulable) &&
+		  !sFrameExp->Init(&schedulable) &&
 		  !sFrameExp->Reset(mainStack))
 		goto err_ex;
 	if (  eFrameExp &&
-		  !eFrameExp->Init(schedulable) &&
+		  !eFrameExp->Init(&schedulable) &&
 		  !eFrameExp->Reset(mainStack))
 		goto err_ex;
 	glob.PopContext(sym);	
@@ -1422,7 +1420,7 @@ SampleInstance::Run()
 	wakeDuration = uberQua->theTime - startTime;
 	UpdateEnvelopes(wakeDuration);
 	
-	if (schedulable->mainBlock) {
+	if (schedulable.mainBlock) {
 		Stream	mainStream;
 		Time	tag_time = uberQua->theTime;
 
@@ -1432,7 +1430,7 @@ SampleInstance::Run()
 		flag	uac = UpdateActiveBlock(
 						uberQua,
 						mainStream,
-						schedulable->mainBlock,
+						schedulable.mainBlock,
 						tag_time,
 						this,
 						sym,
@@ -1591,15 +1589,11 @@ SampleInstance::Generate(float **outSig, long nFramesReqd, short nAudioChannels)
 	sample_buf_zero(outSig, nAudioChannels, nFramesReqd);
 	
 //	fprintf(stderr, "!os[0] %g oframe %d\r", outSig[0], outFrame);
-#ifdef LOTSALOX
-	schedulable->stackableLock.Lock();
-#endif
-	if (schedulable->mainBlock && mainStack->locusStatus == STATUS_RUNNING) {
-		ApplyQuaFX(mainStack, schedulable->mainBlock, outSig, nFramesReqd, nAudioChannels);
+	sample.bufferLock.lock();
+	if (schedulable.mainBlock && mainStack->locusStatus == STATUS_RUNNING) {
+		ApplyQuaFX(mainStack, schedulable.mainBlock, outSig, nFramesReqd, nAudioChannels);
 	}
-#ifdef LOTSALOX
-	schedulable->stackableLock.Unlock();
-#endif
+	sample.bufferLock.unlock();
 
 //	fprintf(stderr, "@os[0] %g oframe %d %d-%d\n", outSig[0], outFrame, startFrame.ticks, endFrame.ticks);
 	

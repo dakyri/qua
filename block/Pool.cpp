@@ -190,19 +190,19 @@ err_ex:
 }
 
 Instance *
-Pool::addInstance(std::string nm, Time t, Time d, Channel * chan)
+Pool::addInstance(const std::string &nm, const Time &startt, const Time &dur, Channel * chan)
 {
 //	ArrangerObject *p =  new ArrangerObject(representation->label, this,
 //		 chan, start,
 //		 mainStream->EndTime(), tv, representation->color);
 //	return p;
-	PoolInstance *i = new PoolInstance(this, nm, t, d, chan);
+	PoolInstance *i = new PoolInstance(*this, nm, startt, dur, chan);
 	addInstToList(i);
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
-		uberQua->AddToSchedule(i);
+		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
 		fprintf(stderr, "Schedulable: unexpected null while committing to schedule");
@@ -483,12 +483,12 @@ Pool::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 }
 
 
-PoolInstance::PoolInstance(Pool *p, std::string nm, Time t, Time d, Channel * c):
+PoolInstance::PoolInstance(Pool &p, const std::string & nm, const Time &t, const Time &d, Channel * const c):
 	Instance(p,nm, t,d,c)
 {
 	nextItem = nullptr;
 	loopStart = Time::zero;
-	loopDuration = p->duration;
+	loopDuration = p.duration;
 	loopCount = 0;
 	loopCondition = new Block( Block::C_VALUE); 
 	loopCondition->crap.constant.value = TypedValue::Bool(1);
@@ -517,7 +517,7 @@ PoolInstance::Run()
 	wakeDuration = uberQua->theTime - startTime;
 	UpdateEnvelopes(wakeDuration);
 	
-	if (schedulable->mainBlock) {
+	if (schedulable.mainBlock) {
 		Stream	mainStream;
 		Time	tag_time = uberQua->theTime;
 
@@ -527,7 +527,7 @@ PoolInstance::Run()
 		flag	uac = UpdateActiveBlock(
 						uberQua,
 						mainStream,
-						schedulable->mainBlock,
+						schedulable.mainBlock,
 						tag_time,
 						this,
 						sym,

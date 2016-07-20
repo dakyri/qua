@@ -2827,10 +2827,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 					}
 				}
 			}
-			Instance	*instance = sch->addInstance(
-					nmbuf,
-					chan_id,
-					&at_t, &dur_t, false);
+			Instance	*instance = sch->addInstance(nmbuf, chan_id, at_t, dur_t, false);
 			if (instance) {
 //				for (i=0; i<NIndexer(); i++) {
 //					Indexer(i)->AddToSymbolIndex(instance->sym);

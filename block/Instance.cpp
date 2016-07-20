@@ -31,15 +31,15 @@ Loggable::SetLogValue(Block *b)
 	return B_NO_ERROR;
 }
 
-Instance::Instance(class Schedulable *s, std::string nm, Time t, Time d, Channel * c):
-	Notified(s->uberQua)
+Instance::Instance(Schedulable &s, const std::string &nm, const Time &t, const Time &d, Channel * const c)
+	: Notified(s.uberQua)
+	, schedulable(s)
+	, startTime(t)
+	, duration(d)
 {
 	thruEnabled = false;
-	startTime = t;
-	duration = d;
 	channel = c;
 	status = STATUS_SLEEPING;
-	schedulable = s;
 	wokenAt = Time::zero;
 	wakeDuration = Time::zero;
 
@@ -52,21 +52,13 @@ Instance::Instance(class Schedulable *s, std::string nm, Time t, Time d, Channel
 	cueStack = nullptr;
 	
 
-	if (s) {
-		uberQua = s->uberQua;
-
-		if (nm == "") {
-			nm = s->sym->name;
-		}
-
-		std::string nmbuf = glob.makeUniqueName(s->sym, nm, 0);
-
-		sym = DefineSymbol(nmbuf, TypedValue::S_INSTANCE, 0,
-						this, s->sym,
-						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT);
-//		interfaceBridge.SetSymbol(sym);
-		fprintf(stderr, "instance %s of %s defined at %s on %d\n",sym->uniqueName(), s->sym->name.c_str(), startTime.StringValue(), (unsigned)channel);
-	}
+	uberQua = s.uberQua;
+	std::string nmbuf = glob.makeUniqueName(s.sym, nm != "" ? nm : s.sym->name, 0);
+	sym = DefineSymbol(nmbuf, TypedValue::S_INSTANCE, 0,
+		this, s.sym,
+		TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT);
+	//		interfaceBridge.SetSymbol(sym);
+	fprintf(stderr, "instance %s of %s defined at %s on %d\n", sym->uniqueName(), s.sym->name.c_str(), startTime.StringValue(), (unsigned)channel);
 
 // keep a list of  the standard controllers
 //	controlVariables = new QuaControllerBridge(s->uberQua, this, nullptr, s->standardControlInfo);
@@ -131,7 +123,7 @@ err_ex:
 
 Instance::~Instance()
 {
-	schedulable->removeInstance(this, false);
+	schedulable.removeInstance(this, false);
 }
 
 void
@@ -143,20 +135,20 @@ Instance::Reset()
 bool
 Instance::ResetStacks()
 {
-	if (schedulable->mainBlock)
-		schedulable->mainBlock->Reset(mainStack);
-	if (schedulable->wake.block)
-		schedulable->wake.block->Reset(wakeStack);
-	if (schedulable->sleep.block)
-		schedulable->sleep.block->Reset(sleepStack);
-	if (schedulable->rx.block)
-		schedulable->rx.block->Reset(rxStack);
-	if (schedulable->start.block)
-		schedulable->start.block->Reset(startStack);
-	if (schedulable->stop.block)
-		schedulable->stop.block->Reset(stopStack);
-	if (schedulable->record.block)
-		schedulable->record.block->Reset(recordStack);
+	if (schedulable.mainBlock)
+		schedulable.mainBlock->Reset(mainStack);
+	if (schedulable.wake.block)
+		schedulable.wake.block->Reset(wakeStack);
+	if (schedulable.sleep.block)
+		schedulable.sleep.block->Reset(sleepStack);
+	if (schedulable.rx.block)
+		schedulable.rx.block->Reset(rxStack);
+	if (schedulable.start.block)
+		schedulable.start.block->Reset(startStack);
+	if (schedulable.stop.block)
+		schedulable.stop.block->Reset(stopStack);
+	if (schedulable.record.block)
+		schedulable.record.block->Reset(recordStack);
 	return true;
 }
 
@@ -187,46 +179,46 @@ bool
 Instance::SetStacks()
 {
 //	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
-	if (schedulable->uberQua == nullptr)
+	if (schedulable.uberQua == nullptr)
 		return false;
 		
 	QuasiStack	*mainMainStack = mainStack;
 	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
 	if (mainStack == nullptr) {
-		mainStack = new QuasiStack(schedulable->sym, this, sym, nullptr, nullptr, schedulable->uberQua->theStack, schedulable->uberQua, nullptr);
+		mainStack = new QuasiStack(schedulable.sym, this, sym, nullptr, nullptr, schedulable.uberQua->theStack, schedulable.uberQua, nullptr);
 
-		if (schedulable->mainBlock &&
-				!schedulable->mainBlock->StackOMatic(mainStack, 3))
+		if (schedulable.mainBlock &&
+				!schedulable.mainBlock->StackOMatic(mainStack, 3))
 			return false;
 			
 		mainMainStack = mainStack;
 	}
 	
 	fprintf(stderr, "wake stack for %s\n", sym->uniqueName());
-	if (wakeStack == nullptr && schedulable->wake.block) {
+	if (wakeStack == nullptr && schedulable.wake.block) {
 		wakeStack = new QuasiStack(
-							schedulable->wake.sym,
-							this, sym, nullptr, nullptr, mainStack, schedulable->uberQua, "Wake");
-		if (!schedulable->wake.block->StackOMatic(wakeStack, 3))
+							schedulable.wake.sym,
+							this, sym, nullptr, nullptr, mainStack, schedulable.uberQua, "Wake");
+		if (!schedulable.wake.block->StackOMatic(wakeStack, 3))
 			return false;
 		wakeStack->lowerFrame = mainMainStack;
 	}
 	
 	fprintf(stderr, "sleep stack for %s\n", sym->uniqueName());
-	if (sleepStack == nullptr && schedulable->sleep.block) {
+	if (sleepStack == nullptr && schedulable.sleep.block) {
 		sleepStack = new QuasiStack(
-							schedulable->sleep.sym,
-							this, sym, nullptr, nullptr, mainStack, schedulable->uberQua, "Sleep");
-		if (!schedulable->sleep.block->StackOMatic(sleepStack, 3))
+							schedulable.sleep.sym,
+							this, sym, nullptr, nullptr, mainStack, schedulable.uberQua, "Sleep");
+		if (!schedulable.sleep.block->StackOMatic(sleepStack, 3))
 			return false;
 		sleepStack->lowerFrame = mainMainStack;
 	}
 	
-	if (rxStack == nullptr && schedulable->rx.block) {
+	if (rxStack == nullptr && schedulable.rx.block) {
 		rxStack = new QuasiStack(
-							schedulable->rx.sym,
-							this, sym, nullptr, nullptr, mainStack, schedulable->uberQua, "Receive");
-		if (!schedulable->rx.block->StackOMatic(rxStack, 3))
+							schedulable.rx.sym,
+							this, sym, nullptr, nullptr, mainStack, schedulable.uberQua, "Receive");
+		if (!schedulable.rx.block->StackOMatic(rxStack, 3))
 			return false;
 		rxStack->lowerFrame = mainMainStack;
 	}
@@ -242,7 +234,7 @@ Instance::Recv(Stream &s)
 		flag	uac = UpdateActiveBlock(
 					uberQua,
 					s,
-					schedulable->rx.block,
+					schedulable.rx.block,
 					tag_time,
 					this,
 					sym,
@@ -444,7 +436,7 @@ status_t
 Instance::Save(FILE *fp, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s", schedulable->sym->printableName().c_str());
+	tab(fp, indent); fprintf(fp, "%s", schedulable.sym->printableName().c_str());
 	fprintf(fp, "(");
 	if (channel && channel->sym){
 		fprintf(stderr, "%s", channel->sym->name.c_str());
@@ -485,11 +477,10 @@ Instance::SaveStackInfo(FILE *fp, short indent)
 }
 
 
-
 void
 Instance::StartRecording()
 {
-	schedulable->status = STATUS_RECORDING;
+	schedulable.status = STATUS_RECORDING;
 	status = STATUS_RECORDING;
 	uberQua->bridge.DisplayStatus(this, status);
 }
@@ -498,15 +489,15 @@ void
 Instance::StopRecording()
 {
 //	Stream.Coalesce();
-	switch (schedulable->sym->type) {
+	switch (schedulable.sym->type) {
 	
 	case TypedValue::S_SAMPLE: {
-		Sample *sample = (Sample *) schedulable;
+		Sample *sample = (Sample *) &schedulable;
 		break;
 	} 
 	
 	case TypedValue::S_POOL: {
-		Pool *pool = (Pool *) schedulable;
+		Pool *pool = (Pool *) &schedulable;
 		((PoolInstance*)this)->loopDuration = 
 				pool->recordTake->duration =
 				pool->duration = pool->selectedTakeStream.EndTime();
@@ -520,7 +511,7 @@ Instance::StopRecording()
 //	if (controlPanel)
 //		controlPanel->DisplayStatus(STATUS_RUNNING);
 	status = STATUS_SLEEPING;
-	schedulable->status = STATUS_RUNNING;
+	schedulable.status = STATUS_RUNNING;
 }
 
 // careful some big changes may have to be made when changing channels
@@ -562,6 +553,7 @@ status_t
 Instance::SetStartTime(const Time &t, const bool display)
 {
 	startTime = t;
+	uberQua->updateInstanceSchedule(this);
 	if (display) {
 		uberQua->bridge.DisplayStartTime(this);
 	}

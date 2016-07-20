@@ -694,8 +694,13 @@ QuaDisplay::HideObjectRepresentation(StabEnt *sym)
 {
 	;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////
 // called by an interface to make dynamic changes to a potentially running sequencer
+/////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Change an instances time and duration ... may also update several screen objects
+ * TODO FIXME XXXX perhaps split this into 2 or 3 separate functions for time, duration and/or channel
+ */
 void
 QuaDisplay::MoveInstance(StabEnt *instSym, short chan, const Time &at_t, const Time &dur_t)
 {
@@ -706,9 +711,9 @@ QuaDisplay::MoveInstance(StabEnt *instSym, short chan, const Time &at_t, const T
 		for (i=0; i<NArranger(); i++) {
 			Arranger(i)->MoveInstanceRepresentation(inst);
 		}
-		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->chanSym);
-		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->starttSym);
-		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable->durSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable.chanSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable.starttSym);
+		UpdateControllerDisplay(instSym, inst->mainStack, inst->schedulable.durSym);
 	}
 }
 
@@ -732,12 +737,12 @@ QuaDisplay::ListEnvelopesFor(StabEnt *stacker)
 
 // called by an interface to make dynamic changes to a potentially running sequencer
 StabEnt *
-QuaDisplay::CreateInstance(StabEnt *schSym, short chan, Time *at_t, Time *dur_t)
+QuaDisplay::CreateInstance(StabEnt *schSym, const short chan, const Time &t, const Time &d)
 {
 	short	i;
 	Schedulable	*sch = schSym->SchedulableValue();
 	if (sch) {
-		Instance	*instance = sch->addInstance(sch->sym->name, chan, at_t, dur_t, false);
+		Instance	*instance = sch->addInstance(sch->sym->name, chan, t, d, false);
 		if (instance) {
 			for (i=0; i<NIndexer(); i++) {
 				Indexer(i)->addToSymbolIndex(instance->sym);
@@ -753,7 +758,7 @@ QuaDisplay::CreateInstance(StabEnt *schSym, short chan, Time *at_t, Time *dur_t)
 
 // called by an interface to make dynamic changes to a potentially running sequencer
 StabEnt *
-QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, short chan, Time *at_t, Time *dur_t)
+QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
 {
 	// create sample
 	std::string	sample_nm;
@@ -776,11 +781,15 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 			sample->addSampleTake(b, p, false);
 		}
 		// update index displays
-		Instance	*instance = sample->addInstance(nm, chan, at_t, dur_t, false);
-		for (short i=0; i<NIndexer(); i++) {
-			Indexer(i)->addToSymbolIndex(sample->sym);
-			if (instance) {
-				Indexer(i)->addToSymbolIndex(instance->sym);
+		Instance	*instance = nullptr;
+		if (tp != nullptr && dp != nullptr) {
+			Time t = *tp, d = *dp;
+			instance = sample->addInstance(nm, chan, t, d, false);
+			for (short i = 0; i < NIndexer(); i++) {
+				Indexer(i)->addToSymbolIndex(sample->sym);
+				if (instance) {
+					Indexer(i)->addToSymbolIndex(instance->sym);
+				}
 			}
 		}
 		// update arranger displays;
@@ -804,7 +813,7 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 }
 
 StabEnt *
-QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short chan, Time *at_t, Time *dur_t)
+QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
 {
 	// create voice
 	short	i;
@@ -827,8 +836,9 @@ QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short
 		}
 		// update index displays
 		Instance	*instance=nullptr;
-		if (chan >= 0 && at_t != nullptr && dur_t != nullptr) {
-			instance = voice->addInstance(voice->sym->name, chan, at_t, dur_t, false);
+		if (chan >= 0 && tp != nullptr && dp != nullptr) {
+			Time t = *tp, d = *dp;
+			instance = voice->addInstance(voice->sym->name, chan, t, d, false);
 		}
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(voice->sym);
@@ -904,7 +914,7 @@ QuaDisplay::CreateChannel(char *nm, short chan,
 }
 
 StabEnt *
-QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
+QuaDisplay::CreateMethod(const std::string &nm, StabEnt *parent)
 {
 	// create voice
 	short	i;
@@ -935,16 +945,11 @@ QuaDisplay::CreateMethod(std::string nm, StabEnt *parent)
 
 
 StabEnt *
-QuaDisplay::CreateClip(std::string nm, Time *at_t, Time *dur_t)
+QuaDisplay::CreateClip(const std::string &nm, const Time &at, const Time &dur)
 {
 	std::string clip_nm = glob.makeUniqueName(qua->sym, nm.size() > 0? nm:"clip", 1);
-	Time st;
-	st.Set("0:0.0");
-	Time dt;
-	dt.Set("1:0.0");
-	if (dur_t) dt = *dur_t;
-	if (at_t) st = *at_t;
-	Clip	*clip = qua->addClip(clip_nm, st, dt, false);
+
+	Clip *clip = qua->addClip(clip_nm, at, dur, false);
 	if (clip) {
 		fprintf(stderr, "created clip %s\n", clip->sym->name.c_str());
 		for (short i=0; i<NIndexer(); i++) {

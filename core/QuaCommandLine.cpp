@@ -201,8 +201,8 @@ QuaCommandLine::loadAsio(int devind, FILE *fp)
 #ifdef QUA_V_AUDIO_ASIO
 	int32		na = QuaAudioManager::asio.nDrivers;
 	if (devind >= 0 && devind < na) {
-		char	*p;
-		if (p == NULL || !(*p)) {
+		char *p = QuaAudioManager::asio.DriverName(devind);
+		if (p == nullptr || !(*p)) {
 			return;
 		}
 		status_t err = QuaAudioManager::asio.LoadDriver(p);
@@ -210,8 +210,7 @@ QuaCommandLine::loadAsio(int devind, FILE *fp)
 			fprintf(fp, "ASIO error while loading %s: %d\n", QuaAudioManager::asio.DriverName(devind), err);
 			return;
 		}
-	}
-	else {
+	} else {
 		fprintf(fp, "Bad ASIO device number %d\n", devind);
 		return;
 	}

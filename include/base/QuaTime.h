@@ -37,9 +37,12 @@ public:
 	void		DecrementBeat();
 	void		DecrementTick();
 	
-	bool		operator >= (const Time & t2);
+	bool operator ! () const;
+
 	bool		operator == (const Time & t2);
 	bool		operator != (const Time &t2);
+
+	bool		operator >= (const Time & t2);
 	bool		operator <= (const Time &t2);
 	bool		operator > (const Time &t2);
 	bool		operator < (const Time &t2);
@@ -56,6 +59,7 @@ public:
 	Time		operator / (const int n);
 	Time		operator - (const int n);
 	Time		operator + (const int n);
+
 	long		operator = (const long n);
 	Time		operator ~ ();
 

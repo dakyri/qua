@@ -32,16 +32,16 @@ public:
 	) override {
 		return nullptr;
 	}
-	virtual StabEnt	*		CreateMethod(std::string nm, StabEnt *p = nullptr) override { return nullptr; }
-	virtual StabEnt	*		CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr)override { return nullptr; }
-	virtual StabEnt *		CreateInstance(StabEnt *, short, Time *, Time *)override { return nullptr; }
-	virtual void			MoveInstance(StabEnt *, short, Time *, Time *) override { };
-	virtual void			DeleteInstance(StabEnt *) override { };
-	virtual void			DeleteObject(StabEnt *)override { };
-	virtual void			ShowObjectRepresentation(StabEnt *) override { };
-	virtual void			HideObjectRepresentation(StabEnt *)override { };
-	virtual short			CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) override { return 0; }
-	virtual short			ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) override { return 0; }
+	virtual StabEnt	* CreateMethod(std::string nm, StabEnt *p = nullptr) override { return nullptr; }
+	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr)override { return nullptr; }
+	virtual StabEnt * CreateInstance(StabEnt *, const short, const Time &, const Time &) override {};
+	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) override {};
+	virtual void DeleteInstance(StabEnt *) override { };
+	virtual void DeleteObject(StabEnt *)override { };
+	virtual void ShowObjectRepresentation(StabEnt *) override { };
+	virtual void HideObjectRepresentation(StabEnt *)override { };
+	virtual short CompileBlock(StabEnt *, char *srcnm, char *txt, long textlen) override { return 0; }
+	virtual short ParseBlock(StabEnt *, char *srcnm, char *txt, long textlen) override { return 0; }
 
 	virtual void			UpdateControllerDisplay(StabEnt *stackerSym, QuasiStack *stack, StabEnt *sym,
 		qua_perpective_type srctype = QUAPSCV_NOT, QuaPerspective *src = nullptr) override { };

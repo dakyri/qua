@@ -404,12 +404,12 @@ QuaAudioManager::buffaerator()
 			sampleLock.lock(); /*read*/
 			for (short i=0; ((unsigned)i)<samples.size(); i++) {
 				Sample	*sam = samples[i];
-				sam->uberQua->objectsBlockStack.lock() /*read*/;
+				sam->bufferLock.lock() /*read*/;
 				status_t	err = sam->SynchronizeBuffers();
 				if (err != B_NO_ERROR) {
 					sam->uberQua->bridge.reportError("sample reader: file error on %s: %s", sam->sym->name, errorStr(err));
 				}
-				sam->uberQua->objectsBlockStack.unlock() /*read*/;
+				sam->bufferLock.unlock() /*read*/;
 			}
 			sampleLock.unlock() /*read*/;
 		}
@@ -434,7 +434,7 @@ QuaAudioManager::writer()
 		} else {
 			for (short i=0; ((unsigned)i)<recordInstances.size(); i++) {
 				SampleInstance	*si = recordInstances[i];
-				if (si->QSample()->FlushRecordBuffers(false) != B_NO_ERROR) {
+				if (si->sample.FlushRecordBuffers(false) != B_NO_ERROR) {
 					recordInstances.erase(recordInstances.begin()+i);
 					break;
 				}
@@ -741,34 +741,32 @@ QuaAudioManager::startRecording(SampleInstance *ri)
 
 	recordInstanceLock.lock();
 	for (short i=0; ((unsigned)i)<recordInstances.size(); i++) {
-		if (ri->QSample() == ((SampleInstance*)recordInstances[i])->QSample()) {
+		if (&ri->sample == &((SampleInstance*)recordInstances[i])->sample) {
 			recordInstanceLock.unlock();
 			return B_ERROR;
 		}
 	}
 	
-	Sample	*sam = ri->QSample();
 
 	SampleTake *recdTake = nullptr;
-	if (sam != nullptr) {
-		recdTake = sam->AddRecordTake(
-						SampleFile::WAVE_TYPE,
-						ri->channel->nAudioIns,
-						4, 44100.0);
-		if (recdTake == nullptr) {
-			sam->uberQua->bridge.reportError("Output file not initialised: %s", errorStr(err));
-		} else {
-			sam->recordTake->file->SeekToFrame(0);
-			ri->QSample()->status = STATUS_RECORDING;
+	recdTake = ri->sample.AddRecordTake(
+		SampleFile::WAVE_TYPE,
+		ri->channel->nAudioIns,
+		4, 44100.0);
+	if (recdTake == nullptr) {
+		ri->sample.uberQua->bridge.reportError("Output file not initialised: %s", errorStr(err));
+	}
+	else {
+		ri->sample.recordTake->file->SeekToFrame(0);
+		ri->sample.status = STATUS_RECORDING;
 
-			recordInstances.push_back(ri);
+		recordInstances.push_back(ri);
 
-			if (recordInstances.size() >= 1) {
-				resumeWriter();
-			}
+		if (recordInstances.size() >= 1) {
+			resumeWriter();
 		}
 	}
-	
+
 	recordInstanceLock.unlock();
 
 	return B_NO_ERROR;
@@ -787,15 +785,13 @@ QuaAudioManager::stopRecording(SampleInstance *ri)
 	}
 
 	// no more flushing from main writer
-	Sample	*sam = ri->QSample();
-
-	sam->FlushRecordBuffers(true);
-	ri->endFrame = sam->recordTake->file->nFrames;
-	sam->status = STATUS_RUNNING;
-	SampleTake		*newest = sam->recordTake;
-	sam->recordTake = nullptr;
-	if (sam->sampleClip(0)->media == nullptr) {
-		sam->SelectTake(newest, true);
+	ri->sample.FlushRecordBuffers(true);
+	ri->endFrame = ri->sample.recordTake->file->nFrames;
+	ri->sample.status = STATUS_RUNNING;
+	SampleTake		*newest = ri->sample.recordTake;
+	ri->sample.recordTake = nullptr;
+	if (ri->sample.sampleClip(0)->media == nullptr) {
+		ri->sample.SelectTake(newest, true);
 	}
 	fprintf(stderr, "Sampler: stopped recording\n");
 	recordInstanceLock.unlock();

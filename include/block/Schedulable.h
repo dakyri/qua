@@ -27,8 +27,8 @@ public:
 							~Schedulable();
 						
 	virtual bool			Init();
-	virtual Instance		*addInstance(std::string, Time startt, Time dur, Channel * chan);
-	virtual Instance		*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp);
+	virtual Instance		*addInstance(const std::string &, const Time &startt, const Time &dur, Channel * const chan);
+	virtual Instance		*addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp);
 	virtual void			removeInstance(Instance *i, bool display);
 
 	virtual void			Cue(Time &t)=0;

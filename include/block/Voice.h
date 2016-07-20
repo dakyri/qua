@@ -30,9 +30,9 @@ public:
 	virtual status_t	QuaStart() override;
 	virtual status_t	QuaRecord() override;
 
-	virtual Instance	*addInstance(std::string, Time, Time, Channel *) override;
-	virtual Instance	*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool) override;
-	
+	virtual Instance *addInstance(const std::string &, const Time &startt, const Time &dur, Channel * const chan) override;
+	virtual Instance *addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp) override;
+
 	status_t			Save(FILE *fp, short indent);
 	status_t			SaveSnapshot(FILE *fp);
 
@@ -66,7 +66,7 @@ public:
 class VoiceInstance: public Instance
 {
 public:
-	VoiceInstance(Voice *s, std::string, Time t, Time d, Channel * c);
+	VoiceInstance(Voice &s, const std::string&, const Time &t, const Time &d, Channel *const c);
 	virtual ~VoiceInstance();
 
 	virtual size_t		Generate(float **bufs, long nf, short nc);	// add to out buf

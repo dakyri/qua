@@ -220,7 +220,7 @@ void CQuaMFCDoc::OnAddClip()
 		Time	dur;
 		start = qua->theTime;
 		dur.Set("1:0.0");
-		display.CreateClip("region", &start, &dur);
+		display.CreateClip("region", start, dur);
 	}
 }
 
@@ -231,7 +231,7 @@ void CQuaMFCDoc::OnAddMarker()
 		Time	dur;
 		start = qua->theTime;
 		dur.ticks = 0;
-		display.CreateClip("marker", &start, &dur);
+		display.CreateClip("marker", start, dur);
 	}
 }
 

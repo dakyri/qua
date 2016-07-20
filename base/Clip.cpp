@@ -551,9 +551,9 @@ Clip::Clip(std::string nm, StabEnt *ctxt)
 }
 
 bool	
-Clip::Set(Take *m, Time&s, Time &e)
+Clip::Set(const Take *m, const Time&s, const Time &e)
 {
-	media = m;
+	media = const_cast<Take*>(m);
 	start = s;
 	duration = e;
 	return true;

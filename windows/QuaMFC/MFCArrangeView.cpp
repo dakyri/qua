@@ -477,7 +477,7 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 			envelopes = quaLink->ListEnvelopesFor(inst->sym);
 			nEnvelope = envelopes.size();
 			char	buf[256];
-			sprintf(buf, "Envelopes for '%s'", inst->sym->name);
+			sprintf(buf, "Envelopes for '%s'", inst->sym->name.c_str());
 			ctxtMenu->AppendMenu(MF_POPUP, (UINT) envMenu->m_hMenu, buf);
 //			for each variable
 //				envMenu->AppendMenu(MF_STRING, ID_EDIT_SHOW_ENVELOPE, variable name);
@@ -610,18 +610,9 @@ MFCArrangeView::OnInitialUpdate()
 			quaLink->DisplayTempo(qdoc->qua->metric->tempo, false);
 		}
 
-		StreamItem	*p = qdoc->qua->schedule.head;
-		while (p != NULL) {
-			if (p->type == TypedValue::S_VALUE) {
-				StreamValue	*isp = (StreamValue *)p;
-				Instance	*inst = isp->value.InstanceValue();
-				if (inst) {
-					AddInstanceRepresentation(inst);
-				}
-			}
-			p = p->next;
+		for (auto ip = qdoc->qua->schedule.begin(); ip != qdoc->qua->schedule.end(); ++ip) {
+			AddInstanceRepresentation(*ip);
 		}
-
 		AddAllItemViews(false);
 
 		quaLink->DisplayGlobalTime(qdoc->qua->theTime, false);
@@ -782,7 +773,7 @@ MFCArrangeView::OnDrop(
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drop schedulable %s: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", dragon.data.symbol->name, point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
 
-			quaLink->CreateInstance(dragon.data.symbol, at_channel, &at_time, NULL);
+			quaLink->CreateInstance(dragon.data.symbol, at_channel, at_time, NULL);
 			return TRUE;
 		}
 			
@@ -1355,9 +1346,9 @@ MFCArrangeView::UpdateControllerDisplay(StabEnt *stacker, QuasiStack *qs, StabEn
 	Instance	*inst=stacker->InstanceValue();
 	fprintf(stderr, "MFCArrangeView::Update controller display\n");
 	if (inst) {
-		if (sym == inst->schedulable->chanSym ||
-				sym == inst->schedulable->durSym ||
-				sym == inst->schedulable->starttSym) {
+		if (sym == inst->schedulable.chanSym ||
+				sym == inst->schedulable.durSym ||
+				sym == inst->schedulable.starttSym) {
 			MoveInstanceRepresentation(inst);
 			return;
 		}

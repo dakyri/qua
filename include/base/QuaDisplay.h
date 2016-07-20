@@ -91,7 +91,7 @@ public:
 
 /*
  * the basic requirements that a sequencer has or would like to have from a display or display-like entity
- * it's ok if these are all stubs
+ * it's ok if these are all stubs. This is the minimum functional display required by the constructor
  */
 class QuaReflection: public ErrorHandler {
 public:
@@ -241,8 +241,8 @@ public:
 	virtual void GotoEndOfClip(StabEnt *) = 0;
 	virtual void SelectRegion(StabEnt *) = 0;
 
-	virtual StabEnt * CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
-	virtual StabEnt * CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
+	virtual StabEnt * CreateSample(const std::string &nm, const std::vector<std::string> & p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
+	virtual StabEnt * CreateVoice(const std::string &nm, const std::vector<std::string> & pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
 	virtual StabEnt * CreateChannel(
 		char *nm = nullptr, short c = -1,
 		uchar nin = 2, uchar nout = 2,
@@ -251,12 +251,12 @@ public:
 		bool add_dflt_str_in = false,
 		bool add_dflt_str_out = false
 	) = 0;
-	virtual StabEnt	* CreateMethod(std::string nm, StabEnt *p = nullptr) = 0;
-	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) = 0;
+	virtual StabEnt	* CreateMethod(const std::string &nm, StabEnt *p = nullptr) = 0;
+	virtual StabEnt	* CreateClip(const std::string &nm, const Time &st, const Time &dur) = 0;
 
 	// callbacks from the interface to create and manipulate instances of schedulables
-	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) = 0;
-	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) = 0;
+	virtual StabEnt * CreateInstance(StabEnt * const, const short, const Time &, const Time &) = 0;
+	virtual void MoveInstance(StabEnt *, const short, const Time &, const Time &) = 0;
 	virtual void DeleteInstance(StabEnt *) = 0;
 
 	virtual void CreateStreamTake(StabEnt *) = 0;
@@ -499,8 +499,8 @@ public:
 	virtual void GotoEndOfClip(StabEnt *) override;
 	virtual void SelectRegion(StabEnt *) override;
 
-	virtual StabEnt * CreateSample(std::string nm, std::vector<std::string> p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
-	virtual StabEnt * CreateVoice(std::string nm, std::vector<std::string> pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
+	virtual StabEnt * CreateSample(const std::string &nm, const std::vector<std::string> &p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
+	virtual StabEnt * CreateVoice(const std::string &nm, const std::vector<std::string> &pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
 	virtual StabEnt * CreateChannel(
 		char *nm = nullptr, short c = -1,
 		uchar nin = 2, uchar nout = 2,
@@ -509,9 +509,9 @@ public:
 		bool add_dflt_str_in = false,
 		bool add_dflt_str_out = false
 	) override;
-	virtual StabEnt * CreateMethod(std::string nm, StabEnt *p = nullptr) override;
-	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) override;
-	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) override;
+	virtual StabEnt * CreateMethod(const std::string &nm, StabEnt * const p = nullptr) override;
+	virtual StabEnt	* CreateClip(const std::string &nm, const Time &st, const Time &dur) override;
+	virtual StabEnt * CreateInstance(StabEnt *, const short, const Time &, const Time &) override;
 	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) override;
 	virtual void DeleteInstance(StabEnt *) override;
 	virtual void DeleteObject(StabEnt *) override;

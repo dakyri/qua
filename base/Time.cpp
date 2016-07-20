@@ -241,8 +241,14 @@ Time::operator - (const Time& t2)
 	return ti;
 }
 
+bool
+Time::operator ! () const
+{
+	return ticks != 0;
+}
+
 Time
-Time::operator - (int t2)
+Time::operator - (const int t2)
 {
 	Time	ti;
 
@@ -257,7 +263,7 @@ Time::operator - (int t2)
 }
 
 Time
-Time::operator + (int t2)
+Time::operator + (const int t2)
 {
 	Time	ti;
 
@@ -317,7 +323,7 @@ Time::operator %= (const Time &t2)
 
 
 Time
-Time::operator / (int n)
+Time::operator / (const int n)
 {
 	Time	ti;
 	
@@ -334,14 +340,14 @@ Time::operator / (int n)
 
 
 long
-Time::operator = (long n)
+Time::operator = (const long n)
 {
 	ticks = n;
 	return n;
 }
 
 Time
-Time::operator &(Metric *m)
+Time::operator &(Metric * const m)
 {
 	if (m == nullptr || metric == m || *metric == *m) {
 		return *this;
@@ -355,7 +361,7 @@ Time::operator &(Metric *m)
 }
 
 Time
-Time::operator &=(Metric *m)
+Time::operator &=(Metric *const m)
 {
 	if (m != nullptr) {
 		if (metric != m && *metric != *m) {

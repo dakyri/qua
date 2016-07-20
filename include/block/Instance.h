@@ -39,7 +39,7 @@ class Instance: public Notified,
 				public Loggable
 {
 public:
-	Instance(Schedulable *s, std::string nm, Time t, Time d, Channel *c);
+	Instance(Schedulable &s, const std::string &nm, const Time &t, const Time &d, Channel *const c);
 	virtual ~Instance();
 
 	virtual Time RelativeTime(Time &t);
@@ -72,13 +72,12 @@ public:
 	bool ResetStacks();
 	bool DestroyStacks();
 
-	Qua *uberQua;
-
+	Schedulable &schedulable;
 	Time startTime;
 	Time duration;
 
+	Qua *uberQua;
 	Channel *channel;
-	Schedulable *schedulable;
 	
 	QuasiStack *mainStack;
 	QuasiStack *wakeStack;

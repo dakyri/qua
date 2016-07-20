@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 class Voice;
 class Lambda;
@@ -32,7 +33,7 @@ class QuaParallelManager;
 struct EnvelopeSegment;
 
 // lest we forget ... 3d fly throughs of sequences in 1997!
-// class B3dUniverse;
+class B3dUniverse;
 
 #include "Metric.h"
 #include "QuaTime.h"
@@ -45,7 +46,7 @@ struct EnvelopeSegment;
 #include "Stream.h"
 #include "QuaDisplay.h"
 
-char				*NameStr(short s);
+char *NameStr(short s);
 
 namespace tinyxml2 {
 	class XMLElement;
@@ -54,6 +55,8 @@ namespace tinyxml2 {
 #include <vector>
 #include <thread>
 #include <mutex>
+
+typedef list<Instance*> sched_t;
 
 struct QuaHead
 {
@@ -73,21 +76,21 @@ class Qua:
 	public Executable, public Stacker, public TimeKeeper
 {
 public:
-							Qua(string nm, QuaReflection &display=defaultDisplay, bool chan_add=true);							
-							~Qua();
+	Qua(string nm, QuaReflection &display=defaultDisplay, bool chan_add=true);							
+	~Qua();
 
-	status_t				OnCreationInit(bool chan_add);
-	status_t				PostCreationInit();
-	long					Start();
-	status_t				StartRecording();
-	status_t				StopRecording();
-	long					Pause();
-	long					Restart();
-	long					Stop();
-	long					Rewind();
-	long					ToNextMarker();
-	long					ToPreviousMarker();
-	long					FastForward();
+	status_t OnCreationInit(bool chan_add);
+	status_t PostCreationInit();
+	long Start();
+	status_t StartRecording();
+	status_t StopRecording();
+	long Pause();
+	long Restart();
+	long Stop();
+	long Rewind();
+	long ToNextMarker();
+	long ToPreviousMarker();
+	long FastForward();
 
 	static string getVersionString();
 	static string getCapabilityString();
@@ -158,7 +161,7 @@ public:
 	std::string				projectDirectoryPath;
 	std::string				sampleDirectoryPath;
 
-	class QuasiStack		*theStack;
+	class QuasiStack *theStack;
 
 	QuaReflection &bridge;
 
@@ -169,35 +172,42 @@ public:
 	long nChannel;
 
 #ifdef QUA_V_BETTER_SCHEDULER
-	status_t CheckScheduledActivations();
-	bool AddToSchedule(Instance *);
-	bool RemoveFromSchedule(Instance *);
-	status_t				Wake(Instance *inst);
-	status_t				Sleep(Instance *inst);
+	list<Instance*> schedule;
+	list<Instance*>::iterator cueItem;
+	std::vector<Instance*> activeInstances;
+	std::mutex scheduleLock;
 
-	Stream					schedule;
-	StreamItem				*cueItem;
-	std::vector<Instance*>	activeInstances;
-	std::mutex				objectsBlockStack;
+	status_t checkScheduledActivations();
+	bool addToSchedule(Instance *);
+	bool removeFromSchedule(Instance *);
+	bool updateInstanceSchedule(Instance *);
+
+	sched_t::iterator findSchedulePos(const sched_t::iterator it, const Time &t);
+	sched_t::iterator findScheduleItem(const sched_t::iterator it, const Instance *i);
+	sched_t::iterator findSchedulePos(const Time &t);
+	sched_t::iterator findScheduleItem(const Instance *i);
+
+	status_t Wake(Instance *inst);
+	status_t Sleep(Instance *inst);
 #endif
 
 	void					Cue(Time &t);
 	void					SetToRegionStart();
 	void					SetToRegionEnd();
 
-	status_t				WaitUntilStop();
-	status_t				WaitUntil(Time &t);
+	status_t WaitUntilStop();
+	status_t WaitUntil(Time &t);
 
 	int						iterCounter;	// main iteration
 	int						syncCounter;	// # of midi syncs
 	
 // clip of zero or less in length is a marker,
 // clips here have no associated data ... ie 'take' field is null
-	Clip					*addClip(std::string nm, Time&at, Time&dur, bool disp);
-	Clip					*addClip(std::string nm, bool disp);
-	void					removeClip(Clip *, bool disp);
-	inline Clip				*regionClip(long i) { return clips[i]; }
-	long					nClip() { return clips.size(); }
+	Clip *addClip(const std::string &nm, const Time&at, const Time&dur, const bool disp);
+	Clip *addClip(const std::string &nm, bool disp);
+	void removeClip(Clip *, bool disp);
+	inline Clip *regionClip(long i) { return clips[i]; }
+	long nClip() { return clips.size(); }
 
 	void					SelectRegion(StabEnt *clipSym);
 	void					GotoStartOfClip(StabEnt *clipSym);
@@ -230,9 +240,8 @@ public:
 	bool					doMetroGnome;
 	bool					autoCreateAmpEnv;
 	bool					generateSync;
-	bool					singleWindow;
 
-	bool					SetTimingMode(flag, QuaPort *);
+	bool					setTimingMode(flag, QuaPort *);
 	flag					timingType;
 	QuaPort					*timingDevice;
 };

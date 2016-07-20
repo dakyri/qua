@@ -126,16 +126,16 @@ otherwise once for each created instance ... ????????!!!!!!!!!!
 }
 
 Instance *
-Schedulable::addInstance(string nm, Time t, Time d, Channel * chan)
+Schedulable::addInstance(const string &nm, const Time & t, const Time & d, Channel * const chan)
 {
-	Instance *i = new Instance(this, nm, t, d, chan);
+	Instance *i = new Instance(*this, nm, t, d, chan);
 	addInstToList(i);
 
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
-		uberQua->AddToSchedule(i);
+		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
 		cout << "Schedulable: unexpected null while committing to schedule" << endl;
@@ -144,25 +144,14 @@ Schedulable::addInstance(string nm, Time t, Time d, Channel * chan)
 }
 
 Instance *
-Schedulable::addInstance(string nm, short chan_id, Time *t, Time *d, bool disp)
+Schedulable::addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp)
 {
-	Time	at_t;
-	Time	dur_t;
 	Channel	*c;
-	if (t == nullptr) {
-		return nullptr;
-	}
-	at_t = *t;
-	if (d == nullptr) {
-		dur_t = Time::infinity;
-	} else {
-		dur_t = *d;
-	}
 	if (chan_id >= uberQua->nChannel || chan_id < 0) {
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return addInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, t, d, c);
 }
 
 void
@@ -170,7 +159,7 @@ Schedulable::removeInstance(Instance *i, bool display)
 {
 	removeInstFromList(i);
 	if (uberQua && i) {
-		uberQua->RemoveFromSchedule(i);
+		uberQua->removeFromSchedule(i);
 		if (display) {
 			uberQua->bridge.RemoveInstanceRepresentations(i->sym);
 		}

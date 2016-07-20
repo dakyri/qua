@@ -55,6 +55,7 @@
 #include "Sampler.h"
 #endif
 
+#include <iostream>
 
 QuaEnvironmentDisplay environmentDisplay;
 QuaEnvironment	environment(environmentDisplay);
@@ -94,7 +95,7 @@ Qua::Qua(string nm, QuaReflection &display, bool chan_add) :
 }
 
 Clip *
-Qua::addClip(std::string nm, bool disp)
+Qua::addClip(const std::string &nm, bool disp)
 {
 	Clip	*c = new Clip(nm, sym);
 	clips.push_back(c);
@@ -102,7 +103,7 @@ Qua::addClip(std::string nm, bool disp)
 }
 
 Clip *
-Qua::addClip(std::string nm, Time&start, Time&duration, bool disp)
+Qua::addClip(const std::string & nm, const Time&start, const Time&duration, bool disp)
 {
 	Clip	*c = new Clip(nm, sym);
 	clips.push_back(c);
@@ -326,7 +327,7 @@ Qua::PostCreationInit()
 	tickProcessEndTime = 0;
 	lastUpdate.ticks = -1;
 //	theTime = currentLoop?currentLoop->start:Time::zero;
-	cueItem = schedule.head;
+	cueItem = schedule.begin();
 	usecTime = 0;
 #ifdef QUA_V_ALARMCLOCK
     theClock->Start();
@@ -445,18 +446,12 @@ Qua::RemoveChannel(short ch_id, bool updateDisplay)
 	if (c == nullptr) {
 		bridge.reportError("Attemt to delete null channel %d fails", ch_id);
 	}
-	StreamItem	*p =nullptr;
-	p = schedule.head;
-	while (p != NULL) {
-		if (p->type == TypedValue::S_VALUE) {
-			StreamValue	*q = ((StreamValue *)p);
-			Instance	*i = q->value.InstanceValue();
-			if (i && i->channel == c) {
-				bridge.reportError("Channel must be clear before deletion");
-				return B_ERROR;
-			}
+	for (auto p = schedule.begin(); p != schedule.end(); ++p) {
+		Instance	*i = *p;
+		if (i && i->channel == c) {
+			bridge.reportError("Channel must be clear before deletion");
+			return B_ERROR;
 		}
-		p = p->next;
 	}
 
 	nChannel--;
@@ -1104,98 +1099,153 @@ Qua::Cue(class Time &t)
 status_t
 Qua::WaitUntilStop()
 {
+	cout << "WaitUntilStop unimplemented " << endl;
 	return B_OK;
 }
 
 status_t
 Qua::WaitUntil(Time &t)
 {
+	cout << "WaitUntil unimplemented " << endl;
 	return B_OK;
 }
 
 inline status_t
-Qua::Wake(Instance *inst)	{ return inst->schedulable->Wake(inst); }
+Qua::Wake(Instance *inst)	{ return inst->schedulable.Wake(inst); }
 inline status_t
-Qua::Sleep(Instance *inst)	{ return inst->schedulable->Sleep(inst); }
+Qua::Sleep(Instance *inst)	{ return inst->schedulable.Sleep(inst); }
+
+
+sched_t::iterator
+Qua::findSchedulePos(const Time &t) {
+	return findSchedulePos(schedule.begin(), t);
+}
+sched_t::iterator
+Qua::findSchedulePos(const sched_t::iterator it0, const Time &t) {
+	auto it = it0;
+	while (it != schedule.end()) {
+		if ((*it)->startTime >= t) {
+			return it;
+		}
+		++it;
+	}
+	return it;
+}
+
+
+sched_t::iterator
+Qua::findScheduleItem(const Instance *i) {
+	return findScheduleItem(schedule.begin(), i);
+}
+sched_t::iterator
+Qua::findScheduleItem(const sched_t::iterator it0, const Instance *i) {
+	auto it = it0;
+	while (it != schedule.end()) {
+		if ((*it) == i) {
+			return it;
+		}
+		++it;
+	}
+	return it;
+}
 
 bool
-Qua::AddToSchedule(Instance *inst)
+Qua::addToSchedule(Instance *inst)
 {
 	if (!inst) return false;
-	TypedValue	v;
-	v.Set(inst);
-	schedule.AddToStream(v, inst->startTime);
-	if (inst->startTime < theTime && (inst->startTime+inst->duration) >theTime) {
-		cueItem = nullptr;
+	scheduleLock.lock();
+	sched_t::iterator pos = findSchedulePos(inst->startTime);
+	sched_t::iterator checkPos = findScheduleItem(pos, inst);
+	if (checkPos != schedule.end()) {
+		return false;
 	}
+	schedule.insert(pos, inst);
+	if (inst->startTime <= theTime && (inst->startTime + inst->duration) > theTime) { // this item should be active
+		if (cueItem != schedule.end() && (*cueItem)->startTime >= inst->startTime) {
+			cueItem = pos; // schedule.begin();
+		}
+	}
+	scheduleLock.unlock();
 	return true;
 }
 
 bool
-Qua::RemoveFromSchedule(Instance *inst)
+Qua::removeFromSchedule(Instance *inst)
 {
 	if (!inst) return false;
-	TypedValue	v;
-	v.Set(inst);
-	StreamItem	*instit = schedule.FindItemAtTime(0, inst->startTime, v);
-	if (instit) {
-		if (instit == cueItem) {
-			cueItem = nullptr;
-		}
-		schedule.DeleteItem(instit);
-	}
+	scheduleLock.lock();
+	schedule.remove(inst);
+	/*
+	sched_t::iterator pos = findScheduleItem(inst, schedule.begin());
+	while (pos != schedule.end()) {
+		schedule.erase(pos);
+		pos = findScheduleItem(inst, schedule.begin());
+	}*/
+	scheduleLock.unlock();
 	return true;
 }
 
 status_t
-Qua::CheckScheduledActivations()
+Qua::checkScheduledActivations()
 {
-	if (cueItem == nullptr) {
-		if (schedule.head == nullptr) { // nothin to do
-			if (debug_schedule) fprintf(stderr, "No schedule at %s\r", theTime.StringValue());
+	scheduleLock.lock();
+	if (cueItem == schedule.end()) {
+		if (schedule.begin() == schedule.end()) { // nothin to do
+			scheduleLock.unlock();
 			return B_OK;
 		}
-		cueItem = schedule.head;
+		cueItem = schedule.begin();
 	}
-	if (debug_schedule) {
-		fprintf(stderr, "Scheduling %x at %s\r", (unsigned)cueItem, theTime.StringValue());
-	}
-	while (cueItem && cueItem->time <= theTime) {
+
+	while (cueItem != schedule.end() && (*cueItem)->startTime <= theTime) {
+		Instance	*inst = *cueItem;
 		if (debug_schedule) {
-			fprintf(stderr, "Scheduling %x %s ", (unsigned)cueItem, cueItem->time.StringValue());
+			fprintf(stderr, "instance %d ", inst->status);
 		}
-		if (debug_schedule) fprintf(stderr, "at %s ", theTime.StringValue());
-			switch (cueItem->type) {
-
-			case TypedValue::S_VALUE: {
-				TypedValue	v = ((StreamValue*)cueItem)->value;
-				if (debug_schedule) fprintf(stderr, "value %d ", v.type);
-				switch (v.type) {
-					case TypedValue::S_INSTANCE: {
-						Instance	*inst = v.val.instance;
-						if (debug_schedule) fprintf(stderr, "instance %d ", inst->status);
-						if (	inst->status != STATUS_RUNNING
-								&& theTime >= inst->startTime
-								&& theTime <= (inst->startTime + inst->duration)
-							  ) {
-							fprintf(stderr, "Waking %s at %s\n", inst->sym->name.c_str(), theTime.StringValue());
-							Wake(inst);
-							activeInstances.push_back(inst);
-						}
-						break;
-					}
-				}
-				break;
-			}
-
-			default: {
-				break;
-			}
+		if (inst->status != STATUS_RUNNING && theTime >= inst->startTime && theTime <= (inst->startTime + inst->duration)) {
+			Wake(inst);
+			activeInstances.push_back(inst);
 		}
-		cueItem = cueItem->next;
-		if (debug_schedule) fprintf(stderr, "\r");
+		++cueItem;
+
 	}
+	scheduleLock.unlock();
 	return B_OK;
+}
+
+bool
+Qua::updateInstanceSchedule(Instance *inst) {
+	if (!inst) return false;
+	scheduleLock.lock();
+
+	sched_t::iterator chkPos = findScheduleItem(schedule.begin(), inst);
+	if (chkPos == schedule.end()) {
+		scheduleLock.unlock();
+		return false;
+	}
+	sched_t::iterator nxPos = chkPos, prPos = chkPos;
+	nxPos++;
+	prPos--;
+	Instance *next = (nxPos == schedule.end() ? nullptr : (*nxPos));
+	Instance *prev = (prPos == schedule.end() ? nullptr : (*prPos));
+	if (next != nullptr && next->startTime < inst->startTime) {
+		sched_t::iterator pos = findSchedulePos(chkPos, inst->startTime); // current position too early, start fwd search from here
+		if (pos != chkPos) {
+			schedule.remove(inst);
+			schedule.insert(pos, inst);
+		}
+	} else if (prev != nullptr && prev->startTime > inst->startTime) { // current position too late
+		sched_t::iterator pos = findSchedulePos(schedule.begin() , inst->startTime);
+		if (pos != chkPos) {
+			schedule.remove(inst);
+			schedule.insert(pos, inst);
+		}
+	} else { // we are actually in a correct position in the schedule
+	
+	}
+	
+	scheduleLock.unlock();
+	return true;
 }
 
 void
@@ -1235,7 +1285,7 @@ Qua::SequencerIteration()
 // and would need write access
 			
 				// activeInstances.Lock();
-				CheckScheduledActivations();
+				checkScheduledActivations();
 
 //					objectsBlockStack.ReadLock();
 				std::vector<Instance*> sleepers;
@@ -1243,9 +1293,7 @@ Qua::SequencerIteration()
 				for (auto ai = activeInstances.begin(); ai != activeInstances.end();) {
 					Instance	*inst = *ai;
 					if (	/* inst->status == STATUS_RUNNING && */
-								(	theTime < inst->startTime
-								|| theTime >= (inst->startTime + inst->duration)
-							)) {
+								(	theTime < inst->startTime || theTime >= (inst->startTime + inst->duration) )) {
 						sleepers.push_back(inst);
 						ai = activeInstances.erase(ai);
 					} else {
@@ -1257,7 +1305,7 @@ Qua::SequencerIteration()
 					ai->Run();
 				}
 				for (auto ai : sleepers) {
-					ai->Run();
+					Sleep(ai);
 				}
 
 //					objectsBlockStack.ReadUnlock();
@@ -2062,7 +2110,11 @@ Qua::getCapabilityString()
 	return caps;
 }
 
-
+bool
+Qua::setTimingMode(flag, QuaPort *) {
+	cout << "unimplemented change timing mode " << endl;
+	return false;
+}
 
 QuaPort *
 findQuaPort(int deviceType, const string &nm, int direction, int nports)

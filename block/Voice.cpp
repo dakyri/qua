@@ -527,16 +527,16 @@ Voice::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 
 
 Instance *
-Voice::addInstance(std::string nm, Time t, Time d, Channel * chan)
+Voice::addInstance(const std::string &nm, const Time &startt, const Time &dur, Channel * const chan)
 {
-	VoiceInstance *i = new VoiceInstance(this, nm, t, d, chan);
+	VoiceInstance *i = new VoiceInstance(*this, nm, startt, dur, chan);
 	addInstToList(i);
 
 	if (uberQua && i) {
 //		b = b->Sibling(3);
 //		i->SetValue(b);
 		i->Init();
-		uberQua->AddToSchedule(i);
+		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
 		fprintf(stderr, "Voice: unexpected null while committing to schedule");
@@ -546,33 +546,29 @@ Voice::addInstance(std::string nm, Time t, Time d, Channel * chan)
 
 
 Instance *
-Voice::addInstance(std::string nm, short chan_id, Time *t, Time *d, bool disp)
+Voice::addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp)
 {
-	Time	at_t;
-	Time	dur_t;
+	Time	dur;
 	Channel	*c;
-	if (t == nullptr) {
-		return nullptr;
-	}
-	at_t = *t;
-	if (d == nullptr) {
+
+	if (!d) {
 		if (streamClip(0) == nullptr || streamClip(0)->media == nullptr) {
-			dur_t = Time::infinity;
+			dur = Time::infinity;
 		} else {
-			dur_t = streamClip(0)->duration;
+			dur = streamClip(0)->duration;
 		}
 	} else {
-		dur_t = *d;
+		dur = d;
 	}
 	if (chan_id >= uberQua->nChannel || chan_id < 0) {
 		return nullptr;
 	}
 	c = uberQua->channel[chan_id];
-	return addInstance(nm, at_t, dur_t, c);
+	return addInstance(nm, t, dur, c);
 }
 
 
-VoiceInstance::VoiceInstance(Voice *s, std::string nm, Time t, Time d, Channel * c):
+VoiceInstance::VoiceInstance(Voice &s, const std::string & nm, const Time &t, const Time &d, Channel * const c):
 	Instance(s, nm, t, d, c)
 {
 }
@@ -588,7 +584,7 @@ VoiceInstance::Run()
 //	fprintf(stderr, "run voice\n");
 	wakeDuration = uberQua->theTime - startTime;
 	UpdateEnvelopes(wakeDuration);
-	if (schedulable->mainBlock) {
+	if (schedulable.mainBlock) {
 		Stream	mainStream;
 
 		////////// should be locked on mainBlock !!!
@@ -598,7 +594,7 @@ VoiceInstance::Run()
 		flag ua_complete = UpdateActiveBlock(
     						uberQua,
     						mainStream,
-    						schedulable->mainBlock,
+    						schedulable.mainBlock,
     						uberQua->theTime,
 							this,
 							sym,
@@ -626,8 +622,8 @@ VoiceInstance::Generate(float **outSig, long nFramesReqd, short nAudioChannels)
 #ifdef LOTSALOX
 	schedulable->stackableLock.Lock();
 #endif
-	if (schedulable->mainBlock && mainStack->locusStatus == STATUS_RUNNING) {
-		ApplyQuaFX(mainStack, schedulable->mainBlock, outSig, nFramesReqd, nAudioChannels);
+	if (schedulable.mainBlock && mainStack->locusStatus == STATUS_RUNNING) {
+		ApplyQuaFX(mainStack, schedulable.mainBlock, outSig, nFramesReqd, nAudioChannels);
 	}
 #ifdef LOTSALOX
 	schedulable->stackableLock.Unlock();

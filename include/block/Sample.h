@@ -44,8 +44,8 @@ public:
 						~Sample();
 						
 	virtual bool		Init();
-	virtual Instance	*addInstance(std::string, Time startt, Time dur, Channel *chan) override;
-	virtual Instance	*addInstance(std::string, short ch_idx, Time *startt, Time *dur, bool disp) override;
+	virtual Instance *addInstance(const std::string &, const Time &startt, const Time &dur, Channel * const chan) override;
+	virtual Instance *addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp) override;
 	virtual void		RemoveInstance(Instance *i, bool display);
 
 	virtual void		Cue(Time &t) override;
@@ -76,8 +76,7 @@ public:
 
 	
 	long sampleRate;
-	std::mutex flock;
-	
+
 	SampleFile *selectedFile();
 	std::string selectedPath();
 
@@ -104,17 +103,19 @@ public:
 	
 	status_t			SetTakeList(Block *b);
 	
-	StabEnt				*ampSym;
-	StabEnt				*panSym;
-	StabEnt				*sfrSym;
-	StabEnt				*efrSym;
+	StabEnt *ampSym;
+	StabEnt *panSym;
+	StabEnt *sfrSym;
+	StabEnt *efrSym;
 	
-	static long			ChunkForFrame(SampleFile *, long);
-	static long			StartFrameOfChunk(SampleFile *, long);
-	static long			ChunkForFrame(short, long);
-	static long			StartFrameOfChunk(short, long);
-	SampleBuffer		*BufferForFrame(SampleFile *, long f);
-	SampleBuffer		*BufferForChunk(SampleFile *, long f);
+	static long ChunkForFrame(SampleFile *, long);
+	static long StartFrameOfChunk(SampleFile *, long);
+	static long ChunkForFrame(short, long);
+	static long StartFrameOfChunk(short, long);
+	SampleBuffer *BufferForFrame(SampleFile *, long f);
+	SampleBuffer *BufferForChunk(SampleFile *, long f);
+
+	mutex bufferLock;
 
 	char				*fileBuffer;
 	int					fileBufferLength;
@@ -131,7 +132,7 @@ public:
 	SampleBuffer		*freeRecordBuffers;
 	SampleTake			*recordTake;
 	long				recordFrame;
-	std::mutex			recordbufLock;
+	std::mutex			recordbufferLock;
 };
 
 inline long
@@ -160,8 +161,8 @@ Sample::StartFrameOfChunk(short nc, long ch)
 
 class SampleInstance: public Instance {
 public:
-						SampleInstance(Sample *s, std::string nm, Time t, Time d, Channel * c);
-						~SampleInstance();
+	SampleInstance(Sample &s, const std::string &nm, const Time &t, const Time &d, Channel * const c);
+	~SampleInstance();
 
 	virtual size_t		Generate(float **bufs, long nf, short nc);	// add to out buf
 	virtual void		Reset();
@@ -171,29 +172,29 @@ public:
 
 	bool				LoopConditionMet(StreamItem *, Instance *, QuasiStack *);
 	
-	inline class Sample	*QSample() { return (class Sample *)schedulable; }
+	int WantedChunks(
+			short  pcc[],
+			short  pcs[],
+			short  pce[],
+			short  pccl[],
+			int np,
+			int max);
 
-	int					WantedChunks(
-							short  pcc[],
-							short  pcs[],
-							short  pce[],
-							short  pccl[],
-							int np,
-							int max);
+	Sample &sample;
 	
-	bool				mute;
-	float				amp;
-	float				pan;
+	bool mute;
+	float amp;
+	float pan;
 	
 // !!!!!!!! should be off_t
-	Time				startFrame;
-	Time				endFrame;
-	long				loopCount;
+	Time startFrame;
+	Time endFrame;
+	long loopCount;
 	
 //processing blocks
-	Block				*sFrameExp;
-	Block				*eFrameExp;
-	Block				*loopCondition;
+	Block *sFrameExp;
+	Block *eFrameExp;
+	Block *loopCondition;
 };
 
 

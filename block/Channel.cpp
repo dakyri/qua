@@ -582,7 +582,7 @@ Channel::CheckRecord(Stream &s)
 	if (recordState == RECORD_ING && streamRecordInstance) {	// dump into rec stream
 						// let's hope this is always a
 						// pool .......
-		Pool *pool = (Pool *) streamRecordInstance->schedulable;
+		Pool *pool = (Pool *) &streamRecordInstance->schedulable;
 		pool->recordTake->stream.AddToStream(s, recordStarted);
 	}
 }
@@ -848,7 +848,7 @@ Channel::Receive(size_t nFrames)
 // save shit
 	
 	if (recordState == RECORD_ING && audioRecordInstance) {
-		audioRecordInstance->QSample()->Stash(inSig, nAudioIns, nFrames);
+		audioRecordInstance->sample.Stash(inSig, nAudioIns, nFrames);
 	}
 #endif
 	return nFrames;

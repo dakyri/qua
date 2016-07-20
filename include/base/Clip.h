@@ -131,7 +131,7 @@ class Clip
 {
 public:
 						Clip(std::string nm, StabEnt *ctxt);
-	bool				Set(Take *, Time&s, Time &t);
+	bool				Set(const Take *, const Time&s, const Time &t);
 	status_t			SaveSnapshot(FILE *fp);
 
 	Take				*media;
