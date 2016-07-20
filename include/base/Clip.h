@@ -8,6 +8,7 @@ class StabEnt;
 class Sample;
 class SampleFile;
 class Clip;
+class Block;
 
 namespace tinyxml2 {
 	class XMLElement;
@@ -16,8 +17,8 @@ namespace tinyxml2 {
 class Take
 {
 public:
-						Take(std::string nm, StabEnt *, short t);
-						~Take();
+	Take(std::string nm, StabEnt *, short t);
+	virtual ~Take();
 						
 	enum {
 		NOT=0,
@@ -25,11 +26,11 @@ public:
 		SAMPLE=2
 	};
 
-	virtual status_t	SaveSnapshot(FILE *fp)=0;
+	virtual status_t SaveSnapshot(FILE *fp)=0;
 
-	StabEnt				*sym;
-	short				type;
-	status_t			status;
+	StabEnt	 *sym;
+	short type;
+	status_t status;
 };
 
 #if QUA_V_SAMPLE_DRAW=='p'
@@ -50,12 +51,13 @@ struct qpk_hdr_1 {
 class SampleTake: public Take
 {
 public:
-						SampleTake(Sample *, std::string nm, std::string path);
-						~SampleTake();
-	long				NextChunk(long, long, long);
-	long				PrevChunk(long, long, long);
+	SampleTake(Sample *, const std::string &m, const std::string &path);
+	virtual ~SampleTake();
 
-	status_t			SetSampleFile(const std::string path, SampleFile *);
+	long NextChunk(long, long, long);
+	long PrevChunk(long, long, long);
+
+	status_t SetSampleFile(const std::string &path, SampleFile *);
 
 	Sample *sample;
 	SampleFile *file;
@@ -105,16 +107,17 @@ public:
 class StreamTake: public Take
 {
 public:
-						StreamTake(std::string, StabEnt *, Time &);
-						~StreamTake();
+	StreamTake(const std::string &, StabEnt *, const Time &);
+	virtual~StreamTake();
 						
 	virtual status_t	SaveSnapshot(FILE *fp);
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	Stream				stream;
-	Time				duration;
-	flag				saveFormat;
+	Stream stream;
+	Time duration;
+	flag saveFormat;
+	Block *initBlock;
 };
 
 enum {

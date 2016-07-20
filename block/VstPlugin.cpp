@@ -38,7 +38,7 @@ using namespace boost;
 
 flag debug_vst = 0;
 
-VstPlugin::VstPlugin(char *plugin, char *nm, bool doLoad, bool doMap, bool isasyn, int32 ni, int32 no, int32 npar, int32 nprog):
+VstPlugin::VstPlugin(const char *plugin, char *nm, bool doLoad, bool doMap, bool isasyn, int32 ni, int32 no, int32 npar, int32 nprog):
 	Stackable(DefineSymbol(nm, TypedValue::S_VST_PLUGIN, 0, this, nullptr, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
 	mapParams = doMap;
@@ -244,7 +244,7 @@ VstPlugin::Unload()
 #endif
 
 status_t
-VstPlugin::SetPluginPath(char *plug)
+VstPlugin::SetPluginPath(const char *plug)
 {
 	pluginExecutablePath = plug;
 	status = VST_PLUG_UNLOADED;

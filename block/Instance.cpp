@@ -530,7 +530,7 @@ Instance::StopRecording()
 // sample pulled out of one channels audio list
 // app stopped and started.... maybe. this could be good or bad.
 status_t
-Instance::SetChannel(Channel * newchan, bool display)
+Instance::SetChannel(Channel * const newchan, const bool display)
 {
 	if (status == STATUS_RUNNING) {
 		if (channel)
@@ -549,7 +549,7 @@ Instance::SetChannel(Channel * newchan, bool display)
 }
 
 status_t
-Instance::SetDuration(Time &t, bool display)
+Instance::SetDuration(const Time &t, const bool display)
 {
 	duration = t;
 	if (display) {
@@ -559,7 +559,7 @@ Instance::SetDuration(Time &t, bool display)
 }
 
 status_t
-Instance::SetStartTime(Time &t, bool display)
+Instance::SetStartTime(const Time &t, const bool display)
 {
 	startTime = t;
 	if (display) {
@@ -570,17 +570,16 @@ Instance::SetStartTime(Time &t, bool display)
 
 
 bool
-Instance::Move(short chan_id, Time *t, Time *d, bool display)
+Instance::Move(short chan_id, const Time &t, const Time &d, bool display)
 {
-	if (t != nullptr) {
-		SetStartTime(*t, display);
+	if (startTime != t) {
+		SetStartTime(t, display);
 	}
-	if (d != nullptr) {
-		SetDuration(*d, display);
+	if (duration != d) {
+		SetDuration(d, display);
 	}
 	if (chan_id >= 0 && chan_id < uberQua->nChannel) {
-		Channel	*c;
-		c = uberQua->channel[chan_id];
+		Channel	*c = uberQua->channel[chan_id];
 		SetChannel(c, display);
 	}
 	return true;

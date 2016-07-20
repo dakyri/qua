@@ -58,7 +58,9 @@ public:
 	bool				SetRecordTake();
 	StreamTake			*recordTake;
 
-	StreamTake			*AddTake(char *, Time &t);
+	StreamTake			*addStreamTake(std::string &nm, const Time &t, bool);
+	StreamTake			*addStreamTake(std::string &nm, const std::string &fnm, bool);
+
 	status_t			DeleteTake(StreamTake *);
 	status_t			SelectTake(StreamTake *);
 	StreamTake			*selectedTake;

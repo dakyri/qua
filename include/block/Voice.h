@@ -39,8 +39,8 @@ public:
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	StreamTake			*AddStreamTake(std::string, Time *t, bool);
-	StreamTake			*AddStreamTake(std::string, std::string, bool);
+	StreamTake			*addStreamTake(std::string &nm, const Time &t, bool);
+	StreamTake			*addStreamTake(std::string &nm, const std::string &fnm, bool);
 	status_t			DeleteTake(StreamTake *, bool);
 	status_t			SelectTake(StreamTake *, bool);
 	StreamTake			*selectedTake;

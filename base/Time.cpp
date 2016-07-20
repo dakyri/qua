@@ -84,11 +84,10 @@ Time::BeatValue()
 }
 
 float
-Time::SecsValue()
+Time::SecsValue() const
 {
-	return 60.0*(((double)ticks)/(metric->granularity*metric->tempo));
+	return 60.0*(((double)ticks) / (metric->granularity*metric->tempo));
 }
-
 
 void
 Time::IncrementTick()
@@ -127,7 +126,7 @@ Time::DecrementBar()
 }
 
 bool
-Time::operator >= (Time t2)
+Time::operator >= (const Time &t2)
 {
 	if (ticks == INFINITE_TICKS) {
 		return true;
@@ -141,7 +140,7 @@ Time::operator >= (Time t2)
 }
 
 bool
-Time::operator <= (Time t2)
+Time::operator <= (const Time& t2)
 {
 	if (t2.ticks == INFINITE_TICKS) {
 		return true;
@@ -155,7 +154,7 @@ Time::operator <= (Time t2)
 }
 
 bool
-Time::operator < (Time t2)
+Time::operator < (const Time& t2)
 {
 	if (t2.ticks == INFINITE_TICKS) {
 		return true;
@@ -169,7 +168,7 @@ Time::operator < (Time t2)
 }
 
 bool
-Time::operator > (Time t2)
+Time::operator > (const Time& t2)
 {
 	if (ticks == INFINITE_TICKS) {
 		return true;
@@ -183,7 +182,7 @@ Time::operator > (Time t2)
 }
 
 bool
-Time::operator != (Time t2)
+Time::operator != (const Time &t2)
 {
 	if (ticks == INFINITE_TICKS && t2.ticks == INFINITE_TICKS) {
 		return false;
@@ -195,7 +194,7 @@ Time::operator != (Time t2)
 }
 
 bool
-Time::operator == (Time t2)
+Time::operator == (const Time& t2)
 {
 	if (ticks == INFINITE_TICKS && t2.ticks == INFINITE_TICKS) {
 		return false;
@@ -207,7 +206,7 @@ Time::operator == (Time t2)
 }
 
 Time
-Time::operator + (Time t2)
+Time::operator + (const Time &t2)
 {
 	Time	time;
 
@@ -225,7 +224,7 @@ Time::operator + (Time t2)
 }
  
 Time
-Time::operator - (Time t2)
+Time::operator - (const Time& t2)
 {
 	Time	ti;
 
@@ -273,7 +272,7 @@ Time::operator + (int t2)
 }
 
 Time
-Time::operator += (Time t2)
+Time::operator += (const Time& t2)
 {
 	if (ticks == INFINITE_TICKS || t2.ticks==INFINITE_TICKS) {
 		ticks = INFINITE_TICKS;
@@ -288,7 +287,7 @@ Time::operator += (Time t2)
 }
 
 Time
-Time::operator -= (Time t2)
+Time::operator -= (const Time &t2)
 {
 	if (ticks == INFINITE_TICKS || t2.ticks==INFINITE_TICKS) {
 		ticks = INFINITE_TICKS;
@@ -303,7 +302,7 @@ Time::operator -= (Time t2)
 }
 
 Time
-Time::operator %= (Time t2)
+Time::operator %= (const Time &t2)
 {
 	if (ticks == INFINITE_TICKS || t2.ticks==INFINITE_TICKS) {
 		ticks = INFINITE_TICKS;
@@ -370,26 +369,26 @@ Time::operator &=(Metric *m)
 }
 
 Time
-Time::operator &(Metric &m)
+Time::operator &(const Metric &m)
 {
 	if (*metric == m || metric == nullptr) {
 		return *this;
 	}
 
 	Time	t1;
-	t1.metric = &m;
+	t1.metric = const_cast<Metric*>(&m);
 	double	f = (m.tempo*m.granularity)/(metric->tempo*metric->granularity);
 	t1.ticks = ((double)ticks)*f;
 	return t1;
 }
 
 Time
-Time::operator &=(Metric &m)
+Time::operator &=(const Metric &m)
 {
 	if (*metric != m && metric != nullptr) {
 		double	f = (m.tempo*m.granularity)/(metric->tempo*metric->granularity);
 		ticks = ((double)ticks)*f;
-		metric = &m;
+		metric = const_cast<Metric*>(&m);
 	}
 
 	return *this;

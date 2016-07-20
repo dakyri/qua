@@ -27,6 +27,8 @@
 #include "QuaAudio.h"
 #endif
 
+#include <iostream>
+
 #ifdef QUA_V_DEBUG_CONSOLE
 flag	debug_stack = 0;
 #define QDBMSG_STK(X,Y,Z) if (debug_stack) fprintf(stderr, X, Y, Z);
@@ -36,7 +38,8 @@ flag	debug_stack = 0;
 
 Stackable::Stackable(StabEnt *s)
 {
-	sym = s;
+	cout << "stackable " << (s ? s->name : "anon") << endl;
+ 	sym = s;
 	stackSize = 0;
 }
 

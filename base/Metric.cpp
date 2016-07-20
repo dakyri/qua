@@ -25,7 +25,7 @@ Metric Metric::sampleRate("msf", 44100,60,60,60);
 std::vector<Metric*> metrix;
 
 Metric *
-findMetric(std::string nm)
+findMetric(const std::string &nm)
 {
 	Metric		*fnd = nullptr;
 	for (short i=0; ((size_t)i)<metrix.size(); i++) {
@@ -71,13 +71,13 @@ Metric::~Metric()
 // equivalence ops.
 //  if 2 metrics are equal, times measured in them are comparable
 bool
-Metric::operator == (Metric &m)
+Metric::operator == (const Metric &m)
 {
 	return granularity == m.granularity && tempo == m.tempo;
 }
 
 bool
-Metric::operator != (Metric &m)
+Metric::operator != (const Metric &m)
 {
 	return !(granularity == m.granularity && tempo == m.tempo);
 }

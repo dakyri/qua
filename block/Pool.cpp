@@ -29,7 +29,7 @@ Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
 //	} else {
 //		name = "";
 //	}
-	SelectTake(AddTake("original", Time::zero));
+	SelectTake(addStreamTake(string("original"), Time::zero, false));
     uberQua = uq;
 	status = STATUS_RUNNING;
 	
@@ -80,18 +80,34 @@ Pool::SetRecordTake()
 		recordTake = selectedTake;
 		return false;
 	} else {
-		char		buf[20];
-		sprintf(buf, "Record%d", outTakes.size());
-		recordTake = AddTake(buf, Time::zero);
+		string buf = "Record" + to_string(outTakes.size());
+		recordTake = addStreamTake(buf, Time::zero, true);
 	}
 	return true;
 }
 
+// this should call up something to parse a midi file...
 StreamTake	*
-Pool::AddTake(char *nm, Time &t)
+Pool::addStreamTake(std::string &nm, const Time &t, bool disp)
 {
 	StreamTake	*take = new StreamTake(nm, sym, t);
 	outTakes.push_back(take);
+	if (disp) {
+		uberQua->bridge.UpdateTakeIndexDisplay(sym);
+	}
+	return take;
+}
+
+// this should call up something to parse a midi file...
+StreamTake	*
+Pool::addStreamTake(std::string &nm, const std::string &pnm, bool disp)
+{
+	Time	time = Time::zero;
+	StreamTake	*take = new StreamTake(nm, sym, time);
+	outTakes.push_back(take);
+	if (disp) {
+		uberQua->bridge.UpdateTakeIndexDisplay(sym);
+	}
 	return take;
 }
 

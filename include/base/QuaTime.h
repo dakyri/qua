@@ -18,7 +18,7 @@ class Time: public qua_time
 public:
 	Time(long c=0, Metric *m=&Metric::std);
 				
-	float		SecsValue();
+	float SecsValue() const;
 	void		SetToSecs(float);
 	long		TickValue(Metric *m);
 	long		BeatValue();
@@ -37,26 +37,26 @@ public:
 	void		DecrementBeat();
 	void		DecrementTick();
 	
-	bool		operator >= (Time t2);
-	bool		operator == (Time t2);
-	bool		operator != (Time t2);
-	bool		operator <= (Time t2);
-	bool		operator > (Time t2);
-	bool		operator < (Time t2);
-	Time		operator + (Time t2);
-	Time		operator += (Time t2);
-	Time		operator - (Time t2);
-	Time		operator -= (Time t2);
-	Time		operator % (Time t2);
-	Time		operator %= (Time t2);
-	Time		operator & (Metric &m);
-	Time		operator & (Metric *m);
-	Time		operator &= (Metric &m);
-	Time		operator &= (Metric *m);
-	Time		operator / (int n);
-	Time		operator - (int n);
-	Time		operator + (int n);
-	long		operator = (long n);
+	bool		operator >= (const Time & t2);
+	bool		operator == (const Time & t2);
+	bool		operator != (const Time &t2);
+	bool		operator <= (const Time &t2);
+	bool		operator > (const Time &t2);
+	bool		operator < (const Time &t2);
+	Time		operator + (const Time& t2);
+	Time		operator += (const Time &t2);
+	Time		operator - (const Time& t2);
+	Time		operator -= (const Time & t2);
+	Time		operator % (const Time &t2);
+	Time		operator %= (const Time &t2);
+	Time		operator & (const Metric &m);
+	Time		operator & (Metric *const m);
+	Time		operator &= (const Metric &m);
+	Time		operator &= (Metric * const m);
+	Time		operator / (const int n);
+	Time		operator - (const int n);
+	Time		operator + (const int n);
+	long		operator = (const long n);
 	Time		operator ~ ();
 
 	static Time	zero;

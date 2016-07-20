@@ -97,7 +97,7 @@ public:
 	}
 	inline int Sample::countTakes() { return takes.size(); }
 
-	SampleTake *AddSampleTake(std::string nm, std::string path, bool disp);
+	SampleTake *addSampleTake(const std::string &nm, const std::string &path, bool disp);
 	status_t DeleteTake(SampleTake *, bool disp);
 	status_t SelectTake(SampleTake *, bool disp);
 	SampleTake *AddRecordTake(long fileType, short nChan, short sampleSize, float sampleRate);

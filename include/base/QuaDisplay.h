@@ -256,7 +256,7 @@ public:
 
 	// callbacks from the interface to create and manipulate instances of schedulables
 	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) = 0;
-	virtual void MoveInstance(StabEnt *, short, Time *, Time *) = 0;
+	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) = 0;
 	virtual void DeleteInstance(StabEnt *) = 0;
 
 	virtual void CreateStreamTake(StabEnt *) = 0;
@@ -456,7 +456,6 @@ public:
 	virtual void RemoveDestinationRepresentation(Channel *, Input *) override;
 	virtual void RemoveDestinationRepresentation(Channel *, Output *) override;
 
-
 	virtual void RemoveSchedulableRepresentations(StabEnt *) override;
 	virtual void RemoveMethodRepresentations(StabEnt *) override;
 	virtual void RemoveChannelRepresentations(StabEnt *) override;
@@ -513,7 +512,7 @@ public:
 	virtual StabEnt * CreateMethod(std::string nm, StabEnt *p = nullptr) override;
 	virtual StabEnt	* CreateClip(std::string nm, Time *st = nullptr, Time *dur = nullptr) override;
 	virtual StabEnt * CreateInstance(StabEnt *, short, Time *, Time *) override;
-	virtual void MoveInstance(StabEnt *, short, Time *, Time *) override;
+	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) override;
 	virtual void DeleteInstance(StabEnt *) override;
 	virtual void DeleteObject(StabEnt *) override;
 	virtual void ShowObjectRepresentation(StabEnt *) override;

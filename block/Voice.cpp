@@ -102,15 +102,9 @@ Voice::RemoveClip(Clip *c, bool disp)
 
 // this should call up something to parse a midi file...
 StreamTake	*
-Voice::AddStreamTake(std::string nm, Time *t, bool disp)
+Voice::addStreamTake(std::string &nm, const Time &t, bool disp)
 {
-	Time	time;
-	if (t == nullptr) {
-		time = Time::zero;
-	} else {
-		time = *t;
-	}
-	StreamTake	*take = new StreamTake(nm, sym, time);
+	StreamTake	*take = new StreamTake(nm, sym, t);
 	outTakes.push_back(take);
 	if (disp) {
 		uberQua->bridge.UpdateTakeIndexDisplay(sym);
@@ -120,7 +114,7 @@ Voice::AddStreamTake(std::string nm, Time *t, bool disp)
 
 // this should call up something to parse a midi file...
 StreamTake	*
-Voice::AddStreamTake(std::string nm, std::string fnm, bool disp)
+Voice::addStreamTake(std::string &nm, const std::string &pnm, bool disp)
 {
 	Time	time = Time::zero;
 	StreamTake	*take = new StreamTake(nm, sym, time);

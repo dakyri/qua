@@ -697,7 +697,7 @@ QuaDisplay::HideObjectRepresentation(StabEnt *sym)
 
 // called by an interface to make dynamic changes to a potentially running sequencer
 void
-QuaDisplay::MoveInstance(StabEnt *instSym, short chan, Time *at_t, Time *dur_t)
+QuaDisplay::MoveInstance(StabEnt *instSym, short chan, const Time &at_t, const Time &dur_t)
 {
 	short	i;
 	Instance	*inst = instSym->InstanceValue();
@@ -773,7 +773,7 @@ QuaDisplay::CreateSample(std::string nm, std::vector<std::string> pathList, shor
 		fprintf(stderr, "created sample %s\n", sample->sym->name.c_str());
 		for (std::string p: pathList) {
 			std::string b = Qua::nameFromLeaf(p);
-			sample->AddSampleTake(b, p, false);
+			sample->addSampleTake(b, p, false);
 		}
 		// update index displays
 		Instance	*instance = sample->addInstance(nm, chan, at_t, dur_t, false);
@@ -823,7 +823,7 @@ QuaDisplay::CreateVoice(std::string nm, std::vector<std::string> pathList, short
 //		fprintf(stderr, "created voice %s\n", voice->sym->name);
 		for (i=0; ((size_t)i)<pathList.size(); i++) {
 			std::string nm = Qua::nameFromLeaf(pathList[i]);
-			voice->AddStreamTake(nm, pathList[i], true);
+			voice->addStreamTake(nm, pathList[i], true);
 		}
 		// update index displays
 		Instance	*instance=nullptr;
@@ -1022,7 +1022,7 @@ QuaDisplay::LoadSampleTake(StabEnt *sampleSym, std::string path)
 		return;
 	}
 	std::string name = glob.makeUniqueName(sampleSym, getBase(path),  1);
-	sample->AddSampleTake(name, path, true);
+	sample->addSampleTake(name, path, true);
 }
 
 void
@@ -1036,7 +1036,7 @@ QuaDisplay::CreateStreamTake(StabEnt *voiceSym)
 	duration.Set("1:0.0");
 
 	std::string nmbuf = glob.makeUniqueName(voiceSym, "stream", 1);
-	voice->AddStreamTake(nmbuf, &duration, true);
+	voice->addStreamTake(nmbuf, duration, true);
 }
 
 

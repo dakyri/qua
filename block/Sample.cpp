@@ -53,7 +53,7 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	ampSym = panSym = sfrSym = efrSym = nullptr;
 	
 	if (path.size() > 0) {
-		AddSampleTake(nm, path, true);
+		addSampleTake(nm, path, true);
 	}
 	
 	SampleInstance	*i = 0;
@@ -193,7 +193,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 		return nullptr;
 	}
 
-	recordTake = AddSampleTake(takenm,	nullptr, true);
+	recordTake = addSampleTake(takenm,	"", true);
 	recordTake->SetSampleFile(path, file);
 	return recordTake;
 }
@@ -201,7 +201,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 
 
 SampleTake	*
-Sample::AddSampleTake(std::string nm, std::string path, bool disp)
+Sample::addSampleTake(const std::string &nm, const std::string &path, bool disp)
 {
 	fprintf(stderr, "sample %s: adding sample take %s at %s\n", sym->name.c_str(), nm.c_str(), path.c_str());
 	SampleTake	*take;

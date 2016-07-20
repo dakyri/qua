@@ -1439,7 +1439,7 @@ MFCDataEditorTScale::OnPaint()
 			dc.SetBkColor(rgb_blue);
 
 			dc.DrawText(buf, -1, &tr, DT_LEFT|DT_BOTTOM);
-			t+=editor->displayMetric->granularity;
+			t += editor->displayMetric->granularity;
 			tsx = xp+sx-point.x;
 		}
 	}

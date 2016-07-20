@@ -1,9 +1,6 @@
 #include "qua_version.h"
 
 #include "StdDefs.h"
-
-
-
 #include "Sym.h"
 #include "Executable.h"
 #include "Instance.h"
@@ -14,8 +11,9 @@
 #include "Envelope.h"
 #include "Channel.h"
 #include "Schedulable.h"
-
 #include "QuaDisplay.h"
+
+#include <iostream>
 
 Schedulable::Schedulable(StabEnt *s, Qua *q, class Metric *m):
 	Notifiable(s),
@@ -28,6 +26,8 @@ Schedulable::Schedulable(StabEnt *s, Qua *q, class Metric *m):
 	record("Record", s),
 	init("Init", s)
 {
+	cout << "building schedulable " << endl;
+
 	uberQua = q;
 	metric = m;
 
@@ -138,7 +138,7 @@ Schedulable::addInstance(string nm, Time t, Time d, Channel * chan)
 		uberQua->AddToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
-		fprintf(stderr, "Schedulable: unexpected null while committing to schedule");
+		cout << "Schedulable: unexpected null while committing to schedule" << endl;
 	}
 	return i;
 }
@@ -220,10 +220,7 @@ Schedulable::Schedule(Block *b)
    	ResultValue		v0 = EvaluateExpression(b);
    	ResultValue		v1 = EvaluateExpression(b->Sibling(1));
    	ResultValue		v2 = EvaluateExpression(b->Sibling(2));
-	fprintf(stderr, "scheduling %s: ", sym->name.c_str());
-	fprintf(stderr, "on %s ", v0.StringValue());
-	fprintf(stderr, "at %s ", v1.StringValue());
-	fprintf(stderr, "for %s\n", v2.StringValue());
+	cout << "scheduling "<< sym->name <<  " on "<< v0.StringValue() << " at " << v1.StringValue() << " for " << v2.StringValue() << endl;
 	Channel *c=nullptr;
 	if (v0.type == TypedValue::S_CHANNEL) {
 		c = (Channel *)v0.PointerValue(nullptr);
@@ -240,8 +237,7 @@ Schedulable::Schedule(Block *b)
 						*v2.TimeValue():
 						Time(v2.IntValue(nullptr), uberQua->metric),
 					c);
-	fprintf(stderr, "instance created and added!!!\n");
-	fprintf(stderr, "scheduled!!!\n");
+	cout << "instance created and added!!!\n";
 	return err;
 }
 

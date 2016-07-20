@@ -1,6 +1,5 @@
 #include "qua_version.h"
 
-
 #include "StdDefs.h"
 #include "Executable.h"
 #include "Qua.h"
@@ -10,18 +9,21 @@
 #include "Lambda.h"
 #include "QuaDisplay.h"
 
+#include <iostream>
+
 Notifiable::Notifiable(StabEnt *S):
 	Executable(S),
 	start("Start", S),
 	stop("Stop", S),
 	record("Record", S)
 {
+	cout << "Notifiable::Notifiable()\n";
 }
 
 
 Notifiable::~Notifiable()
 {
-	fprintf(stderr, "Notifiable::~Notifiable()\n");
+	cout << "Notifiable::~Notifiable()\n";
 }
 
 

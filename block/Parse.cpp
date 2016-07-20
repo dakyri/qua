@@ -2119,8 +2119,9 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
     long		eventType = TypedValue::S_UNKNOWN;
     StabEnt		*sym=nullptr;
 	Schedulable	*schedulable = nullptr;
-	char		*dataPath=nullptr;
-	char		*mime=nullptr;
+
+	string dataPath;
+	string mime;
 
 	bool		foundDisplayParameters=false;
 
@@ -2134,7 +2135,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
     if (debug_parse >= 2)
     	fprintf(stderr, "defining a type '%s' in %s %d\n", currentToken, context?context->name.c_str() :"global", context?context->type:-1);
     	
-	mime = dataPath = nullptr;
     if (currentTokenType == TOK_TYPE) {
 		if (currentToken[0] == '\\') { // a type qualifier
 			type = TypedValue::S_LAMBDA;
@@ -2402,16 +2402,11 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			isInit = true;
 			break;
 		case Attribute::MIME: {
-			if (mime)
-				delete mime;
-    		GetToken();
-			mime = new char[strlen(currentTokenVal.StringValue())+1];
-			strcpy(mime, currentTokenVal.StringValue());
+    		GetToken(true);
+			mime = currentToken;
 			GetToken();
 			break;
 		}
-
-
 		
 		case Attribute::STREAM: {
 			isStream = true;
@@ -2421,21 +2416,15 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 		case Attribute::SAMPLE: {
 			isSample=true;
-    		GetToken();
-			if (dataPath)
-				delete dataPath;
-			dataPath = new char[strlen(currentTokenVal.StringValue())+1];
-			strcpy(dataPath, currentTokenVal.StringValue());
+    		GetToken(true);
+			dataPath = currentToken;
 			GetToken();
 			break;
 		}
 
 		case Attribute::PATH: {
-    		GetToken();
-			if (dataPath)
-				delete dataPath;
-			dataPath = new char[strlen(currentTokenVal.StringValue())+1];
-			strcpy(dataPath, currentTokenVal.StringValue());
+    		GetToken(true);
+			dataPath = currentToken;
 			GetToken();
 			break;
 		}
@@ -2476,9 +2465,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		if (debug_parse) {
 			cout << "expect ident: type " << type << " subtype " << subType << " at " << currentToken << " (" << currentTokenType << ")" << endl;
 		}
-		if (dataPath) delete dataPath;
-		if (mime) delete mime;
-		return nullptr;
 	}
 //	if (type != TypedValue::S_VST_PLUGIN) reportError("type %d %s", type, currentToken);
 	switch (type) {
@@ -2607,33 +2593,43 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		string nm;
 		if (currentTokenType == TOK_WORD) {
 			nm = currentToken;
-			GetToken();
+			GetToken(true); // we're ready for worms
 		} else {
 			nm = "takedata";
 		}
 		if (schedSym) {
+			Block *initBlock = nullptr;
+			if (currentTokenType == TOK_VAL && currentTokenVal.type == TypedValue::S_STRING) {
+				dataPath = currentToken;
+				GetToken();
+			} else if (strcmp(currentToken, "[")==0 || strcmp(currentToken, "{") == 0) { // TODO XXX FIXME messy syntax is getting messy lots of odd cases could happen
+				initBlock = ParseBlockInfo(context, schedSym);
+			}
+
 			if (schedSym->type == TypedValue::S_SAMPLE) {
-	// sample data
 				Sample	*samp = schedSym->SampleValue();
-				if (currentTokenType == TOK_VAL && currentTokenVal.type == TypedValue::S_STRING) {
-					if (dataPath == nullptr) {
-						dataPath = currentTokenVal.StringValue();
-					}
-					samp->AddSampleTake(nm, dataPath, false);
-					GetToken();
-				} else {
-					SampleTake *t=samp->AddSampleTake(nm, dataPath, false);
-				}
+				samp->addSampleTake(nm, dataPath, false);
 			} else if (schedSym->type == TypedValue::S_VOICE) {
 				Voice	*v = schedSym->VoiceValue();
 				Time	dur = Time::zero;
-				v->AddStreamTake(nm, &dur, false);
-			} else  if (schedSym->type == TypedValue::S_POOL) {
+				if (dataPath.size()) {
+					v->addStreamTake(nm, dataPath, false);
+				} else {
+					v->addStreamTake(nm, dur, false);
+				}
+			} else if (schedSym->type == TypedValue::S_POOL) {
 				Pool	*p = schedSym->PoolValue();
+				Time	dur = Time::zero;
+				if (dataPath.size()) {
+					p->addStreamTake(nm, dataPath, false);
+				} else {
+					p->addStreamTake(nm, dur, false);
+				}
 			} else {
 				ParseError(ERROR_ERR, "inappropriate context for take data, near '%s'", currentToken);
-				Block		*b = ParseBlockInfo(context, schedSym);
-				b->DeleteAll();
+			}
+			if (initBlock != nullptr) {
+				initBlock->DeleteAll();
 			}
 		} else {
 			ParseError(ERROR_ERR, "inappropriate context for take data, near '%s'", currentToken);
@@ -2658,8 +2654,9 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		StabEnt *sym = nullptr;
 		bool found = parsePort(deviceKind, portDeviceName, port, sym, QUA_PORT_IN, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
-			Channel		*cha=context->ChannelValue();
-			Input *s = cha->AddInput(nm, portDeviceName, port, chans[0], true);
+ 			Channel		*cha=context->ChannelValue();
+
+			Input *s = cha->AddInput(nm, portDeviceName, port, chans.size()? chans[0]: 0, true);
 			for (short i=1; i<chans.size(); i++) {
 				s->setPortInfo(port, chans[i], i);
 			}
@@ -2716,7 +2713,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		bool found = parsePort(deviceKind, portDeviceName, port, sym, QUA_PORT_OUT, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
-			Output *s = cha->AddOutput(nm, portDeviceName, port, chans[0], true);
+			Output *s = cha->AddOutput(nm, portDeviceName, port, chans.size()? chans[0]: 0, true);
 			for (short i=1; i<chans.size(); i++) {
 				s->setPortInfo(port, chans[i], i);
 			}
@@ -2763,8 +2760,8 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    						currentToken,
 	    						context,
 	    						templateType,
-	    						*mime?mime:0,
-	    						*dataPath?dataPath:0);
+	    						mime,
+	    						dataPath);
 	    GetToken();
 	    ParseFormalsList(F->sym, F->sym, true);
 	    glob.PushContext(F->sym);
@@ -2919,9 +2916,8 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			ParseError(ERROR_ERR, "sample must be in outer context.");
 
 //		entry_ref	fileRef;
-	
-		S = new Sample(currentToken, nullptr, uberQua, MAX_BUFFERS_PER_SAMPLE, MAX_REQUESTS_PER_SAMPLE);
-	    S->next = schedulees;
+		S = new Sample(currentToken, "", uberQua, MAX_BUFFERS_PER_SAMPLE, MAX_REQUESTS_PER_SAMPLE);
+		S->next = schedulees;
 	    schedulees = S;
 	
 	    GetToken();
@@ -3005,7 +3001,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			ParseError(ERROR_ERR, "vst plugin should be undimensioned");
 		}
 	    VstPlugin	*vstp;
-		vstp = new VstPlugin(dataPath, currentToken, doLoadPlugin, mapVstParams, isSynthPlugin, nIns, nOuts, nParam, nProgram);
+		vstp = new VstPlugin(dataPath.c_str(), currentToken, doLoadPlugin, mapVstParams, isSynthPlugin, nIns, nOuts, nParam, nProgram);
 	    GetToken();
 	    ParseFormalsList(vstp->sym, schedSym, doLoadPlugin);
 	    sym = vstp->sym;
@@ -3122,9 +3118,6 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	default:
 		ParseError(ERROR_ERR, "unimplimented type %d, near '%s'", type, currentToken);
 	}
-	if (dataPath) delete dataPath;
-	if (mime) delete mime;
-
 	if (sym && foundDisplayParameters && uberQua) {
 	// TODO XXXX FIXME placeholder for the moment ... not quite sure how this is best implemented ... originally very be-specific ... now, maybe json?
 		uberQua->bridge.SetDisplayParameters(sym, nullptr);
@@ -3258,7 +3251,9 @@ QSParser::parsePort(int deviceType, string &portName, QuaPort* &port, StabEnt* &
 		ParseError(ERROR_ERR, "Expect a port identifier near '%s'", currentToken);
 		return false;
 	}
-
+	if (chans.size() == 0) {
+		chans.push_back(0);
+	}
 	return true;
 }
 

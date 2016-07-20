@@ -794,8 +794,12 @@ MFCArrangeView::OnDrop(
 //			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drop instance %s: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", dragon.data.symbol->name, point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
-
-			quaLink->MoveInstance(dragon.data.symbol, at_channel, &at_time, NULL);
+			Instance *i = dragon.data.symbol->InstanceValue();
+			if (i != nullptr) {
+				quaLink->MoveInstance(dragon.data.symbol, at_channel, at_time, i->duration);
+			} else {
+				cout << "oops bad drop ... expected an instance" << endl;
+			}
 			return TRUE;
 		}
 		case QuaDrop::APPLICATION:
@@ -914,7 +918,7 @@ MFCArrangeView::OnLButtonDown(
 				Instance	*inst = mouse_instance->instance;
 				if (inst) {
 					Pix2Time(point.x-mouse_move_inst_offset.x, at_time);
-					quaLink->MoveInstance(inst->sym, -1, NULL, &at_time);
+					quaLink->MoveInstance(inst->sym, -1, inst->startTime, at_time);
 				}
 			}
 			break;
@@ -1052,7 +1056,7 @@ MFCArrangeView::OnMouseMove(
 					Pix2Time(last_mouse_point.x-mouse_move_inst_offset.x, last_time);
 					short	last_channel = Pix2Channel(last_mouse_point.y);
 					if (last_time != at_time || last_channel != at_channel) {
-						quaLink->MoveInstance(inst->sym, at_channel, &at_time, NULL);
+						quaLink->MoveInstance(inst->sym, at_channel, at_time, inst->duration);
 					}
 				}
 			}
@@ -1071,7 +1075,7 @@ MFCArrangeView::OnMouseMove(
 					Time	last_time;
 					Pix2Time(last_mouse_point.x-mouse_move_inst_offset.x, last_time);
 					if (last_time != at_time) {
-						quaLink->MoveInstance(inst->sym, -1, NULL, &at_time);
+						quaLink->MoveInstance(inst->sym, -1, inst->startTime, at_time);
 					}
 				}
 			}

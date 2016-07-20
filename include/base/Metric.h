@@ -17,8 +17,8 @@ public:
 	Metric(const Metric &m);
 	~Metric();
 				
-	bool operator==(Metric &m);
-	bool operator!=(Metric &m);
+	bool operator==(const Metric &m);
+	bool operator!=(const Metric &m);
 
 	inline double secsPerTick() { return 60.0 / (granularity * tempo); }
 	
@@ -34,6 +34,6 @@ public:
 	std::string name;
 };
 
-Metric *findMetric(std::string);
+Metric *findMetric(const std::string &);
 extern std::vector<Metric*> metrix;
 #endif

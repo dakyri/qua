@@ -59,10 +59,10 @@ public:
 	virtual void StartRecording();
 	virtual void StopRecording();
 
-	virtual status_t SetChannel(Channel *, bool);
-	virtual status_t SetDuration(Time &t, bool);
-	virtual status_t SetStartTime(Time &t, bool);
-	virtual bool Move(short ch_idx, Time *startt, Time *dur, bool disp);
+	virtual status_t SetChannel(Channel *const, const bool);
+	virtual status_t SetDuration(const Time &t, const bool);
+	virtual status_t SetStartTime(const Time &t, const bool);
+	virtual bool Move(const short ch_idx, const Time &startt, const Time &dur, bool const disp);
 
 	virtual size_t Generate(float **bufs, long nf, short nc);	// add to out buf
 	virtual status_t Run();

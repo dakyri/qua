@@ -5,6 +5,7 @@
 #include "QuaTime.h"
 #include "Sample.h"
 #include "Clip.h"
+#include "Block.h"
 
 SampleTake *
 TypedValue::SampleTakeValue()
@@ -34,16 +35,20 @@ Take::~Take()
 {
 }
 
-StreamTake::StreamTake(std::string nm, StabEnt *ctxt, Time &dur):
+StreamTake::StreamTake(const std::string &nm, StabEnt *ctxt, const Time &dur):
 	Take(nm, ctxt, Take::STREAM)
 {
 	duration = dur;
 	status = STATUS_LOADED;
+	initBlock = nullptr;
 }
 
 StreamTake::~StreamTake()
 {
 	stream.ClearStream();
+	if (initBlock != nullptr) {
+		initBlock->DeleteAll();
+	}
 }
 
 status_t
@@ -104,7 +109,7 @@ StreamTake::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 	return B_OK;
 }
 
-SampleTake::SampleTake(Sample *s, std::string nm, std::string pathnm):
+SampleTake::SampleTake(Sample *s, const std::string &nm, const std::string &pathnm):
 	Take(nm, s->sym, Take::SAMPLE)
 {
 	sample = s;
@@ -134,7 +139,7 @@ SampleTake::~SampleTake()
 }
 
 status_t
-SampleTake::SetSampleFile(const std::string pathnm, SampleFile *newFile)
+SampleTake::SetSampleFile(const std::string &pathnm, SampleFile *newFile)
 {
 	status_t	err=B_OK;
 	status = STATUS_UNLOADED;
