@@ -21,6 +21,8 @@
 #include "Time.h"
 #include "Clip.h"
 
+#include <iostream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -1489,7 +1491,7 @@ void
 MFCDataEditorTScale::OnHScroll(
 				UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	fprintf(stderr, "on h scroll\n");
+	cerr << "on h scroll" << endl;
 }
 
 bool

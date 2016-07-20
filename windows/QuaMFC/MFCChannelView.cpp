@@ -74,10 +74,10 @@ void MFCChannelView::OnDraw(CDC* pdc)
 	CRect textRect(1,1,bounds.right-1,11);
 	pdc->SelectObject(&displayFont);
 	pdc->SetBkMode(TRANSPARENT);
-	char	buf[512];
+
 //	sprintf(buf, "%s (%d ins, %d outs)", channel->sym->name, channel->nAudioIns, channel->nAudioOuts);
-	sprintf(buf, "%s", channel->sym->name.c_str(), channel->nAudioIns, channel->nAudioOuts);
-	pdc->DrawText(buf, &textRect, DT_VCENTER|DT_LEFT);
+	string buf = channel->sym->name; // , channel->nAudioIns, channel->nAudioOuts);
+	pdc->DrawText(buf.c_str(), &textRect, DT_VCENTER|DT_LEFT);
 
 	for (short i=0; i<NInR(); i++) {
 		MFCInputView	*iv = (MFCInputView *)InR(i);
@@ -223,13 +223,13 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 	char	buf[128];
 	for (i=0; i<channel->inputs.size(); i++) {
 		cout << "input menu item" << i << endl;
-		sprintf(buf, "input %d (%s)", i+1, channel->inputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
-		chInputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 3), buf);
+		string buf = "input " + to_string(i + 1) + " ("+ channel->inputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM) +")";
+		chInputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 3), buf.c_str());
 	}
 	for (i=0; i<channel->outputs.size(); i++) {
 		cout << "output menu item" << i << endl;
-		sprintf(buf, "output %d (%s)", i+1, channel->outputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM));
-		chOutputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 2), buf);
+		string buf = "output " + to_string(i + 1) + " (" + channel->outputs.Item(i)->Name(NMFMT_NAME, NMFMT_NUM) + ")";
+		chOutputMenu->AppendMenu(MF_STRING, pp.MenuIndexItem(NULL, i, 2), buf.c_str());
 	}
 
 	deviceMenu->AppendMenu(MF_POPUP, (UINT) inputPortMenu->m_hMenu, "add input");
@@ -427,16 +427,15 @@ PortPopup::MidiMenu(bool isInput)
 				(!isInput && (p->mode & QUA_PORT_OUT))) {
 			CMenu	*chmenu = new CMenu;
 			chmenu->CreatePopupMenu();
-			static char	buf[16];
 			if (isInput) {
 				for (short j=1; j<=16; j++) {
-					sprintf(buf, "Ch %d", j);
-					chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), buf);
+					string buf = "Ch " + to_string(j);
+					chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), buf.c_str());
 				}
 			} else {
 				for (short j=1; j<=16; j++) {
-					sprintf(buf, "Ch %d", j);
-					chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), buf);
+					string buf = "Ch " + to_string(j);
+					chmenu->AppendMenu(MF_STRING, MenuIndexItem(p, j, isInput), buf.c_str());
 				}
 			}
 			menu->AppendMenu(MF_POPUP, (UINT) chmenu->m_hMenu, p->name(NMFMT_NAME));

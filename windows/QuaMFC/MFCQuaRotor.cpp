@@ -645,18 +645,18 @@ MFCQuaRotor::OnToolTipNotify(NMHDR *pNMHDR, LRESULT *pResult)
 	int iID = GetDlgCtrlID();
 //	fprintf(stderr, "ottn\n");
 
-	char buf[256];
+	string buf;
 	if (label.size()) {
-		sprintf(buf, "%s:%g", label.c_str(), fValue);
+		buf = label + ":"+ to_string(fValue);
 	} else {
-		sprintf(buf, "%g", fValue);
+		buf = to_string(fValue);
 	}
 	if (pNMHDR->code == TTN_NEEDTEXTA) {
 	//	pttta->lpszText = buf;
-		strcpy(pttta->szText, buf);
+		strcpy(pttta->szText, buf.c_str());
 	} else { 
 		WCHAR	*p=ptttw->szText;
-		char	*q=buf;
+		char	*q=const_cast<char*>(buf.c_str());
 		while (*p++=*q++);
 	} 
 //	return TRUE;

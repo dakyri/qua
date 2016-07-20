@@ -79,8 +79,8 @@ public:
 	void				SetRange(long, long, long);
 	void				SetSteps(long, long=0, long=0);
 
-	virtual char		*GetText();
-	virtual void		SetText(char *);
+	virtual string getText();
+	virtual void setText(const char *);
 protected:
 	//{{AFX_MSG(MFCQuaIntCtrl)
 	afx_msg void		OnLButtonDown(UINT nFlags, CPoint point);

@@ -476,9 +476,8 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 
 			envelopes = quaLink->ListEnvelopesFor(inst->sym);
 			nEnvelope = envelopes.size();
-			char	buf[256];
-			sprintf(buf, "Envelopes for '%s'", inst->sym->name.c_str());
-			ctxtMenu->AppendMenu(MF_POPUP, (UINT) envMenu->m_hMenu, buf);
+			string buf =  "Envelopes for '" + inst->sym->name + "'";
+			ctxtMenu->AppendMenu(MF_POPUP, (UINT) envMenu->m_hMenu, buf.c_str());
 //			for each variable
 //				envMenu->AppendMenu(MF_STRING, ID_EDIT_SHOW_ENVELOPE, variable name);
 //					tick state
@@ -495,8 +494,7 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 			if (c && c->duration.ticks <= 0) {
 				ismark = true;
 			}
-			ctxtMenu->AppendMenu(MF_STRING, ID_EDITORCONTEXT_DEL_CLIP,
-				ismark? "Delete Marker":"Delete Region");
+			ctxtMenu->AppendMenu(MF_STRING, ID_EDITORCONTEXT_DEL_CLIP, ismark? "Delete Marker":"Delete Region");
 		} else if (iv->type == MFCEditorItemView::ENV) {
 		} else {
 		}

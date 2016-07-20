@@ -263,8 +263,8 @@ END_MESSAGE_MAP()
 // MFCQuaTimeCtrl message handlers
 
 
-char *
-MFCQuaTimeCtrl::GetText()
+string
+MFCQuaTimeCtrl::getText()
 {
 	static char	buf[100];
 	GetWindowText(buf, 100);
@@ -273,7 +273,7 @@ MFCQuaTimeCtrl::GetText()
 }
 
 void
-MFCQuaTimeCtrl::SetText(char *txt)
+MFCQuaTimeCtrl::setText(const char *txt)
 {
 	time.Set(txt);
 	CEdit::SetWindowText(time.StringValue());

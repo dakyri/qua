@@ -4,6 +4,9 @@
 
 #include "ParserDriver.h"
 
+/**
+ * test framework for building up a decent script parser in bison. current flakey RD parser is one of the original pieces of atari code. 
+ */
 using namespace std;
 
 int

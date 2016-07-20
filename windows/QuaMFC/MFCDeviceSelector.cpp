@@ -254,14 +254,13 @@ MFCDeviceSelector::OnToolTipNotify(NMHDR *pNMHDR, LRESULT *pResult)
 	
 	int iID = GetDlgCtrlID();
 
-	char buf[256];
-	sprintf(buf, "%s", DeviceName(NMFMT_NAME,NMFMT_NAME));
+	string buf = DeviceName(NMFMT_NAME,NMFMT_NAME);
 	if (pNMHDR->code == TTN_NEEDTEXTA) {
 	//	pttta->lpszText = buf;
-		strcpy(pttta->szText, buf);
+		strcpy(pttta->szText, buf.c_str());
 	} else { 
 		WCHAR	*p=ptttw->szText;
-		char	*q=buf;
+		char	*q=const_cast<char*>(buf.c_str());
 		while (*p++=*q++);
 	} 
 //	return TRUE;

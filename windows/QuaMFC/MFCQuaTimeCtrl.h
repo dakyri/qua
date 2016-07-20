@@ -68,8 +68,8 @@ public:
 	bool				CreateTimeCtrl(CRect &r, CWnd *w, UINT id, CFont *cf=NULL, CRect *tr=NULL, COLORREF *bgc=NULL, COLORREF *tbgc=NULL, COLORREF *tc=NULL);
 	virtual void		DrawContents(CDC *);
 
-	virtual char		*GetText();
-	virtual void		SetText(char *);
+	virtual string getText();
+	virtual void setText(const char *);
 
 	void				SetTime(Time&t);
 	void				GetTime(Time&t);

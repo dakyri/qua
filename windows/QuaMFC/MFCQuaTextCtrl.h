@@ -111,8 +111,8 @@ public:
 	virtual void		DrawContents(CDC *);
 
 	void				RedrawDisplay();
-	virtual char		*GetText()=NULL;
-	virtual void		SetText(char *)=NULL;
+	virtual string getText()=0;
+	virtual void setText(const char *)=0;
 
 	void				SendVCMsg();
 	void				SetVCMsgParams(uint32, WPARAM, LPARAM);

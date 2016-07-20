@@ -81,8 +81,8 @@ public:
 	void				SetRange(float min, float ini, float max);
 	void				SetSteps(float step1, float step2=0, float step3=0);
 
-	virtual char		*GetText();
-	virtual void		SetText(char *);
+	virtual string getText() override;
+	virtual void setText(const char *) override;
 protected:
 	//{{AFX_MSG(MFCQuaFloatEdit)
 	afx_msg void		OnLButtonDown(UINT nFlags, CPoint point);

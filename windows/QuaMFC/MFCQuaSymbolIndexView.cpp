@@ -161,6 +161,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 				it = IndexItemFor(s, iti);
 				if (it == NULL) {
 					Clip	*c = s->ClipValue(NULL);
+					cout << "adding symbol index item " << s->name << endl;
 					short	img=10;
 					if (c && c->duration.ticks <= 0) {
 						img = 11;
@@ -201,7 +202,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
+				cerr << "adding instance item, parent " << p <<" " << p->name << endl;
 				switch (p->type) {
 				case TypedValue::S_VOICE: {
 						if (iti != NULL) {
@@ -219,7 +220,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 								it = AddIndexItem(s->uniqueName(), (LPARAM)s, iti, 3);
 							}
 						} else {
-							fprintf(stderr, "parent index item not found\n");
+							cerr << "parent index item not found" << endl;
 						}
 						break;
 					}
@@ -243,6 +244,7 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 				HTREEITEM	it = IndexItemFor(s, regions);
 				if (it == NULL) {
 					Clip	*c = s->ClipValue(NULL);
+					cout << "adding clip item " << s->name << endl;
 					short	img=10;
 					if (c && c->duration.ticks <= 0) {
 						img = 11;
@@ -292,7 +294,7 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
+				cerr << "adding instance item, parent " << p << ", " << p->name << endl;
 				switch (p->type) {
 					case  TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
@@ -312,7 +314,7 @@ MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 								it = AddIndexItem(s->uniqueName(), (LPARAM)s, ipt, 3);
 							}
 						} else {
-							fprintf(stderr, "parent index item not found\n");
+							cerr << "parent index item not found" << endl;
 						}
 						break;
 					}
@@ -339,6 +341,7 @@ MFCQuaSymbolIndexView::removeFromSymbolIndex(StabEnt *s)
 void
 MFCQuaSymbolIndexView::updateClipIndexDisplay()
 {
+	cerr << "updateClipIndexDisplay()" << endl;
 	StabEnt	*sym = quaLink->QuaSym();
 	StabEnt	*cs = sym->children;
 	vector<StabEnt*> clips;
@@ -350,15 +353,13 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 	}
 	vector<StabEnt*> present = quaLink->ClipSyms(0);
 
-	long	i;
-	for (i=0; i<present.size(); i++) {
-		StabEnt	*s =present[i];
-		if (s && s->type == TypedValue::S_CLIP) {
-			fprintf(stderr, "\tadd %x %s\n", (unsigned)s, s->name.c_str());
+	for (auto s: present) {
+		if (s != nullptr && s->type == TypedValue::S_CLIP) {
+			cerr << "\tadd from present " << (unsigned)s << " " << s->name << endl;
 			addToSymbolIndex(s);
 		}
 	}
-	fprintf(stderr, "update master clip index display\n");
+	cerr << "update master clip index display" << endl;
 	HTREEITEM hItem=NULL;
 	hItem = GetTreeCtrl().GetNextItem(regions, TVGN_CHILD);
 	while (hItem != NULL) {
@@ -370,8 +371,8 @@ MFCQuaSymbolIndexView::updateClipIndexDisplay()
 		if (item.lParam >= QSI_SYMBOL_LPARAM) {
 			StabEnt	*s = (StabEnt *)item.lParam;
 			if (s->type == TypedValue::S_CLIP) {
-				fprintf(stderr, "\tfound %x %s\n", (unsigned)s, s->name.c_str());
-				if (find(present.begin(), present.end(), s) != present.end()) {
+				if (find(present.begin(), present.end(), s) == present.end()) {
+					cerr << "\tfound " << (unsigned)s << " " << s->name << " not in present " << endl;
 					GetTreeCtrl().DeleteItem(hItem);
 				}
 			}
@@ -411,7 +412,7 @@ MFCQuaSymbolIndexView::AddTopLevelClass(char *s, LPARAM type, HTREEITEM parent, 
 HTREEITEM
 MFCQuaSymbolIndexView::AddIndexItem(const char *s, LPARAM type, HTREEITEM parent, int img)
 {
-	fprintf(stderr, "ai %s %x %x %d\n", s, (unsigned)type, (unsigned)parent, img);
+	cerr << "MFCQuaSymbolIndexView::AddIndexItem("<< s <<","<< (unsigned)type << "," << (unsigned)parent << "," << img << ")"<<endl;
 	HTREEITEM ht = GetTreeCtrl().InsertItem(
 				TVIF_TEXT|TVIF_PARAM|TVIF_STATE|TVIF_IMAGE|TVIF_SELECTEDIMAGE, /* nMask */
 				s,
@@ -478,7 +479,7 @@ MFCQuaSymbolIndexView::IndexItemFor(StabEnt *s)
 			  }
 			case TypedValue::S_INSTANCE: {
 				StabEnt	*p = s->context;
-				fprintf(stderr, "adding instance item, parent %x %s\n", p, p->name.c_str());
+				cerr << "adding instance item, parent " << p << " " << p->name << endl;
 				switch (p->type) {
 					case TypedValue::S_VOICE: {
 						HTREEITEM	ipt = IndexItemFor(p, voices);
@@ -525,7 +526,9 @@ MFCQuaSymbolIndexView::AddAllIndexItems()
 	}
 	AddMethodIndexItems(quaLink->QuaSym(), methods);
 	vector<StabEnt*> clips = quaLink->ClipSyms(0);
+	cout << "got clipes " << clips.size() << endl;
 	for (short i = 0; i<clips.size(); i++) {
+		cout << "got cliep " << i << endl;
 		StabEnt	*sym = clips[i];
 		if (sym != nullptr) {
 			addToSymbolIndex(sym);
@@ -561,7 +564,7 @@ MFCQuaSymbolIndexView::AddInstanceIndexItems(StabEnt *sym, HTREEITEM it)
 afx_msg void
 MFCQuaSymbolIndexView::OnBeginDrag(NMHDR *pnmh, LRESULT* bHandled)
 {
-	fprintf(stderr, "MFCQuaSymbolIndexView begin drag\n");
+	cerr << "MFCQuaSymbolIndexView begin drag" << endl;
 	NM_TREEVIEW* tvp = (NM_TREEVIEW*)pnmh;
 
 	if (!draggingNow) {
@@ -692,9 +695,8 @@ MFCQuaSymbolIndexView::OnKeyDown(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	TV_KEYDOWN* pKeyDown = (TV_KEYDOWN *) pNotifyStruct;
 
-	if (pKeyDown->wVKey == VK_DELETE)
-	{
-		fprintf(stderr, "delete key");
+	if (pKeyDown->wVKey == VK_DELETE) {
+		cerr << "delete key" << endl;
 		/*
 		BOOL bShowWarnings = ((CDaoViewApp *)AfxGetApp())->m_bShowWarnings;
 		int retCode = IDYES;
@@ -717,7 +719,7 @@ MFCQuaSymbolIndexView::OnNodeSelect(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	*result = 0;
 	NMTREEVIEW	*tvp = (NMTREEVIEW *)pNotifyStruct;
-	fprintf(stderr, "symbol index node select %x %x\n", tvp->itemOld.lParam, tvp->itemNew.lParam);
+	cerr << "symbol index node select " << tvp->itemOld.lParam << " " << tvp->itemNew.lParam << endl;
 
 	/*
 	if (m_bNoNotifications)
@@ -775,7 +777,7 @@ void
 MFCQuaSymbolIndexView::OnNodeExpand(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	*result = 0;
-	fprintf(stderr, "node expand\n");
+	cerr << "node expand" << endl;
 
 	NMTREEVIEW	*tvp = (NMTREEVIEW *)pNotifyStruct;
 	if (tvp->itemNew.lParam > QSI_SYMBOL_LPARAM) {
@@ -946,6 +948,7 @@ MFCQuaSymbolIndexView::OnRightClick(NMHDR *pNotifyStruct,LRESULT *result)
 					break;
 				case  TypedValue::S_CLIP: {
 					Clip	*c = sym->ClipValue(NULL);
+					cout << "doing poopup on " << sym->name << endl;
 					if (c->duration.ticks <= 0) {
 						DoPopupMenu(IDR_MAINMARK_RCLICK);
 					} else {
@@ -964,7 +967,7 @@ void
 MFCQuaSymbolIndexView::OnDoubleClick(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	CTreeCtrl& ctl = (CTreeCtrl&) GetTreeCtrl();
-	fprintf(stderr, "on double click\n");
+	cerr << "on double click" << endl;
 
 	UINT nFlags;
 	CPoint curPoint;
@@ -996,7 +999,7 @@ void
 MFCQuaSymbolIndexView::OnRightDoubleClick(NMHDR *pNotifyStruct,LRESULT *result)
 {
 	CTreeCtrl& ctl = (CTreeCtrl&) GetTreeCtrl();
-	fprintf(stderr, "on right double click\n");
+	cerr << "on right double click" << endl;
 
 	UINT nFlags;
 	CPoint curPoint;
@@ -1025,9 +1028,9 @@ void
 MFCQuaSymbolIndexView::DoPopupMenu(UINT nMenuID)
 {
 	CMenu popMenu;
-
+	cout << "doing popup menu " << nMenuID << endl;
 	if (!popMenu.LoadMenu(nMenuID)) {
-		fprintf(stderr, "load menu %d fails\n", nMenuID);
+		cerr << "load menu " << nMenuID << " fails" << endl;
 		return;
 	}
 
@@ -1036,7 +1039,7 @@ MFCQuaSymbolIndexView::DoPopupMenu(UINT nMenuID)
 
 	CMenu	*sub = popMenu.GetSubMenu(0);
 	if (sub == NULL) {
-		fprintf(stderr, "load menu %d has no popup\n", nMenuID);
+		cerr << "load menu " << nMenuID << " has no popup" << endl;
 		return;
 	}
 	sub->TrackPopupMenu(0,posMouse.x,posMouse.y,this);
@@ -1048,7 +1051,7 @@ MFCQuaSymbolIndexView::OnPopupAddMethod()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*pSym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup add child method %s\n", pSym->uniqueName());
+		cerr << "Popup add child method " << pSym->uniqueName() << endl;
 		switch (pSym->type) {
 			case TypedValue::S_LAMBDA:
 			case TypedValue::S_CHANNEL:
@@ -1076,7 +1079,7 @@ MFCQuaSymbolIndexView::OnPopupDelete()
 	DWORD_PTR selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QSI_SYMBOL_LPARAM) {
 		StabEnt	*sym = (StabEnt *) selectedData;
-		fprintf(stderr, "Popup delete %s\n", sym->uniqueName());
+		cerr << "Popup delete " << sym->uniqueName() << endl;
 		switch (sym->type) {
 			case TypedValue::S_LAMBDA:
 				quaLink->DeleteObject(sym);
@@ -1193,7 +1196,7 @@ MFCQuaSymbolIndexView::OnPopupEdit()
 DROPEFFECT
 MFCQuaSymbolIndexView::OnDragEnter(COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
 {
-	fprintf(stderr, "drag enter\n");
+	cerr << "drag enter" << endl;
 	/*
 	if (m_pDB)
 		if (pDataObject->IsDataAvailable(m_nIDClipFormat))

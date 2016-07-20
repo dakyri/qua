@@ -99,12 +99,10 @@ MFCQuaIntCtrl::DrawContents(CDC *pdc)
 	pdc->DrawText(GetText(), &textRect, DT_VCENTER|DT_LEFT);
 }
 
-char *
+string
 MFCQuaIntCtrl::GetText()
 {
-	static char	buf[100];
-	sprintf(buf, "%d", value);
-	return buf;
+	return to)strin(value);
 }
 
 void
@@ -242,7 +240,7 @@ MFCQuaIntCtrl::SetValue(long v)
 		v = max;
 	}
 	value = v;
-	SetWindowText(GetText());
+	SetWindowText(getText().c_str());
 }
 
 void
@@ -279,16 +277,14 @@ MFCQuaIntCtrl::DrawContents(CDC *pdc)
 //	pdc->DrawText(GetText(), &textRect, DT_VCENTER|DT_LEFT);
 }
 
-char *
-MFCQuaIntCtrl::GetText()
+string
+MFCQuaIntCtrl::getText()
 {
-	static char	buf[100];
-	sprintf(buf, "%d", value);
-	return buf;
+	return to_string(value);
 }
 
 void
-MFCQuaIntCtrl::SetText(char *txt)
+MFCQuaIntCtrl::setText(const char *txt)
 {
 	SetValue(atoi(txt));
 }

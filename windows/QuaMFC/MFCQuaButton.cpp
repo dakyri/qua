@@ -249,18 +249,18 @@ MFCQuaButton::OnToolTipNotify(NMHDR *pNMHDR, LRESULT *pResult)
 	
 	int iID = GetDlgCtrlID();
 
-	char buf[256];
+	string buf;
 	if (tooltipText.size()) {
-		sprintf(buf, "%s", tooltipText.c_str());
+		buf = tooltipText;
 	} else {
-		sprintf(buf, "Button");
+		buf = "Button";
 	}
 	if (pNMHDR->code == TTN_NEEDTEXTA) {
 	//	pttta->lpszText = buf;
-		strcpy(pttta->szText, buf);
+		strcpy(pttta->szText, buf.c_str());
 	} else { 
 		WCHAR	*p=ptttw->szText;
-		char	*q=buf;
+		char	*q=const_cast<char*>(buf.c_str());
 		while (*p++=*q++);
 	} 
 //	return TRUE;

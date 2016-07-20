@@ -489,7 +489,7 @@ MFCQuaTextCtrl::OnKillFocus(CWnd* pNewWnd)
 	int n = GetWindowTextLength();
 	char	*buf = new char[n+1];
 	GetWindowText(buf, n+1);
-	SetText(buf);
+	setText(buf);
 	fprintf(stderr, "okf: window text %s\n", buf);
 	delete buf;
 	SendVCMsg();
@@ -501,17 +501,17 @@ MFCQuaTextCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	switch(nChar) {
 		case VK_RETURN: { // ???? don't seem to receive this in single line mode
-			SetWindowText(GetText());
+			SetWindowText(getText().c_str());
 			::SetFocus(NULL);
 			break;
 		}
 		case VK_NEXT: {
-			SetWindowText(GetText());
+			SetWindowText(getText().c_str());
 			::SetFocus(NULL);
 			break;
 		}
 		case VK_TAB: {
-			SetWindowText(GetText());
+			SetWindowText(getText().c_str());
 			::SetFocus(NULL);
 			break;
 		}

@@ -154,8 +154,9 @@ CQuaMFCApp::InitInstance()
 	freopen("conin$", "r", stdin); 
 	freopen("conout$", "w", stdout); 
 	freopen("conout$", "w", stderr); 
+	ios::sync_with_stdio();
 #endif
-	std::cout.setf(std::ios::unitbuf);
+
 	fprintf(trace_fp, "InitInstance()\n");
 	QuaCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);

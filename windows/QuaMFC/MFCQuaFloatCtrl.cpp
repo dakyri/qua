@@ -99,9 +99,7 @@ MFCQuaFloatCtrl::DrawContents(CDC *pdc)
 char *
 MFCQuaFloatCtrl::GetText()
 {
-	static char	buf[100];
-	sprintf(buf, "%g", value);
-	return buf;
+	return to_string(value).c_str();
 }
 
 void
@@ -237,7 +235,7 @@ MFCQuaFloatCtrl::SetValue(float v)
 		v = max;
 	}
 	value = v;
-	SetWindowText(GetText());
+	SetWindowText(getText().c_str());
 }
 
 void
@@ -275,17 +273,14 @@ MFCQuaFloatCtrl::DrawContents(CDC *pdc)
 //	pdc->DrawText(GetText(), &textRect, DT_VCENTER|DT_LEFT);
 }
 
-char *
-MFCQuaFloatCtrl::GetText()
+string
+MFCQuaFloatCtrl::getText()
 {
-	static char	buf[100];
-	sprintf(buf, "%g", value);
-//	GetWindowText(buf, 100);
-	return buf;
+	return to_string(value);
 }
 
 void
-MFCQuaFloatCtrl::SetText(char *txt)
+MFCQuaFloatCtrl::setText(const char *txt)
 {
 	SetValue((float)atof(txt));
 }
