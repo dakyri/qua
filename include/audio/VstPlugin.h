@@ -64,7 +64,7 @@ public:
 
 	void* libhandle;
 #endif
-	static void ScanFile(string path, FILE *scriptFile, FILE *lstfile, bool recurse);
+	static void ScanFile(const string &path, ostream &scriptFile, ostream &lstfile, bool recurse);
 
 // plugin properties, so we can know beforehand
 	char				effectName[32];	// original effect name. may be different to the qua name. qua names don't have spaces or odd characters.

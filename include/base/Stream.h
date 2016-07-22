@@ -46,6 +46,7 @@ public:
 			free = static_cast<C *>(free->next);
 		} else {
 			p = malloc(s/*sizeof(C)*/);
+//			cerr << "malloc " << s << " of " << sizeof(C) << ", " << sizeof(StreamItem) << ", " << sizeof(Note) << ", " << sizeof(Time) << ", " << sizeof(StreamItem*) << endl;
 		}
 		mutex.unlock();
 		return p;
@@ -73,10 +74,9 @@ public:
 	StreamItem(Time &_time, short _type = TypedValue::S_UNKNOWN);
 	virtual ~StreamItem() {}
 
-	short				type;
-	Time				time;
-	StreamItem			*next,
-		*prev;
+	Time time;
+	StreamItem *next, *prev;
+	short type;
 
 	StreamItem *Subsequent(short typ, short cmd, short data);
 	//    StreamItem			*Previous(short typ, short cmd, short data); // currently next is ignored?
@@ -98,8 +98,8 @@ template <typename C>
 class StreamItemImpl : public StreamItem {
 public:
 	StreamItemImpl<C>(Time &_time, short _type = TypedValue::S_UNKNOWN)
-		: StreamItem(time, _type)
-	{ }
+		: StreamItem(_time, _type)
+	{	}
 protected:
 	static StreamItemCache<C> cache;
 public:

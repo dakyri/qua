@@ -27,6 +27,8 @@
 #include "SampleBuffer.h"
 #include "QuaDisplay.h"
 
+#include <iostream>
+
 Voice::Voice(std::string nm, Qua *parent):
 	Schedulable(
 		DefineSymbol(nm, TypedValue::S_VOICE, 0,
@@ -529,7 +531,9 @@ Voice::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 Instance *
 Voice::addInstance(const std::string &nm, const Time &startt, const Time &dur, Channel * const chan)
 {
-	VoiceInstance *i = new VoiceInstance(*this, nm, startt, dur, chan);
+	cerr << "Voice::addInstance()!!! " << dur.ticks <<  "," << (!dur) << endl;
+
+	VoiceInstance *i = new VoiceInstance(*this, nm, startt, (!dur)? Time::infinity : dur, chan);
 	addInstToList(i);
 
 	if (uberQua && i) {
@@ -539,7 +543,7 @@ Voice::addInstance(const std::string &nm, const Time &startt, const Time &dur, C
 		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
-		fprintf(stderr, "Voice: unexpected null while committing to schedule");
+		cerr << "Voice: unexpected null while committing to schedule" << endl;
 	}
 	return i;
 }

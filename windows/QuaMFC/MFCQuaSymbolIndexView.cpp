@@ -156,6 +156,7 @@ MFCQuaSymbolIndexView::AddToSymbolIndex(StabEnt *s, HTREEITEM iti)
 {
 	HTREEITEM	it = NULL;
 	if (s!= NULL) {
+		cerr << "MFCQuaSymbolIndexView::AddToSymbolIndex(HTREEITEM iti) " << s->name << " to symbol index" << endl;
 		switch (s->type) {
 			case TypedValue::S_CLIP: {
 				it = IndexItemFor(s, iti);
@@ -239,12 +240,12 @@ void
 MFCQuaSymbolIndexView::addToSymbolIndex(StabEnt *s)
 {
 	if (s!= NULL) {
+		cerr << "MFCQuaSymbolIndexView::addToSymbolIndex " << s->name << endl;
 		switch (s->type) {
 			case TypedValue::S_CLIP: {
 				HTREEITEM	it = IndexItemFor(s, regions);
 				if (it == NULL) {
 					Clip	*c = s->ClipValue(NULL);
-					cout << "adding clip item " << s->name << endl;
 					short	img=10;
 					if (c && c->duration.ticks <= 0) {
 						img = 11;

@@ -64,14 +64,14 @@ StreamItemCache::Dealloc(void *p)
 	mutex.unlock();
 }
 #endif
-
+#include <iostream>
 StreamItem::StreamItem(Time &_time, short _type)
 	: type(_type)
 	, time(_time)
 	, next(nullptr)
 	, prev(nullptr)
 {
-
+	cerr << "time in " << time.metric << " v " << _time.metric << endl;
 }
 
 StreamItem *
@@ -185,6 +185,7 @@ StreamNote::StreamNote(Time &t, Note &tp)
 
 StreamNote::StreamNote(Time &tag, cmd_t cmd, pitch_t pitch, vel_t vel, dur_t dur)
 	: StreamItemImpl<StreamNote>(tag, TypedValue::S_NOTE) {
+	cerr << "tag " << (unsigned)tag.metric << endl;
 	note.cmd = cmd;
 	note.duration = dur;
 	note.dynamic = vel;

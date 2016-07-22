@@ -37,6 +37,8 @@
 #include "Block.h"
 #include "Parse.h"
 
+#include <iostream>
+
 CFont	MFCObjectView::displayFont;
 CFont	MFCStackFrameView::displayFont;
 CFont	MFCQuaClipController::displayFont;
@@ -2331,7 +2333,7 @@ MFCSampleObjectView::OnDraw(CDC* pdc)
 int
 MFCSampleObjectView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 {
-	fprintf(stderr, "create sample object view %x\n", this);
+	cerr << "MFCSampleObjectView::OnCreate()" << (unsigned) this <<endl;
 	minimizeButton = new MFCSmallQuaMinBut;
 	minimizeButton->CreateButton(NULL, CRect(1,1,12, 12), this, 6969);
 	minimizeButton->SetLCMsgParams(QM_MINIMIZE_VIEW,NULL,NULL);
@@ -2393,7 +2395,7 @@ MFCSampleObjectView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 void
 MFCSampleObjectView::ArrangeChildren()
 {
-	fprintf(stderr, "arrange sample children\n");
+	cerr << "MFCSampleObjectView::ArrangeChildren()" << endl;
 	clipsView->SetWindowPos(&wndTop, CLIP_POSX, CLIP_POSY, 0, 0, SWP_NOSIZE);
 //	takesView->SetWindowPos(&wndTop, TAKE_POSX, TAKE_POSY, 0, 0, SWP_NOSIZE);
 	dataEditor->SetWindowPos(&wndTop, EDIT_POSX,EDIT_POSY,bounds.right-OV_MARGIN-EDIT_POSX, 100-EDIT_POSY, NULL);
@@ -2910,7 +2912,7 @@ void MFCVoiceObjectView::OnDraw(CDC* pdc)
 int
 MFCVoiceObjectView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 {
-	fprintf(stderr, "create sample object view %x\n", this);
+	cerr << "MFCVoiceObjectView::OnCreate()" << (unsigned) this << endl;
 	int ret = MFCObjectView::OnCreate(lpCreateStruct);
 	CRect		r;
 
@@ -2989,7 +2991,7 @@ MFCVoiceObjectView::OnDestroy()
 void
 MFCVoiceObjectView::ArrangeChildren()
 {
-	fprintf(stderr, "arrange voice children\n");
+	cerr << "MFCVoiceObjectView::ArrangeChildren()" << endl;
 	clipsView->SetWindowPos(&wndTop, CLIP_POSX, CLIP_POSY, 0, 0, SWP_NOSIZE);
 //	takesView->SetWindowPos(&wndTop, TAKE_POSX, TAKE_POSY, 0, 0, SWP_NOSIZE);
 //	yscale->SetWindowPos(&wndTop, EDIT_POSX,EDIT_POSY,0,0, SWP_NOSIZE);

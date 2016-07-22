@@ -707,7 +707,7 @@ MFCArrangeView::OnDrop(
 			CPoint point 
 		)
 {
-	cout << "MFCArrangeView::on drop\n";
+	cerr << "MFCArrangeView::on drop"<<endl;
 	point += GetScrollPosition();
 	switch (dragon.type) {
 		case QuaDrop::FILES:
@@ -717,7 +717,8 @@ MFCArrangeView::OnDrop(
 			short	at_channel;
 			Pix2Time(point.x, at_time);
 			at_channel = Pix2Channel(point.y);
-//			int		bar, barbeat, beattick;
+			cerr << "file drop " << at_channel << " chan " << at_time.StringValue() << endl;
+			//			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drag files is dropped: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
 			short	i;
@@ -767,11 +768,12 @@ MFCArrangeView::OnDrop(
 			short	at_channel;
 			Pix2Time(point.x, at_time);
 			at_channel = Pix2Channel(point.y);
+			cerr << "schedulable drop " << at_channel << " chan " << at_time.StringValue() << endl;
 //			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drop schedulable %s: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", dragon.data.symbol->name, point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
 
-			quaLink->CreateInstance(dragon.data.symbol, at_channel, at_time, NULL);
+			quaLink->CreateInstance(dragon.data.symbol, at_channel, at_time, Time::zero);
 			return TRUE;
 		}
 			
@@ -780,7 +782,8 @@ MFCArrangeView::OnDrop(
 			short	at_channel;
 			Pix2Time(point.x, at_time);
 			at_channel = Pix2Channel(point.y);
-//			int		bar, barbeat, beattick;
+			cerr << "instance drop " << at_channel << " chan " << at_time.StringValue() << endl;
+			//			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drop instance %s: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", dragon.data.symbol->name, point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
 			Instance *i = dragon.data.symbol->InstanceValue();
@@ -1432,7 +1435,7 @@ MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
 	if (clipBox->left > bounds.left) clipBounds.left = clipBox->left-1;
 	if (clipBox->right < bounds.right) clipBounds.right = clipBox->right+1;
 
-//	fprintf(stderr, "drawing instance view %d\n", clipBounds.right-clipBounds.left);
+	cerr << "ondraw instance view " << endl;
 	dc->FillRectangle(&blueBrush,
 			bounds.left, bounds.top,
 			bounds.right-bounds.left, bounds.bottom-bounds.top);

@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 using namespace boost::filesystem;
 
@@ -42,13 +43,8 @@ QuaEnvironment::SetVstPluginDir(char *path, bool add, bool reload)
 {
 #ifdef QUA_V_VST_HOST
 	std::string	cfgPath = configDirectory + "/" + "vstplugins.qua";
-	FILE	*fp = fopen(cfgPath.c_str(), add ? "w+" : "w");
-	if (fp == NULL) {
-		return false;
-	}
-	setbuf(fp, NULL);
-	VstPlugin::ScanFile(path, fp, NULL, true);
-	fclose(fp);
+
+	VstPlugin::ScanFile(path, std::ofstream(cfgPath, add? ios_base::app : ios_base::out), std::ofstream(), true);
 	if (reload) {
 		display.RefreshVstPluginList();
 	}

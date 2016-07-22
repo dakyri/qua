@@ -14,6 +14,8 @@
 #include "QuaPort.h"
 #include "ControllerBridge.h"
 
+#include <iostream>
+
 status_t
 Loggable::SaveLogInfo(FILE *fp, short indent)
 {
@@ -58,7 +60,7 @@ Instance::Instance(Schedulable &s, const std::string &nm, const Time &t, const T
 		this, s.sym,
 		TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT);
 	//		interfaceBridge.SetSymbol(sym);
-	fprintf(stderr, "instance %s of %s defined at %s on %d\n", sym->uniqueName(), s.sym->name.c_str(), startTime.StringValue(), (unsigned)channel);
+	cerr << "instance " << sym->uniqueName() << " of " << s.sym->name<< " defined at "<< startTime.StringValue() << " on " << channel->chanId << endl;
 
 // keep a list of  the standard controllers
 //	controlVariables = new QuaControllerBridge(s->uberQua, this, nullptr, s->standardControlInfo);
@@ -108,7 +110,7 @@ Instance::Init()
 
 	if (!SetStacks())
 		goto err_ex;
-	fprintf(stderr, "stacks setup\n");
+	cerr <<  "Instance :: stacks setup" << endl;
 		
 	ResetStacks();
 	

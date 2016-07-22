@@ -244,7 +244,7 @@ Time::operator - (const Time& t2)
 bool
 Time::operator ! () const
 {
-	return ticks != 0;
+	return ticks == 0;
 }
 
 Time

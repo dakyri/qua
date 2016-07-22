@@ -7,6 +7,8 @@
 #include "QuaCommandLine.h"
 #include "VstPlugin.h"
 
+#include <iostream>
+#include <fstream>
 
 char			*QuaCommandLine::usage_str = "\
 Usage: qua [options|files]*\n\
@@ -77,7 +79,7 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 		} else if (arg =="listvst") {
 #ifdef QUA_V_VST_HOST
 			for (short i = 0; i<vstList.size(); i++) {
-				VstPlugin::ScanFile(vstList[i], NULL, listFile, true);
+				VstPlugin::ScanFile(vstList[i], ofstream(), cerr, true);
 			}
 #endif
 			return true;
@@ -129,16 +131,11 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 		}
 #ifdef QUA_V_VST_HOST
 		case SET_VST: {
-			FILE	*fp = fopen("vstplugins.qua", "w");
-			setbuf(fp, NULL);
-			VstPlugin::ScanFile(arg, fp, NULL, true);
-			fclose(fp);
+			VstPlugin::ScanFile(arg, ofstream("vstplugins.qua", ios_base::out), ofstream(), true);
 			return true;
 		}
 		case ADD_VST: {
-			FILE	*fp = fopen("vstplugins.qua", "w+");
-			VstPlugin::ScanFile(arg, fp, NULL, true);
-			fclose(fp);
+			VstPlugin::ScanFile(arg, ofstream("vstplugins.qua", ios_base::app), ofstream(), true);
 			return true;
 		}
 #endif

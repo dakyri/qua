@@ -9,6 +9,8 @@
 #include "QuaDrop.h"
 #include "Sym.h"
 
+#include <iostream>
+
 // registered format codes for pointers to qua internal structures
 UINT		QuaDrop::clipFormat;
 UINT		QuaDrop::instanceFormat;
@@ -234,7 +236,7 @@ QuaDrop::SetTo(COleDataObject *object, DWORD ks)
 		data.symbol = clip->symbol;
 		GlobalUnlock(medium.hGlobal);
 		// ??? should GlobalFree
-		fprintf(stderr, "qua drop::voice %s\n", data.symbol->name.c_str());
+		cerr << "qua drop done"<< endl;
 		return true;
 	} else if (object->IsDataAvailable(instanceFormat)) {
 		fprintf(stderr, "qua drop::instance\n");

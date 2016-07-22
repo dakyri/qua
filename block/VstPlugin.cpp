@@ -1752,18 +1752,19 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 };
 
 void
-VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
+VstPlugin::ScanFile(const string &vstpath, ostream &scriptFile, ostream &logFile, bool recursive)
 {
 //	path = "f:/progs/vstplugins/korg legacy collection/legacycell.dll";
 //	lfp = stderr;
+	bool doLog = logFile.good();
 	string ext = getExt(vstpath);
 	if (ext == "dll") {
-		if (lfp) {
-			fprintf(lfp, "try loading %s ...\n", vstpath);
+		if (doLog) {
+			logFile << "try loading "<< vstpath <<" ...\n";
 		}
 		HINSTANCE libhandle=AfxLoadLibrary(vstpath.c_str());
 		if (libhandle == nullptr) {
-			if (lfp) {
+			if (doLog) {
 				cout << "libhandle null in " << vstpath << endl;
 			}
 			return;
@@ -1773,37 +1774,37 @@ VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
 									GetProcAddress(libhandle, "main");
 		cout << "fx factory " << (unsigned) fxFactory << endl;
 		if (fxFactory == nullptr) {
-			if (lfp) {
-				fprintf(lfp, "'main' null from %s\n", vstpath);
+			if (doLog) {
+				logFile << "'main' null from " << vstpath << endl;
 			}
 			if (!AfxFreeLibrary(libhandle)) {
-				cout << "afx free library fails\n";
+				cout << "afx free library fails" << endl; 
 			}
 			return;
 		}
 		AEffect	*afx = fxFactory(HostCallback);
 		if (afx == nullptr) {
-			if (lfp) {
-                fprintf(lfp, "failed to create afx from %s\n", vstpath);
+			if (doLog) {
+				logFile << "failed to create afx from "<<vstpath << endl; 
 			}
 			if (!AfxFreeLibrary(libhandle)) {
-				cout << "afx free library fails\n";
+				cout << "afx free library fails" << endl; 
 			}
 			return;
 		}
 		if (afx->magic != kEffectMagic) {
-			cout << vstpath  << "is not magic enougfh for vst\n";
+			cout << vstpath  << "is not magic enougfh for vst" << endl;
 			if (!AfxFreeLibrary(libhandle)) {
-				cout << "afx free library fails\n";
+				cout << "afx free library fails" << endl;
 			}
 			return;
 		}
 		bool asynth = (afx->flags & effFlagsIsSynth)!=0;
-		if (lfp) {
-			fprintf(lfp, "Effect '%s' by %s\n", GetEffectName(afx), GetVendorName(afx));
-			fprintf(lfp, "\tFull path: %s\n", vstpath);
-			fprintf(lfp, "\t%d inputs, %d outputs, \n", afx->numInputs, afx->numOutputs);
-			fprintf(lfp, "\t%d parameters:\n", afx->numParams);
+		if (doLog) {
+			logFile << "Effect '"<< GetEffectName(afx) <<"' by "<< GetVendorName(afx) << endl;
+			logFile << "\tFull path: " << vstpath << endl;
+			logFile << "\t"<< afx->numInputs <<" inputs, "<< afx->numOutputs <<" outputs, " << endl; 
+			logFile << "\t"<< afx->numParams <<" parameters:" << endl;
 			for (short j=0; j<afx->numParams; j++) {/*
 				VstParameterProperties	*p = GetParamProperties(afx, j);
 				fprintf(lfp, "\t  %d. '%s' ", j, GetParameterName(afx, j));
@@ -1826,13 +1827,13 @@ VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
 					}
 				}
 				for (short k=0; k<afx->numPrograms; k++) {
-//					fprintf(lfp, "program %d: %s\n", k, GetProgramName(afx, k));
+//					fprintf(lfp, "program %d: %s" << endl; //, k, GetProgramName(afx, k));
 				}
 
 				fprintf(lfp, "" << endl;*/
 			}
 		}
-		if (scriptFile) {
+		if (scriptFile.good()) {
 			string	fpath(vstpath);
 			string dnm = getBase(fpath);
 			string qnm;
@@ -1841,13 +1842,14 @@ VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
 			if (qnm.size() == 0) {
 				qnm = "vstfx";
 			}
-			fprintf(scriptFile, "vst \\path \"%s\" \\id '%s'\n", vstpath, uintstr(afx->uniqueID).c_str());
-			fprintf(scriptFile, "\t\\noload\n");
+			scriptFile << "vst \\path \""<< vstpath <<"%s\" \\id '"<< uintstr(afx->uniqueID) <<"'"<< endl;
+			scriptFile << "\t\\noload" << endl;
 			if (asynth) {
-				fprintf(scriptFile, "\t\\synth\n");
+				scriptFile << "\t\\synth" << endl;
 			}
-			fprintf(scriptFile, "\t\\ins %d \\outs %d \\nparam %d \\nprogram %d %s(\n",
-				afx->numInputs, afx->numOutputs, afx->numParams, afx->numPrograms, qnm);
+			scriptFile << "\t\\ins " << afx->numInputs << " \\outs " << afx->numOutputs
+						<< " \\nparam " << afx->numParams << " \\nprogram " << afx->numPrograms << " " << qnm << "(" << endl; //;
+			// TODO XXX FIXME not sure about tracking and storing all parameters these days
 			for (short j=0; j<afx->numParams; j++) {
 				/*
 				string pqnm;
@@ -1856,22 +1858,22 @@ VstPlugin::ScanFile(string vstpath, FILE *scriptFile, FILE *lfp, bool recursive)
 				if (*pqnm == 0) {
 					strcpy(pqnm, "param");
 				}
-				fprintf(scriptFile, "\t\tvstparam %d %s\n", j, pqnm);
+				fprintf(scriptFile, "\t\tvstparam %d %s" << endl; //, j, pqnm);
 				*/
 			}
-			fprintf(scriptFile, "\t)\n");
+			scriptFile << "\t)" << endl;
 		}
 		cout << "unloading library..." << endl;
 		if (!AfxFreeLibrary(libhandle)) {
-			cout << "fails\n";
+			cout << "fails" << endl; //;
 		} else {
-			cout << "succeeds\n";
+			cout << "succeeds" << endl; //;
 		}
 	} else {	// not a dll, maybe it's a dir of dll
 		filesystem::path dir(vstpath);
 		if (filesystem::exists(dir) && filesystem::is_directory(dir) && recursive) {
 			for (filesystem::directory_entry& file : filesystem::directory_iterator(dir)) {
-				ScanFile(file.path().string(), scriptFile, lfp, recursive);
+				ScanFile(file.path().string(), scriptFile, logFile, recursive);
 			}
 		}
 	}

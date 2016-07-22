@@ -743,6 +743,7 @@ QuaDisplay::CreateInstance(StabEnt *schSym, const short chan, const Time &t, con
 	Schedulable	*sch = schSym->SchedulableValue();
 	if (sch) {
 		Instance	*instance = sch->addInstance(sch->sym->name, chan, t, d, false);
+		cerr << "QuaDisplay::CreateInstance() duraction " << instance->duration.ticks << endl;
 		if (instance) {
 			for (i=0; i<NIndexer(); i++) {
 				Indexer(i)->addToSymbolIndex(instance->sym);
@@ -775,7 +776,7 @@ QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> 
 
 	Sample	*sample = qua->CreateSample(nmbuf, false);
 	if (sample) {
-		fprintf(stderr, "created sample %s\n", sample->sym->name.c_str());
+		cerr << "created sample " << sample->sym->name<< endl;
 		for (std::string p: pathList) {
 			std::string b = Qua::nameFromLeaf(p);
 			sample->addSampleTake(b, p, false);
@@ -785,11 +786,11 @@ QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> 
 		if (tp != nullptr && dp != nullptr) {
 			Time t = *tp, d = *dp;
 			instance = sample->addInstance(nm, chan, t, d, false);
-			for (short i = 0; i < NIndexer(); i++) {
-				Indexer(i)->addToSymbolIndex(sample->sym);
-				if (instance) {
-					Indexer(i)->addToSymbolIndex(instance->sym);
-				}
+		}
+		for (short i = 0; i < NIndexer(); i++) {
+			Indexer(i)->addToSymbolIndex(sample->sym);
+			if (instance) {
+				Indexer(i)->addToSymbolIndex(instance->sym);
 			}
 		}
 		// update arranger displays;

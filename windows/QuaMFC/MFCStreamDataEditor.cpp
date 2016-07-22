@@ -8,17 +8,16 @@
 #include "ShlObj.h"
 
 #include "StdDefs.h"
-
-
 #include "QuaMFC.h"
 #include "QuaMFCDoc.h"
 #include "MFCStreamDataEditor.h"
 #include "MFCObjectView.h"
-
 #include "Qua.h"
 #include "QuaMidi.h"
 #include "Time.h"
 #include "Voice.h"
+
+#include <iostream>
 
 CFont		MFCStreamEditorYScale::displayFont;
 
@@ -54,8 +53,8 @@ END_MESSAGE_MAP()
 
 MFCStreamDataEditor::MFCStreamDataEditor(void)
 {
-	stream = NULL;
-	take = NULL;
+	stream = nullptr;
+	take = nullptr;
 }
 
 MFCStreamDataEditor::~MFCStreamDataEditor(void)
@@ -99,7 +98,7 @@ MFCStreamDataEditor::SetHVScroll()
 bool
 MFCStreamDataEditor::SetToTake(Take *t)
 {
-	if (t == NULL) {// watch this !!!!
+	if (t == nullptr) {// watch this !!!!
 		return true;
 	} else if (t->type == Take::STREAM) {
 		if (take != t) {
@@ -119,7 +118,7 @@ MFCStreamDataEditor::AddAllItemViews(bool redraw)
 	if (NItemR() > 0) {
 		ClearAllItemViews(false);
 	}
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		if (redraw) {
 			InvalidateRect(&bounds);
 		}
@@ -130,7 +129,7 @@ MFCStreamDataEditor::AddAllItemViews(bool redraw)
 	CPoint		pt;
 	pt.x = 0;
 	pt.y = 0;
-	while (p != NULL) {
+	while (p != nullptr) {
 		MFCEditorItemView	*iv = AddStreamItemView(p, &pt, false);
 		if (iv->type == MFCEditorItemView::LIST) {
 			pt.y = iv->BoundingBox().bottom + 5;
@@ -141,10 +140,10 @@ MFCStreamDataEditor::AddAllItemViews(bool redraw)
 	StabEnt	*pars = parent->Symbol();
 	if (pars) {
 		StabEnt	*sibp = pars->children;
-		while (sibp != NULL) {
+		while (sibp != nullptr) {
 			if (sibp->type == TypedValue::S_CLIP) {
-				Clip	*c = sibp->ClipValue(NULL);
-				if (c->media != NULL) {
+				Clip	*c = sibp->ClipValue(nullptr);
+				if (c->media != nullptr) {
 					StabEnt		*ts = c->media->sym;
 					Take		*tk = ts->TakeValue();
 					if (take == tk) {
@@ -167,9 +166,9 @@ void
 MFCStreamDataEditor::OnInitialUpdate()
 {
 	CQuaMFCDoc	*qdoc = (CQuaMFCDoc *)GetDocument();
-	if (qdoc == NULL) {
+	if (qdoc == nullptr) {
 //		reportError("initial update of stream data editor finds a null sequencer document");
-	} else if (qdoc->qua == NULL) {
+	} else if (qdoc->qua == nullptr) {
 //		reportError("initial update of stream data editor finds a null sequencer");
 	} else {	// set qua up with our hooks
 //		quaLink = qdoc->qua->bridge.display;
@@ -187,7 +186,7 @@ MFCStreamDataEditor::OnDraw(CDC* pdc)
 	CRect	clipBox;
 	int		cbType;
 	cbType = pdc->GetClipBox(&clipBox);
-//	fprintf(stderr, "OnDraw() clip (%d %d %d %d) type %s\n", clipBox.left, clipBox.top, clipBox.right, clipBox.bottom, cbType==COMPLEXREGION?"complex":cbType==SIMPLEREGION?"simple":cbType==NULLREGION?"null":"error");
+//	fprintf(stderr, "OnDraw() clip (%d %d %d %d) type %s\n", clipBox.left, clipBox.top, clipBox.right, clipBox.bottom, cbType==COMPLEXREGION?"complex":cbType==SIMPLEREGION?"simple":cbType==nullptrREGION?"null":"error");
 //	fprintf(stderr, "lt %d\n", lastScheduledEvent.ticks);
 	CDocument* pDoc = GetDocument();
 #ifdef QUA_V_GDI_PLUS
@@ -225,14 +224,14 @@ MFCStreamDataEditor::OnDraw(CDC* pdc)
 MFCEditorItemView*
 MFCStreamDataEditor::AddStreamItemView(StreamItem *i, CPoint *pt, bool redraw)
 {
-	if (i == NULL) {
-		return NULL;
+	if (i == nullptr) {
+		return nullptr;
 	}
 	Time	evT = i->time + i->Duration();
 	if (evT > lastScheduledEvent) {
 		lastScheduledEvent = evT;
 	}
-	MFCEditorItemView *nv = NULL;
+	MFCEditorItemView *nv = nullptr;
 	switch (i->type) {
 		case TypedValue::S_BEND:
 		case TypedValue::S_CTRL:
@@ -241,9 +240,9 @@ MFCStreamDataEditor::AddStreamItemView(StreamItem *i, CPoint *pt, bool redraw)
 			if (i->type == TypedValue::S_CTRL) {
 				d1 = ((StreamCtrl*)i)->ctrl.controller;
 			}
-			MFCStreamItemListView *nlv = NULL;
+			MFCStreamItemListView *nlv = nullptr;
 			nlv = ItemListViewFor(i);
-			if (nlv == NULL) {
+			if (nlv == nullptr) {
 				nlv = new MFCStreamItemListView(this, pt, i->type, d1);
 				AddItemR(nlv);
 			}
@@ -277,7 +276,7 @@ MFCStreamDataEditor::ItemListViewFor(StreamItem *item)
 				return (MFCStreamItemListView*)iv;
 			} else {	// this would be a bit pear shaped
 				fprintf(stderr, "shape of pear: bad item type deep in ItemListViewFor()\n");
-				return NULL;
+				return nullptr;
 			}
 		} else if (iv->type == MFCEditorItemView::LIST) {
 			MFCStreamItemListView *slv = (MFCStreamItemListView *)iv;
@@ -294,7 +293,7 @@ MFCStreamDataEditor::ItemListViewFor(StreamItem *item)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void
@@ -344,10 +343,7 @@ MFCStreamDataEditor::SetStartTimeMidiParams(MFCEditorItemView *iv, Time &at, int
 /////////////////////////////////////////////////////////////////////////////
 
 afx_msg void
-MFCStreamDataEditor::OnLButtonDown(
-			UINT nFlags,
-			CPoint point 
-		)
+MFCStreamDataEditor::OnLButtonDown( UINT nFlags, CPoint point  )
 {
 	point += GetScrollPosition();
 	last_mouse_point = mouse_click = point;
@@ -362,19 +358,21 @@ MFCStreamDataEditor::OnLButtonDown(
 	dur_time.metric = at_time.metric;
 	dur_time.ticks = 1;
 
+	cerr << "got note time " << at_time.metric <<", "<< at_time.ticks << endl;
+
 //	int		bar, barbeat, beattick;
 //	at_time.GetBBQValue(bar, barbeat, beattick);
 //	fprintf(stderr, "left button down: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
 
-	if (stream == NULL) {
+	if (stream == nullptr) {
 		return;
 	}
-	mouse_sub_item = NULL;
+	mouse_sub_item = nullptr;
 	switch (currentTool) {
 		case ID_ARTOOL_POINT: {
 			DeselectAll();
 			short	hitType;
-			void	*hitIt=NULL;
+			void	*hitIt=nullptr;
 			mouse_item = ItemViewAtPoint(mouse_click, nFlags, hitType, hitIt);
 			if (mouse_item) {
 				if (hitIt) {
@@ -450,13 +448,15 @@ MFCStreamDataEditor::OnLButtonDown(
 		}
 		case ID_ARTOOL_DRAW: {
 			short	hitType;
-			void	*hitIt=NULL;
+			void	*hitIt=nullptr;
 			mouse_item = ItemViewAtPoint(mouse_click, nFlags, hitType, hitIt);
-			if (mouse_item == NULL) {
-				StreamItem		*iv=NULL;
-				iv = new StreamNote(at_time, 0, at_note, 80, 1);
+			cerr << "draw note time " << at_time.metric << ", " << at_time.ticks << endl;
+
+			if (mouse_item == nullptr) {
+				StreamItem		*iv= new StreamNote(at_time, 0, at_note, 80, 1);
+				cerr << iv->time.metric << " got this " << endl;
 				stream->InsertItem(iv);
-				mouse_item = AddStreamItemView(iv, NULL, true);
+				mouse_item = AddStreamItemView(iv, nullptr, true);
 			}
 			if (mouse_item) {
 				if (hitIt) {
@@ -480,14 +480,14 @@ MFCStreamDataEditor::OnLButtonDown(
 					case MFCEditorItemView::LIST: {
 						MFCStreamItemListView	*siv = (MFCStreamItemListView *)mouse_item;
 						Pix2Time(point.x, at_time);
-						StreamItem	*it = NULL;
+						StreamItem	*it = nullptr;
 						float		val = siv->Pix2Val(point.y);
 						last_controller_value = val;
 						switch (siv->listitemType) {
 							case TypedValue::S_CTRL: {
 								if (stream) {
 									mouse_action = QUA_MOUSE_ACTION_DRAW_EVENT;
-									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_CTRL, -1, siv->listitemData1)) == NULL) {
+									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_CTRL, -1, siv->listitemData1)) == nullptr) {
 										it = new StreamCtrl(at_time, 0, siv->listitemData1, 0);
 										stream->InsertItem(it);
 									}
@@ -498,7 +498,7 @@ MFCStreamDataEditor::OnLButtonDown(
 							case TypedValue::S_BEND: {
 								if (stream) {
 									mouse_action = QUA_MOUSE_ACTION_DRAW_EVENT;
-									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_BEND, -1, siv->listitemData1))==NULL) {
+									if ((it=stream->FindItemAtTime(0, at_time, TypedValue::S_BEND, -1, siv->listitemData1))==nullptr) {
 										it = new StreamBend(at_time, 0, 0);
 										stream->InsertItem(it);
 									}
@@ -525,7 +525,7 @@ MFCStreamDataEditor::OnLButtonUp(
 		)
 {
 	point += GetScrollPosition();
-	mouse_item = NULL;
+	mouse_item = nullptr;
 	mouse_action = QUA_MOUSE_ACTION_NONE;
 }
 
@@ -609,12 +609,12 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 	int i=0;
 	char buf[128];
 	short hitType;
-	void *hitIt=NULL;
+	void *hitIt=nullptr;
 	CPoint itPt = point;
 	itPt += GetScrollPosition();
 	MFCEditorItemView	* iv = ItemViewAtPoint(itPt, nFlags|MK_CONTROL, hitType, hitIt);
 	bool menu_built = false;
-	if (iv != NULL) {
+	if (iv != nullptr) {
 		if (iv->type == MFCEditorItemView::LIST) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			switch (siv->listitemType) {
@@ -725,7 +725,7 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 
 	short ret = ctxtMenu->TrackPopupMenuEx(
 						TPM_LEFTALIGN|TPM_LEFTBUTTON|TPM_RETURNCMD,
-						popPt.x, popPt.y, this, NULL);
+						popPt.x, popPt.y, this, nullptr);
 	delete ctxtMenu;
 	if (ret == 0) {	// cancel
 		return;
@@ -733,15 +733,15 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 
 	if (ret >= ID_STREAMEDITORCONTEXT_ADD_CONTROLLER && ret <= ID_STREAMEDITORCONTEXT_ADD_CONTROLLER+127) {
 		short ctl = ret-ID_STREAMEDITORCONTEXT_ADD_CONTROLLER;
-		if (stream != NULL) {
-			StreamItem		*iv=NULL;
+		if (stream != nullptr) {
+			StreamItem		*iv=nullptr;
 			iv = new StreamCtrl(at_time, 0, ctl, 80);
 			stream->InsertItem(iv);
 			MFCEditorItemView	*added_item = AddStreamItemView(iv, &itPt, true);
 		}
 	} else if (ret >= ID_STREAMEDITORCONTEXT_DUP_CONTROLLER && ret <= ID_STREAMEDITORCONTEXT_DUP_CONTROLLER+127) {
 		short ctl_to = ret-ID_STREAMEDITORCONTEXT_DUP_CONTROLLER;
-		if (stream != NULL && iv != NULL) {
+		if (stream != nullptr && iv != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			if (siv->listitemType == TypedValue::S_CTRL) {
 				stream->DuplicateController(siv->listitemData1,ctl_to);
@@ -751,64 +751,64 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 		}
 	} else if (ret >= ID_STREAMEDITORCONTEXT_ADD_PROGRAM && ret <= ID_STREAMEDITORCONTEXT_ADD_PROGRAM+127) {
 		short prg = ret-ID_STREAMEDITORCONTEXT_ADD_PROGRAM;
-		if (stream != NULL) {
-			StreamItem		*iv=NULL;
+		if (stream != nullptr) {
+			StreamItem		*iv=nullptr;
 			iv = new StreamProg(at_time, 0, prg, NON_PROG, NON_PROG);
 			stream->InsertItem(iv);
 			MFCEditorItemView	*added_item = AddStreamItemView(iv, &itPt, true);
 		}
 	} else if (ret >= ID_STREAMEDITORCONTEXT_SET_PROGRAM && ret <= ID_STREAMEDITORCONTEXT_SET_PROGRAM+127) {
 		short prg = ret-ID_STREAMEDITORCONTEXT_SET_PROGRAM;
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_PROG, -1, -1);
 			StreamProg		*sip = (StreamProg *)si;
-			if (si != NULL) {
+			if (si != nullptr) {
 				siv->SetSubItemValue(si, prg, sip->prog.bank, sip->prog.subbank);
 			}
 		}
 	} else if (ret >= ID_STREAMEDITORCONTEXT_SET_BANK && ret <= ID_STREAMEDITORCONTEXT_SET_BANK+127) {
 		short prg = ret-ID_STREAMEDITORCONTEXT_SET_BANK;
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_PROG, -1, -1);
 			StreamProg		*sip = (StreamProg *)si;
-			if (siv != NULL && si != NULL) {
+			if (siv != nullptr && si != nullptr) {
 				siv->SetSubItemValue(si, sip->prog.program, prg, sip->prog.subbank);
 			}
 		}
 	} else if (ret >= ID_STREAMEDITORCONTEXT_SET_SUBBANK && ret <= ID_STREAMEDITORCONTEXT_SET_SUBBANK+127) {
 		short prg = ret-ID_STREAMEDITORCONTEXT_SET_SUBBANK;
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_PROG, -1, -1);
 			StreamProg		*sip = (StreamProg *)si;
-			if (siv != NULL && si != NULL) {
+			if (siv != nullptr && si != nullptr) {
 				siv->SetSubItemValue(si, sip->prog.program, sip->prog.bank, prg);
 			}
 		}
 
 	} else if (ret == ID_STREAMEDITORCONTEXT_DEL_PROGRAM) {
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_PROG, -1, -1);
-			if (siv != NULL && si != NULL) {
+			if (siv != nullptr && si != nullptr) {
 				siv->DelSubItem(si);
 			}
 		}
 	} else if (ret == ID_STREAMEDITORCONTEXT_DEL_BEND) {
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_BEND, -1, -1);
-			if (siv != NULL && si != NULL) {
+			if (siv != nullptr && si != nullptr) {
 				siv->DelSubItem(si);
 			}
 		}
 	} else if (ret == ID_STREAMEDITORCONTEXT_DEL_CTRL) {
-		if (stream != NULL) {
+		if (stream != nullptr) {
 			MFCStreamItemListView	*siv = (MFCStreamItemListView *)iv;
 			StreamItem		*si= stream->FindItemAtTime(-1, at_time, TypedValue::S_CTRL, -1, siv->listitemData1);
-			if (siv != NULL && si != NULL) {
+			if (siv != nullptr && si != nullptr) {
 				siv->DelSubItem(si);
 			}
 		}
@@ -825,26 +825,26 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 	} else if (ret == ID_STREAMEDITORCONTEXT_ADD_SYSC) {
 		;
 	} else if (ret == ID_STREAMEDITORCONTEXT_ADD_BEND) {
-		if (stream != NULL) {
-			StreamItem		*si=NULL;
+		if (stream != nullptr) {
+			StreamItem		*si=nullptr;
 			si = new StreamBend(at_time, 0, 0);
 			stream->InsertItem(si);
 			MFCEditorItemView	*added_item = AddStreamItemView(si, &itPt, true);
 		}
 	} else if (ret == ID_STREAMEDITORCONTEXT_DEL_NOTE) {
-		if (stream != NULL && iv != NULL) {
+		if (stream != nullptr && iv != nullptr) {
 			DelItemView(iv);
 		}
 	} else if (ret == ID_STREAMEDITORCONTEXT_CLEAR_CONTROLLER) {
-		if (stream != NULL && iv != NULL) {
+		if (stream != nullptr && iv != nullptr) {
 			DelItemView(iv);
 		}
 	} else if (ret == ID_EDITORCONTEXT_ADD_CLIP) {
-		if (take != NULL) {
+		if (take != nullptr) {
 			StabEnt	*chSym = parent->Symbol();
 			if (chSym) {
 				Voice	*v;
-				if ((v = chSym->VoiceValue()) != NULL) {
+				if ((v = chSym->VoiceValue()) != nullptr) {
 					Time	dur_time;
 					dur_time.Set(1,0,0,at_time.metric);
 					string nmbuf = glob.makeUniqueName(chSym, "clip", 1);
@@ -855,10 +855,10 @@ MFCStreamDataEditor::EditorContextMenu(CPoint &point, UINT nFlags)
 		}
 	} else if (ret == ID_EDITORCONTEXT_DEL_CLIP) {
 		StabEnt	*chSym = parent->Symbol();
-		if (iv != NULL && chSym) {
+		if (iv != nullptr && chSym) {
 			Voice	*v;
 			MFCClipItemView	*civ = (MFCClipItemView*)iv;
-			if ((v = chSym->VoiceValue()) != NULL && civ->item != NULL) {
+			if ((v = chSym->VoiceValue()) != nullptr && civ->item != nullptr) {
 				Clip	*c = civ->item;
 				fprintf(stderr, "remove clip %x\n", c);
 //				DelClipItemView(iv);
@@ -908,9 +908,9 @@ MFCStreamDataEditor::CursorCheck(CPoint point, bool isCtl)
 		if (mouse_captured) {
 			ReleaseCapture();
 			mouse_captured = false;
-			if (originalCursor != NULL) {
+			if (originalCursor != nullptr) {
 				::SetCursor(originalCursor);
-				originalCursor = NULL;
+				originalCursor = nullptr;
 			}
 		}
 	}
@@ -1046,8 +1046,8 @@ MFCStreamDataEditor::OnMouseMove(
 					case MFCEditorItemView::LIST: {
 						MFCStreamItemListView	*siv = (MFCStreamItemListView *)mouse_item;
 						Pix2Time(point.x, at_time);
-						StreamItem	*it = NULL;	// item strictly on pixel time
-						StreamItem	*pt = NULL; // item strictly before pixel time
+						StreamItem	*it = nullptr;	// item strictly on pixel time
+						StreamItem	*pt = nullptr; // item strictly before pixel time
 						float		val = siv->Pix2Val(point.y);
 						switch (siv->listitemType) {
 							case TypedValue::S_CTRL: {
@@ -1064,13 +1064,13 @@ MFCStreamDataEditor::OnMouseMove(
 														-1,
 														siv->listitemData1,
 														pt);
-									if (pt==NULL || ((StreamCtrl*)pt)->ctrl.amount != actualval) {
-										if (it==NULL) {
-											StreamItem	*ft = NULL;
-											if (pt != NULL) {
+									if (pt==nullptr || ((StreamCtrl*)pt)->ctrl.amount != actualval) {
+										if (it==nullptr) {
+											StreamItem	*ft = nullptr;
+											if (pt != nullptr) {
 												ft = pt->Subsequent(TypedValue::S_CTRL, -1, siv->listitemData1);
 											}
-											if (ft != NULL && ((StreamCtrl *)ft)->ctrl.amount == actualval) {
+											if (ft != nullptr && ((StreamCtrl *)ft)->ctrl.amount == actualval) {
 												siv->SetSubItemTime(ft, at_time);
 											} else {
 												it = new StreamCtrl(at_time, 0, siv->listitemData1, 0);
@@ -1080,10 +1080,10 @@ MFCStreamDataEditor::OnMouseMove(
 										} else {
 											siv->SetSubItemValue(it, val);
 										}
-									} else { // pt != NULL && pt->amount == the pixelval
-										if (it != NULL) {
+									} else { // pt != nullptr && pt->amount == the pixelval
+										if (it != nullptr) {
 											siv->DelSubItem(it);
-											it = NULL;
+											it = nullptr;
 										}
 									}
 								}
@@ -1094,13 +1094,13 @@ MFCStreamDataEditor::OnMouseMove(
 									short	actualval = 127*val;
 									pt=stream->FindItemAtTime(-2, at_time, TypedValue::S_BEND, -1, siv->listitemData1);
 									it=stream->FindItemAtTime(0, at_time, TypedValue::S_BEND, -1, siv->listitemData1, pt);
-									if (pt==NULL || ((StreamCtrl*)pt)->ctrl.amount != actualval) {
-										if (it==NULL) {
-											StreamItem	*ft = NULL;
-											if (pt != NULL) {
+									if (pt==nullptr || ((StreamCtrl*)pt)->ctrl.amount != actualval) {
+										if (it==nullptr) {
+											StreamItem	*ft = nullptr;
+											if (pt != nullptr) {
 												ft = pt->Subsequent(TypedValue::S_CTRL, -1, siv->listitemData1);
 											}
-											if (ft != NULL && ((StreamBend *)ft)->bend.bend == actualval) {
+											if (ft != nullptr && ((StreamBend *)ft)->bend.bend == actualval) {
 												siv->SetSubItemTime(ft, at_time);
 											} else {
 												it = new StreamBend(at_time, 0, 0);
@@ -1110,10 +1110,10 @@ MFCStreamDataEditor::OnMouseMove(
 										} else {
 											siv->SetSubItemValue(it, val);
 										}
-									} else { // pt != NULL && pt->amount == the pixelval
-										if (it != NULL) {
+									} else { // pt != nullptr && pt->amount == the pixelval
+										if (it != nullptr) {
 											siv->DelSubItem(it);
-											it = NULL;
+											it = nullptr;
 										}
 									}
 								}
@@ -1155,7 +1155,7 @@ MFCStreamDataEditor::OnKeyDown(
 			short i=0;
 			while (i<NItemR()) {
 				MFCEditorItemView *iv = ItemR(i);
-				if (iv == NULL) {
+				if (iv == nullptr) {
 					break;
 				}
 				if (iv->selected) {
@@ -1338,7 +1338,7 @@ MFCStreamItemView::Draw(CDC *dc, CRect *clipBox)
 bool
 MFCStreamItemView::Represents(void *it)
 {
-	if (it == NULL)
+	if (it == nullptr)
 		return false;
 	if (item == (StreamItem *)it) {
 		return true;
@@ -1349,7 +1349,7 @@ MFCStreamItemView::Represents(void *it)
 short
 MFCStreamItemView::HitTest(CPoint &p, UINT flgs, void *&clkit)
 {
-	clkit = NULL;
+	clkit = nullptr;
 	return bounds.Contains(p)?1:0;
 }
 
@@ -1396,7 +1396,7 @@ short
 MFCStreamItemListView::HitTest(CPoint &p, UINT flgs, void *&clkit)
 {
 //	fprintf(stderr, "hit test %d %d\n", p.y, bounds.bottom, bounds.top);
-	clkit = NULL;
+	clkit = nullptr;
 	bool	look_interior = ((flgs & MK_CONTROL) != 0);
 	if (!look_interior) {
 		if (Abs(p.y - bounds.top) < 2) {
@@ -1410,8 +1410,8 @@ MFCStreamItemListView::HitTest(CPoint &p, UINT flgs, void *&clkit)
 	if (bounds.Contains(p)) {
 		if (sed->stream) {	// may need to be careful here with deleting, perhaps lock???
 			StreamItem	*si = sed->stream->head;
-			StreamItem	*last = NULL;
-			while (si != NULL) {
+			StreamItem	*last = nullptr;
+			while (si != nullptr) {
 				if (listitemType == TypedValue::S_PROG) {
 					long ppxt = editor->Time2Pix(si->time);
 					if (Abs(ppxt-p.x) < 2) {
@@ -1531,7 +1531,7 @@ MFCStreamItemListView::ResizeToY(long newh)
 bool
 MFCStreamItemListView::SetSubItemTime(StreamItem *si, Time &t)
 {
-	if (si == NULL) {
+	if (si == nullptr) {
 		return false;
 	}
 	if (t > editor->lastScheduledEvent) {
@@ -1553,7 +1553,7 @@ MFCStreamItemListView::SetSubItemTime(StreamItem *si, Time &t)
 	}
 // dunno that we need to worry about this sort of bounds checking
 //	StreamItem	*sxi = si->Subsequent(si->type, -1, d1);
-//	if (sxi != NULL) {
+//	if (sxi != nullptr) {
 //		if (tot > sxi->time) {
 //			tot = sxi->time;
 //			tot.ticks--;
@@ -1679,7 +1679,7 @@ MFCStreamItemListView::SetSubItemValue(StreamItem *si, int8 d1, int8 d2, int8 d3
 bool
 MFCStreamItemListView::DelSubItem(StreamItem *si)
 {
-	if (si == NULL) {
+	if (si == nullptr) {
 		return false;
 	}
 	if (si->type != listitemType) {
@@ -1782,7 +1782,7 @@ MFCStreamItemListView::Draw(Graphics *dc, CRect *clipBox)
 
 //	fprintf(stderr, "drawing instance view %d\n", bounds.right-bounds.left);
 	dc->DrawRectangle(selected?&redPen:&bluePen, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
-	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
+	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, nullptr);
 
 	MFCStreamDataEditor	*sed = (MFCStreamDataEditor *)editor;
 	wstring	nm;
@@ -1804,15 +1804,15 @@ MFCStreamItemListView::Draw(Graphics *dc, CRect *clipBox)
 
 	if (sed->stream) {	// may need to be careful here with deleting, perhaps lock???
 		StreamItem	*p = sed->stream->head;
-		StreamItem	*last = NULL;
-		while (p != NULL) {
+		StreamItem	*last = nullptr;
+		while (p != nullptr) {
 			if (p->type == listitemType) {
 				if (listitemType == TypedValue::S_CTRL) {
 					StreamCtrl	*pc = (StreamCtrl *)p;
 					if (pc->ctrl.controller == listitemData1) {
 						long	pixy = Val2Pix(pc);
 						long	pixx = editor->Time2Pix(p->time);
-						if (last != NULL) {
+						if (last != nullptr) {
 							long	pixly = Val2Pix((StreamCtrl *)last);
 							long	pixlst = editor->Time2Pix(last->time);
 							dc->FillRectangle(&softgreenBrush,
@@ -1835,7 +1835,7 @@ MFCStreamItemListView::Draw(Graphics *dc, CRect *clipBox)
 				} else if (listitemType == TypedValue::S_BEND) {
 					long	pixx = editor->Time2Pix(p->time);
 					long	pixy = Val2Pix((StreamBend *)p);
-					if (last != NULL) {
+					if (last != nullptr) {
 						long	pixly = Val2Pix((StreamBend *)last);
 						long	pixlst = editor->Time2Pix(last->time);
 						dc->FillRectangle(&softgreenBrush,
@@ -1857,7 +1857,7 @@ MFCStreamItemListView::Draw(Graphics *dc, CRect *clipBox)
 				} else if (listitemType == TypedValue::S_PROG) {
 					StreamProg	*progp = (StreamProg *)p;
 					long	pixx = editor->Time2Pix(p->time);
-					if (last != NULL) {
+					if (last != nullptr) {
 						long	pixlst = editor->Time2Pix(last->time);
 						dc->FillRectangle(&softgreenBrush,
 								pixlst+1, bounds.top,
@@ -1883,7 +1883,7 @@ MFCStreamItemListView::Draw(Graphics *dc, CRect *clipBox)
 			}
 			p = p->next;
 		}
-		if (last != NULL) {
+		if (last != nullptr) {
 			if (listitemType == TypedValue::S_PROG) {
 				long	pixlst = editor->Time2Pix(last->time);
 				dc->FillRectangle(&softgreenBrush,
@@ -1953,7 +1953,7 @@ END_MESSAGE_MAP()
 
 MFCStreamEditorYScale::MFCStreamEditorYScale()
 {
-	editor = NULL;
+	editor = nullptr;
 }
 
 MFCStreamEditorYScale::~MFCStreamEditorYScale()

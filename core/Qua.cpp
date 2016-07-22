@@ -1224,10 +1224,10 @@ Qua::updateInstanceSchedule(Instance *inst) {
 		return false;
 	}
 	sched_t::iterator nxPos = chkPos, prPos = chkPos;
-	nxPos++;
-	prPos--;
+	if (nxPos != schedule.end()) nxPos++;
+	if (prPos != schedule.begin()) prPos--;
 	Instance *next = (nxPos == schedule.end() ? nullptr : (*nxPos));
-	Instance *prev = (prPos == schedule.end() ? nullptr : (*prPos));
+	Instance *prev = (prPos == schedule.begin() ? nullptr : (*prPos));
 	if (next != nullptr && next->startTime < inst->startTime) {
 		sched_t::iterator pos = findSchedulePos(chkPos, inst->startTime); // current position too early, start fwd search from here
 		if (pos != chkPos) {
