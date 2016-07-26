@@ -1530,45 +1530,46 @@ Qua::DoSave(const char *fileName)
 #endif
 
 	setName(getBase(fileName).c_str());
-	FILE	*scriptfp = fopen(projectScriptPath.c_str(), "w");
-	if (scriptfp == nullptr) {
+	ofstream out(projectScriptPath, ofstream::out);
+	if (!out.good()) {
 		bridge.reportError("Can't open file '%s' for writing", projectScriptPath.c_str());
 		return B_ERROR;
 	}
-	status_t	err = sym->SaveScript(scriptfp, 0, true, false);
+	status_t	err = sym->SaveScript(out, 0, true, false);
 	if (err != B_NO_ERROR) {
 		bridge.reportError("can't save arrangement to %s", projectScriptPath.c_str());
 	}
-	fclose(scriptfp);
+	out.close();
 #ifdef  QUA_V_SAVE_INITASXML
-	FILE	*snapfp = fopen(projectSnapshotPath.c_str(), "w");
-	if (snapfp == nullptr) {
+	ofstream snap(projectSnapshotPath, ofstream::out);
+	if (!snap.good()) {
 		bridge.reportError("Can't open file '%s' for writing", projectSnapshotPath.c_str());
 		return B_ERROR;
 	}
-	fprintf(snapfp, "<?xml version = '1.0'?>\n");
+	snap << "<?xml version = '1.0'?>" << endl;
 //	fprintf(snapfp, "<!DOCTYPE snapshot [\n");
 //		<!ENTITY author_codes SYSTEM "author_codes.xml">
 //		<!ENTITY gender_codes SYSTEM "gender_codes.xml">
 //		<!ENTITY rsc_codes SYSTEM "rsc_codes.xml">
 //	fprintf(snapfp, "]>\n");
-	fprintf(snapfp, "<snapshot script=\"%s\">\n", getLeaf(fileName).c_str());
-	err = sym->SaveSnapshot(snapfp);
-	fprintf(snapfp, "</snapshot>\n");
+	snap << "<snapshot script=\""<< getLeaf(fileName) <<"\">" << endl;
+	err = sym->SaveSnapshot(snap);
+	snap << "</snapshot>" << endl;
 	if (err != B_NO_ERROR) {
 		bridge.reportError("can't save arrangement to %s", projectSnapshotPath.c_str());
 	}
-	fclose(snapfp);
+	snap.close();
 #endif
 	return err;
 }
 
 status_t
-Qua::Save(FILE *fp, short indent, bool clearHistory)
+Qua::Save(ostream &out, short indent, bool clearHistory)
 {
-	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "qua %s\n", sym->printableName().c_str());
-	tab(fp, indent); fprintf(fp, "{\n");
+	status_t err = NO_ERROR;
+
+	out << tab(indent) << "qua " << sym->printableName() << endl;
+	out << tab(indent) << "{" << endl;
 	if (clearHistory) {
 		StabEnt	*is = glob.findContextSymbol("Init", sym, -1);
 		if (is) {
@@ -1576,55 +1577,58 @@ Qua::Save(FILE *fp, short indent, bool clearHistory)
 		}
 	}
 	if (sym->children) {
-		err=sym->children->SaveScript(fp, indent+1, true, false);
+		err=sym->children->SaveScript(out, indent+1, true, false);
 	}
 	for (Schedulable *SO=schedulees; SO != nullptr; SO = SO->next) {
 		if (SO->sym->type == TypedValue::S_PORT) {
-			SO->sym->PortValue()->save(fp, indent+1);
+			SO->sym->PortValue()->save(out, indent+1);
 		}
 	}
 #ifndef  QUA_V_SAVE_INITASXML
 	SaveInit(fp, indent+1);
 #endif
-	tab(fp, indent); fprintf(fp, "}\n");
+	out << tab(indent) << "}" << endl;
 	return err;
 }
 
 #ifndef  QUA_V_SAVE_INITASXML
 status_t
-Qua::SaveInit(FILE *fp, short indent)
+Qua::SaveInit(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "define Init()\n");
-	tab(fp, indent); fprintf(fp, "{\n");
-	tab(fp, indent+1); fprintf(fp, "tempo = %g\n", metric->tempo);
+	out << tab(indent) << "define Init()" << endl;
+	out << (indent) <<  "{" << endl;
+	out << tab(indent+1)<< "tempo = " << metric->tempo << endl;
 	for (Schedulable *SO=schedulees; SO != nullptr; SO = SO->next) {
 		for (short i=0; i<SO->countInstances(); i++) {
 			Instance *inst = SO->instanceAt(i);
-			inst->Save(fp, indent+1);
+			inst->Save(out, indent+1);
 		}
 	}
-	tab(fp, indent); fprintf(fp, "}\n");
+	out << tab(indent) << "}" << endl;
 	return err;
 }
 #endif
 status_t
-Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
+Qua::WriteChunk(ostream &out, ulong type, void *data, ulong size)
 {
 	status_t err=B_NO_ERROR;
-	if (fwrite(&type, sizeof(type), 1, fp) != 1) {
+	out.write((const char *)&type, sizeof(type));
+	if (!out.good()) {
 		bridge.reportError("cant write chunk type");
 		return err;
 	}
-	off_t		sizePos = ftell(fp);
-	if (fwrite(&size, sizeof(size), 1, fp) != 1) {
+	off_t		sizePos = out.tellp();
+	out.write((const char *)&size, sizeof(size));
+	if (!out.good()) {
 		bridge.reportError("cant write chunk size");
 		return err;
 	}
-	off_t		dataStart = ftell(fp);
+	off_t		dataStart = out.tellp();
 	switch (type) {
 	case 'NAME': {
-		if (fwrite(data, size, 1, fp) != 1) {
+		out.write((const char *)data, size);
+		if (!out.good()) {
 			bridge.reportError("cant write name chunk");
 			return err;
 		} else {
@@ -1635,7 +1639,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 	case 'QUAP': {
 		for (Schedulable *P=schedulees; P!=nullptr; P=P->next) {
 			if (P->sym->type == TypedValue::S_POOL) {
-				if ((err=WriteChunk(fp, 'POOL', P, 0)) != B_NO_ERROR) {
+				if ((err=WriteChunk(out, 'POOL', P, 0)) != B_NO_ERROR) {
 					return err;
 				}
 			}
@@ -1644,12 +1648,13 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 	}
 	case 'POOL': {
 		Pool	*P = (Pool *) data;
-		if ((err=WriteChunk(fp, 'NAME', (void*)P->sym->name.c_str(), P->sym->name.size())) != B_NO_ERROR) {
+		if ((err=WriteChunk(out, 'NAME', (void*)P->sym->name.c_str(), P->sym->name.size())) != B_NO_ERROR) {
 			return err;
 		}
 
 		int32		nTakes = P->outTakes.size();
-		if (fwrite(&nTakes, sizeof(nTakes), 1, fp) != 1) {
+		out.write((char*)&nTakes, sizeof(nTakes));
+		if (!out.good()) {
 			bridge.reportError("Qua::WriteChunk() cant write take chunk");
 			return err;
 		} else {
@@ -1657,7 +1662,7 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 		}
 
 		for (short i = 0; ((unsigned)i)<P->outTakes.size(); i++) {
-			if ((err=WriteChunk(fp, 'TAKE', P->outTakes[i], 0)) != B_NO_ERROR) {
+			if ((err=WriteChunk(out, 'TAKE', P->outTakes[i], 0)) != B_NO_ERROR) {
 				return err;
 			}
 		}
@@ -1665,17 +1670,17 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 	}
 	case 'TAKE': {
 		StreamTake	*S = (StreamTake *) data;
-		if ((err = WriteChunk(fp, 'NAME', (void*)S->sym->name.c_str() , S->sym->name.size())) != B_NO_ERROR) {
+		if ((err = WriteChunk(out, 'NAME', (void*)S->sym->name.c_str() , S->sym->name.size())) != B_NO_ERROR) {
 			return err;
 		}
-		if ((err=WriteChunk(fp, 'STRM', &S->stream, 0)) != B_NO_ERROR) {
+		if ((err=WriteChunk(out, 'STRM', &S->stream, 0)) != B_NO_ERROR) {
 			return err;
 		}
 		break;
 	}
 	case 'STRM': {
 		Stream	*S = (Stream *) data;
-		err = S->Save(fp, this);
+		err = S->Save(out, this);
 		break;
 	}
 	default:
@@ -1683,44 +1688,45 @@ Qua::WriteChunk(FILE *fp, ulong type, void *data, ulong size)
 		return B_ERROR;
 	}
 	if (size == 0) {
-		off_t endPos = ftell(fp);
+		off_t endPos = out.tellp();
 		size = endPos - dataStart;
-		fseek(fp, sizePos, SEEK_SET);
-		if (fwrite(&size, sizeof(size), 1, fp) != 1) {
+		out.seekp(sizePos);
+		if (!out.good()) {
 			bridge.reportError("cant write chunk size");
 			return err;
 		} else {
 			err = B_NO_ERROR;
 		}
-		fseek(fp, endPos, SEEK_SET);
+		out.seekp(endPos);
 	}
 	return err;
 }
 
 ulong
-Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
+Qua::ReadChunk(istream &in, void **bufp, ulong *buf_lenp)
 {
 	ulong	type, size=0;
 	status_t	err=B_OK;
-	
-	if (fread(&type, sizeof(type), 1, fp) != 1) {
+	in.read((char*)&type, sizeof(type));
+	if (!in.good()) {
 		bridge.reportError("Qua: can't read chunk type");
 		return 0;
 	}
-	if (fread(&type, sizeof(type), 1, fp) != 1) {
+	in.read((char*)&size, sizeof(size));
+	if (!in.good()) {
 		bridge.reportError("Qua: can't read chunk size");
 		return 0;
 	}
 
-	off_t	pos=ftell(fp);
+	std::streampos	pos = in.tellg();
 	
 	*buf_lenp = 0;
 	switch (type) {
 	case 'QUAP': {
 		void	*data;
 		ulong	datalen;
-		while (ftell(fp) - pos < ((int)size)) {
-			if (!ReadChunk(fp, &data, &datalen)) {
+		while (in.tellg() - pos < ((int)size)) {
+			if (!ReadChunk(in, &data, &datalen)) {
 				return 0;
 			}
 			if (datalen) {
@@ -1731,7 +1737,8 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 	}
 	case 'NAME': {
 		char *buf = new char[size+1];
-		if (fread(buf, size, 1, fp) != 1) {
+		in.read(buf, size);
+		if (!in.good()) {
 			bridge.reportError("Qua::ReadChunk() can't read name");
 			return 0;
 		} else {
@@ -1747,15 +1754,15 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		char		*nm;
 		ulong		len;
 		
-		if (ReadChunk(fp, (void**)&nm, &len)!='NAME') {
+		if (ReadChunk(in, (void**)&nm, &len)!='NAME') {
 			bridge.reportError("Read chunk, expected name");
 			if (len)	delete nm;
 			break;
 		}
 
 		int32		nTakes = 0;
-		
-		if (fread(&nTakes, sizeof(nTakes), 1, fp) != 1) {
+		in.read((char*)&nTakes, sizeof(nTakes));
+		if (!in.good()) {
 			bridge.reportError("Qua::ReadChunk() cant read stream takes");
 			return err;
 		} else {
@@ -1783,7 +1790,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 			P->SelectTake(nullptr);
 		} else {
 			for (short i=0; i<nTakes; i++) {
-				if (ReadChunk(fp, &data, &datalen) != 'TAKE') {
+				if (ReadChunk(in, &data, &datalen) != 'TAKE') {
 					bridge.reportError("Expected take data");
 					if (datalen) delete data;
 					break;
@@ -1801,7 +1808,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		char		*nm;
 		ulong		len;
 		
-		if (ReadChunk(fp, (void**)&nm, &len)!='NAME') {
+		if (ReadChunk(in, (void**)&nm, &len)!='NAME') {
 			bridge.reportError("Expected name");
 			if (len)	delete nm;
 			break;
@@ -1812,7 +1819,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 
 		void	*data;
 		ulong	datalen;
-		if (ReadChunk(fp, &data, &datalen) != 'STRM') {
+		if (ReadChunk(in, &data, &datalen) != 'STRM') {
 			bridge.reportError("Expected take data");
 			if (datalen) delete data;
 			break;
@@ -1828,7 +1835,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 	
 	case 'STRM': {
 		Stream	*rd = new Stream();
-		rd->Load(fp, this);
+		rd->Load(in, this);
 		*bufp = (void*)rd;
 		*buf_lenp = sizeof(Stream);
 		break;
@@ -1837,7 +1844,7 @@ Qua::ReadChunk(FILE *fp, void **bufp, ulong *buf_lenp)
 		bridge.reportError("mysterious quap");
 		break;
 	}
-	fseek(fp, pos+size, SEEK_SET);
+	in.seekg(pos + static_cast<streamsize>(size));
 	return type;
 }
 

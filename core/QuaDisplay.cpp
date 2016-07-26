@@ -182,10 +182,10 @@ QuaDisplay::DisplayParameterId()
 	return "MFC";
 }
 
-status_t
-QuaDisplay::WriteDisplayParameters(FILE *fp, StabEnt *)
+string
+QuaDisplay::GetDisplayParameters(StabEnt *)
 {
-	return B_OK;
+	return string();
 }
 void*
 QuaDisplay::ReadDisplayParameters(FILE *) {

@@ -13,33 +13,33 @@
 flag debug_method=0;
 
 status_t
-Lambda::Save(FILE *fp, short indent)
+Lambda::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent);
-	fprintf(fp, "function");
+	out << tab(indent);
+	out << "function";
 	if (isLocus)
-		fprintf(fp, " \\node");
+		out << " \\node";
 	if (isModal)
-		fprintf(fp, " \\modal");
+		out << " \\modal";
 	if (isOncer)
-		fprintf(fp, " \\oncer");
+		out << " \\oncer";
 	if (isFixed)
-		fprintf(fp, " \\fixed");
+		out << " \\fixed";
 	if (isHeld)
-		fprintf(fp, " \\held");
+		out << " \\held";
 	if (isInit)
-		fprintf(fp, " \\reset");
+		out << " \\reset";
 		
-	fprintf(fp, " %s", sym->name.c_str());
+	out << " " << sym->name;
 	if (countControllers() > 0) {
-		fprintf(fp, "(");
-		if ((err = saveControllers(fp, indent+2)) != B_NO_ERROR)
+		out << "(";
+		if ((err = saveControllers(out, indent+2)) != B_NO_ERROR)
 			return err;;
-		fprintf(fp, ")");
+		out << ")";
 	}
 //	fprintf(fp,	"\n\display {%s}", uberQua->bridge.DisplayParameterSaveString(sym));
-	err = SaveMainBlock(mainBlock, fp, indent, sym, false, false, nullptr, nullptr); 
+	err = SaveMainBlock(mainBlock, out, indent, sym, false, false, nullptr, nullptr); 
 	return err;
 }
 

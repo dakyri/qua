@@ -33,7 +33,7 @@ public:
 	Notified(Qua *q);
 	virtual ~Notified();
 	bool SetValue(Block *b);
-	void SaveStackInfo(FILE *fp, short indent);
+	void SaveStackInfo(ostream &out, short indent);
 	bool Init(Notifiable *, StabEnt *, QuasiStack *);
 	
 	QuasiStack *startStack;

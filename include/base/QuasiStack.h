@@ -60,8 +60,8 @@ public:
 	bool				GetFrameMap(frame_map_hdr *&map);
 	
 	void				Dump();
-	status_t			Save(FILE *, short);
-	status_t			SaveSnapshot(FILE *, const char *label);
+	status_t			Save(ostream &out, short);
+	status_t			SaveSnapshot(ostream &out, const char *label);
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element, std::vector<std::string> textFrags);
 

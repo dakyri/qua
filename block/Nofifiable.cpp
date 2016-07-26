@@ -63,21 +63,21 @@ Notified::~Notified()
 }
 
 void
-Notified::SaveStackInfo(FILE *fp, short indent)
+Notified::SaveStackInfo(ostream&out, short indent)
 {
 	bool		comma = false;
 
 	if (startStack) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		startStack->Save(fp, indent+1);
+		if (comma){ out << ","; } else comma=true; out << endl;
+		startStack->Save(out, indent+1);
 	}
 	if (stopStack) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		stopStack->Save(fp, indent+1);
+		if (comma){ out <<","; } else comma=true; out <<endl;
+		stopStack->Save(out, indent+1);
 	}
 	if (recordStack) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		recordStack->Save(fp, indent+1);
+		if (comma){ out << ","; } else comma=true;out << endl;
+		recordStack->Save(out, indent+1);
 	}
 }
 

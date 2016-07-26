@@ -43,6 +43,7 @@ inline int32 min32(int32 x, int32 y) { return x<y? x : y; }
 inline int32 max32(int32 x, int32 y) { return x>y? x : y; }
 inline int32 abs32(int32 x) { return x>=0? x : -x; }
 inline int32 round32(float x) { return ((int32)(x+0.5)); }
+inline string tab(int n) { return string(n, '\t'); }
 
 #define MAJORLY_BIG	2147483648
 

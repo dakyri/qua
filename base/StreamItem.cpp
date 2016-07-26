@@ -233,10 +233,10 @@ StreamNote::Clone()
 }
 
 status_t
-StreamNote::SaveSnapshot(FILE *fp)
+StreamNote::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<note time=\"%s\" cmd=\"%x\" pitch=\"%d\" duration=\"%d\" velocity=\"%d\"/>\n",
-		time.StringValue(), note.cmd, note.pitch, note.duration, note.dynamic);
+	out << "<note time=\"" << time.StringValue()
+		<< "\" cmd=\"" << note.cmd << "\" pitch=\"" << note.pitch << "\" duration=\"" << note.duration << "\" velocity=\"" << note.dynamic << "\"/>" << endl;
 	return B_OK;
 }
 dur_t
@@ -297,9 +297,9 @@ StreamMesg::Clone()
 
 
 status_t
-StreamMesg::SaveSnapshot(FILE *fp)
+StreamMesg::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<mesg time=\"%s\">\n", time.StringValue());
+	out << "<mesg time=\""<< time.StringValue() <<"\">"<<endl;
 	return B_OK;
 }
 
@@ -338,11 +338,11 @@ StreamValue::Clone()
 }
 
 status_t
-StreamValue::SaveSnapshot(FILE *fp)
+StreamValue::SaveSnapshot(ostream &out)
 {
 	string nm = findTypeName(value.type);
 	if (nm.size()) {
-		fprintf(fp, "<value time=\"%s\" valType=\"%s\" valValue=\"%s\"/>\n", time.StringValue(), nm.c_str(), value.StringValue());
+		out <<  "<value time=\""<< time.StringValue() <<"\" valType=\"" << nm << "\" valValue=\"" << value.StringValue() << "\"/>"<< endl;
 	}
 	
 	return B_OK;
@@ -379,10 +379,10 @@ StreamCtrl::Clone()
 
 
 status_t
-StreamCtrl::SaveSnapshot(FILE *fp)
+StreamCtrl::SaveSnapshot(ostream & out)
 {
-	fprintf(fp, "<ctrl time=\"%s\" cmd=\"%x\" controller=\"%d\" amount=\"%d\"/>\n",
-		time.StringValue(), ctrl.cmd, ctrl.controller, ctrl.amount);
+	out << "<ctrl time=\"" << time.StringValue()
+		<< "\" cmd=\"" << ctrl.cmd << "\" controller=\"" << ctrl.controller << "\" amount=\"" << ctrl.amount << "\"/>" << endl;
 	return B_OK;
 }
 
@@ -426,10 +426,10 @@ StreamSysX::Clone()
 
 
 status_t
-StreamSysX::SaveSnapshot(FILE *fp)
+StreamSysX::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<sysx time=\"%s\">\n", time.StringValue());
-	fprintf(fp, "</sysx>\n");
+	out << "<sysx time=\""<< time.StringValue() <<"\">"<<endl;
+	out <<"</sysx>"<<endl;
 	return B_OK;
 }
 
@@ -471,10 +471,9 @@ StreamSysC::Clone()
 
 
 status_t
-StreamSysC::SaveSnapshot(FILE *fp)
+StreamSysC::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<sysc time=\"%s\" cmd=\"%x\"  data1=\"%x\"  data2=\"%x\"/>\n",
-		time.StringValue(), sysC.cmd, sysC.data1, sysC.data2);
+	out << "<sysc time=\"" << time.StringValue() << "\" cmd=\"" << sysC.cmd << "\"  data1=\"" << sysC.data1 << "\"  data2=\"" << sysC.data2 << "\"/>" << endl;
 	return B_OK;
 }
 
@@ -518,10 +517,9 @@ StreamBend::Clone()
 
 
 status_t
-StreamBend::SaveSnapshot(FILE *fp)
+StreamBend::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<bend time=\"%s\" cmd=\"%x\" amount=\"%d\"/>\n",
-		time.StringValue(), bend.cmd, bend.bend);
+	out << "<bend time=\"" << time.StringValue() << "\" cmd=\"" << bend.cmd << "\" amount=\"" << bend.bend << "\"/>" << endl;
 	return B_OK;
 }
 
@@ -558,10 +556,9 @@ StreamProg::Clone()
 
 
 status_t
-StreamProg::SaveSnapshot(FILE *fp)
+StreamProg::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<prog time=\"%s\" cmd=\"%x\" program=\"%d\"  bank=\"%d\"  subBank=\"%d\"/>\n",
-		time.StringValue(), prog.cmd, prog.program, prog.bank, prog.subbank);
+	out << "<prog time=\"" << time.StringValue() << "\" cmd=\"" << prog.cmd << "\" program=\"" << prog.program << "\"  bank=\"" << prog.bank << "\"  subBank=\"" << prog.subbank << "\"/>" << endl;
 	return B_OK;
 }
 
@@ -603,10 +600,9 @@ StreamLogEntry::Clone()
 
 
 status_t
-StreamLogEntry::SaveSnapshot(FILE *fp)
+StreamLogEntry::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<logentry time=\"%s\"/>\n",
-		time.StringValue());
+	out << "<logentry time=\"" << time.StringValue() << "\"/>" << endl;
 	return B_OK;
 }
 
@@ -647,20 +643,17 @@ StreamJoy::Clone()
 
 
 status_t
-StreamJoy::SaveSnapshot(FILE *fp)
+StreamJoy::SaveSnapshot(ostream &out)
 {
 	switch (joy.type) {
 		case QUA_JOY_AXIS:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  axis=\"%g\"/>\n",
-				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.axis);
+			out << "<joy time=\""<< time.StringValue() <<"\" stick=\"" << joy.stick << "\"  joyType=\"" << joy.type << "\"  joyWhich=\"" << joy.which << "\"  axis=\"" << joy.value.axis << "\"/>\n" << endl;
 			break;
 		case QUA_JOY_BUTTON:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  button=\"%d\"/>\n",
-				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.button);
+			out << "<joy time=\"" << time.StringValue() << "\" stick=\"" << joy.stick << "\"  joyType=\"" << joy.type << "\"  joyWhich=\"" << joy.which << "\"  button=\"" << joy.value.button << "\"/>\n" << endl;
 			break;
 		case QUA_JOY_HAT:
-			fprintf(fp, "<joy time=\"%s\" stick=\"%d\"  joyType=\"%d\"  joyWhich=\"%d\"  hat=\"%d\"/>\n",
-				time.StringValue(), joy.stick, joy.type, joy.which, joy.value.hat);
+			out << "<joy time=\"" << time.StringValue() << "\" stick=\"" << joy.stick << "\"  joyType=\"" << joy.type << "\"  joyWhich=\"" << joy.which << "\"  hat=\"" << joy.value.hat << "\"/>" << endl;
 			break;
 	}
 	return B_OK;

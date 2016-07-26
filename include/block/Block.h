@@ -2,6 +2,7 @@
 #define _BLOCK
 
 #include <stdio.h>
+#include <ostream>
 
 class Block;
 class Voice;
@@ -304,7 +305,7 @@ union BlockInfo {
 	char			*name;
 };
 
-status_t		SaveMainBlock(class Block *, FILE *fp,
+status_t		SaveMainBlock(class Block *, ostream &out,
 					short indent, StabEnt *dec, bool forceBrace, bool saveInits,
 					Stacker *stacker, QuasiStack *stack);
 

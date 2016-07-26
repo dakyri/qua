@@ -26,7 +26,7 @@ public:
 		SAMPLE=2
 	};
 
-	virtual status_t SaveSnapshot(FILE *fp)=0;
+	virtual status_t SaveSnapshot(ostream &out)=0;
 
 	StabEnt	 *sym;
 	short type;
@@ -64,7 +64,7 @@ public:
 	std::string path;
 
 	Time				&Duration();
-	virtual status_t	SaveSnapshot(FILE *fp) override;
+	virtual status_t	SaveSnapshot(ostream &out) override;
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
@@ -110,7 +110,7 @@ public:
 	StreamTake(const std::string &, StabEnt *, const Time &);
 	virtual~StreamTake();
 						
-	virtual status_t	SaveSnapshot(FILE *fp);
+	virtual status_t	SaveSnapshot(ostream &out) override;
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
@@ -132,7 +132,7 @@ class Clip
 public:
 						Clip(std::string nm, StabEnt *ctxt);
 	bool				Set(const Take *, const Time&s, const Time &t);
-	status_t			SaveSnapshot(FILE *fp);
+	status_t			SaveSnapshot(ostream &out);
 
 	Take				*media;
 	Time				start;

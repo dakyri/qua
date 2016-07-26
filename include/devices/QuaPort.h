@@ -111,7 +111,7 @@ class QuaPort
 public:
 	QuaPort(std::string, short typ, short subt, short mode);
 
-	status_t save(FILE *fp, short indent);
+	status_t save(ostream &out, short indent);
 
 	virtual const char * name(uchar);
 	virtual bool hasMode(const int mode);

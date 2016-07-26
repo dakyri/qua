@@ -24,7 +24,7 @@ public:
 	bool initialize();
 	status_t instantiate(StabEnt *q);
 	
-	status_t save(FILE *fp, short indent);
+	status_t save(ostream &out, short indent);
 	
 	long type;
 	string mimeType;

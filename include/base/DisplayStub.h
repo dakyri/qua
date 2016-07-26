@@ -107,7 +107,7 @@ public:
 
 	virtual bool HasDisplayParameters(StabEnt *) override { return false; }
 	virtual char *DisplayParameterId() override { return ""; }
-	virtual status_t WriteDisplayParameters(FILE *, StabEnt *)override { return B_OK; }
+	virtual string GetDisplayParameters(StabEnt *)override { return string(); }
 	virtual void* ReadDisplayParameters(FILE *) override { return nullptr; }
 	virtual void SetDisplayParameters(StabEnt *, void*) override { };
 

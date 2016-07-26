@@ -28,7 +28,7 @@ namespace tinyxml2 {
 class Loggable
 {
 public:
-	status_t SaveLogInfo(FILE *fp, short indent);
+	status_t SaveLogInfo(ostream &out, short indent);
 	status_t SetLogValue(Block *b);
 
 	Stream log;
@@ -46,9 +46,9 @@ public:
 	
 	virtual bool Init();
 	virtual void Reset();
-	virtual status_t Save(FILE *fp, short indent);
-	status_t SaveStackInfo(FILE *fp, short indent);
-	status_t SaveSnapshot(FILE *fp);
+	virtual status_t Save(ostream &out, short indent);
+	status_t SaveStackInfo(ostream &out, short indent);
+	status_t SaveSnapshot(ostream &out);
 
 	status_t LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t LoadSnapshotChildren(tinyxml2::XMLElement *element);

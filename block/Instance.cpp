@@ -17,12 +17,12 @@
 #include <iostream>
 
 status_t
-Loggable::SaveLogInfo(FILE *fp, short indent)
+Loggable::SaveLogInfo(ostream&out, short indent)
 {
 	status_t	err=B_NO_ERROR;
 	bool		comma = false;
-	fprintf(fp, ", ");
-	log.Save(fp, nullptr, STR_FMT_TEXT);
+	out << ", ";
+	log.Save(out, nullptr, STR_FMT_TEXT);
 	return err;
 }
 
@@ -276,50 +276,50 @@ Instance::SetValue(Block *b)
 }
 
 status_t
-Instance::SaveSnapshot(FILE *fp)
+Instance::SaveSnapshot(ostream &out)
 {
-	fprintf(fp, "<instance name=\"%s\">\n", sym->name.c_str());
+	out << "<instance name=\""<< sym->name <<"\">" << endl;
 	if (sym && sym->context) {
 		StabEnt	*p = sym->context->children;
 		while (p!=nullptr) {
 			if (p->refType == TypedValue::REF_INSTANCE) {
-				p->SaveSimpleTypeSnapshot(fp, this, nullptr);
+				p->SaveSimpleTypeSnapshot(out, this, nullptr);
 			}
 			p = p->sibling;
 		}
 		p = sym->children;
 		while (p!=nullptr) {
 			if (p->refType == TypedValue::REF_INSTANCE || p->refType == TypedValue::REF_POINTER || p->refType == TypedValue::REF_INSTANCE) {
-				p->SaveSimpleTypeSnapshot(fp, this, nullptr);
+				p->SaveSimpleTypeSnapshot(out, this, nullptr);
 			}
 			p = p->sibling;
 		}
 	}
 	if (mainStack) {
-		mainStack->SaveSnapshot(fp, sym->name.c_str());
+		mainStack->SaveSnapshot(out, sym->name.c_str());
 	}
 	if (rxStack) {
-		rxStack->SaveSnapshot(fp, "rx");
+		rxStack->SaveSnapshot(out, "rx");
 	}
 	if (sleepStack) {
-		sleepStack->SaveSnapshot(fp, "sleep");
+		sleepStack->SaveSnapshot(out, "sleep");
 	}
 	if (wakeStack) {
-		wakeStack->SaveSnapshot(fp, "wake");
+		wakeStack->SaveSnapshot(out, "wake");
 	}
 	if (recordStack) {
-		recordStack->SaveSnapshot(fp, "rec");
+		recordStack->SaveSnapshot(out, "rec");
 	}
 	if (cueStack) {
-		cueStack->SaveSnapshot(fp, "cue");
+		cueStack->SaveSnapshot(out, "cue");
 	}
 	if (startStack) {
-		startStack->SaveSnapshot(fp, "start");
+		startStack->SaveSnapshot(out, "start");
 	}
 	if (stopStack) {
-		stopStack->SaveSnapshot(fp, "stop");
+		stopStack->SaveSnapshot(out, "stop");
 	}
-	fprintf(fp, "</instance>\n");
+	out << "</instance>" << endl;
 
 	return B_OK;
 }
@@ -435,46 +435,46 @@ Instance::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 }
 
 status_t
-Instance::Save(FILE *fp, short indent)
+Instance::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s", schedulable.sym->printableName().c_str());
-	fprintf(fp, "(");
+	out << tab(indent) << schedulable.sym->printableName();
+	out << "(";
 	if (channel && channel->sym){
-		fprintf(stderr, "%s", channel->sym->name.c_str());
+		out << channel->sym->name;
 	}
-	fprintf(fp, ", %s", startTime.StringValue());
-	fprintf(fp, ", %s", duration.StringValue());
-	SaveStackInfo(fp, indent);
-	SaveLogInfo(fp, indent);
-	fprintf(fp, ")\n");
+	out << ", "<< startTime.StringValue();
+	out << ", " << duration.StringValue();
+	SaveStackInfo(out, indent);
+	SaveLogInfo(out, indent);
+	out << ")" << endl;
 	return err;
 }
 
 status_t
-Instance::SaveStackInfo(FILE *fp, short indent)
+Instance::SaveStackInfo(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
 	bool		comma = false;
-	fprintf(fp, ", {");
+	out << ", {";
 	if (mainStack) {
 		comma=true;
-		fprintf(fp, "\n");
-		mainStack->Save(fp, indent+1);
+		out << endl;
+		mainStack->Save(out, indent+1);
 	}
 	if (wakeStack && wakeStack->IsInteresting()) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		wakeStack->Save(fp, indent+1);
+		if (comma){ out << ","; } else comma=true; out << endl;
+		wakeStack->Save(out, indent+1);
 	}
 	if (sleepStack && sleepStack->IsInteresting()) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		sleepStack->Save(fp, indent+1);
+		if (comma){ out << ","; } else comma=true;out << endl;
+		sleepStack->Save(out, indent+1);
 	}
 	if (rxStack && rxStack->IsInteresting()) {
-		if (comma){ fprintf(fp, ","); } else comma=true; fprintf(fp, "\n");
-		rxStack->Save(fp, indent+1);
+		if (comma){ out << ","; } else comma=true; out << endl;
+		rxStack->Save(out, indent+1);
 	}
-	fprintf(fp, "}");
+	out << "}";
 	return err;
 }
 

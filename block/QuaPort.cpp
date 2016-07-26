@@ -48,23 +48,21 @@ QuaPort::hasMode(const int m) {
 }
 
 status_t
-QuaPort::save(FILE *fp, short indent)
+QuaPort::save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent);
-
-	fprintf(fp,	"port");
+	out << tab(indent) << "port";
 	
 //	if (appFilePathName)
 //		fprintf(fp, "\n\t#path \"%s\"", appFilePathName);
 //	if (appMimeType)
 //		fprintf(fp, "\n\t#mime \"%s\"", appMimeType);
 		
-	fprintf(fp,	" %s", sym->printableName().c_str());
+	out << " " << sym->printableName();
 	if (countControllers() > 0) {
-		fprintf(fp, "(");
-		err = saveControllers(fp, indent+2);
-		fprintf(fp, ")");
+		out << "(";
+		err = saveControllers(out, indent+2);
+		out << ")";
 	}
 //	if (representation) {
 //		BPoint	atPoint = representation->atPoint;

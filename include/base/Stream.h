@@ -84,7 +84,7 @@ public:
 	virtual bool SetMidiParams(int8, int8, int8, bool);
 	virtual bool setAttributes(AttributeList &attribs);
 	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp) = 0;
+	virtual status_t SaveSnapshot(ostream &out) = 0;
 
 	//	void *operator new(size_t);
 	void operator delete(void *);
@@ -126,7 +126,7 @@ public:
 	virtual bool SetMidiParams(int8, int8, int8, bool) override;
 	virtual bool setAttributes(AttributeList &attribs) override;
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	Note note;
 	AttributeList attributes;
@@ -143,7 +143,7 @@ public:
 
 	virtual bool SetMidiParams(int8, int8, int8, bool) override;
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	Ctrl ctrl;
 };
@@ -158,7 +158,7 @@ public:
 	StreamBend(Time &tag, cmd_t, bend_t);
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	Bend bend;
 };
@@ -174,7 +174,7 @@ public:
 
 	virtual bool SetMidiParams(int8, int8, int8, bool) override;
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	Prog prog;
 };
@@ -190,7 +190,7 @@ public:
 
 	virtual bool SetMidiParams(int8, int8, int8, bool) override;
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	SysC sysC;
 };
@@ -206,7 +206,7 @@ public:
 	~StreamMesg();
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	OSCMessage *mesg;
 };
@@ -220,7 +220,7 @@ public:
 	StreamValue(Time &tag, TypedValue &vp);
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	TypedValue value;
 };
@@ -236,7 +236,7 @@ public:
 	~StreamSysX();
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	SysX sysX;
 };
@@ -252,7 +252,7 @@ public:
 	StreamJoy(Time &tag, uchar st, uchar wh, uchar cmd);
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	QuaJoy joy;
 };
@@ -267,7 +267,7 @@ public:
 	StreamLogEntry(Time &tag, class LogEntry *cp);
 
 	virtual StreamItem *Clone() override;
-	virtual status_t SaveSnapshot(FILE *fp) override;
+	virtual status_t SaveSnapshot(ostream &out) override;
 
 	LogEntry logEntry;
 };
@@ -290,7 +290,7 @@ public:
 	virtual bool SetMidiParams(int8, int8, int8, bool);
 	virtual bool setAttributes(AttributeList &attribs);
 	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp)=0;
+	virtual status_t SaveSnapshot(ostream &out)=0;
 
 //	void *operator new(size_t);
 	void operator delete(void *);
@@ -321,7 +321,7 @@ public:
 	virtual bool SetMidiParams(int8, int8, int8, bool);
 	virtual bool setAttributes(AttributeList &attribs);
 	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
     
     Note note;
 	AttributeList attributes;
@@ -351,7 +351,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	Bend bend;
 };
@@ -367,7 +367,7 @@ public:
 
 	virtual bool SetMidiParams(int8, int8, int8, bool);
 	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	Prog prog;
 };
@@ -383,7 +383,7 @@ public:
 
 	virtual bool SetMidiParams(int8, int8, int8, bool);
 	virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	SysC sysC;
 };
@@ -397,7 +397,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	OSCMessage *mesg;
 };
@@ -409,7 +409,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	TypedValue value;
 };
@@ -422,7 +422,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	SysX sysX;
 };
@@ -435,7 +435,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	QuaJoy joy;
 };
@@ -447,7 +447,7 @@ public:
 	void *operator new(size_t);
 	void operator delete(void *);
     virtual StreamItem *Clone();
-	virtual status_t SaveSnapshot(FILE *fp);
+	virtual status_t SaveSnapshot(ostream &out);
 	
  	LogEntry logEntry;
 };
@@ -521,7 +521,7 @@ public:
 	void			SetDuration(StreamItem *, dur_t);
 	void			ModifyItemTime(StreamItem *I, Time &tag);
 
-	status_t		SaveSnapshot(FILE *fp);
+	status_t		SaveSnapshot(ostream &out);
 
 	status_t		LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t		LoadSnapshotChildren(tinyxml2::XMLElement *element, std::vector<std::string> &textFrags);
@@ -533,8 +533,8 @@ public:
 	void			SetGranularity(ulong gr);
 	void			PrintStream(FILE *fp);
 	
-	status_t		Load(FILE *, Qua *, short fmt=STR_FMT_RAW);
-	status_t		Save(FILE *, Qua *, short fmt=STR_FMT_RAW);
+	status_t		Load(istream&in, Qua *, short fmt=STR_FMT_RAW);
+	status_t		Save(ostream &out, Qua *, short fmt=STR_FMT_RAW);
 	status_t		SetValue(Block *b);
 
 	void forEach(function<void(StreamItem *i)> op);

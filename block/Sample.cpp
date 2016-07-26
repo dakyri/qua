@@ -491,19 +491,16 @@ Sample::SetTakeList(Block *b)
 }*/
 
 status_t
-Sample::Save(FILE *fp, short indent)
+Sample::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
 	short		i=0;
-	tab(fp, indent);
-	fprintf(fp,	"sample");
-	
-	fprintf(fp,	" %s", sym->printableName().c_str());
 
+	out << tab(indent) << "sample " << sym->printableName();
 	if (countControllers() > 0) {
-		fprintf(fp, "(");
-		err = saveControllers(fp, indent+2);
-		fprintf(fp, ")");
+		out << "(";
+		err = saveControllers(out, indent+2);
+		out << ")";
 	}
 /* should now be taken care of as normal sym child of the sample
 	if (CountTakes() > 0) {
@@ -524,7 +521,7 @@ Sample::Save(FILE *fp, short indent)
 		}
 	}	
 */
-	SaveMainBlock(mainBlock, fp, indent, sym, true, false, nullptr, nullptr); 
+	SaveMainBlock(mainBlock, out, indent, sym, true, false, nullptr, nullptr); 
 	return err;
 }
 

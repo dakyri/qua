@@ -55,6 +55,8 @@ namespace tinyxml2 {
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <ostream>
+#include <istream>
 
 typedef list<Instance*> sched_t;
 
@@ -95,7 +97,7 @@ public:
 	static string getVersionString();
 	static string getCapabilityString();
 
-	void					SequencerIteration();
+	void SequencerIteration();
 #ifdef QUA_V_MULTIMEDIA_TIMER
 	static TIMECALLBACK MMEventProc;
 	MMRESULT mmTimerId;
@@ -109,11 +111,10 @@ public:
 
 	void					MetroGnomeClick();
 
-	status_t				Save(FILE *fp, short, bool clear_history);
-	status_t				SaveInit(FILE *fp, short);
-	status_t				WriteChunk(FILE *fp, ulong typ, void *, ulong);
-	ulong					ReadChunk(FILE *fp, void **, ulong*);
-	status_t				SaveQuap(FILE *fp);
+	status_t				Save(ostream &out, short, bool clear_history);
+	status_t				SaveInit(ostream &out, short);
+	status_t				WriteChunk(ostream &out, ulong typ, void *, ulong);
+	ulong					ReadChunk(istream &out, void **, ulong*);
 
 #ifdef  QUA_V_SAVE_INITASXML
 	status_t				DoSave(const char *file);
@@ -125,13 +126,13 @@ public:
 
 	void					SetTempo(float tempo, bool display);
 
-	Pool					*NewPool(short);
-	Sample					*CreateSample(std::string, bool andD);
-	Voice					*CreateVoice(std::string, bool andD);
-	Lambda					*CreateMethod(std::string, StabEnt *ctxt, bool andD);
-	bool					ParsePass2(class Parser *p, StabEnt **loadable);
+	Pool *NewPool(short);
+	Sample *CreateSample(std::string, bool andD);
+	Voice *CreateVoice(std::string, bool andD);
+	Lambda *CreateMethod(std::string, StabEnt *ctxt, bool andD);
+	bool ParsePass2(class Parser *p, StabEnt **loadable);
 	void setName(const string &nm, bool setTitle=true);
-	void 					UpdateRecordDisplay();
+	void UpdateRecordDisplay();
 
 	Channel					*AddChannel(
 								std::string, short id,

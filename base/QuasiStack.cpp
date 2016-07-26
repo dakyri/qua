@@ -402,11 +402,11 @@ QuasiStack::Dump()
 }
 
 status_t
-QuasiStack::Save(FILE *fp, short indent)
+QuasiStack::Save(ostream &out, short indent)
 {
 	bool		comma = false;
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent); fprintf(fp, "%s(", stackable->sym->printableName().c_str());
+	out << tab(indent) << stackable->sym->printableName() << "(";
 	QuaControllerBridge *p;
 	int				i;
 	/*
@@ -427,19 +427,19 @@ QuasiStack::Save(FILE *fp, short indent)
 		/*
 		if (controllerBridge.CountItems())
 			fprintf(fp, ", ");*/
-		fprintf(fp, "{\n");
+		out << "{" << endl;
 		comma = false;
 		for (QuasiStack *s: higherFrame) {
-			if (comma) fprintf(fp, ",\n"); else comma = true;
-			s->Save(fp, indent+1);
+			if (comma) out << "," << endl; else comma = true;
+			s->Save(out, indent+1);
 		}
-		fprintf(fp, "}");
+		out << "}";
 	}
-	fprintf(fp, ")");
+	out << ")";
 	return err;
 }
 status_t
-QuasiStack::SaveSnapshot(FILE *fp, const char *label)
+QuasiStack::SaveSnapshot(ostream &out, const char *label)
 {
 	status_t	err=B_NO_ERROR;
 
@@ -455,30 +455,24 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 				long		chunkLen;
 				chunkLen = vst->GetChunk(stk.afx, &chunkPtr);
 				if (chunkLen > 0) {
-					fprintf(fp,
-						"<stack name=\"%s\" type=\"vst\" saveData=\"chunk\" length=\"%d\" encoding=\"base64\">\n",
-						label, chunkLen);
+					out << "<stack name=\""<< label <<"\" type=\"vst\" saveData=\"chunk\" length=\""<< chunkLen <<"\" encoding=\"base64\">\n";
 					std::string outb = Base64::Encode((uchar *)chunkPtr, chunkLen);
-					fprintf(fp, "%s\n", outb.c_str());
+					out << outb << endl;
 				} else {
-					fprintf(fp,
-						"<stack name=\"%s\" type=\"vst\" length=\"0\" encoding=\"base64\">\n",
-						label);
+					out << "<stack name=\""<< label<<"\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
 				}
 #endif
 			} else { // programs are not chunks!
-				fprintf(fp,
-					"<stack name=\"%s\" type=\"vst\" length=\"0\" encoding=\"base64\">\n",
-					label);
+				out << "<stack name=\""<<label<<"\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
 			}
 
 		} else {
 			if (stackable->stackSize > 0 && saveBinaryValues) {
-				fprintf(fp, "<stack name=\"%s\" length=\"%d\" encoding=\"base64\">\n", label, stackable->stackSize);
+				out << "<stack name=\""<< label <<"\" length=\""<< stackable->stackSize <<"\" encoding=\"base64\">"<<endl;
 				std::string outb = Base64::Encode((uchar *)stk.vars, stackable->stackSize);
-				fprintf(fp, "%s\n", outb.c_str());
+				out << outb << endl;
 			} else {
-				fprintf(fp, "<stack name=\"%s\">\n", label);
+				out << "<stack name=\""<<label<<"\">"<<endl;
 			}
 		}
 
@@ -489,14 +483,14 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 					case TypedValue::S_VST_PROGRAM: {
 						char buf[256];
 						sprintf(buf, "type=\"vstprogram\"");
-						err=p->SaveSimpleTypeSnapshot(fp, stacker, this, buf);
+						err=p->SaveSimpleTypeSnapshot(out, stacker, this, buf);
 						break;
 					}
 #ifdef QUA_V_VST_HOST
 					case TypedValue::S_VST_PARAM: {
 						char buf[256];
 						sprintf(buf, "type=\"vstparam\" position=\"%d\"", p->VstParamValue());
-						err=p->SaveSimpleTypeSnapshot(fp, stacker, this, buf);
+						err=p->SaveSimpleTypeSnapshot(out, stacker, this, buf);
 						break;
 					}
 #endif
@@ -509,14 +503,14 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 					case TypedValue::S_LONG:
 					case TypedValue::S_DOUBLE: {
 						if (p->refType == TypedValue::REF_STACK) {
-							err=p->SaveSimpleTypeSnapshot(fp, stacker, this);
+							err=p->SaveSimpleTypeSnapshot(out, stacker, this);
 						}
 						break;
 					}
 
 					case TypedValue::S_CHANNEL: {
 						if (p->refType == TypedValue::REF_STACK) {
-							err=p->SaveSimpleTypeSnapshot(fp, stacker, this);
+							err=p->SaveSimpleTypeSnapshot(out, stacker, this);
 						}
 						break;
 					}
@@ -525,7 +519,7 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 					}
 					case TypedValue::S_CLIP: {
 						if (p->refType == TypedValue::REF_STACK) {
-							err=p->SaveSimpleTypeSnapshot(fp, stacker, this);
+							err=p->SaveSimpleTypeSnapshot(out, stacker, this);
 						}
 						break;
 					}
@@ -534,7 +528,7 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 			}
 		}
 	} else {
-		fprintf(fp, "<stack name=\"%s\">\n", label);
+		out << "<stack name=\""<<label<<"\">"<<endl;
 	}
 	if (saveChildStacks) {
 		for (short i=0; i<countFrames(); i++) {
@@ -567,10 +561,10 @@ QuasiStack::SaveSnapshot(FILE *fp, const char *label)
 						break;
 				}
 			}
-			s->SaveSnapshot(fp, chlabel.c_str());
+			s->SaveSnapshot(out, chlabel.c_str());
 		}
 	}
-	fprintf(fp, "</stack>\n");
+	out <<"</stack>"<<endl;
 	return err;
 }
 
@@ -796,17 +790,17 @@ QuasiStack::PopHigherFrameRepresentations()
 // Stackable
 ///////////////////////////////////////////////////////////////////////////////
 status_t
-Stackable::saveControllers(FILE *fp, int indent)
+Stackable::saveControllers(ostream &out, int indent)
 {
 	for (short i=0; i<countControllers(); i++) {
 		StabEnt	*ctlsym = controller(i);
 		if (  ctlsym->refType == TypedValue::REF_POINTER ||
 			ctlsym->refType == TypedValue::REF_INSTANCE) {
 		} else {
-			ctlsym->SaveSimpleBits(fp,0);
+			out << ctlsym->SaveSimpleBits();
 			if (i < countControllers()-1) {
-				fprintf(fp, ",\n");
-				tab(fp, indent);
+				out << "," << endl;
+				out << tab(indent);
 			}
 		}
 	}

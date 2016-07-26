@@ -42,13 +42,13 @@ Stream::Stream(Stream *S)
 }
 
 status_t
-Stream::SaveSnapshot(FILE *fp)
+Stream::SaveSnapshot(ostream & out)
 {
-	fprintf(fp, "<stream>\n");
+	out << "<stream>" << endl;
 	for (StreamItem *p = head; p!= nullptr; p=p->next) {
-		p->SaveSnapshot(fp);
+		p->SaveSnapshot(out);
 	}
-	fprintf(fp, "</stream>\n");
+	out << "</stream>"<<endl;
 	return B_OK;
 }
 
@@ -1345,21 +1345,21 @@ TODO XXXX FIXME
 this and its companion should maybe be refactored ... at the very least perhaps though ditched entirely for a less clunky save format.
 */
 status_t
-Stream::Save(FILE *fp, Qua *uberQua, short fmt)
+Stream::Save(ostream &out, Qua *uberQua, short fmt)
 {
 	
 	switch (fmt) {
 	case STR_FMT_TEXT: {
-		fprintf(fp, "{");
+		out << "{";
 		for (StreamItem *p=head; p!=nullptr; p=p->next) {
 		}
-		fprintf(fp, "}");
+		out << "}";
 		break;
 	}
 
 	case STR_FMT_RAW: {
 //#define	WriteVar(X)	if ((err=fp->Write(&X, (ulong)sizeof(X))) < B_NO_ERROR) return err
-#define	WriteVar(X)	if (fwrite(&X, (ulong)sizeof(X), 1, fp) != 1) return B_ERROR;
+#define	WriteVar(X)	out.write((const char*)&X, (ulong)sizeof(X)); if (!out.good()) return B_ERROR; 
 	
 		WriteVar(nItems);
 		for (StreamItem *p=head; p!=nullptr; p=p->next) {
@@ -1431,7 +1431,8 @@ Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 //				if ((err=fp->Write(q->sysX.data, q->sysX.length))<B_NO_ERROR) {
 //					return err;
 //				}
-				if (fwrite(q->sysX.data, q->sysX.length, 1, fp) != 1) {
+				out.write(q->sysX.data, q->sysX.length);
+				if (!out.good()) {
 					return B_ERROR;
 				}
 				break;
@@ -1470,10 +1471,10 @@ Stream::Save(FILE *fp, Qua *uberQua, short fmt)
 }
 
 status_t
-Stream::Load(FILE *fp, Qua *uberQua, short fmt)
+Stream::Load(istream &in, Qua *uberQua, short fmt)
 {
 
-#define	ReadVar(X)	if (fread(&X, sizeof(X), 1, fp) != 1) return B_ERROR
+#define	ReadVar(X)	in.read((char*)&X, sizeof(X)); if (!in.good()) return B_ERROR
 	int			sc;
 	ReadVar(sc);
 	for (int i=0; i<sc; i++) {
@@ -1559,7 +1560,8 @@ Stream::Load(FILE *fp, Qua *uberQua, short fmt)
 //			if ((err=fp->Read(q->sysX.data, q->sysX.length))<B_NO_ERROR) {
 //				return err;
 //			}
-			if (fread(q->sysX.data, q->sysX.length, 1, fp) != 1) {
+			in.read(q->sysX.data, q->sysX.length);
+			if (!in.good()) {
 				return B_ERROR;
 			}
 			

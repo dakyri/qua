@@ -35,7 +35,7 @@ public:
 		return i >= 0 && ((size_t)i) < controllers.size() ? controllers[i] : nullptr;
 	}
 	inline int countControllers() { return controllers.size(); }
-	status_t saveControllers(FILE *, int);
+	status_t saveControllers(ostream &out, int);
 	std::vector<StabEnt*> controllers;
 
     short stackSize;

@@ -62,7 +62,10 @@ string quascript_name(const string &nm)
  *    note	duration
  */
  
-// class QSParser....
+/**
+ * class Parser, class QSParser
+ * this is slowly being replaced by a bison grammar which will use stream output, stdio will do here for now
+ */
 
 Parser::Parser(FILE *fp, std::string fnm, ErrorHandler &_display, Qua *q):
 	QSParser(q, _display, getBase(fnm))

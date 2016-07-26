@@ -19,33 +19,27 @@
 #include "Dictionary.h"
 
 status_t
-Template::save(FILE *fp, short indent)
+Template::save(ostream &out, short indent)
 {
 	status_t err=B_NO_ERROR;
-	const char *typenm = findTypeName(type).c_str();
+	string typenm = findTypeName(type);
 	
-	if (typenm == nullptr) {
+	if (typenm == "") {
 		internalError("Invalid type for template %s: not saved");
 	}
-	
-	tab(fp, indent);
-	fprintf(fp, "template");
-
-	fprintf(fp, " %s", typenm);
-	
+	out << tab(indent) << "template " << typenm;
 	if (mimeType.size())
-		fprintf(fp, " \"%s\"", mimeType.c_str());
-
-	fprintf(fp,	" %s", sym->printableName().c_str());
+		out << " \"" << mimeType << "\"";
+	out <<" %s", sym->printableName();
 
 	if (countControllers() > 0) {
-		fprintf(fp, "(");
-		if ((err = saveControllers(fp, indent+2)) != B_NO_ERROR)
+		out << "(";
+		if ((err = saveControllers(out, indent+2)) != B_NO_ERROR)
 			return err;;
-		fprintf(fp, ")");
+		out << ")";
 	}
 //	fprintf(fp,	"\n#display {%s}", uberQua->bridge.DisplayParameterSaveString(sym));
-	err = SaveMainBlock(mainBlock, fp, indent, sym, false, false, nullptr, nullptr); 
+	err = SaveMainBlock(mainBlock, out, indent, sym, false, false, nullptr, nullptr); 
 	return err;
 }
 

@@ -110,14 +110,14 @@ public:
 	string preciseName();
 	string printableName();
 	
-	status_t			SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInternal);
+	status_t			SaveScript(ostream &out, short indent, bool saveControllers, bool saveInternal);
 
 	status_t			SaveValue(FILE *fp, Stacker *i, QuasiStack *s);
-	status_t			SaveSimpleType(FILE *fp, short indent, bool saveInternal);
-	status_t			SaveSimpleBits(FILE *fp, short indent);
+	status_t			SaveSimpleType(ostream &out, short indent, bool saveInternal);
+	string SaveSimpleBits();
 
-	status_t			SaveSnapshot(FILE *fp);
-	status_t			SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char *additionalAttributes=nullptr);
+	status_t			SaveSnapshot(ostream &out);
+	status_t			SaveSimpleTypeSnapshot(ostream &out, Stacker *stacker, QuasiStack *qs, char *additionalAttributes=nullptr);
 	status_t			SetAtomicSnapshot(tinyxml2::XMLElement *element, Stacker *stker, StabEnt *stackerSym, QuasiStack *stk);
 	status_t			SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack);
 	status_t			SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack *stack);

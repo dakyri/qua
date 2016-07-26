@@ -10,9 +10,6 @@
 #include "tinyxml2.h"
 #include "StdDefs.h"
 
-
-///////////////// Application headers
-
 #include "Sym.h"
 #include "Block.h"
 #include "Channel.h"
@@ -33,6 +30,8 @@
 #include "Parse.h"
 #include "QuaPort.h"
 #include "Dictionary.h"
+
+#include <iostream>
 
 SymTab				glob(MAX_SYMBOLS);
 StabEnt				*typeSymbolStreamItem=nullptr,
@@ -975,16 +974,16 @@ StabEnt::printableName()
 }
 
 status_t
-StabEnt::SaveSnapshot(FILE *fp)
+StabEnt::SaveSnapshot(ostream &out)
 {
 	status_t	err=B_NO_ERROR;
 	if (debug_save)
-		fprintf(stderr, "save %s\n", name.c_str());
+		cerr << "save " << name << endl;
 
 	if (!isDeleted && !isClone) {
 		switch(type) {
 			case S_QUA: {
-				fprintf(fp, "<qua name=\"%s\">\n", name.c_str());
+				out << "<qua name=\""<< name <<"\">"<<endl;
 				// save global values
 
 				// save display data
@@ -992,7 +991,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 				// save children ... channels and schedulables
 				StabEnt	*p = children;
 				while (p!= nullptr) {
-					err=p->SaveSnapshot(fp);
+					err=p->SaveSnapshot(out);
 					if (err != B_NO_ERROR) {
 						break;
 					}
@@ -1010,14 +1009,14 @@ StabEnt::SaveSnapshot(FILE *fp)
 						case S_LONG:
 						case S_DOUBLE: {
 							if (p->refType == REF_POINTER || p->refType == REF_VALUE) {
-								err=p->SaveSimpleTypeSnapshot(fp, nullptr, nullptr);
+								err=p->SaveSimpleTypeSnapshot(out, nullptr, nullptr);
 							}
 							break;
 						}
 					}
 					p = p->sibling;
 				}
-				fprintf(fp, "</qua>\n");
+				out << "</qua>"<<endl;
 				break;
 			}
 				
@@ -1026,53 +1025,53 @@ StabEnt::SaveSnapshot(FILE *fp)
 				break;
 				
 			case S_VOICE: {
-				fprintf(fp, "<voice name=\"%s\">\n", name.c_str());
+				out << "<voice name=\""<< name <<"\">"<<endl;
 				// save stream take data
 				// save display data
 				// save instance stacks
 				StabEnt	*p = children;
 				while (p!= nullptr) {
-					err=p->SaveSnapshot(fp);
+					err=p->SaveSnapshot(out);
 					if (err != B_NO_ERROR) {
 						break;
 					}
 					p = p->sibling;
 				}
-				fprintf(fp, "</voice>\n");
+				out << "</voice>"<<endl;
 				break;
 			}
 				
 			case S_SAMPLE: {
-				fprintf(fp, "<sample name=\"%s\">\n", name.c_str());
+				out << "<sample name=\""<< name <<"\">"<<endl;
 				// save sample take data
 				// save display data
 				// save instance stacks
 				StabEnt	*p = children;
 				while (p!= nullptr) {
-					err=p->SaveSnapshot(fp);
+					err=p->SaveSnapshot(out);
 					if (err != B_NO_ERROR) {
 						break;
 					}
 					p = p->sibling;
 				}
-				fprintf(fp, "</sample>\n");
+				out <<"</sample>"<<endl;
 				break;
 			}
 				
 			case S_POOL: {
-				fprintf(fp, "<pool name=\"%s\">\n", name.c_str());
+				out << "<pool name=\""<< name <<"\">";
 				// save stream data
 				// save display data
 				// save instance stacks
 				StabEnt	*p = children;
 				while (p!= nullptr) {
-					err=p->SaveSnapshot(fp);
+					err=p->SaveSnapshot(out);
 					if (err != B_NO_ERROR) {
 						break;
 					}
 					p = p->sibling;
 				}
-				fprintf(fp, "</pool>\n");
+				out << "</pool>"<<endl;
 				break;
 			}				
 			case S_PORT:
@@ -1085,16 +1084,16 @@ StabEnt::SaveSnapshot(FILE *fp)
 				Input	*in = InputValue();
 				Channel	*ch = context->ChannelValue();
 				if (in && ch) {
-					in->SaveSnapshot(fp, ch);
+					in->SaveSnapshot(out, ch);
 				}
 				break;
 			}
 				
 			case S_OUTPUT: {
-				Output	*out = OutputValue();
+				Output	*outv = OutputValue();
 				Channel	*ch = context->ChannelValue();
 				if (out && ch) {
-					out->SaveSnapshot(fp, ch);
+					outv->SaveSnapshot(out, ch);
 				}
 				break;
 			}
@@ -1102,7 +1101,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			case S_CHANNEL: {
 				Channel	*chan = ChannelValue();
 				if (chan) {
-					chan->SaveSnapshot(fp);
+					chan->SaveSnapshot(out);
 				}
 				break;
 			}
@@ -1110,7 +1109,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			case S_INSTANCE: {
 				Instance	*inst = InstanceValue();
 				if (inst) {
-					inst->SaveSnapshot(fp);
+					inst->SaveSnapshot(out);
 				}
 				break;
 			}
@@ -1122,7 +1121,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			case S_TAKE: {
 				Take	* take = TakeValue();
 				if (take) {
-					take->SaveSnapshot(fp);
+					take->SaveSnapshot(out);
 				}
 				break;
 			}
@@ -1130,7 +1129,7 @@ StabEnt::SaveSnapshot(FILE *fp)
 			case S_CLIP: {
 				Clip	* clip = ClipValue(nullptr);
 				if (clip) {
-					clip->SaveSnapshot(fp);
+					clip->SaveSnapshot(out);
 				}
 				break;
 			}
@@ -1214,26 +1213,26 @@ StabEnt::SaveInitialAssigns(FILE *fp, short indent, Stacker *stacker, QuasiStack
 
 
 status_t
-StabEnt::SaveSimpleTypeSnapshot(FILE *fp, Stacker *stacker, QuasiStack *qs, char *additionalAttributes)
+StabEnt::SaveSimpleTypeSnapshot(ostream &out, Stacker *stacker, QuasiStack *qs, char *additionalAttributes)
 {
 	LValue	lv;
 	SetLValue(lv, nullptr, stacker, nullptr, qs);
 	ResultValue	rv = lv.CurrentValue();
 	if (isEnveloped) {
 		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\" %s>\n", name.c_str(), rv.StringValue(), additionalAttributes);
+			out << "<envelope name=\""<< name <<"\" value=\""<< rv.StringValue() <<"\" "<< additionalAttributes <<">"<<endl;
 		}
 		else {
-			fprintf(fp, "<envelope name=\"%s\" value=\"%s\">\n", name.c_str(), rv.StringValue());
+			out << "<envelope name=\""<< name <<"\" value=\""<< rv.StringValue() <<"\">"<<endl;
 		}
-		fprintf(fp, "</envelope>\n");
+		out << "</envelope>"<<endl;
 	}
 	else {
 		if (additionalAttributes != nullptr) {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\" %s/>\n", name.c_str(), rv.StringValue(), additionalAttributes);
+			out << "<fixed name=\""<< name <<"\" value=\""<< rv.StringValue() <<"\" "<< additionalAttributes <<"/>"<<endl;
 		}
 		else {
-			fprintf(fp, "<fixed name=\"%s\" value=\"%s\"/>\n", name.c_str(), rv.StringValue());
+			out << "<fixed name=\""<< name <<"\" value=\""<< rv.StringValue() <<"\"/>"<<endl;
 		}
 	}
 	return B_OK;
@@ -1252,7 +1251,7 @@ StabEnt::SaveSimpleTypeInitialAssigns(FILE *fp, short indent, Stacker *stacker, 
 }
 
 status_t
-StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInternalRefs)
+StabEnt::SaveScript(ostream &out, short indent, bool saveControllers, bool saveInternalRefs)
 {
 	status_t	err=B_NO_ERROR;
 	if (debug_save)
@@ -1265,61 +1264,61 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				) {
 		switch(type) {
 			case S_QUA:
-				if ((err=QuaValue()->Save(fp, indent, true)) != B_NO_ERROR) {
+				if ((err=QuaValue()->Save(out, indent, true)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_TEMPLATE:
-				if ((err=TemplateValue()->save(fp, indent)) != B_NO_ERROR) {
+				if ((err=TemplateValue()->save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_VOICE:
-				if ((err=VoiceValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=VoiceValue()->Save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_SAMPLE:
-				if ((err=SampleValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=SampleValue()->Save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_POOL:
-				if ((err=PoolValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=PoolValue()->Save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 
 			case S_PORT:
-				if ((err=PortValue()->save(fp, indent)) != B_NO_ERROR) {
+				if ((err=PortValue()->save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_LAMBDA:
-				if ((err=LambdaValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=LambdaValue()->Save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 				
 			case S_CHANNEL:
-				if ((err=ChannelValue()->Save(fp, indent)) != B_NO_ERROR) {
+				if ((err=ChannelValue()->Save(out, indent)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
 
 			case S_INSTANCE: {
-				tab(fp, indent);
 				Instance	*inst = InstanceValue();
 				if (inst) {
-					fprintf(fp, "instance %s(", inst->sym->name.c_str());
-					fprintf(fp, "%s,", inst->channel->sym->name.c_str());
-					fprintf(fp, "%s,", inst->startTime.StringValue());
-					fprintf(fp, "%s)\n", inst->duration.StringValue());
+					out << tab(indent);
+					out << "instance " << inst->sym->name << "(";
+					out << inst->channel->sym->name << ",";
+					out << inst->startTime.StringValue() << ",";
+					out << inst->duration.StringValue() << ")" << endl;
 	//				if ((err=InstanceValue()->Save(fp, indent)) != B_NO_ERROR) {
 	//					return err;
 	//				}
@@ -1331,11 +1330,11 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				Clip	*c = ClipValue(nullptr);
 				if (c && c->sym && c->sym->name.size()) {
 					if (c->media && c->media->sym && c->media->sym->name.size()) {
-						tab(fp, indent);
-						fprintf(fp, "clip %s(", c->sym->name.c_str());
-						fprintf(fp, "%s,", c->media->sym->name.c_str());
-						fprintf(fp, "%s,", c->start.StringValue());
-						fprintf(fp, "%s)\n", c->duration.StringValue());
+						out << tab(indent);
+						out << "clip " << c->sym->name <<"(";
+						out << c->media->sym->name << ",";
+						out << c->start.StringValue() << ",";
+						out << c->duration.StringValue() << ")" << endl;
 					}
 				}
 				break;
@@ -1346,12 +1345,10 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				if (t) {
 					if (t->type == Take::SAMPLE) {
 						SampleTake *st = (SampleTake*)t;
-						tab(fp, indent);
-						fprintf(fp, "take \\sample \"%s\" %s\n", st->path.c_str(), t->sym->name.c_str());
+						out << tab(indent) << "take \\sample \"" << st->path << "\" " << t->sym->name << endl;
 					} else if (t->type == Take::STREAM) {
 						StreamTake *st = (StreamTake*)t;
-						tab(fp, indent);
-						fprintf(fp, "take \\stream %s\n", t->sym->name.c_str());
+						out << tab(indent) << "take \\stream \"" << t->sym->name;
 					}
 				}
 				break;
@@ -1369,7 +1366,7 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 			case S_FLOAT:
 			case S_INT:
 			case S_BYTE:
-				if ((err=SaveSimpleType(fp, indent, saveInternalRefs)) != B_NO_ERROR) {
+				if ((err=SaveSimpleType(out, indent, saveInternalRefs)) != B_NO_ERROR) {
 					return err;
 				}
 				break;
@@ -1398,10 +1395,11 @@ StabEnt::SaveScript(FILE *fp, short indent, bool saveControllers, bool saveInter
 				break;
 		}
 	}
-	if (debug_save)
-		fprintf(stderr, "done %d: sibl %x\n", indent, (unsigned)sibling);
+	if (debug_save) {
+		cerr << "done "<< indent <<": sibl "<< (unsigned)sibling <<"\n";
+	}
 	if (sibling) {
-		if ((err=sibling->SaveScript(fp, indent, saveControllers, saveInternalRefs)) != B_NO_ERROR)
+		if ((err=sibling->SaveScript(out, indent, saveControllers, saveInternalRefs)) != B_NO_ERROR)
 			return err;
 	}
 	return B_NO_ERROR;
@@ -1491,35 +1489,36 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 
 
 status_t
-StabEnt::SaveSimpleType(FILE *fp, short indent, bool saveInternalRefs)
+StabEnt::SaveSimpleType(ostream &out, short indent, bool saveInternalRefs)
 {
 
 	if (!saveInternalRefs && (refType == REF_INSTANCE || refType == REF_POINTER)) {
 		return B_NO_ERROR;
 	}
 
-	tab(fp, indent);
-//	fprintf(fp, "define ");
-	SaveSimpleBits(fp, indent);
-	fprintf(fp, "\n");
+	out << tab(indent) << SaveSimpleBits() << endl;
 
 	return B_NO_ERROR;
 }
 
 
-status_t
-StabEnt::SaveSimpleBits(FILE *fp, short indent)
+string
+StabEnt::SaveSimpleBits()
 {
-	fprintf(fp, "%s", findTypeName(type).c_str());
+	string ret = findTypeName(type);
 	if (hasBounds) {
-		fprintf(fp, " \\range %s", minVal.StringValue());
-		fprintf(fp, " %s",  maxVal.StringValue());
+		ret += " \\range ";
+		ret += minVal.StringValue();
+		ret += " ";
+		ret += maxVal.StringValue();
 	}
-	fprintf(fp, " %s", printableName().c_str());
+	ret += " ";
+	ret += printableName();
 	if (hasInit) {
-		fprintf(fp, " = %s",  iniVal.StringValue());
+		ret += " = ";
+		ret += iniVal.StringValue();
 	}
-	return B_NO_ERROR;
+	return ret;
 }
 
 

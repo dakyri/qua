@@ -1628,9 +1628,9 @@ Block::DoFlush(void * clrFlg, void *z, int y)
 /////////////////////////////////////////////////////////////////////////////////////////
 // odd miscellaneous sods
 /////////////////////////////////////////////////////////////////////////
-status_t WriteHandlerBlock(FILE *fp, char *which, short indent);
+status_t WriteHandlerBlock(ostream &out, char *which, short indent);
 status_t
-WriteHandlerBlock(FILE *fp, char *which, Block *b, short indent)
+WriteHandlerBlock(ostream &out, char *which, Block *b, short indent)
 {
 	long		len;
 	status_t	err = B_OK;
@@ -1638,10 +1638,9 @@ WriteHandlerBlock(FILE *fp, char *which, Block *b, short indent)
 	if (b == nullptr) {
 		return B_OK;
 	}
-	tab(fp, indent);
-	fprintf(fp, "%s ", which);
+	out << tab(indent) << which << " ";
 	if (b->type != Block::C_LIST) {
-		fprintf(fp, "{\n");
+		out << "{" << endl;
 	}
 	len=0;
 	txt[0] = 0;
@@ -1649,20 +1648,21 @@ WriteHandlerBlock(FILE *fp, char *which, Block *b, short indent)
 		internalError("block size too large...");
 		return B_ERROR;
 	}
-	if (fwrite(txt, len, 1, fp) != 1) {
+	out.write(txt, len);
+	if (!out.good()) {
 		err = B_ERROR;
 	}
 	if (b->type != Block::C_LIST) {
-		fprintf(fp, "\n");
-		tab(fp, indent);
-		fprintf(fp, "}");
+		out << endl;
+		out << tab(indent);
+		out << "}";
 	}
-	fprintf(fp, "\n");
+	out << endl;
 	return err;
 }
 
 status_t
-SaveHandlers(FILE *fp, short indent, StabEnt *sym, bool force_brace)
+SaveHandlers(ostream &out, short indent, StabEnt *sym, bool force_brace)
 {
 	status_t	err = B_OK;
 	long		len;
@@ -1673,25 +1673,25 @@ SaveHandlers(FILE *fp, short indent, StabEnt *sym, bool force_brace)
 	if ((sched=sym->SchedulableValue()) != nullptr) {
 		if (sched->wake.block) {
 //			sched->wake.block->Dump(stderr, 0);
-			fprintf(fp, "\n");
-			WriteHandlerBlock(fp, "wake", sched->wake.block, indent);
+			out << endl;
+			WriteHandlerBlock(out, "wake", sched->wake.block, indent);
 		}
 		if (sched->sleep.block) {
-			fprintf(fp, "\n");
-			WriteHandlerBlock(fp, "sleep", sched->sleep.block, indent);
+			out << endl;
+			WriteHandlerBlock(out, "sleep", sched->sleep.block, indent);
 		}
 		if (sched->rx.block) {
-			fprintf(fp, "\n");
-			WriteHandlerBlock(fp, "rx", sched->rx.block, indent);
+			out << endl;
+			WriteHandlerBlock(out, "rx", sched->rx.block, indent);
 		}
 		if (sched->start.block) {
-			WriteHandlerBlock(fp, "start", sched->start.block, indent);
+			WriteHandlerBlock(out, "start", sched->start.block, indent);
 		}
 		if (sched->stop.block) {
-			WriteHandlerBlock(fp, "stop", sched->stop.block, indent);
+			WriteHandlerBlock(out, "stop", sched->stop.block, indent);
 		}
 		if (sched->record.block) {
-			WriteHandlerBlock(fp, "record", sched->record.block, indent);
+			WriteHandlerBlock(out, "record", sched->record.block, indent);
 		}
 	} else if ((channel=sym->ChannelValue()) != nullptr) {
 //		if (sym->children) {
@@ -1699,25 +1699,25 @@ SaveHandlers(FILE *fp, short indent, StabEnt *sym, bool force_brace)
 //		}
 		i = 0;
 		for (auto ci: channel->inputs) {
-			ci->Save(fp, indent, i++);
+			ci->Save(out, indent, i++);
 		}
 		i = 0;
 		for (auto ci: channel->outputs) {
-			ci->Save(fp, indent, i++);
+			ci->Save(out, indent, i++);
 		}
 		if (channel->rx.block) {
-			WriteHandlerBlock(fp, "rx", channel->rx.block, indent);
+			WriteHandlerBlock(out, "rx", channel->rx.block, indent);
 		}
 				
 		if (channel->tx.block) {
-			WriteHandlerBlock(fp, "tx", channel->tx.block, indent);
+			WriteHandlerBlock(out, "tx", channel->tx.block, indent);
 		}
 	}
 	return B_OK;
 }
 
 status_t
-SaveMainBlock(Block *b, FILE *fp, short indent, StabEnt *sym, bool force_brace, bool saveInits, Stacker *stacker, QuasiStack *stack)
+SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_brace, bool saveInits, Stacker *stacker, QuasiStack *stack)
 {
 	char		txt[10*1024];
 	long		len = 0;
@@ -1730,80 +1730,79 @@ SaveMainBlock(Block *b, FILE *fp, short indent, StabEnt *sym, bool force_brace, 
 //			fprintf(fp, "\n");
 //			tab(fp, indent);
 			QDBMSG_BLK("save main: sym %d block %x", sym->type, b);
-			fprintf(fp, " {\n");
+			out << " {" << endl;
 			if (sym->children) {
-				sym->children->SaveScript(fp, indent+1, false, false);
+				sym->children->SaveScript(out, indent+1, false, false);
 			}
-			SaveHandlers(fp, indent+1, sym, force_brace);
+			SaveHandlers(out, indent+1, sym, force_brace);
 #ifndef QUA_V_SAVE_INITASXML
 			if (saveInits && sym->children) {
 				sym->children->SaveInitialAssigns(fp, indent+1, stacker, stack);
 			}
 #endif
-			tab(fp, indent);
-			fprintf(fp, "}\n");
+			out << tab(indent) << "}" << endl;
 		} else {
-			fprintf(fp, "\n");
+			out << endl;
 		}
 		return B_NO_ERROR;
 	} else if (b->type == Block::C_LIST) {
-		fprintf(fp, "\n");
-		tab(fp, indent);
+		out << endl << tab(indent);
 		if (!Esrap(b, txt, len, 10*1024, true, indent, 0)) {
 			internalError("block size too large...");
 			return B_ERROR;
 		}
 		int l2 = strchr(txt, ' ') - txt;
-//		err = fp->Write(txt, l2+1);
-		if (fwrite(txt, l2+1, 1, fp) != 1) {
+
+		out.write(txt, l2 + 1);
+		if (!out.good()) {
 			err = B_ERROR;
 		}
 
 		if (force_brace)
-			fprintf(fp, "\n");
+			out << endl;
 		if (sym->children) {
-			sym->children->SaveScript(fp, indent+1, false, false);
+			sym->children->SaveScript(out, indent+1, false, false);
 		}
-		SaveHandlers(fp, indent+1, sym, force_brace);
+		SaveHandlers(out, indent+1, sym, force_brace);
 		if (force_brace)
-			tab(fp, indent+1);
-//		err = fp->Write(txt+l2+1, len-(l2+1));
-		if (fwrite(txt+l2+1, len-(l2+1), 1, fp) != 1) {
+			out << tab(indent+1);
+
+		out.write(txt + l2 + 1, len - (l2 + 1));
+		if (!out.good()) {
 			err = B_ERROR;
 		}
-		fprintf(fp, "\n");
+		out << endl;
 		return B_NO_ERROR;
 	} else if (sym->children || force_brace) {
 		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
 			internalError("block size too large...");
 			return B_ERROR;
 		}
-		fprintf(fp, "{\n");
+		out << "{" << endl;
 		if (sym->children)
-			sym->children->SaveScript(fp, indent+1, false, false);
-		SaveHandlers(fp, indent+1, sym, force_brace);
+			sym->children->SaveScript(out, indent+1, false, false);
+		SaveHandlers(out, indent+1, sym, force_brace);
 		
 		if (b || forceblock) {
-//			err = fp->Write(txt, len);
-			if (fwrite(txt, len, 1, fp) != 1) {
+			out.write(txt, len);
+			if (!out.good()) {
 				err = B_ERROR;
 			}
 		}
 			
-		tab(fp, indent);
-		fprintf(fp, "}\n");
+		out << tab(indent) << "}" << endl;
 		return B_NO_ERROR;
 	} else {	
-		fprintf(fp, "\t");
+		out << "\t";
 		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
 			internalError("block size too large...");
 			return B_ERROR;
 		}
-//		err = fp->Write(txt, len);
-		if (fwrite(txt, len, 1, fp) != 1) {
+		out.write(txt, len);
+		if (!out.good()) {
 			err = B_ERROR;
 		}
-		fprintf(fp, "\n");
+		out << endl;
 		return B_NO_ERROR;
 	}
 	return B_ERROR;

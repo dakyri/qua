@@ -12,8 +12,6 @@
 #include "Channel.h"
 #include "QuaDisplay.h"
 
-flag debug_anal = 0;
-
 Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
 	Schedulable(
 		DefineSymbol(nm, TypedValue::S_POOL, 0,
@@ -343,23 +341,20 @@ Pool::Recv(class Stream &s)
 
 
 status_t
-Pool::Save(FILE *fp, short indent)
+Pool::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent);
-
-	fprintf(fp,	"pool");
+	out << tab(indent) << "pool";
 	if (uberQua->bridge.HasDisplayParameters(sym)) {
-		fprintf(fp,	" \\display %s ", uberQua->bridge.DisplayParameterId());
-		uberQua->bridge.WriteDisplayParameters(fp, sym);
+		out << " \\display " << uberQua->bridge.DisplayParameterId() << " " << uberQua->bridge.GetDisplayParameters(sym);
 	}
-	fprintf(fp,	" %s", sym->printableName().c_str());
+	out << " " << sym->printableName();
 	if (countControllers() > 0) {
-		fprintf(fp, "(");
-		err = saveControllers(fp, indent+2);
-		fprintf(fp, ")");
+		out << "(";
+		err = saveControllers(out, indent+2);
+		out << ")";
 	}
-	SaveMainBlock(mainBlock, fp, indent, sym->children, true, false, nullptr, nullptr); 
+	SaveMainBlock(mainBlock, out, indent, sym->children, true, false, nullptr, nullptr); 
 	return err;
 }
 
@@ -544,6 +539,14 @@ PoolInstance::Run()
 	return B_NO_ERROR;
 }
 
+
+/*
+* TODO XXXX FIXME
+* original style of the Pool had hardcoded playing of a selected pool with input loops as it's default behaviour. So
+* it worked as the nearest thing to a simple midi loop. That's perhaps not a bad thing in retrospect. Currently
+* these behaviours are merged into the Voice, and it would maybe be a good idea to separate these again.
+* currently Pools aren't referenced in the MFC interface.
+*/
 
 
 #ifdef OLD_POOL_PLAY

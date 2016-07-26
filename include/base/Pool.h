@@ -44,7 +44,7 @@ public:
 	Time UpForGrabs(Stream *s, Time &last, Time &now);
 	StreamItem *IndexTo(Time &t);
 
-	status_t Save(FILE *fp, short indent);
+	status_t Save(ostream &out, short indent);
 	status_t SaveSnapshot(FILE *fp);
 
 	status_t LoadSnapshotElement(tinyxml2::XMLElement *);
@@ -54,18 +54,18 @@ public:
 	Stream &selectedTakeStream;
 	Time duration;
 
-	bool				SetRecordTake();
-	StreamTake			*recordTake;
+	bool SetRecordTake();
+	StreamTake *recordTake;
 
-	StreamTake			*addStreamTake(std::string &nm, const Time &t, bool);
-	StreamTake			*addStreamTake(std::string &nm, const std::string &fnm, bool);
+	StreamTake *addStreamTake(std::string &nm, const Time &t, bool);
+	StreamTake *addStreamTake(std::string &nm, const std::string &fnm, bool);
 
-	status_t			DeleteTake(StreamTake *);
-	status_t			SelectTake(StreamTake *);
-	StreamTake			*selectedTake;
+	status_t DeleteTake(StreamTake *);
+	status_t SelectTake(StreamTake *);
+	StreamTake *selectedTake;
 	std::vector<StreamTake*> outTakes;
 	
-	Block				*initBlock;
+	Block *initBlock;
 };
 
 class PoolInstance: public Instance
@@ -74,19 +74,19 @@ public:
 	 PoolInstance(Pool &s, const std::string & nm, const Time &t, const Time &d, Channel * const c);
 	 virtual ~PoolInstance();
 
-	virtual void		Reset();
-	virtual void		Cue(Time &t);
-	virtual status_t	Run();
+	virtual void Reset();
+	virtual void Cue(Time &t);
+	virtual status_t Run();
 	
-	StreamItem			*nextItem;
-	bool				mute;
+	StreamItem *nextItem;
+	bool mute;
 	
-	Time				loopStart;
-	Time				loopDuration;
-	long				loopCount;
-	Block				*loopCondition;
+	Time loopStart;
+	Time loopDuration;
+	long loopCount;
+	Block *loopCondition;
 	
-	Time				lastLoopStartTime;
+	Time lastLoopStartTime;
 };
 
 #endif

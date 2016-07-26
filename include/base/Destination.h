@@ -81,13 +81,13 @@ public:
 	virtual status_t	SetEnabled(uchar);
 	virtual char		*Name(uchar nfmt, uchar cfmt);
 
-	void				SaveSnapshot(FILE *fp, Channel *chan);
+	void				SaveSnapshot(ostream &out, Channel *chan);
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 	
 	bool				HasStreamItems();
 	bool				GetStreamItems(Stream *);
-	bool				Save(FILE *, short, short);
+	bool				Save(ostream &out, short, short);
 
 	union source_info_t
 	{
@@ -114,13 +114,13 @@ public:
 	virtual status_t	SetEnabled(uchar);
 	virtual char		*Name(uchar nfmt, uchar cfmt);
 	
-	void				SaveSnapshot(FILE *fp, Channel *chan);
+	void				SaveSnapshot(ostream&out, Channel *chan);
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
 	bool				ClearStream(Stream *);
 	
-	bool				Save(FILE *, short, short);
+	bool				Save(ostream &out, short, short);
 	bool				OutputStream(Time &t, Stream *stream);
 
 	union destination_info_t

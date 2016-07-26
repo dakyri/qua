@@ -2,6 +2,7 @@
 #define _METHOD
 
 #include <stdio.h>
+#include <ostream>
 
 class Qua;
 class Block;
@@ -16,7 +17,7 @@ class QuaMethodBridge;
 class Lambda: public Executable
 {
 public:					
-	status_t Save(FILE *fp, short indent);
+	status_t Save(ostream &out, short indent);
 
 	Lambda(std::string nm, StabEnt *S, bool f1=false,
 		bool f2 = false,

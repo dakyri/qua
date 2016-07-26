@@ -14,6 +14,8 @@ struct IXMLDOMElement;
 #include "Schedulable.h"
 #include "Clip.h"
 
+#include <ostream>
+
 class Voice: public Schedulable
 {
 public:
@@ -33,7 +35,7 @@ public:
 	virtual Instance *addInstance(const std::string &, const Time &startt, const Time &dur, Channel * const chan) override;
 	virtual Instance *addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp) override;
 
-	status_t			Save(FILE *fp, short indent);
+	status_t			Save(ostream &out, short indent);
 	status_t			SaveSnapshot(FILE *fp);
 
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);

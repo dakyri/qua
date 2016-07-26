@@ -4,8 +4,20 @@
  * this is the original qua actor. previously, this was run in a seperate thread,
  * but this raises many scheduling and locking issues, especially under win$
  * now is as much of a stream data player/recorder as the pool class.
+
  * mayhaps pools should be kept on for a bit, in case a simple optimised
  * stream/midi player is needed.
+
+ * hah 2016 ... that last 2 lines were a comment from 10 years ago. i think now, it will
+ * be simpler on the interface if Pools are a hard coded single stream player with options of more
+ * as they were originally, and some neater hard coded tricks. If nothing else this will help keep
+ * parts of the interface less cluttered, and perhaps also optimize some fundamental ops.
+ *
+ * so, thought now is
+ *  - Sample, as they are, a storer and player of audio data with a default play option
+ *  - Pool, as they were, a storer and player of stream data with a default play option
+ *  - Voice, a piece of pure generative code with no storage, as the original qua actor,
+ * but also, as now with audio possibilities
  */
 
 
@@ -389,20 +401,17 @@ Voice::QuaRecord()
 
 
 status_t
-Voice::Save(FILE *fp, short indent)
+Voice::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent);
-
-	fprintf(fp,	"voice");
-	fprintf(fp,	" %s", sym->printableName().c_str());
+	out << tab(indent) << "voice " << sym->printableName();
 	if (countControllers()>0) {
-		fprintf(fp, "(");
-		err = saveControllers(fp, indent+2);
-		fprintf(fp, ")");
+		out << "(";
+		err = saveControllers(out, indent+2);
+		out << ")";
 	}
-	SaveMainBlock(mainBlock, fp, indent, sym, true, false, nullptr, nullptr); 
-	fprintf(fp, "\n");
+	SaveMainBlock(mainBlock, out, indent, sym, true, false, nullptr, nullptr); 
+	out << endl;
 	return err;
 }
 

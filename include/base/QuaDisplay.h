@@ -125,7 +125,7 @@ public:
 
 	virtual bool HasDisplayParameters(StabEnt *) = 0;
 	virtual char *DisplayParameterId() = 0;
-	virtual status_t WriteDisplayParameters(FILE *, StabEnt *) = 0;
+	virtual string GetDisplayParameters(StabEnt *) = 0;
 	virtual void* ReadDisplayParameters(FILE *) = 0;
 	virtual void SetDisplayParameters(StabEnt *, void*) = 0;
 
@@ -331,7 +331,7 @@ public:
 
 	virtual bool HasDisplayParameters(StabEnt *) override { return false; }
 	virtual char *DisplayParameterId() override { return ""; }
-	virtual status_t WriteDisplayParameters(FILE *, StabEnt *)override { return B_OK; }
+	virtual string GetDisplayParameters(StabEnt *) override { return string(); }
 	virtual void* ReadDisplayParameters(FILE *) override { return nullptr; }
 	virtual void SetDisplayParameters(StabEnt *, void*) override { };
 
@@ -465,7 +465,7 @@ public:
 
 	virtual bool HasDisplayParameters(StabEnt *sym) override;
 	virtual char *DisplayParameterId() override;
-	virtual status_t WriteDisplayParameters(FILE *, StabEnt *) override;
+	virtual string GetDisplayParameters(StabEnt *) override;
 	virtual void* ReadDisplayParameters(FILE *) override;
 	virtual void SetDisplayParameters(StabEnt *, void*) override;
 
@@ -1032,9 +1032,9 @@ public:
 	QuaSchedulableObjectRepresentation();
 	virtual ~QuaSchedulableObjectRepresentation();
 
-	virtual void				UpdateTakeIndexDisplay()=0;
-	virtual void				updateClipIndexDisplay()=0;
-	virtual void				UpdateVariableIndexDisplay()=0;
+	virtual void UpdateTakeIndexDisplay()=0;
+	virtual void updateClipIndexDisplay()=0;
+	virtual void UpdateVariableIndexDisplay()=0;
 };
 
 class QuaSampleObjectRepresentation: public QuaSchedulableObjectRepresentation
@@ -1056,7 +1056,7 @@ class QuaChannelObjectRepresentation: public QuaInstanceObjectRepresentation
 public:
 	QuaChannelObjectRepresentation();
 	virtual ~QuaChannelObjectRepresentation();
-	virtual void				UpdateVariableIndexDisplay()=0;
+	virtual void UpdateVariableIndexDisplay()=0;
 };
 
 class QuaMethodObjectRepresentation: public QuaObjectRepresentation

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <ostream>
 
 #include "SampleFile.h"
 
@@ -53,7 +54,7 @@ public:
 	virtual	status_t	Sleep(Instance *i) override;
 	virtual status_t	Recv(Stream &stream) override;
 
-	status_t			Save(FILE *fp, short indent);
+	status_t			Save(ostream &out, short indent);
 	status_t			SaveSnapshot(FILE *fp);
 
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);

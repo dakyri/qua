@@ -622,38 +622,38 @@ Channel::ClearInBuffers(bool Clr)
 
 				
 status_t
-Channel::SaveSnapshot(FILE *fp)
+Channel::SaveSnapshot(ostream &out)
 {
 	status_t	err = B_OK;
-	fprintf(fp, "<channel name=\"%s\">\n", sym->name.c_str());
+	out << "<channel name=\""<< sym->name <<"\">";
 	if (txStack) {
-		txStack->SaveSnapshot(fp, "tx");
+		txStack->SaveSnapshot(out, "tx");
 	}
 	if (rxStack) {
-		rxStack->SaveSnapshot(fp, "rx");
+		rxStack->SaveSnapshot(out, "rx");
 	}
 	StabEnt	*p = sym->children;
 	while (p != nullptr) {
 		if (p->refType == TypedValue::REF_POINTER || p->refType == TypedValue::REF_VALUE) {
-			p->SaveSnapshot(fp);
+			p->SaveSnapshot(out);
 		}
 		p = p->sibling;
 	}
-	fprintf(fp, "</channel>\n");
+	out <<"</channel>" << endl;
 	return err;
 }
 
 status_t
-Channel::Save(FILE *fp, short indent)
+Channel::Save(ostream &out, short indent)
 {
 	status_t	err=B_NO_ERROR;
-	tab(fp, indent);
-		fprintf(fp,	"channel %d", chanId);
+	out << tab(indent);
+		out << "channel " << chanId;
 		if (nAudioIns >= 0) {
-			fprintf(fp,	" \\ins %d", nAudioIns);
+			out << " \\ins " << nAudioIns;
 		}
 		if (nAudioOuts >= 0) {
-			fprintf(fp,	" \\outs %d", nAudioOuts);
+			out << " \\outs " << nAudioOuts;
 		}
 //		if (midiThru) {
 //			fprintf(fp,	" \\midithru");
@@ -665,8 +665,8 @@ Channel::Save(FILE *fp, short indent)
 //		} else {
 //			fprintf(fp,	" \\noAudiothru");
 //		}
-		fprintf(fp,	" %s", sym->name.c_str());
-	SaveMainBlock(nullptr, fp, indent, sym, true, true, this, nullptr); 
+	out << " " << sym->name;
+	SaveMainBlock(nullptr, out, indent, sym, true, true, this, nullptr); 
 //	tab(fp, indent+1);
 //	fprintf(fp, "input {%s %s} {}\n",
 //			streamRX.Name(),

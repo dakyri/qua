@@ -95,15 +95,15 @@ Output::Output(std::string nm,
 }
 
 void
-Input::SaveSnapshot(FILE *fp, Channel *chan)
+Input::SaveSnapshot(ostream &out, Channel *chan)
 {
-	fprintf(fp, "<input name=\"%s\">\n", sym->name.c_str());
+	out << "<input name=\""<< sym->name <<"\">" << endl;
 	StabEnt	*p = sym->children;
 	while (p != nullptr) {
-		p->SaveSimpleTypeSnapshot(fp, chan, nullptr);
+		p->SaveSimpleTypeSnapshot(out, chan, nullptr);
 		p = p->sibling;
 	}
-	fprintf(fp, "</input>\n");
+	out << "</input>" << endl;
 }
 
 
@@ -181,15 +181,15 @@ Input::LoadSnapshotChildren(tinyxml2::XMLElement *element)
 
 
 void
-Output::SaveSnapshot(FILE *fp, Channel *chan)
+Output::SaveSnapshot(ostream &out, Channel *chan)
 {
-	fprintf(fp, "<output name=\"%s\">\n", sym->name.c_str());
+	out <<"<output name=\""<< sym->name <<"\">" <<endl;
 	StabEnt	*p = sym->children;
 	while (p != nullptr) {
-		p->SaveSimpleTypeSnapshot(fp, chan, nullptr);
+		p->SaveSimpleTypeSnapshot(out, chan, nullptr);
 		p = p->sibling;
 	}
-	fprintf(fp, "</output>\n");
+	out <<"</output>" << endl;
 }
 
 
@@ -550,91 +550,89 @@ Input::GetStreamItems(Stream *recvStream)
 }
 
 bool
-Input::Save(FILE *fp, short indent, short i)
+Input::Save(ostream &out, short indent, short i)
 {
-	tab(fp, indent);
-	fprintf(fp, "input");
+	out << tab(indent) << "input";
 	if (device) {
 		switch (device->deviceType) {
 			case QUA_DEV_AUDIO: {
-				fprintf(fp, " \\audio %s %d", device->sym->name.c_str(), deviceChannel);
+				out << " \\audio " << device->sym->name << " " << deviceChannel;
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
-						fprintf(fp, " \\audio %s %d", xDevice->sym->name.c_str(), xChannel);
+						out << " \\audio " << xDevice->sym->name << xChannel;
 					} else {
-						fprintf(fp, " %d", xChannel);
+						out << " " << xChannel;
 					}
 				}
 				break;
 			}
 			case QUA_DEV_JOYSTICK: {
-				fprintf(fp, " \\joystick %s", device->sym->name.c_str());
+				out << " \\joystick " << device->sym->name;
 				break;
 			}
 
 			case QUA_DEV_MIDI: {
-				fprintf(fp, " \\midi %s %d", device->sym->name.c_str(), deviceChannel);
+				out << " \\midi " << device->sym->name << " " << deviceChannel;
 				break;
 			}
 			case QUA_DEV_PARALLEL: {
-				fprintf(fp, " \\parallel %s", device->sym->name.c_str());
+				out << " \\parallel " << device->sym->name;
 				break;
 			}
 		}
 	}
-	fprintf(fp, " %s", sym->name.c_str());
+	out << " " << sym->name;
 #ifndef QUA_V_SAVE_INITASXML
 	if (sym->children) {
-		fprintf(fp, " {\n");
-		sym->children->SaveInitialAssigns(fp, indent+1, nullptr, nullptr);
-		tab(fp, indent);fprintf(fp, "}");
+		out << " {"  << endl;
+		sym->children->SaveInitialAssigns(out, indent+1, nullptr, nullptr);
+		out << tab(indent) << "}";
 	}
 #endif
-	fprintf(fp, "\n");
+	out << endl;
 	return true;
 }
 
 bool
-Output::Save(FILE *fp, short indent, short i)
+Output::Save(ostream &out, short indent, short i)
 {
-	tab(fp, indent);
-	fprintf(fp, "output");
+	out << indent << "output";
 	if (device) {
 		switch (device->deviceType) {
 			case QUA_DEV_AUDIO: {
-				fprintf(fp, " \\audio %s %d", device->sym->name.c_str(), deviceChannel);
+				out << " \\audio " << device->sym->name << " "<< deviceChannel;
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
-						fprintf(fp, " \\audio %s %d", xDevice->sym->name.c_str(), xChannel);
+						out << " \\audio " << xDevice->sym->name << " " << xChannel;
 					} else {
-						fprintf(fp, " %d", xChannel);
+						out << " " << xChannel;
 					}
 				}
 				break;
 			}
 			case QUA_DEV_JOYSTICK: {
-				fprintf(fp, " \\joystick %s", device->sym->name.c_str());
+				out << " \\joystick " << device->sym->name;
 				break;
 			}
 			case QUA_DEV_MIDI: {
-				fprintf(fp, " \\midi %s %d", device->sym->name.c_str(), deviceChannel);
+				out << " \\midi " << device->sym->name << " " << deviceChannel;
 				break;
 			}
 			case QUA_DEV_PARALLEL: {
-				fprintf(fp, " \\parallel %s", device->sym->name.c_str());
+				out << " \\parallel "<< device->sym->name;
 				break;
 			}
 		}
 	}
-	fprintf(fp, " %s", sym->name.c_str());
+	out << " " << sym->name;
 #ifndef QUA_V_SAVE_INITASXML
 	if (sym->children) {
-		fprintf(fp, " {\n");
-		sym->children->SaveInitialAssigns(fp, indent+1, nullptr, nullptr);
-		tab(fp, indent);fprintf(fp, "}");
+		out <<" {" << endl;
+		sym->children->SaveInitialAssigns(out, indent+1, nullptr, nullptr);
+		out << tab(indent) << "}";
 	}
 #endif
-	fprintf(fp, "\n");
+	out << endl;
 	return true;
 }
 

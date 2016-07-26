@@ -97,8 +97,8 @@ public:
 	Block				*initBlock;
 	bool				Init();
 
-	status_t			SaveSnapshot(FILE *fp);
-	status_t			Save(FILE *fp, short in);
+	status_t			SaveSnapshot(ostream &out);
+	status_t			Save(ostream &out, short in);
 
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
