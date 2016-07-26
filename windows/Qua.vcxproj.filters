@@ -285,6 +285,9 @@
     <ClInclude Include="..\include\base\DisplayStub.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="QuaMFC\MemDC.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Stdafx.cpp">

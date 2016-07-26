@@ -160,6 +160,7 @@
     <ClInclude Include="..\util\Base64.h" />
     <ClInclude Include="..\util\tinyxml2.h" />
     <ClInclude Include="..\util\Url.h" />
+    <ClInclude Include="QuaMFC\MemDC.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>

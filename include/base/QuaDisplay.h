@@ -253,12 +253,12 @@ public:
 		bool add_dflt_str_in = false,
 		bool add_dflt_str_out = false
 	) = 0;
-	virtual StabEnt	* CreateMethod(const std::string &nm, StabEnt *p = nullptr) = 0;
+	virtual StabEnt	* CreateMethod(const std::string &nm, StabEnt * const p = nullptr) = 0;
 	virtual StabEnt	* CreateClip(const std::string &nm, const Time &st, const Time &dur) = 0;
 
 	// callbacks from the interface to create and manipulate instances of schedulables
 	virtual StabEnt * CreateInstance(StabEnt * const, const short, const Time &, const Time &) = 0;
-	virtual void MoveInstance(StabEnt *, const short, const Time &, const Time &) = 0;
+	virtual void MoveInstance(StabEnt * const, const short, const Time &, const Time &) = 0;
 	virtual void DeleteInstance(StabEnt *) = 0;
 
 	virtual void CreateStreamTake(StabEnt *) = 0;
@@ -513,7 +513,7 @@ public:
 	) override;
 	virtual StabEnt * CreateMethod(const std::string &nm, StabEnt * const p = nullptr) override;
 	virtual StabEnt	* CreateClip(const std::string &nm, const Time &st, const Time &dur) override;
-	virtual StabEnt * CreateInstance(StabEnt *, const short, const Time &, const Time &) override;
+	virtual StabEnt * CreateInstance(StabEnt * const, const short, const Time &, const Time &) override;
 	virtual void MoveInstance(StabEnt *const, const short, const Time &, const Time &) override;
 	virtual void DeleteInstance(StabEnt *) override;
 	virtual void DeleteObject(StabEnt *) override;
@@ -642,25 +642,27 @@ public:
 
 	QuaInstanceRepresentation	*InstanceRepresentationFor(Instance *c);
 
-	virtual void				displayArrangementTitle(const char *)=0;
-	virtual void				updateClipIndexDisplay()=0;
+	virtual void displayArrangementTitle(const char *)=0;
+	virtual void updateClipIndexDisplay()=0;
 
-	virtual void				AddInstanceRepresentation(Instance *i)=0;
-	virtual void				MoveInstanceRepresentation(Instance *i)=0;
-	virtual void				RemoveInstanceRepresentation(Instance *i)=0;
+	virtual void AddInstanceRepresentation(Instance *i)=0;
+	virtual void MoveInstanceRepresentation(Instance *i)=0;
+	virtual void RemoveInstanceRepresentation(Instance *i)=0;
 
-	virtual void				UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *)=0;
+	virtual void symbolNameChanged(StabEnt *s) = 0;
+
+	virtual void UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *)=0;
 
 
-	virtual void				DisplayCurrentTime(Time &t, bool async)=0;	// ie update time cursor
-	virtual void				DisplayTempo(float t, bool async)=0;
-	virtual void				DisplayMetric(Metric *m, bool async)=0;	// ie update time cursor
-	virtual void				DisplayChannelMetric(Channel *c, Metric *m, bool async)=0;
+	virtual void DisplayCurrentTime(Time &t, bool async)=0;	// ie update time cursor
+	virtual void DisplayTempo(float t, bool async)=0;
+	virtual void DisplayMetric(Metric *m, bool async)=0;	// ie update time cursor
+	virtual void DisplayChannelMetric(Channel *c, Metric *m, bool async)=0;
 
-	void						GlobalTimeSetTo(Time &t); // global cursor changed by user event
-	void						ChannelMetricSetTo(Channel *c, Metric *m);
+	void GlobalTimeSetTo(Time &t); // global cursor changed by user event
+	void ChannelMetricSetTo(Channel *c, Metric *m);
 
-	void						SelectRegion();
+	void SelectRegion();
 };
 
 class QuaChannelRackPerspective: public QuaPerspective
@@ -926,12 +928,12 @@ public:
 	QuaObjectRepresentation();
 	virtual ~QuaObjectRepresentation();
 
-	void						SetSymbol(StabEnt *s);
+	void SetSymbol(StabEnt *s);
 
-	void						Rename(char *nm); // calls to symbol table rename
-	virtual void				SetName()=0;
-	virtual void				ChildNameChanged(StabEnt *)=0;
-	void						Delete();	// calls to symbol table delete
+	void Rename(char *nm); // calls to symbol table rename
+	virtual void SetName()=0;
+	virtual void ChildNameChanged(StabEnt *)=0;
+	void Delete();	// calls to symbol table delete
 
 	void Populate();
 	virtual void ChildPopulate(StabEnt *sym)=0;

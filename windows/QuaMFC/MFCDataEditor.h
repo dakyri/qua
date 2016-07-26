@@ -22,6 +22,7 @@ using namespace Gdiplus;
 #include "QuaDrop.h"
 
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -82,9 +83,9 @@ public:
 	virtual				~MFCClipItemView();
 
 #ifdef QUA_V_GDI_PLUS
-	virtual void		Draw(Graphics *, CRect *);
+	virtual void		Draw(Graphics &g, CRect &r);
 #else
-	virtual void		Draw(CDC *, CRect *);
+	virtual void		Draw(CDC *, CRect &r);
 #endif
 	virtual void		CalculateBounds();
 	virtual bool		Represents(void *);
@@ -159,20 +160,22 @@ public:
 		{ return itemRepresentations.size(); }
 	inline MFCEditorItemView *ItemR(long i)
 		{ return i >= 0 && ((unsigned)i)<itemRepresentations.size()? itemRepresentations[i]:nullptr; }
-	inline void AddItemR(MFCEditorItemView *i)
-		{ itemRepresentations.push_back(i); }
+	inline void AddItemR(MFCEditorItemView *i) {
+		auto ci = find(itemRepresentations.begin(), itemRepresentations.end(), i);
+		if (ci == itemRepresentations.end()) {
+			itemRepresentations.push_back(i);
+		}
+	}
 	inline bool	RemItemR(MFCEditorItemView *i) {
-		for (auto it = itemRepresentations.begin(); it != itemRepresentations.end(); ++it) {
-			if (*it == i) {
-				itemRepresentations.erase(it);
-				return true;
-			}
+		auto ci = find(itemRepresentations.begin(), itemRepresentations.end(), i);
+		if (ci == itemRepresentations.end()) {
+			itemRepresentations.erase(ci);
 		}
 		return false;
 	}
 
-	MFCEditorItemView			*ItemViewFor(void *i);
-	MFCEditorItemView			*ItemViewAtPoint(CPoint &p, UINT flags, short &hitType, void *&clkit);
+	MFCEditorItemView *ItemViewFor(void *i);
+	MFCEditorItemView *ItemViewAtPoint(CPoint &p, UINT flags, short &hitType, void *&clkit);
 
 	MFCEditorItemView *			AddClipItemView(Clip*clip);
 	bool						DelClipItemView(MFCEditorItemView *itemview);
@@ -293,7 +296,7 @@ public:
 class MFCDataEditorTScale: public CWnd
 {
 public:
-						MFCDataEditorTScale();
+	MFCDataEditorTScale();
 	DECLARE_DYNCREATE(MFCDataEditorTScale)
 	virtual				~MFCDataEditorTScale();
 

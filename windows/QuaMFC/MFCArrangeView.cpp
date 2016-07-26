@@ -150,11 +150,12 @@ MFCArrangeView::SetCursor(Time &t)
 	long	oldCursorPx = cursorPx;
 	cursorTime = t;
 	cursorPx = Time2Pix(t);
+	CPoint ps = GetScrollPosition();
 	if (oldCursorPx != cursorPx) {
 		BRect r;
-		r.Set(cursorPx, 0, cursorPx+1,bounds.bottom);
+		r.Set(cursorPx - ps.x, 0, cursorPx + 1 - ps.x, bounds.bottom);
 		InvalidateRect(&r);
-		r.Set(oldCursorPx, 0, oldCursorPx+1,bounds.bottom);
+		r.Set(oldCursorPx - ps.x, 0, oldCursorPx+1 - ps.x,bounds.bottom);
 		InvalidateRect(&r);
 		UpdateWindow();
 	}
@@ -346,6 +347,7 @@ MFCArrangeView::DrawGrid(CDC *pdc, CRect *cbp)
 void
 MFCArrangeView::DrawCursor(Graphics &pdc, CRect &clipBox)
 {
+//	cerr << "curser " << clipBox.left << ", " << cursorPx <<  ", " << clipBox.right << endl;
 	bool	doDraw = true;
 	if (clipBox != NULL) {
 		if (clipBox.left > cursorPx || cursorPx > clipBox.right) {
@@ -414,13 +416,12 @@ MFCArrangeView::OnDraw(CDC* pdc)
 	
 	for (short i=0; i<NIR(); i++) {
 		MFCInstanceView *ir = (MFCInstanceView *)IR(i);
-		cerr << "instance " << ir->bounds.left << ", " << ir->bounds.right << endl;
+//		cerr << "instance " << ir->bounds.left << ", " << ir->bounds.right << endl;
 		if (ir->bounds.Intersects(clipBox)) {
-			cerr << "instersects" << endl;
+//			cerr << "instersects" << endl;
 			ir->Draw(graphics, clipBox);
 		}
 	}
-
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type != MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
@@ -597,7 +598,9 @@ MFCArrangeView::EditorContextMenu(CPoint &point, UINT nFlags)
 }
 
 
-
+/*
+ * setup this arranger view, call parents and stuff back up the chain and create a time scale object
+ */
 int
 MFCArrangeView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 {
@@ -1249,8 +1252,7 @@ MFCArrangeView::OnScroll(
 				GetDeviceScrollSizes(scrollMapMode, totalSize, pageSize, lineSize);
 //				fprintf(stderr, "V Scrolling channels linedown %d %d %d\n", lineSize.cy, cPos, totalSize.cy);
 				if (cPos < totalSize.cy-bounds.bottom) {
-					int scrollAmt = 
-						(cPos+lineSize.cy > totalSize.cy-bounds.bottom)?cPos - totalSize.cy+bounds.bottom:-lineSize.cy;
+					int scrollAmt =  (cPos+lineSize.cy > totalSize.cy-bounds.bottom)?cPos - totalSize.cy+bounds.bottom:-lineSize.cy;
 					channeler->ScrollWindow(0, scrollAmt, NULL, NULL);
 				}
 			}
@@ -1266,8 +1268,7 @@ MFCArrangeView::OnScroll(
 				CSize	lineSize;
 				GetDeviceScrollSizes(scrollMapMode, totalSize, pageSize, lineSize);
 				if (cPos > 0) {
-					int scrollAmt = 
-						(cPos-lineSize.cy < 0)?cPos:lineSize.cy;
+					int scrollAmt =  (cPos-lineSize.cy < 0)?cPos:lineSize.cy;
 //					fprintf(stderr, "V Scrolling channels lineup %d %d %d scroll amt %d %d\n", lineSize.cy, cPos, totalSize.cy, scrollAmt, chPos);
 					channeler->ScrollWindow(0, scrollAmt, NULL, NULL);
 				}
@@ -1284,8 +1285,7 @@ MFCArrangeView::OnScroll(
 				GetDeviceScrollSizes(scrollMapMode, totalSize, pageSize, lineSize);
 //				fprintf(stderr, "V Scrolling channels pagedown %d\n", pageSize.cy);
 				if (cPos < totalSize.cy-bounds.bottom) {
-					int scrollAmt = 
-						(cPos+pageSize.cy > totalSize.cy-bounds.bottom)?cPos - totalSize.cy+bounds.bottom:-pageSize.cy;
+					int scrollAmt = (cPos+pageSize.cy > totalSize.cy-bounds.bottom)?cPos - totalSize.cy+bounds.bottom:-pageSize.cy;
 					channeler->ScrollWindow(0, scrollAmt, NULL, NULL);
 				}
 			}
@@ -1439,6 +1439,27 @@ MFCArrangeView::updateClipIndexDisplay()
 //	clipsView->RemoveClipsNotIn(presentClips);
 }
 
+void
+MFCArrangeView::symbolNameChanged(StabEnt *s) {
+	if (s == nullptr) {
+		return;
+	}
+	Instance *i = s->InstanceValue();
+	if (i != nullptr) {
+		MFCInstanceView* iv = (MFCInstanceView*) InstanceRepresentationFor(i);
+		if (iv != nullptr) {
+			iv->Redraw();
+		}
+		return;
+	}
+	Clip *c = s->ClipValue(nullptr);
+	if (c != nullptr) {
+		MFCEditorItemView *iv = (MFCEditorItemView*) ItemViewFor(c);
+		if (iv != nullptr) {
+			iv->Redraw();
+		}
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // MFCInstanceView

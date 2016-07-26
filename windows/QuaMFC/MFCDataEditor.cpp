@@ -138,6 +138,7 @@ MFCSequenceEditor::ItemViewFor(void *item)
 	return NULL;
 }
 
+
 void
 MFCSequenceEditor::DeselectAll()
 {
@@ -1049,13 +1050,14 @@ bool
 MFCSequenceEditor::RemoveClipsNotIn(vector<StabEnt*> &list)
 {
 	long	i=0;
+	cerr << "RemoveClipsNotIn " << list.size() << endl;
 	while (i<NItemR()) {
 		MFCEditorItemView	*iv = ItemR(i);
 		bool	del = false;
 		if (iv->type == MFCEditorItemView::CLIP) {
 			Clip	*c = ((MFCClipItemView*)iv)->item;
 			auto it = find(list.begin(), list.end(), c->sym);
-			if (it != list.end()) {
+			if (it == list.end()) {
 				del = true;
 			}
 		}
@@ -1075,10 +1077,9 @@ MFCSequenceEditor::RemoveClipsNotIn(vector<StabEnt*> &list)
 MFCEditorItemView *
 MFCSequenceEditor::AddClipItemView(Clip *clip)
 {
-	
-	MFCEditorItemView *nv;
-	nv = ItemViewFor(clip);
-	if (nv != NULL) {
+	cerr << "add clip item view " << (clip != nullptr ? clip->sym->name : "(null)") << endl;
+	MFCEditorItemView *nv = ItemViewFor(clip);
+	if (nv != nullptr) {
 		return nv;
 	}
 	nv = new MFCClipItemView(this, clip);
@@ -1101,6 +1102,7 @@ MFCSequenceEditor::DelClipItemView(MFCEditorItemView *iv)
 bool
 MFCSequenceEditor::ClearAllItemViews(bool redraw)
 {
+	cerr << "clear all item views " << endl;
 	long	count = NItemR();
 	for (long i=0; i<count; i++) {
 		MFCEditorItemView	*iv = ItemR(0);
@@ -1241,35 +1243,31 @@ MFCClipItemView::CalculateBounds()
 			}
 		}
 		CSize sz = editor->GetTotalSize();
-		fprintf(stderr, "calculate bounds %x %x %d %d %d\n", item, editor, pixl, pixd, arrDur.ticks);
+		cerr << "clip item calculate bounds of " << item->sym->name << ", " << (unsigned) editor << ", px " << pixl << ", " << pixd << ", " << arrDur.ticks << endl;
 		bounds.Set(pixl, 0, pixl+pixd, sz.cy);
 	}
 }
 
 #ifdef QUA_V_GDI_PLUS
 void
-MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
+MFCClipItemView::Draw(Graphics &dc, CRect &clipBox)
 {
 // !!!??? need to clip properly for short instances with long names
-	Pen			blackPen(Color(250, 0, 0, 0), 1);
-	Pen			redPen(Color(250, 238, 100, 100), 1);
-	Pen			orangePen(Color(200, 250, 150, 10), 1);
-	SolidBrush	blueBrush(Color(100, 100, 100, 238));
-	SolidBrush	blackBrush(Color(200, 0, 0, 0));
-	SolidBrush	orangeBrush(Color(190, 250, 150, 10));
-	dc->DrawLine(
-		&orangePen,
-		bounds.left, 0,
-		bounds.left, bounds.bottom);
+	cerr << "clip item draw " << item->sym->name << endl;
+	Pen blackPen(Color(250, 0, 0, 0), 1);
+	Pen redPen(Color(250, 238, 100, 100), 1);
+	Pen orangePen(Color(200, 250, 150, 10), 1);
+	SolidBrush blueBrush(Color(100, 100, 100, 238));
+	SolidBrush blackBrush(Color(200, 0, 0, 0));
+	SolidBrush orangeBrush(Color(190, 250, 150, 10));
+
+	dc.DrawLine( &orangePen, bounds.left, 0, bounds.left, bounds.bottom);
 	bool	isMarker = false;
 	if (item != NULL && item->duration.ticks <= 0) {
 		isMarker = true;
 	}
 	if (!isMarker) {
-		dc->DrawLine(
-			&orangePen,
-			bounds.right, 0,
-			bounds.right, bounds.bottom);
+		dc.DrawLine( &orangePen, bounds.right, 0, bounds.right, bounds.bottom);
 	}
 
 	PointF	tri[3];
@@ -1288,27 +1286,27 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 			tri[0].X = bounds.left; tri[0].Y = py;
 			tri[1].X = bounds.left+6; tri[1].Y = py+3;
 			tri[2].X = bounds.left; tri[2].Y = py+6;
-			dc->FillPolygon(&orangeBrush, tri, 3);
+			dc.FillPolygon(&orangeBrush, tri, 3);
 		}
 
 		p.X = bounds.left-1;
 		p.Y = py+5;
 		RectF	box;
 		StringFormat	sff = StringFormatFlagsDirectionVertical;
-		dc->MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
-		dc->DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
+		dc.MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
+		dc.DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
 
 		if (!isMarker) {
 			// a nother triangle bit
 			tri[0].X = bounds.right;
 			tri[1].X = bounds.right-6;
 			tri[2].X = bounds.right;
-			dc->FillPolygon(&orangeBrush, tri, 3);
+			dc.FillPolygon(&orangeBrush, tri, 3);
 
 			p.X = bounds.right-10;
 			p.Y = py+5;
-			dc->MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
-			dc->DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
+			dc.MeasureString(nm.c_str(), -1, &labelFont, p, &sff, &box);
+			dc.DrawString(nm.c_str(), -1, &labelFont, box,	&sff, &blackBrush);
 		}
 		py += editor->bounds.bottom;
 	} while (py < bounds.bottom);
@@ -1317,7 +1315,7 @@ MFCClipItemView::Draw(Graphics *dc, CRect *clipBox)
 
 #else
 void
-MFCClipItemView::Draw(CDC *dc, CRect *clipBox)
+MFCClipItemView::Draw(CDC *dc, CRect &clipBox)
 {
 	;
 }
@@ -1517,10 +1515,7 @@ MFCDataEditorTScale::CreateTScale(
 {
 	editor = ed;
 	if (!Create(_T("STATIC"), "timeline",
-				WS_CHILD|WS_VISIBLE
-				/*|WS_CLIPSIBLINGS*/
-				/*|TBS_TOOLTIPS*/
-						, r, w, id)) {
+					WS_CHILD|WS_VISIBLE /*|WS_CLIPSIBLINGS*/ /*|TBS_TOOLTIPS*/, r, w, id)) {
 		return false;
 	}
 	ed->xscale = this;
@@ -1537,7 +1532,7 @@ MFCDataEditorTScale::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 	bounds.right = cx;
 	bounds.bottom = cy;
-	fprintf(stderr, "tscale size %d %d\n", cx, cy);
+	cerr << "tscale size " << cx << " "<< cy << endl;
 }
 
 void
@@ -1550,7 +1545,7 @@ afx_msg void
 MFCDataEditorTScale::OnMove(int x, int y)
 {
 	CWnd::OnMove(x, y);
-	fprintf(stderr, "tscale move %d %d\n", x, y);
+	cerr << "tscale move " << x << " " << y << endl;
 }
 
 int

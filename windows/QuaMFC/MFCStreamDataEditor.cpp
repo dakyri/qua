@@ -1246,6 +1246,8 @@ MFCStreamDataEditor::Pix2Note(long px)
 bool
 MFCStreamDataEditor::DelItemView(MFCEditorItemView *iv)
 {
+	cerr << "del item view from stream editor " << endl;
+
 	switch (iv->type) {
 		case MFCEditorItemView::DISCRETE: {
 			MFCStreamItemView	*siv = (MFCStreamItemView *)iv;

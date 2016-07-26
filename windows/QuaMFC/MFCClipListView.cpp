@@ -177,10 +177,24 @@ MFCClipListView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 				switch (sym->type) {
 				case TypedValue::S_CLIP:
 					glob.rename(sym, tvp->item.pszText);
+					if (editor) {
+						cerr << "got an editor " << endl;
+						MFCEditorItemView*eiv = editor->ItemViewFor(sym->ClipValue(nullptr));
+						if (eiv != nullptr) {
+							cerr << "got an editor item " << endl;
+							eiv->Redraw();
+						}
+					}
 					*result = 1;
 					break;
 				case TypedValue::S_TAKE:
 					glob.rename(sym, tvp->item.pszText);
+					if (editor) {
+						MFCEditorItemView*eiv = editor->ItemViewFor(sym->TakeValue());
+						if (eiv != nullptr) {
+							eiv->Redraw();
+						}
+					}
 					*result = 1;
 					break;
 				}

@@ -144,6 +144,7 @@ public:
 	virtual void updateClipIndexDisplay();
 
 	virtual void UpdateControllerDisplay(StabEnt *, QuasiStack *, StabEnt *);
+	virtual void symbolNameChanged(StabEnt *s);
 
 	MFCInstanceView *InstanceViewAtPoint(CPoint &);
 	void DeselectAll();

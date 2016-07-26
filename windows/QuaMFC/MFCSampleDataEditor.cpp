@@ -22,6 +22,8 @@
 #include "Stackable.h"
 #include "Dictionary.h"
 
+#include <iostream>
+
 IMPLEMENT_DYNCREATE(MFCSampleDataEditor, MFCSequenceEditor)
 
 BEGIN_MESSAGE_MAP(MFCSampleDataEditor, MFCSequenceEditor)
@@ -1181,6 +1183,7 @@ MFCSampleDataEditor::OnKeyUp(
 bool
 MFCSampleDataEditor::DelItemView(MFCEditorItemView *iv)
 {
+	cerr << "del item view from sample editor " << endl;
 	switch (iv->type) {
 		case MFCEditorItemView::DISCRETE: {
 //			MFCStreamItemView	*siv = (MFCStreamItemView *)iv;

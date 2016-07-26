@@ -737,7 +737,7 @@ QuaDisplay::ListEnvelopesFor(StabEnt *stacker)
 
 // called by an interface to make dynamic changes to a potentially running sequencer
 StabEnt *
-QuaDisplay::CreateInstance(StabEnt *schSym, const short chan, const Time &t, const Time &d)
+QuaDisplay::CreateInstance(StabEnt * const schSym, const short chan, const Time &t, const Time &d)
 {
 	short	i;
 	Schedulable	*sch = schSym->SchedulableValue();
@@ -984,6 +984,9 @@ QuaDisplay::Rename(StabEnt *sym, const string &nm)
 	}
 	for (short j=0; j<NIndexer(); j++) {
 		Indexer(j)->symbolNameChanged(sym);
+	}
+	for (short j = 0; j < NArranger(); j++) {
+		Arranger(j)->symbolNameChanged(sym);
 	}
 	if (sym->type == TypedValue::S_CHANNEL) {
 		for (short k=0; k<NChannelRack(); k++) {
