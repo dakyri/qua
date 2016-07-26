@@ -562,18 +562,21 @@ Qua::Restart()
 static int		new_id = 0;
 
 Pool *
-Qua::NewPool(short chan)
+Qua::CreatePool(string &nm)
 {
-	string pool_nm = string("new") + std::to_string(new_id++);
-	
-    Pool *S = new Pool(pool_nm, this, sym, true);
+	static int		new_pool_id = 0;
+	if (nm.size() == 0) {
+		nm = string("pool") + std::to_string(new_pool_id++);
+	}
+
+    Pool *S = new Pool(nm, this, sym, true);
     AddSchedulable(S);
 
 	return S;
 }
 
 Sample *
-Qua::CreateSample(std::string nm, bool andD)
+Qua::CreateSample(std::string& nm, bool andD)
 {
 	static int		new_sample_id = 0;
 
@@ -591,7 +594,7 @@ Qua::CreateSample(std::string nm, bool andD)
 }
 
 Voice *
-Qua::CreateVoice(std::string nm, bool andD)
+Qua::CreateVoice(std::string& nm, bool andD)
 {
 	static int		new_voice_id = 0;
 
@@ -609,7 +612,7 @@ Qua::CreateVoice(std::string nm, bool andD)
 }
 
 Lambda *
-Qua::CreateMethod(std::string nm, StabEnt *ctxt, bool andD)
+Qua::CreateMethod(std::string& nm, StabEnt *ctxt, bool andD)
 {
 	static int		new_method_id = 0;
 	if (nm.size() == 0) {
@@ -765,7 +768,7 @@ Qua::loadObject(StabEnt *obj)
 		
 		case TypedValue::S_SAMPLE: {
 			Sample			*sam;
-			sam = CreateSample(nullptr, true);
+			sam = CreateSample(string(), true);
 			if (t->instantiate(sam->sym) != B_OK) {
 				bridge.reportError("Can't instantiate template");
 			}
@@ -775,7 +778,7 @@ Qua::loadObject(StabEnt *obj)
 		
 		case TypedValue::S_POOL: {
 			Pool			*sam;
-			sam = NewPool(0);
+			sam = CreatePool(string());
 
 			if (t->instantiate(sam->sym) != B_OK) {
 				bridge.reportError("Can't instantiate template");

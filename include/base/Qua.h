@@ -107,60 +107,54 @@ public:
 	std::thread myThread;
 #endif
 
-	void					ResetTicks();
+	void ResetTicks();
 
-	void					MetroGnomeClick();
+	void MetroGnomeClick();
 
-	status_t				Save(ostream &out, short, bool clear_history);
-	status_t				SaveInit(ostream &out, short);
-	status_t				WriteChunk(ostream &out, ulong typ, void *, ulong);
-	ulong					ReadChunk(istream &out, void **, ulong*);
+	status_t Save(ostream &out, short, bool clear_history);
+	status_t SaveInit(ostream &out, short);
+	status_t WriteChunk(ostream &out, ulong typ, void *, ulong);
+	ulong ReadChunk(istream &out, void **, ulong*);
 
 #ifdef  QUA_V_SAVE_INITASXML
-	status_t				DoSave(const char *file);
+	status_t DoSave(const char *file);
 #endif
 
-	void					AddSchedulable(Schedulable *p);
-	void					RemoveSchedulable(Schedulable *p, bool andD, bool andDisplay);
-	void					RemoveMethod(Lambda *p, bool andD, bool andDisplay);
+	void AddSchedulable(Schedulable *p);
+	void RemoveSchedulable(Schedulable *p, bool andD, bool andDisplay);
+	void RemoveMethod(Lambda *p, bool andD, bool andDisplay);
 
-	void					SetTempo(float tempo, bool display);
+	void SetTempo(float tempo, bool display);
 
-	Pool *NewPool(short);
-	Sample *CreateSample(std::string, bool andD);
-	Voice *CreateVoice(std::string, bool andD);
-	Lambda *CreateMethod(std::string, StabEnt *ctxt, bool andD);
+	Pool	*CreatePool(std::string &);
+	Sample	*CreateSample(std::string &, bool andD);
+	Voice	*CreateVoice(std::string &, bool andD);
+	Lambda	*CreateMethod(std::string &, StabEnt *ctxt, bool andD);
+
 	bool ParsePass2(class Parser *p, StabEnt **loadable);
 	void setName(const string &nm, bool setTitle=true);
 	void UpdateRecordDisplay();
 
-	Channel					*AddChannel(
-								std::string, short id,
-								short nAudioIns, short nAudioOuts,
-								bool au_thru, bool midi_thru,
-								bool add_dflt_au_in,
-								bool add_dflt_au_out,
-								bool add_dflt_str_in,
-								bool add_dflt_str_out,
-								short midi_ch);
-	status_t				RemoveChannel(short id, bool upDisp);
-	status_t				MoveChannel(short id, short toId, bool updisp);
-	void					SetTargets();		
+	Channel *AddChannel( std::string, short id, short nAudioIns, short nAudioOuts, bool au_thru, bool midi_thru,
+				bool add_dflt_au_in, bool add_dflt_au_out, bool add_dflt_str_in, bool add_dflt_str_out, short midi_ch);
+	status_t RemoveChannel(short id, bool upDisp);
+	status_t MoveChannel(short id, short toId, bool updisp);
+	void SetTargets();		
 
-	StabEnt					*loadFile(std::string path);
-	StabEnt					*loadObject(StabEnt *obj);
-	static std::string		identifyFile(std::string);
-	static std::string		nameFromLeaf(std::string);
+	StabEnt *loadFile(std::string path);
+	StabEnt *loadObject(StabEnt *obj);
+	static std::string identifyFile(std::string);
+	static std::string nameFromLeaf(std::string);
 
-	static Qua *			loadScriptFile(const char *path, QuaReflection &display);
-	status_t				loadSnapshotFile(const char *path);
-	status_t				loadSnapshotElement(tinyxml2::XMLElement *element);
-	status_t				loadSnapshotChildren(tinyxml2::XMLElement *element);
+	static Qua * loadScriptFile(const char *path, QuaReflection &display);
+	status_t loadSnapshotFile(const char *path);
+	status_t loadSnapshotElement(tinyxml2::XMLElement *element);
+	status_t loadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	std::string				projectScriptPath;
-	std::string				projectSnapshotPath;
-	std::string				projectDirectoryPath;
-	std::string				sampleDirectoryPath;
+	std::string projectScriptPath;
+	std::string projectSnapshotPath;
+	std::string projectDirectoryPath;
+	std::string sampleDirectoryPath;
 
 	class QuasiStack *theStack;
 

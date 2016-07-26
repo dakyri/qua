@@ -33,6 +33,7 @@ public:
 						
 						virtual bool		Init() override;
 	virtual Instance	*addInstance(const std::string &, const Time &startt, const Time &dur, Channel * chan) override;
+	virtual Instance *addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp) override;
 	virtual void		removeInstance(Instance *i, bool display) override;
 
 	virtual void		Cue(Time &t) override;

@@ -245,6 +245,7 @@ public:
 
 	virtual StabEnt * CreateSample(const std::string &nm, const std::vector<std::string> & p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
 	virtual StabEnt * CreateVoice(const std::string &nm, const std::vector<std::string> & pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
+	virtual StabEnt * CreatePool(const std::string &nm, const std::vector<std::string> & pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) = 0;
 	virtual StabEnt * CreateChannel(
 		char *nm = nullptr, short c = -1,
 		uchar nin = 2, uchar nout = 2,
@@ -503,6 +504,7 @@ public:
 
 	virtual StabEnt * CreateSample(const std::string &nm, const std::vector<std::string> &p1, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
 	virtual StabEnt * CreateVoice(const std::string &nm, const std::vector<std::string> &pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
+	virtual StabEnt * CreatePool(const std::string &nm, const std::vector<std::string> & pl, short c = -1, Time *att = nullptr, Time *ctp = nullptr) override;
 	virtual StabEnt * CreateChannel(
 		char *nm = nullptr, short c = -1,
 		uchar nin = 2, uchar nout = 2,

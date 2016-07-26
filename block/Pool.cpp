@@ -188,7 +188,7 @@ err_ex:
 }
 
 Instance *
-Pool::addInstance(const std::string &nm, const Time &startt, const Time &dur, Channel * chan)
+Pool::addInstance(const std::string &nm, const Time &startt, const Time &dur, Channel *chan)
 {
 //	ArrangerObject *p =  new ArrangerObject(representation->label, this,
 //		 chan, start,
@@ -206,6 +206,30 @@ Pool::addInstance(const std::string &nm, const Time &startt, const Time &dur, Ch
 		fprintf(stderr, "Schedulable: unexpected null while committing to schedule");
 	}
 	return i;
+}
+
+Instance *
+Pool::addInstance(const string &nm, const short chan_id, const Time &t, const Time &d, const bool disp)
+{
+	Time	dur;
+	Channel	*c;
+	/*
+	if (!d) {
+		if (streamClip(0) == nullptr || streamClip(0)->media == nullptr) {
+			dur = Time::infinity;
+		}
+		else {
+			dur = streamClip(0)->duration;
+		}
+	}
+	else {
+		dur = d;
+	}*/
+	if (chan_id >= uberQua->nChannel || chan_id < 0) {
+		return nullptr;
+	}
+	c = uberQua->channel[chan_id];
+	return addInstance(nm, t, dur, c);
 }
 
 void

@@ -31,6 +31,7 @@ using namespace std;
 #include "QuaPort.h"
 #include "Sample.h"
 #include "Voice.h"
+#include "Pool.h"
 #include "Parse.h"
 #include "Block.h"
 
@@ -866,6 +867,60 @@ QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & 
 	return nullptr;
 }
 
+
+StabEnt *
+QuaDisplay::CreatePool(const std::string &nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
+{
+	// create pool
+	short	i;
+	std::string pool_nm;
+
+	if (nm.size() > 0) {
+		pool_nm = nm;
+	}
+	else if (pathList.size() > 0) {
+		pool_nm = Qua::nameFromLeaf(pathList[0]);
+	}
+
+	pool_nm = glob.makeUniqueName(qua->sym, pool_nm, 0);
+
+	Pool	*pool = qua->CreatePool(pool_nm);
+	if (pool) {
+		//		fprintf(stderr, "created pool %s\n", pool->sym->name);
+		for (i = 0; ((size_t)i)<pathList.size(); i++) {
+			std::string nm = Qua::nameFromLeaf(pathList[i]);
+			pool->addStreamTake(nm, pathList[i], true);
+		}
+		// update index displays
+		Instance	*instance = nullptr;
+		if (chan >= 0 && tp != nullptr && dp != nullptr) {
+			Time t = *tp, d = *dp;
+			instance = pool->addInstance(pool->sym->name, chan, t, d, false);
+		}
+		for (short i = 0; i<NIndexer(); i++) {
+			Indexer(i)->addToSymbolIndex(pool->sym);
+			if (instance) {
+				Indexer(i)->addToSymbolIndex(instance->sym);
+			}
+		}
+		// update arranger displays;
+		/*
+		Time t = pool->StreamClip(0)->duration;
+		int	bar;
+		int	beat;
+		int	q;
+		t.GetBBQValue(bar, beat, q);
+		fprintf(stderr, "selection duration %d:%d.%d\n", bar, beat, q);*/
+		if (instance) {
+			for (short i = 0; i<NArranger(); i++) {
+				Arranger(i)->AddInstanceRepresentation(instance);
+			}
+		}
+		ShowObjectRepresentation(pool->sym);
+		return pool->sym;
+	}
+	return nullptr;
+}
 
 StabEnt *
 QuaDisplay::CreateChannel(char *nm, short chan,
