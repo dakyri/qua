@@ -56,6 +56,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 QuaEnvironmentDisplay environmentDisplay;
 QuaEnvironment	environment(environmentDisplay);
@@ -1924,17 +1925,17 @@ TypedValue::StringValue()
 			val.instance->sym->name.c_str() :"_null_instance";
 	case S_EXPRESSION:
 	case S_BLOCK: {
-		static char	txt[10*1024];
 		long	len = 0;
 		Block	*block = refType>0?*val.blockP:val.block;
-		
+		static string hax;
+		stringstream ssos(hax);
 		if (!block) {
 			return "";
-		} else if (!(Esrap(block, txt, len, 10*1024, false, 0, false))) {
+		} else if (!(Esrap(block, ssos, false, 0, false))) {
 			internalError("block size too large...");
 			return "";
 		} else {
-			return txt;
+			return const_cast<char*>(hax.c_str());
 		}
 		break;
 	}

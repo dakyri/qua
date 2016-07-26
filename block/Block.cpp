@@ -30,7 +30,7 @@
 #include "QuaAudio.h"
 #endif
 
-
+#include <sstream>
 
 // ???? this is getting messy.... should be subclassed, rather than
 // a mass of dodgy traversals....
@@ -1634,7 +1634,7 @@ WriteHandlerBlock(ostream &out, char *which, Block *b, short indent)
 {
 	long		len;
 	status_t	err = B_OK;
-	char		txt[1024*10];
+
 	if (b == nullptr) {
 		return B_OK;
 	}
@@ -1643,14 +1643,9 @@ WriteHandlerBlock(ostream &out, char *which, Block *b, short indent)
 		out << "{" << endl;
 	}
 	len=0;
-	txt[0] = 0;
-	if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
+	if (!Esrap(b, out, true, indent+1, 0)) {
 		internalError("block size too large...");
 		return B_ERROR;
-	}
-	out.write(txt, len);
-	if (!out.good()) {
-		err = B_ERROR;
 	}
 	if (b->type != Block::C_LIST) {
 		out << endl;
@@ -1719,8 +1714,6 @@ SaveHandlers(ostream &out, short indent, StabEnt *sym, bool force_brace)
 status_t
 SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_brace, bool saveInits, Stacker *stacker, QuasiStack *stack)
 {
-	char		txt[10*1024];
-	long		len = 0;
 	status_t	err;
 	bool		forceblock = (sym->type != TypedValue::S_CHANNEL);
 
@@ -1747,13 +1740,15 @@ SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_bra
 		return B_NO_ERROR;
 	} else if (b->type == Block::C_LIST) {
 		out << endl << tab(indent);
-		if (!Esrap(b, txt, len, 10*1024, true, indent, 0)) {
+		string os;
+		stringstream ssos(os);
+		if (!Esrap(b, ssos, true, indent, 0)) {
 			internalError("block size too large...");
 			return B_ERROR;
 		}
-		int l2 = strchr(txt, ' ') - txt;
+		int l2 = os.find_last_of(' ');
 
-		out.write(txt, l2 + 1);
+		out.write(os.c_str(), l2 + 1);
 		if (!out.good()) {
 			err = B_ERROR;
 		}
@@ -1767,40 +1762,30 @@ SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_bra
 		if (force_brace)
 			out << tab(indent+1);
 
-		out.write(txt + l2 + 1, len - (l2 + 1));
+		out.write(os.c_str() + l2 + 1, os.size() - (l2 + 1));
 		if (!out.good()) {
 			err = B_ERROR;
 		}
 		out << endl;
 		return B_NO_ERROR;
 	} else if (sym->children || force_brace) {
-		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
-			internalError("block size too large...");
-			return B_ERROR;
-		}
 		out << "{" << endl;
 		if (sym->children)
 			sym->children->SaveScript(out, indent+1, false, false);
 		SaveHandlers(out, indent+1, sym, force_brace);
 		
-		if (b || forceblock) {
-			out.write(txt, len);
-			if (!out.good()) {
-				err = B_ERROR;
-			}
+		if (!Esrap(b, out, true, indent + 1, 0)) {
+			internalError("block size too large...");
+			return B_ERROR;
 		}
-			
+
 		out << tab(indent) << "}" << endl;
 		return B_NO_ERROR;
 	} else {	
 		out << "\t";
-		if (!Esrap(b, txt, len, 10*1024, true, indent+1, 0)) {
+		if (!Esrap(b, out, true, indent+1, 0)) {
 			internalError("block size too large...");
 			return B_ERROR;
-		}
-		out.write(txt, len);
-		if (!out.good()) {
-			err = B_ERROR;
 		}
 		out << endl;
 		return B_NO_ERROR;

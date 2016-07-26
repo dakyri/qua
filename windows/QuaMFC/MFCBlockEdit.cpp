@@ -17,6 +17,7 @@
 #include "Block.h"
 #include "Sym.h"
 
+#include <sstream>
 
 //////////////////////////////////
 // MFCBlockEdit
@@ -391,13 +392,10 @@ void
 MFCBlockEdit::SetValue(Block *b)
 {
 	if (b != NULL) {
-		long		scriptLen = 10*1024;
-		char		*scriptBuf = new char[scriptLen];
-		bool		succ = false;
-		long		pos = 0;
-		succ = Esrap(b, scriptBuf, pos, scriptLen, true, 0, true);
-		if (succ) {
-			SetWindowText(scriptBuf);
+		string os;
+		stringstream ssos(os);
+		if (Esrap(b, ssos, true, 0, true)) {
+			SetWindowText(os.c_str());
 		} else {
 			fprintf(stderr, "MFCBlockEdit:: esrap fails to generate readable form\n");
 		}

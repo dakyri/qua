@@ -32,6 +32,7 @@
 #include "Dictionary.h"
 
 #include <iostream>
+#include <sstream>
 
 SymTab				glob(MAX_SYMBOLS);
 StabEnt				*typeSymbolStreamItem=nullptr,
@@ -1458,14 +1459,15 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 	case S_BLOCK: {
 		long	len = 0;
 		Block	*block = *((Block **)lval.addr);
-		
+		static string hax;
+		stringstream ssos(hax);
 		if (!block) {
 			return "";
-		} else if (!(Esrap(block, buf, len, 10*1024, false, 0, 1))) {
+		} else if (!(Esrap(block, ssos, false, 0, 1))) {
 			internalError("block size too large...");
 			return "";
 		} else {
-			return buf;
+			return const_cast<char *>(hax.c_str());
 		}
 		break;
 	}

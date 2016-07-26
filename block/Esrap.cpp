@@ -15,32 +15,25 @@
 
 #include "Dictionary.h"
 
-int32	nlpos = 0;
+int32 lineLength = 0;
 
-inline bool AddToBuf(const string &s, char *buf, long &pos, long len)
+inline void put(const string &s, ostream &out)
 {
-	if ((long)(pos+s.size())<len) {
-		strcpy(&buf[pos], s.c_str());
-		pos += s.size();
-		return true;
-	}
-	return false;
+	out << s;
+	lineLength += s.size();
 }
 
-inline bool AddNL(char *buf, long &pos, long len, short indent, short crlf)
+inline bool putNL(ostream &out, short indent, short crlf)
 {
-	nlpos = pos;
-	if (!AddToBuf("\n", buf, pos, len)) return false;
-	for (short i=0; i<indent; i++) {
-		if (!AddToBuf("\t", buf, pos, len)) return false;
-	}
+	lineLength = 0;
+	out << endl << tab(indent);
 	return true;
 }
 
-inline bool CheckNL(char *buf, long &pos, long len, short indent, short crlf)
+inline bool checkNL(ostream &out, short indent, short crlf)
 {
-	if (pos - nlpos > 90) {
-		AddNL(buf, pos, len, indent, crlf);
+	if (lineLength > 90) {
+		putNL(out, indent, crlf);
 		return true;
 	}
 	return false;
@@ -48,7 +41,7 @@ inline bool CheckNL(char *buf, long &pos, long len, short indent, short crlf)
 
 
 bool
-Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent, short crlf)
+Esrap(Block *block, ostream &out, bool do_indent, short indent, short crlf)
 {
 	bool	addSeperator=true;
 	int		cnt=0;
@@ -57,51 +50,50 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		switch (block->type) {
 	
 		case Block::C_WAIT:
-			if (cnt >= 2) AddNL(buf, pos, len, indent, crlf);
-			if (!AddToBuf("wait(", buf, pos, len)) return false;
-			if (!Esrap(block->crap.block, buf,pos,len, false, indent, crlf))
+			if (cnt >= 2) putNL(out, indent, crlf);
+			put("wait(", out);
+			if (!Esrap(block->crap.block, out, false, indent, crlf))
 				return false;
-			if (!AddToBuf(")", buf, pos, len)) return false;
+			put(")", out);
 			break;
 	
 		case Block::C_FLUX:
-			if (cnt >= 2) AddNL(buf, pos, len, indent, crlf);
-			if (!AddToBuf("<-", buf, pos, len)) return false;
+			if (cnt >= 2) putNL(out, indent, crlf);
+			put("<-", out);
 		    if (block->crap.flux.lengthExp) {
-		    	if (!AddToBuf("(", buf, pos, len)) return false;
-		    	if (!Esrap(block->crap.flux.lengthExp, buf,pos,len, false, indent, crlf)) return false;
-		    	if (!AddToBuf(")", buf, pos, len)) return false;
+		    	put("(", out);
+		    	if (!Esrap(block->crap.flux.lengthExp, out, false, indent, crlf)) return false;
+		    	put(")", out);
 		    }
-			if (!Esrap(block->crap.flux.block, buf,pos,len, do_indent, indent+1, crlf)) return false;
+			if (!Esrap(block->crap.flux.block, out, do_indent, indent+1, crlf)) return false;
 			if (block->crap.flux.rateExp) {
-				if (!AddToBuf(" : ", buf, pos, len)) return false;
-				if (!Esrap(block->crap.flux.rateExp, buf,pos,len, false, indent, crlf)) return false;
+				put(" : ", out);
+				if (!Esrap(block->crap.flux.rateExp, out, false, indent, crlf)) return false;
 			}
 			break;
 	
 		case Block::C_LIST:
-			if (!AddToBuf(
-				((char *)(
+			put((
 					block->subType == Block::LIST_SEQ? "[":
 					block->subType == Block::LIST_FORK? "{&":
-					block->subType == Block::LIST_PAR? "{|": "{")), buf, pos, len)) return false;
-			if (!AddToBuf(" ", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.list.block, buf,pos,len, do_indent, indent+1, crlf)) return false;
-			if (!AddToBuf(" ", buf, pos, len)) return false;
-			if (!AddToBuf(((char *)(block->subType == Block::LIST_SEQ?"]":"}")), buf, pos, len)) return false;
+					block->subType == Block::LIST_PAR? "{|": "{"), out);
+			put(" ", out);
+		    if (!Esrap(block->crap.list.block, out, do_indent, indent+1, crlf)) return false;
+			put(" ", out);
+			put(((char *)(block->subType == Block::LIST_SEQ?"]":"}")), out);
 			addSeperator = !do_indent;
 		    break;
 		
 		case Block::C_DIVERT:
-			if (!Esrap(block->crap.divert.block, buf,pos,len, do_indent, indent, crlf)) return false;
-			if (!AddToBuf(" @ ", buf, pos, len)) return false;
-			if (!Esrap(block->crap.divert.clockExp, buf,pos,len, false, indent, crlf)) return false;
+			if (!Esrap(block->crap.divert.block, out, do_indent, indent, crlf)) return false;
+			put(" @ ", out);
+			if (!Esrap(block->crap.divert.clockExp, out, false, indent, crlf)) return false;
 			break;
 			
 		case Block::C_BUILTIN: {
 			std::string s;
 			if (block->subType == Block::BUILTIN_CREATE) {
-				AddNL(buf, pos, len, indent, crlf);
+				putNL(out, indent, crlf);
 				int typ = block->crap.call.crap.createType;
 				s = qut::unfind(builtinCommandIndex, typ);
 			} else {
@@ -109,18 +101,18 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 				s=qut::unfind(builtinCommandIndex, typ);
 			}
 			if (s.size() == 0) {
-				if (!AddToBuf("undefined", buf, pos, len)) return false;
+				put("undefined", out);
 			} else {
-				if (!AddToBuf(s.c_str(), buf, pos, len)) return false;
+				put(s, out);
 			}
 			Block		*params=nullptr;
 			
 			params=block->crap.call.parameters;
 	
 			if (params) {
-				if (!AddToBuf("(", buf, pos, len)) return false;
-				if(!Esrap(params, buf,pos,len, false, indent, crlf)) return false;
-				if (!AddToBuf(")", buf, pos, len)) return false;
+				put("(", out);
+				if(!Esrap(params, out, false, indent, crlf)) return false;
+				put(")", out);
 				addSeperator = false;
 	 	    } else {
 				addSeperator = true;
@@ -137,15 +129,15 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 			if (s.size() == 0) {
 				fprintf(stderr, "not recognised player");
 			} else {
-				if (!AddToBuf(s.c_str(), buf, pos, len)) return false;
+				put(s, out);
 				Block		*params=nullptr;
 			
 				params=block->crap.call.parameters;
 	
 				if (params) {
-					if (!AddToBuf("(", buf, pos, len)) return false;
-					if(!Esrap(params, buf,pos,len, false, indent, crlf)) return false;
-					if (!AddToBuf(")", buf, pos, len)) return false;
+					put("(", out);
+					if(!Esrap(params, out, false, indent, crlf)) return false;
+					put(")", out);
 					addSeperator = false;
 	 			} else {
 					addSeperator = true;
@@ -155,30 +147,30 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		}
 		
 		case Block::C_OUTPUT: {
-			char	b2[20];
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-			sprintf(b2, ">> %d", block->crap.channel->chanId);
+			string b2;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+			b2 = ">> " + to_string(block->crap.channel->chanId);
 			addSeperator = false;
-			if (!AddToBuf(b2, buf, pos, len)) return false;
+			put(b2, out);
 			break;
 		}
 			 
 		case Block::C_INPUT: {
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-			char	b2[20];
-			sprintf(b2, "<< %d", block->crap.channel->chanId);
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+			string b2;
+			b2 = "<< " + to_string(block->crap.channel->chanId);
 			addSeperator = false;
-			if (!AddToBuf(b2, buf, pos, len)) return false;
+			put(b2, out);
 			break;
 		}
 	
 		case Block::C_UNLINKED_CALL:
 		    if (block->crap.call.crap.name) {
-				if (!AddToBuf(block->crap.call.crap.name, buf, pos, len)) return false;
+				put(block->crap.call.crap.name, out);
 			    if (block->crap.call.parameters) {
-			    	if (!AddToBuf("(", buf, pos, len)) return false;
-			    	if (!Esrap(block->crap.call.parameters, buf,pos,len, false, indent, crlf)) return false;
-			    	if (!AddToBuf(")", buf, pos, len)) return false;
+			    	put("(", out);
+			    	if (!Esrap(block->crap.call.parameters, out, false, indent, crlf)) return false;
+			    	put(")", out);
 			    }
 				addSeperator = false;
 	 	    } else {
@@ -188,11 +180,11 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 	
 		case Block::C_CALL:
 		    if (block->crap.call.crap.lambda) {
-				if (!AddToBuf(block->crap.call.crap.lambda->sym->name, buf, pos, len)) return false;
+				put(block->crap.call.crap.lambda->sym->name, out);
 			    if (block->crap.call.parameters) {
-			    	if (!AddToBuf("(", buf, pos, len)) return false;
-			    	if (!Esrap(block->crap.call.parameters, buf,pos,len, false, indent, crlf)) return false;
-			    	if (!AddToBuf(")", buf, pos, len)) return false;
+			    	put("(", out);
+			    	if (!Esrap(block->crap.call.parameters, out, false, indent, crlf)) return false;
+			    	put(")", out);
 			    }
 				addSeperator = false;
 	 	    } else
@@ -204,13 +196,13 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 //		case Block::C_GENERIC_PLAYER: // 40,
 
 		case Block::C_VST: // 41,
-			AddNL(buf, pos, len, indent, crlf);
+			putNL(out, indent, crlf);
 			if (block->crap.call.crap.vstplugin) {
-				if (!AddToBuf(block->crap.call.crap.vstplugin->sym->name, buf, pos, len)) return false;
+				put(block->crap.call.crap.vstplugin->sym->name, out);
 			    if (block->crap.call.parameters) {
-			    	if (!AddToBuf("(", buf, pos, len)) return false;
-			    	if (!Esrap(block->crap.call.parameters, buf,pos,len, false, indent, crlf)) return false;
-			    	if (!AddToBuf(")", buf, pos, len)) return false;
+			    	put("(", out);
+			    	if (!Esrap(block->crap.call.parameters, out, false, indent, crlf)) return false;
+			    	put(")", out);
 			    }
 				addSeperator = false;
 			} else {
@@ -230,19 +222,19 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 			break;
 	
 		case Block::C_BREAK:
-			if (!AddToBuf("break", buf, pos, len)) return false;
+			put("break", out);
 			addSeperator = false;
 			break;
 	
 		case Block::C_WAKE:
 		case Block::C_SUSPEND:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
 		    if (block->crap.call.crap.sym) {
-				if (!AddToBuf(block->crap.call.crap.sym->name, buf, pos, len)) return false;
+				put(block->crap.call.crap.sym->name, out);
 			    if (block->crap.call.parameters) {
-			    	if (!AddToBuf("(", buf, pos, len)) return false;
-			    	if (!Esrap(block->crap.call.parameters, buf,pos,len, false, indent, crlf)) return false;
-			    	if (!AddToBuf(")", buf, pos, len)) return false;
+			    	put("(", out);
+			    	if (!Esrap(block->crap.call.parameters, out, false, indent, crlf)) return false;
+			    	put(")", out);
 			    }
 				addSeperator = false;
 	 	    } else
@@ -250,84 +242,84 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		    break;
 	
 		case Block::C_ASSIGN:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-		    if (!Esrap(block->crap.assign.atom, buf,pos,len, false, indent, crlf)) return false;
-			if (!AddToBuf(" = ", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.assign.exp, buf,pos,len, false, indent, crlf)) return false;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+		    if (!Esrap(block->crap.assign.atom, out, false, indent, crlf)) return false;
+			put(" = ", out);
+		    if (!Esrap(block->crap.assign.exp, out, false, indent, crlf)) return false;
 		    break;
 	
 		case Block::C_GUARD:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-		    if (!Esrap(block->crap.guard.condition, buf,pos,len, false, indent, crlf)) return false;
-			if (!AddToBuf(" :: ", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.guard.block, buf,pos,len, do_indent, indent, crlf)) return false;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+		    if (!Esrap(block->crap.guard.condition, out, false, indent, crlf)) return false;
+			put(" :: ", out);
+		    if (!Esrap(block->crap.guard.block, out, do_indent, indent, crlf)) return false;
 			addSeperator = false;
 		    break;
 	
 		case Block::C_REPEAT:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-			if (!AddToBuf("repeat(", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.repeat.Exp, buf,pos,len, false, indent, crlf)) return false;
-			if (!AddToBuf(")", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.repeat.block, buf,pos,len, do_indent, indent, crlf)) return false;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+			put("repeat(", out);
+		    if (!Esrap(block->crap.repeat.Exp, out, false, indent, crlf)) return false;
+			put(")", out);
+		    if (!Esrap(block->crap.repeat.block, out, do_indent, indent, crlf)) return false;
 			addSeperator = false;
 		    break;
 	
 		case Block::C_IF:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-			if (!AddToBuf("if (", buf, pos, len)) return false;
-		    if (!Esrap(block->crap.iff.condition, buf,pos,len, false, indent, crlf)) return false;
-			if (!AddToBuf(")", buf, pos, len)) return false;
-			AddNL(buf, pos, len, indent+1, crlf);
-		    if (!Esrap(block->crap.iff.ifBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+			put("if (", out);
+		    if (!Esrap(block->crap.iff.condition, out, false, indent, crlf)) return false;
+			put(")", out);
+			putNL(out, indent+1, crlf);
+		    if (!Esrap(block->crap.iff.ifBlock, out, do_indent, indent+1, crlf)) return false;
 		    if (block->crap.iff.elseBlock) {
-				AddNL(buf, pos, len, indent, crlf);
-		    	if (!AddToBuf("else", buf, pos, len)) return false;
-				AddNL(buf, pos, len, indent+1, crlf);
-				if (!Esrap(block->crap.iff.elseBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+				putNL(out, indent, crlf);
+		    	put("else", out);
+				putNL(out, indent+1, crlf);
+				if (!Esrap(block->crap.iff.elseBlock, out, do_indent, indent+1, crlf)) return false;
 			}
 			addSeperator = false;
 		    break;
 	
 		case Block::C_FOREACH:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
-			if (!AddToBuf("foreach ", buf, pos, len)) return false;
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
+			put("foreach ", out);
 			if (block->crap.foreach.condition) {
-				if (!AddToBuf("having (", buf, pos, len)) return false;
-			    if (!Esrap(block->crap.foreach.condition, buf,pos,len, false, indent, crlf)) return false;
-				if (!AddToBuf(")", buf, pos, len)) return false;
-				AddNL(buf, pos, len, indent+1, crlf);
-			    if (!Esrap(block->crap.foreach.ifBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+				put("having (", out);
+			    if (!Esrap(block->crap.foreach.condition, out, false, indent, crlf)) return false;
+				put(")", out);
+				putNL(out, indent+1, crlf);
+			    if (!Esrap(block->crap.foreach.ifBlock, out, do_indent, indent+1, crlf)) return false;
 			    if (block->crap.foreach.elseBlock) {
-					AddNL(buf, pos, len, indent, crlf);
-			    	if (!AddToBuf("else", buf, pos, len)) return false;
-					AddNL(buf, pos, len, indent+1, crlf);
-					if (!Esrap(block->crap.foreach.elseBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+					putNL(out, indent, crlf);
+			    	put("else", out);
+					putNL(out, indent+1, crlf);
+					if (!Esrap(block->crap.foreach.elseBlock, out, do_indent, indent+1, crlf)) return false;
 				}
 			} else {
-			    if (!Esrap(block->crap.foreach.ifBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+			    if (!Esrap(block->crap.foreach.ifBlock, out, do_indent, indent+1, crlf)) return false;
 			}
 			addSeperator = false;
 		    break;
 	
 		case Block::C_WITH:
-			/* if (cnt >= 2) */AddNL(buf, pos, len, indent, crlf);
+			/* if (cnt >= 2) */putNL(out, indent, crlf);
 		    if (block->crap.with.object) {
-				if (!AddToBuf("with ", buf, pos, len)) return false;
-			    if (!Esrap(block->crap.with.object, buf,pos,len, false, indent, crlf)) return false;
+				put("with ", out);
+			    if (!Esrap(block->crap.with.object, out, false, indent, crlf)) return false;
 			}
 		    if (block->crap.with.condition) {
-				if (!AddToBuf(" having (", buf, pos, len)) return false;
-			    if (!Esrap(block->crap.with.condition, buf,pos,len, false, indent, crlf)) return false;
-				if (!AddToBuf(")", buf, pos, len)) return false;
+				put(" having (", out);
+			    if (!Esrap(block->crap.with.condition, out, false, indent, crlf)) return false;
+				put(")", out);
 			}
-			AddNL(buf, pos, len, indent+1, crlf);
-		    if (!Esrap(block->crap.with.withBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+			putNL(out, indent+1, crlf);
+		    if (!Esrap(block->crap.with.withBlock, out, do_indent, indent+1, crlf)) return false;
 		    if (block->crap.with.withoutBlock) {
-				AddNL(buf, pos, len, indent, crlf);
-		    	if (!AddToBuf("else", buf, pos, len)) return false;
-				AddNL(buf, pos, len, indent+1, crlf);
-				if (!Esrap(block->crap.with.withoutBlock, buf,pos,len, do_indent, indent+1, crlf)) return false;
+				putNL(out, indent, crlf);
+		    	put("else", out);
+				putNL(out, indent+1, crlf);
+				if (!Esrap(block->crap.with.withoutBlock, out, do_indent, indent+1, crlf)) return false;
 			}
 			addSeperator = false;
 		    break;
@@ -335,109 +327,109 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		case Block::C_UNOP:
 		    if (block->crap.op.l) {
 		    	switch(block->subType) {
-		    	case Block::OP_UMINUS:	if (!AddToBuf("-", buf, pos, len)) return false; break;
-		    	case Block::OP_NOT:	if (!AddToBuf("!", buf, pos, len)) return false; break;
-		    	case Block::OP_BNOT:	if (!AddToBuf("~", buf, pos, len)) return false; break;
+		    	case Block::OP_UMINUS:	put("-", out); break;
+		    	case Block::OP_NOT:	put("!", out); break;
+		    	case Block::OP_BNOT:	put("~", out); break;
 		    	default:
 					internalError("Unimplimented Esrap: unop");
 		    	}
-		    	if ((block->crap.op.l->isOperator())) if (!AddToBuf("(", buf, pos, len)) return false;
-		    	if (!Esrap(block->crap.op.l, buf,pos,len, do_indent, indent, crlf))
+		    	if ((block->crap.op.l->isOperator())) put("(", out);
+		    	if (!Esrap(block->crap.op.l, out, do_indent, indent, crlf))
 		    		return false;
 		    	if ((block->crap.op.l->isOperator()))
-					if (!AddToBuf(")", buf, pos, len)) return false;
+					put(")", out);
 		    }
 		    break;
 		    
 		case Block::C_BINOP:
 			if (block->crap.op.l && block->crap.op.r) {
 		    	if ((block->crap.op.l->isOperator()))
-					if (!AddToBuf("(", buf, pos, len)) return false;
-		    	if (!Esrap(block->crap.op.l, buf,pos,len, do_indent, indent, crlf)) return false;
+					put("(", out);
+		    	if (!Esrap(block->crap.op.l, out, do_indent, indent, crlf)) return false;
 		    	if ((block->crap.op.l->isOperator()))
-					if (!AddToBuf(")", buf, pos, len)) return false;
+					put(")", out);
 		    	switch(block->subType) {
-				case Block::OP_LT:		if (!AddToBuf("<", buf, pos, len)) return false; break;
-				case Block::OP_GT:		if (!AddToBuf(">", buf, pos, len)) return false; break;
-				case Block::OP_EQ:		if (!AddToBuf("==", buf, pos, len)) return false; break;
-				case Block::OP_NEQ:	if (!AddToBuf("!=", buf, pos, len)) return false; break;
-				case Block::OP_LE:		if (!AddToBuf("<=", buf, pos, len)) return false; break;
-				case Block::OP_GE:		if (!AddToBuf(">=", buf, pos, len)) return false; break;
-				case Block::OP_MUL:	if (!AddToBuf("*", buf, pos, len)) return false; break;
-				case Block::OP_DIV:	if (!AddToBuf("/", buf, pos, len)) return false; break;
-				case Block::OP_ADD:	if (!AddToBuf("+", buf, pos, len)) return false; break;
-				case Block::OP_SUB:	if (!AddToBuf("-", buf, pos, len)) return false; break;
-				case Block::OP_MOD:	if (!AddToBuf("%", buf, pos, len)) return false; break;
-				case Block::OP_AND:	if (!AddToBuf("&&", buf, pos, len)) return false; break;
-				case Block::OP_OR:		if (!AddToBuf("||", buf, pos, len)) return false; break;
-				case Block::OP_BAND:	if (!AddToBuf("&", buf, pos, len)) return false; break;
-				case Block::OP_BOR:	if (!AddToBuf("|", buf, pos, len)) return false; break;
+				case Block::OP_LT:		put("<", out); break;
+				case Block::OP_GT:		put(">", out); break;
+				case Block::OP_EQ:		put("==", out); break;
+				case Block::OP_NEQ:	put("!=", out); break;
+				case Block::OP_LE:		put("<=", out); break;
+				case Block::OP_GE:		put(">=", out); break;
+				case Block::OP_MUL:	put("*", out); break;
+				case Block::OP_DIV:	put("/", out); break;
+				case Block::OP_ADD:	put("+", out); break;
+				case Block::OP_SUB:	put("-", out); break;
+				case Block::OP_MOD:	put("%", out); break;
+				case Block::OP_AND:	put("&&", out); break;
+				case Block::OP_OR:		put("||", out); break;
+				case Block::OP_BAND:	put("&", out); break;
+				case Block::OP_BOR:	put("|", out); break;
 		    	default:
 					internalError("Unimplimented Esrap: unop");
 		    	}
 		
 		    	if ((block->crap.op.r->isOperator()))
-					if (!AddToBuf("(", buf, pos, len)) return false;
-		    	if (!Esrap(block->crap.op.r, buf,pos,len, do_indent, indent, crlf)) return false;
+					put("(", out);
+		    	if (!Esrap(block->crap.op.r, out, do_indent, indent, crlf)) return false;
 		    	if ((block->crap.op.r->isOperator()))
-					if (!AddToBuf(")", buf, pos, len)) return false;
+					put(")", out);
 			}
 		    break;
 		    
 		case Block::C_IFOP:
-		    if (block->crap.iff.condition && !Esrap(block->crap.iff.condition, buf,pos,len, do_indent, indent, crlf)) return false;
-			if (!AddToBuf("?", buf, pos, len)) return false;
-		    if (block->crap.iff.ifBlock && !Esrap(block->crap.iff.ifBlock, buf,pos,len, do_indent, indent, crlf)) return false;
-			if (!AddToBuf(":", buf, pos, len)) return false;
-		    if (block->crap.iff.elseBlock && !Esrap(block->crap.iff.elseBlock, buf,pos,len, do_indent, indent, crlf)) return false;
+		    if (block->crap.iff.condition && !Esrap(block->crap.iff.condition, out, do_indent, indent, crlf)) return false;
+			put("?", out);
+		    if (block->crap.iff.ifBlock && !Esrap(block->crap.iff.ifBlock, out, do_indent, indent, crlf)) return false;
+			put(":", out);
+		    if (block->crap.iff.elseBlock && !Esrap(block->crap.iff.elseBlock, out, do_indent, indent, crlf)) return false;
 		    break;
 		    
 		case Block::C_VALUE:
 			if (block->crap.constant.value.type == TypedValue::S_STRING) {
-				if (!AddToBuf("\"", buf, pos, len)) return false;
-				if (!AddToBuf(block->crap.constant.value.StringValue(), buf, pos, len)) return false;
-				if (!AddToBuf("\"", buf, pos, len)) return false;
+				put("\"", out);
+				put(block->crap.constant.value.StringValue(), out);
+				put("\"", out);
 			} else if (block->crap.constant.stringValue) {
-				if (!AddToBuf(block->crap.constant.stringValue, buf, pos, len)) return false;
+				put(block->crap.constant.stringValue, out);
 			} else {
-				if (!AddToBuf(block->crap.constant.value.StringValue(), buf, pos, len)) return false;
+				put(block->crap.constant.value.StringValue(), out);
 			}
 		    break;
 		    
 		case Block::C_SYM:
-			if (!AddToBuf(block->crap.sym->name, buf, pos, len)) return false;
+			put(block->crap.sym->name, out);
 			break;
 	
 		case Block::C_NAME:
-			if (!AddToBuf(block->crap.name, buf, pos, len)) return false;
+			put(block->crap.name, out);
 		    break;
 		    
 		case Block::C_STRUCTURE_REF:
-			if (!Esrap(block->crap.structureRef.base, buf,pos,len, do_indent, indent, crlf)) return false;
-			if (!AddToBuf(".", buf, pos, len)) return false;
+			if (!Esrap(block->crap.structureRef.base, out, do_indent, indent, crlf)) return false;
+			put(".", out);
 			if (block->crap.structureRef.member) {
-				if (!AddToBuf(block->crap.structureRef.member->name, buf, pos, len)) return false;
+				put(block->crap.structureRef.member->name, out);
 			} else if (block->crap.structureRef.unresolved) {
-				if (!Esrap(block->crap.structureRef.unresolved, buf,pos,len, do_indent, indent, crlf)) return false;
+				if (!Esrap(block->crap.structureRef.unresolved, out, do_indent, indent, crlf)) return false;
 			}
 			break;
 			
 		case Block::C_ARRAY_REF:
 			if (block->crap.arrayRef.base && block->crap.arrayRef.index) {
-				if (!Esrap(block->crap.arrayRef.base, buf,pos,len, do_indent, indent, crlf)) return false;
-				if (!AddToBuf("[", buf, pos, len)) return false;
-				if (!Esrap(block->crap.arrayRef.index, buf,pos,len, do_indent, indent, crlf)) return false;
-				if (!AddToBuf("]", buf, pos, len)) return false;
+				if (!Esrap(block->crap.arrayRef.base, out, do_indent, indent, crlf)) return false;
+				put("[", out);
+				if (!Esrap(block->crap.arrayRef.index, out, do_indent, indent, crlf)) return false;
+				put("]", out);
 			}
 			break;
 	
 		case Block::C_CAST: {
 			std::string s=findTypeName(block->crap.cast.type);
-			if (!AddToBuf("(#", buf, pos, len)) return false;
-			if (!AddToBuf(s.c_str(), buf, pos, len)) return false;
-			if (!AddToBuf(" ", buf, pos, len)) return false;
-			if (!Esrap(block->crap.cast.block,buf,pos,len, do_indent, indent, crlf)) return false;
-			if (!AddToBuf(")", buf, pos, len)) return false;
+			put("(#", out);
+			put(s.c_str(), out);
+			put(" ", out);
+			if (!Esrap(block->crap.cast.block,out, do_indent, indent, crlf)) return false;
+			put(")", out);
 			break;
 		}
 		
@@ -449,9 +441,9 @@ Esrap(Block *block, char *buf, long &pos, long len, bool do_indent, short indent
 		block = block->next;
 		if (block) {
 			if (addSeperator)
-				if (!AddToBuf(",", buf, pos, len)) return false;
-			if (!do_indent || !CheckNL(buf, pos, len, indent, crlf)) {
-				if (!AddToBuf(" ", buf, pos, len)) return false;
+				put(",", out);
+			if (!do_indent || !checkNL(out, indent, crlf)) {
+				put(" ", out);
 			}
 		}
 	}	

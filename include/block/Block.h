@@ -507,10 +507,7 @@ enum BlockStatus {
 };
 
 
-Block			*LoadBlock(FILE *fp, Qua *uberQ);
-
-bool			Esrap(Block *b, char *buf, long &pos, long len,
-						bool do_indent, short indent, short crlf);
+bool			Esrap(Block *b, ostream &out, bool do_indent, short indent, short crlf);
 						
 flag			UpdateActiveBlock(
 						Qua *uberQ,
