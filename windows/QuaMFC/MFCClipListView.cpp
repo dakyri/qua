@@ -17,6 +17,7 @@
 #include "Metric.h"
 
 #include <algorithm>
+#include <iostream>
 // MFCClipListView
 
 IMPLEMENT_DYNCREATE(MFCClipListView, CTreeView)
@@ -99,13 +100,7 @@ MFCClipListView::OnCreate(LPCREATESTRUCT lpCreateStruct )
 	frame.right = frame.left+bounds.right; 
 	frame.bottom = frame.top+bounds.bottom; 
 
-	images.Create(
-			16,
-			15,
-			ILC_COLOR8,
-			11,
-			1 
-		);
+	images.Create( 16, 15, ILC_COLOR8, 11, 1 );
 	CBitmap bm;
 	bm.LoadBitmap(IDB_CLIP_IDX_IMG);
 	images.Add(&bm, RGB(0, 0, 0));
@@ -172,26 +167,31 @@ MFCClipListView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	NMTVDISPINFO	*tvp = (NMTVDISPINFO *)pNotifyStruct;
 	HTREEITEM		it = tvp->item.hItem;
 
-	fprintf(stderr, "label edit end %s\n", tvp->item.pszText?tvp->item.pszText:"");
-	DWORD_PTR		selectedData = GetTreeCtrl().GetItemData(selectedItem);
-	if (selectedData > QCI_SYMBOL_LPARAM && SymTab::ValidSymbolName(tvp->item.pszText)) {
-		StabEnt		*sym = (StabEnt *)selectedData;
-		switch (sym->type) {
-			case TypedValue::S_CLIP:
-				glob.rename(sym, tvp->item.pszText);
-				*result = 1;
-				break;
-			case TypedValue::S_TAKE:
-				glob.rename(sym, tvp->item.pszText);
-				*result = 1;
-				break;
-			default:
-				*result = 0;
-				break;
+	cerr << "clip list : label edit end " << (tvp != nullptr && tvp->item.pszText? tvp->item.pszText: "(null pszText)") << endl;
+	*result = 0;
+	if (tvp != nullptr && tvp->item.pszText != nullptr) {
+		DWORD_PTR		selectedData = GetTreeCtrl().GetItemData(selectedItem);
+		if (selectedData > QCI_SYMBOL_LPARAM && SymTab::ValidSymbolName(tvp->item.pszText)) {
+			StabEnt		*sym = (StabEnt *)selectedData;
+			if (sym != nullptr) {
+				switch (sym->type) {
+				case TypedValue::S_CLIP:
+					glob.rename(sym, tvp->item.pszText);
+					*result = 1;
+					break;
+				case TypedValue::S_TAKE:
+					glob.rename(sym, tvp->item.pszText);
+					*result = 1;
+					break;
+				}
+			} else {
+				if (sym == nullptr) cerr << "unexpected selectd data null" << endl;
+			}
 		}
 	} else {
-        *result = 0;
+		if (tvp == nullptr) cerr << "unexpected null textured vegetable protean" << endl;
 	}
+
 }
 
 void

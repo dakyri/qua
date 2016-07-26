@@ -15,6 +15,8 @@
 
 #include "Qua.h"
 
+#include <iostream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -208,7 +210,7 @@ MFCObjectMountView::OnToolTipNeedsTxt( UINT id, NMHDR * pTTTStruct, LRESULT * pR
 afx_msg void
 MFCObjectMountView::OnSetFocus(CWnd* pOldWnd)
 {
-	fprintf(stderr, "object mount on set focus\n");
+	cerr << "object mount on set focus " << (unsigned)pOldWnd << endl;
 	if (pOldWnd != NULL) {
 //		pOldWnd->SetFocus();
 	}

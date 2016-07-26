@@ -27,6 +27,8 @@
 #include "QuaPort.h"
 #include "Sym.h"
 
+#include <iostream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -702,7 +704,7 @@ MFCQuaContextIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 	NMTVDISPINFO	*tvp = (NMTVDISPINFO *)pNotifyStruct;
 	HTREEITEM		it = tvp->item.hItem;
 
-	fprintf(stderr, "label edit end %s\n", tvp->item.pszText?tvp->item.pszText:"");
+	cerr << "ctxt:: label edit end " << (tvp->item.pszText ? tvp->item.pszText:"")<< endl;
 	DWORD_PTR		selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QCI_SYMBOL_LPARAM && SymTab::ValidSymbolName(tvp->item.pszText)) {
 		StabEnt		*sym = (StabEnt *)selectedData;

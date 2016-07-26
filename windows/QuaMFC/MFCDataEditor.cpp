@@ -21,6 +21,8 @@
 #include "Time.h"
 #include "Clip.h"
 
+#include "MemDC.h"
+
 #include <iostream>
 
 #ifdef _DEBUG
@@ -74,6 +76,8 @@ BEGIN_MESSAGE_MAP(MFCSequenceEditor, CScrollView)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_SIZING()
+//	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN( )
 	ON_WM_LBUTTONUP( )
 	ON_WM_LBUTTONDBLCLK( )
@@ -159,7 +163,7 @@ MFCSequenceEditor::ChangeSelection(BRect &r)
 
 #ifdef QUA_V_GDI_PLUS
 void
-MFCSequenceEditor::DrawGridGraphics(Graphics *pdc, CRect *cbp)
+MFCSequenceEditor::DrawGridGraphics(Graphics &pdc, CRect &cbp)
 {
 	Metric *dm = (displayMetric?displayMetric:NULL);
 //	pdc->SetBkColor(rgb_red);
@@ -167,8 +171,8 @@ MFCSequenceEditor::DrawGridGraphics(Graphics *pdc, CRect *cbp)
 	Pen	mdGrayPen(Color(255, 140, 140, 140), 1);
 	Pen	dkGrayPen(Color(255, 80, 80, 80), 1);
 
-	long startTick = cbp->left/pixPerNotch;
-	long endTick = cbp->right/pixPerNotch;
+	long startTick = cbp.left/pixPerNotch;
+	long endTick = cbp.right/pixPerNotch;
 	short notchInc = 1;
 	long notchPx = startTick*pixPerNotch;
 	long tickCnt = 0;
@@ -186,24 +190,24 @@ MFCSequenceEditor::DrawGridGraphics(Graphics *pdc, CRect *cbp)
 		} else {
 			gridPen = &ltGrayPen;
 		}
-		pdc->DrawLine(gridPen, notchPx, cbp->top, notchPx, cbp->bottom);
+		pdc.DrawLine(gridPen, notchPx, cbp.top, notchPx, cbp.bottom);
 	}
 	for (short i=0; i<NHorizontalPix(); i++) {
-		pdc->DrawLine(&dkGrayPen, cbp->left, HorizontalPix(i), cbp->right, HorizontalPix(i));
+		pdc.DrawLine(&dkGrayPen, cbp.left, HorizontalPix(i), cbp.right, HorizontalPix(i));
 	}
 }
 #endif
 
 void
-MFCSequenceEditor::DrawGrid(CDC *pdc, CRect *cbp)
+MFCSequenceEditor::DrawGrid(CDC *pdc, CRect &cbp)
 {
 	Metric *dm = (displayMetric?displayMetric:NULL);
 //	pdc->SetBkColor(rgb_red);
 	pdc->SelectObject(GetStockObject(DC_BRUSH));
 	pdc->SelectObject(GetStockObject(DC_PEN));
 	pdc->SetDCPenColor(rgb_ltGray);
-	long startTick = cbp->left/pixPerNotch;
-	long endTick = cbp->right/pixPerNotch;
+	long startTick = cbp.left/pixPerNotch;
+	long endTick = cbp.right/pixPerNotch;
 	short notchInc = 1;
 	long notchPx = startTick*pixPerNotch;
 	long tickCnt = 0;
@@ -219,8 +223,8 @@ MFCSequenceEditor::DrawGrid(CDC *pdc, CRect *cbp)
 		} else {
 			pdc->SetDCPenColor(rgb_ltGray);
 		}
-		pdc->MoveTo(notchPx, cbp->top);
-		pdc->LineTo(notchPx, cbp->bottom);
+		pdc->MoveTo(notchPx, cbp.top);
+		pdc->LineTo(notchPx, cbp.bottom);
 	}
 	pdc->SetDCPenColor(rgb_dkGray);
 //	for (short i=0; i<quaLink->NChannel(); i++) {
@@ -232,7 +236,7 @@ MFCSequenceEditor::DrawGrid(CDC *pdc, CRect *cbp)
 #ifdef QUA_V_GDI_PLUS
 
 void
-MFCSequenceEditor::DrawCursor(Graphics *pdc, CRect *clipBox)
+MFCSequenceEditor::DrawCursor(Graphics &pdc, CRect &clipBox)
 {
 	;
 }
@@ -247,6 +251,24 @@ MFCSequenceEditor::DrawCursor(CDC *pdc, CRect *clipBox)
 
 #endif
 
+// To this code
+BOOL
+MFCSequenceEditor::OnEraseBkgnd(CDC* pDC)
+{
+	//	cerr << "on erase back" << endl;
+	return FALSE;
+	//	return CScrollView::OnEraseBkgnd(pDC);
+}
+
+void
+MFCSequenceEditor::OnPaint()
+{
+	// standard paint routine
+	CPaintDC dc(this);
+	OnPrepareDC(&dc);
+	OnDraw(&dc);
+}
+
 void
 MFCSequenceEditor::OnDraw(CDC* pdc)
 {
@@ -258,7 +280,7 @@ MFCSequenceEditor::OnDraw(CDC* pdc)
 	CDocument* pDoc = GetDocument();
 #ifdef QUA_V_GDI_PLUS
 	Graphics	graphics(pdc->m_hDC);
-	DrawGridGraphics(&graphics, &clipBox);
+	DrawGridGraphics(graphics, clipBox);
 
 // test the interoperation of GDI and GDI+
 //	Color	p = Color::MakeARGB(100, 255, 20, 255);
@@ -270,7 +292,7 @@ MFCSequenceEditor::OnDraw(CDC* pdc)
 //			ir->Draw(&graphics, &clipBox);
 //		}
 //	}
-	DrawCursor(&graphics, &clipBox);
+	DrawCursor(graphics, clipBox);
 #else
 	DrawGrid(pdc, &clipBox);
 	DrawCursor(pdc, &clipBox);
@@ -966,18 +988,15 @@ MFCSequenceEditor::OnScroll(
 }
 
 BOOL
-MFCSequenceEditor::OnScrollBy(
-			CSize sizeScroll,
-			BOOL bDoScroll 
-		)
+MFCSequenceEditor::OnScrollBy( CSize sizeScroll, BOOL bDoScroll  )
 {
 	bool scr = CScrollView::OnScrollBy(sizeScroll,bDoScroll);
-	fprintf(stderr, "onscrollby %d %d %d %d\n", sizeScroll.cx, sizeScroll.cy, bDoScroll, scr);
+	cerr << "MFCSequenceEditor onscrollby cx "<< sizeScroll.cx << ", cy "<< sizeScroll.cy << ", do " << bDoScroll << ", scrollview::onscrolly()  " << scr << endl;
 	if (scr) {
-		fprintf(stderr, "scroll ok %x xsc\n", xscale);
+		cerr << "MFCSequenceEditor scroll ok xscale " << xscale << endl;
 		if (xscale) {
 			if (bDoScroll) {
-				fprintf(stderr, "x scroll %d %\n", -sizeScroll.cx);
+				cerr << "MFCSequenceEditor x scroll " << -sizeScroll.cx << endl;
 				CRect	r;
 //				xscale->GetWindowRect(&r);
 				xscale->SetWindowPos(&wndTop,0,bounds.bottom-xscale->bounds.bottom,0,0,SWP_NOSIZE);
@@ -1064,7 +1083,8 @@ MFCSequenceEditor::AddClipItemView(Clip *clip)
 	}
 	nv = new MFCClipItemView(this, clip);
 	AddItemR(nv);
-	nv->Redraw(true);
+	nv->Redraw();
+	UpdateWindow();
 	Time	endT = clip->start + clip->duration;
 	if (endT > lastScheduledEvent) {
 		lastScheduledEvent = endT;
@@ -1132,7 +1152,7 @@ MFCEditorItemView::CalculateBounds()
 
 #ifdef QUA_V_GDI_PLUS
 void
-MFCEditorItemView::Draw(Graphics *dc, CRect *clipBox)
+MFCEditorItemView::Draw(Graphics &dc, CRect &clipBox)
 {
 // !!!??? need to clip properly for short instances with long names
 	Pen			blackPen(Color(250, 0,0,0), 1);
@@ -1141,8 +1161,8 @@ MFCEditorItemView::Draw(Graphics *dc, CRect *clipBox)
 	SolidBrush	blackBrush(Color(100, 0,0,0));
 
 //	fprintf(stderr, "drawing instance view %d\n", bounds.right-bounds.left);
-	dc->FillRectangle(&blueBrush, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
-	dc->DrawRectangle(selected?&redPen:&blackPen, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
+	dc.FillRectangle(&blueBrush, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
+	dc.DrawRectangle(selected?&redPen:&blackPen, bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
 }
 
 #else
@@ -1154,7 +1174,7 @@ MFCEditorItemView::Draw(CDC *dc, CRect *clipBox)
 #endif
 
 void
-MFCEditorItemView::Redraw(bool redraw)
+MFCEditorItemView::Redraw()
 {
 	if (editor) {
 		CRect	updr = bounds;
@@ -1162,11 +1182,7 @@ MFCEditorItemView::Redraw(bool redraw)
 		updr = bounds - scr;
 		updr.bottom ++;
 		updr.right ++;
-		if (redraw) {
-			editor->RedrawWindow(&updr);
-		} else {
-			editor->InvalidateRect(&updr);
-		}
+		editor->InvalidateRect(&updr);
 	}
 }
 void

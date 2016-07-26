@@ -17,6 +17,8 @@
 #include "Time.h"
 #include "Voice.h"
 
+#include "MemDC.h"
+
 #include <iostream>
 
 CFont		MFCStreamEditorYScale::displayFont;
@@ -30,6 +32,7 @@ BEGIN_MESSAGE_MAP(MFCStreamDataEditor, MFCSequenceEditor)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_SIZING()
+
 	ON_WM_LBUTTONDOWN( )
 	ON_WM_LBUTTONUP( )
 	ON_WM_LBUTTONDBLCLK( )
@@ -180,6 +183,24 @@ MFCStreamDataEditor::OnInitialUpdate()
 	SetHVScroll();
 }
 
+// To this code
+BOOL
+MFCStreamDataEditor::OnEraseBkgnd(CDC* pDC)
+{
+	//	cerr << "on erase back" << endl;
+	return FALSE;
+	//	return CScrollView::OnEraseBkgnd(pDC);
+}
+
+void
+MFCStreamDataEditor::OnPaint()
+{
+	// standard paint routine
+	CPaintDC dc(this);
+	OnPrepareDC(&dc);
+	OnDraw(&dc);
+}
+
 void
 MFCStreamDataEditor::OnDraw(CDC* pdc)
 {
@@ -190,8 +211,9 @@ MFCStreamDataEditor::OnDraw(CDC* pdc)
 //	fprintf(stderr, "lt %d\n", lastScheduledEvent.ticks);
 	CDocument* pDoc = GetDocument();
 #ifdef QUA_V_GDI_PLUS
-	Graphics	graphics(pdc->m_hDC);
-	DrawGridGraphics(&graphics, &clipBox);
+	CMemDC memdc(pdc);
+	Graphics	graphics(memdc);
+	DrawGridGraphics(graphics, clipBox);
 
 // test the interoperation of GDI and GDI+
 //	Color	p = Color::MakeARGB(100, 255, 20, 255);
@@ -201,16 +223,16 @@ MFCStreamDataEditor::OnDraw(CDC* pdc)
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type != MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type == MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
-	DrawCursor(&graphics, &clipBox);
+	DrawCursor(graphics, clipBox);
 #else
 	DrawGrid(pdc, &clipBox);
 	DrawCursor(pdc);
@@ -247,7 +269,8 @@ MFCStreamDataEditor::AddStreamItemView(StreamItem *i, CPoint *pt, bool redraw)
 				AddItemR(nlv);
 			}
 			if (redraw) {
-				nlv->Redraw(true);
+				nlv->Redraw();
+				UpdateWindow();
 			}
 			nv = nlv;
 			break;
@@ -256,7 +279,8 @@ MFCStreamDataEditor::AddStreamItemView(StreamItem *i, CPoint *pt, bool redraw)
 			MFCStreamItemView	*siv = new MFCStreamItemView(this, i);
 			AddItemR(siv);
 			if (redraw) {
-				siv->Redraw(true);
+				siv->Redraw();
+				UpdateWindow();
 			}
 			nv = siv;
 			break;
@@ -1265,7 +1289,8 @@ MFCStreamDataEditor::RefreshControllerView(ctrl_t ct, UINT py)
 	MFCEditorItemView *iv = new MFCStreamItemListView(this, &pt, TypedValue::S_CTRL, ct);
 	if (iv) {
 		AddItemR(iv);
-		iv->Redraw(true);
+		iv->Redraw();
+		UpdateWindow();
 	}
 	return iv;
 }

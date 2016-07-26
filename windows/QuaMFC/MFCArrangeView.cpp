@@ -3,6 +3,7 @@
 //
 //#define _AFXDLL
 #define _CRT_SECURE_NO_WARNINGS
+
 #include "stdafx.h"
 #include "qua_version.h"
 
@@ -24,9 +25,12 @@
 #include "Envelope.h"
 #include "BaseVal.h"
 
+//#include <afxglobals.h>
+#include "MemDC.h"
 #include "Colors.h"
 
 #include <iostream>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,6 +75,8 @@ BEGIN_MESSAGE_MAP(MFCArrangeView, MFCSequenceEditor)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_SIZING()
+//	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN( )
 	ON_WM_LBUTTONUP( )
 	ON_WM_LBUTTONDBLCLK( )
@@ -264,7 +270,7 @@ MFCArrangeView::ChangeSelection(BRect &r)
 
 #ifdef QUA_V_GDI_PLUS
 void
-MFCArrangeView::DrawGridGraphics(Graphics *pdc, CRect *cbp)
+MFCArrangeView::DrawGridGraphics(Graphics &pdc, CRect &cbp)
 {
 	Metric *dm = (displayMetric?displayMetric:quaLink->QMetric());
 //	pdc->SetBkColor(rgb_red);
@@ -272,29 +278,30 @@ MFCArrangeView::DrawGridGraphics(Graphics *pdc, CRect *cbp)
 	Pen	mdGrayPen(AlphaColor(255, rgb_mdGray), 1);
 	Pen	dkGrayPen(AlphaColor(255, rgb_dkGray), 1);
 
-	long startTick = cbp->left/pixPerNotch;
-	long endTick = cbp->right/pixPerNotch;
+	long startTick = cbp.left/pixPerNotch;
+	long endTick = cbp.right/pixPerNotch;
 	short notchInc = 1;
 	long notchPx = startTick*pixPerNotch;
 	long tickCnt = 0;
 	short tickPerNotch = 1;
+//	cerr << "start tick" << startTick << ", end " << endTick << endl;
 
 	MFCChannelView *fv =(MFCChannelView *)channeler->CR(0);
 	MFCChannelView *ev =(MFCChannelView *)channeler->CR(channeler->NCR()-1);
-
+	
 	for (tickCnt=startTick; tickCnt<=endTick; tickCnt+=tickPerNotch, notchPx += pixPerNotch) {
-		Pen		*gridPen;
 		if (tickCnt % (dm->granularity*dm->beatsPerBar) == 0) {
-			gridPen = &dkGrayPen;
+			pdc.DrawLine(&dkGrayPen, notchPx, cbp.top, notchPx, cbp.bottom);
 		} else if (tickCnt % dm->granularity == 0) {
-			gridPen = &mdGrayPen;
+			pdc.DrawLine(&mdGrayPen, notchPx, cbp.top, notchPx, cbp.bottom);
 		} else {
-			gridPen = &ltGrayPen;
+//			pdc.DrawLine(&ltGrayPen, notchPx, cbp.top, notchPx, cbp.bottom);
 		}
-		pdc->DrawLine(gridPen, notchPx, cbp->top, notchPx, cbp->bottom);
+
 	}
+
 	for (short i=0; i<quaLink->NChannel(); i++) {
-		pdc->DrawLine(&dkGrayPen, cbp->left, Channel2Pix(i), cbp->right, Channel2Pix(i));
+		pdc.DrawLine(&dkGrayPen, cbp.left, Channel2Pix(i), cbp.right, Channel2Pix(i));
 	}
 }
 #endif
@@ -337,19 +344,17 @@ MFCArrangeView::DrawGrid(CDC *pdc, CRect *cbp)
 #ifdef QUA_V_GDI_PLUS
 
 void
-MFCArrangeView::DrawCursor(Graphics *pdc, CRect *clipBox)
+MFCArrangeView::DrawCursor(Graphics &pdc, CRect &clipBox)
 {
 	bool	doDraw = true;
 	if (clipBox != NULL) {
-		if (clipBox->left > cursorPx || cursorPx > clipBox->right) {
+		if (clipBox.left > cursorPx || cursorPx > clipBox.right) {
 			doDraw = false;
 		}
 	}
 	if (doDraw) {
 		Pen	cursorPen(AlphaColor(255, rgb_purple), 1);
-		pdc->DrawLine(&cursorPen,
-						cursorPx, clipBox->top,
-						cursorPx, clipBox->bottom);
+		pdc.DrawLine(&cursorPen, cursorPx, clipBox.top, cursorPx, clipBox.bottom);
 	}
 }
 
@@ -363,50 +368,75 @@ MFCArrangeView::DrawCursor(CDC *pdc, CRect *clipBox)
 
 #endif
 
+// To this code
+BOOL
+MFCArrangeView::OnEraseBkgnd(CDC* pDC)
+{
+//	cerr << "on erase back" << endl;
+	return FALSE;
+//	return CScrollView::OnEraseBkgnd(pDC);
+}
+
+void
+MFCArrangeView::OnPaint()
+{
+	// standard paint routine
+	CPaintDC dc(this);
+	OnPrepareDC(&dc);
+	OnDraw(&dc);
+}
+
 void
 MFCArrangeView::OnDraw(CDC* pdc)
 {
 	CRect	clipBox;
 	int		cbType;
 	cbType = pdc->GetClipBox(&clipBox);
-//	fprintf(stderr, "OnDraw() clip (%d %d %d %d) type %s\n", clipBox.left, clipBox.top, clipBox.right, clipBox.bottom, cbType==COMPLEXREGION?"complex":cbType==SIMPLEREGION?"simple":cbType==NULLREGION?"null":"error");
-//	fprintf(stderr, "lt %d\n", lastScheduledEvent.ticks);
 	CDocument* pDoc = GetDocument();
-#ifdef QUA_V_GDI_PLUS
-	Graphics	graphics(pdc->m_hDC);
-	DrawGridGraphics(&graphics, &clipBox);
-// straight GDI seems a lot faster out of the box at drawing, ... perhaps there are ways of
-// optimizing GDI+, but for the big line array in the grid, it slows the scrolling
-// oth there's an occaisional glitch where the drawing code loops, and
-// very little doco on gdi - gdi+ hybrids
-//	DrawGrid(pdc, &clipBox);
+	// COMPLEXREGION 3
+	// SIMPLEREGION 2
+	// NULLREGION 1
+	// ERROR 0
 
-// test the interoperation of GDI and GDI+
-//	Color	p = Color::MakeARGB(100, 255, 20, 255);
-//	Pen	semip(p, 3);
-//	graphics.DrawLine(&semip, 0,0, 200, 200);
+#ifdef QUA_V_GDI_PLUS
+	CMemDC memdc(pdc);
+	Graphics graphics(memdc);
+	CPoint sp = GetScrollPosition();
+
+//  graphics.TranslateTransform(-sp.x, -sp.y);
+//	SetWindowOrgEx(pdc->m_hDC, ps.x, ps.y, NULL);
+//	std::cerr << "MFCArrangeView OnDraw " << " clip box " << cbType << ", scroll " << sp.x << ", " << sp.y << "; "
+//		<< clipBox.left << ", " << clipBox.top << ", " << clipBox.right << ", "  << clipBox.bottom;
+//	clipBox -= sp;
+//	std::cerr << ", now box " << cbType << clipBox.left << ", " << clipBox.top << ", " << clipBox.right << ", " << clipBox.bottom << endl;
+
+	DrawGridGraphics(graphics, clipBox);
+	
 	for (short i=0; i<NIR(); i++) {
 		MFCInstanceView *ir = (MFCInstanceView *)IR(i);
+		cerr << "instance " << ir->bounds.left << ", " << ir->bounds.right << endl;
 		if (ir->bounds.Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			cerr << "instersects" << endl;
+			ir->Draw(graphics, clipBox);
 		}
 	}
+
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type != MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type == MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
 	// draw envelopes
 
 	// draw cursor (erase old one?)
-	DrawCursor(&graphics, &clipBox);
+	DrawCursor(graphics, clipBox);
 #else
 	DrawGrid(pdc, &clipBox);
 	for (short i=0; i<NIR(); i++) {
@@ -418,7 +448,6 @@ MFCArrangeView::OnDraw(CDC* pdc)
 	// draw cursor (erase old one?)
 	DrawCursor(pdc, &clipBox);
 #endif
-//	fprintf(stderr, "OnDraw() finito\n");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -717,7 +746,7 @@ MFCArrangeView::OnDrop(
 			short	at_channel;
 			Pix2Time(point.x, at_time);
 			at_channel = Pix2Channel(point.y);
-			cerr << "file drop " << at_channel << " chan " << at_time.StringValue() << endl;
+			std::cerr << "file drop " << at_channel << " chan " << at_time.StringValue() << endl;
 			//			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drag files is dropped: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
@@ -728,7 +757,7 @@ MFCArrangeView::OnDrop(
 			for (i=0; ((unsigned)i)<dragon.data.filePathList->size(); i++) {
 				string	mime_t = Qua::identifyFile(dragon.data.filePathList->at(i));
 				if (mime_t.size() > 0) {
-					cout << "drop " << dragon.data.filePathList->at(i) << ", " << mime_t << endl;
+					std::cout << "drop " << dragon.data.filePathList->at(i) << ", " << mime_t << endl;
 					if (mime_t == "audio/x-midi") {
 						drop_midi_file = true;
 						break;
@@ -782,7 +811,7 @@ MFCArrangeView::OnDrop(
 			short	at_channel;
 			Pix2Time(point.x, at_time);
 			at_channel = Pix2Channel(point.y);
-			cerr << "instance drop " << at_channel << " chan " << at_time.StringValue() << endl;
+			std::cerr << "instance drop " << at_channel << " chan " << at_time.StringValue() << endl;
 			//			int		bar, barbeat, beattick;
 //			at_time.GetBBQValue(bar, barbeat, beattick);
 //			fprintf(stderr, "drop instance %s: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", dragon.data.symbol->name, point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
@@ -790,7 +819,7 @@ MFCArrangeView::OnDrop(
 			if (i != nullptr) {
 				quaLink->MoveInstance(dragon.data.symbol, at_channel, at_time, i->duration);
 			} else {
-				cout << "oops bad drop ... expected an instance" << endl;
+				std::cout << "oops bad drop ... expected an instance" << endl;
 			}
 			return TRUE;
 		}
@@ -853,6 +882,7 @@ MFCArrangeView::OnLButtonDown(
 //	int		bar, barbeat, beattick;
 //	at_time.GetBBQValue(bar, barbeat, beattick);
 //	fprintf(stderr, "left button down: on point %d %d, channel %d, ticks %d t %d:%d.%d\n", point.x, point.y, at_channel, at_time.ticks, bar, barbeat, beattick);
+	std::cerr << "left mouse button down at " << at_time.StringValue() << " flags " << nFlags << endl;
 
 	switch (currentTool) {
 		case ID_ARTOOL_POINT: {
@@ -1004,6 +1034,8 @@ MFCArrangeView::OnMouseMove(
 	short	at_channel;
 	at_channel = Pix2Channel(point.y);
 
+//	std::cerr << "MFCArrangeView:OnMouseMove() " << at_time.StringValue() << " flags " << nFlags << endl;
+
 	if (bounds.PtInRect(point)) {
 		if (!mouse_captured) {
 			SetCapture();
@@ -1041,6 +1073,7 @@ MFCArrangeView::OnMouseMove(
 	switch (mouse_action) {
 		case QUA_MOUSE_ACTION_MOVE_INSTANCE: {
 			if (mouse_instance) {
+				std::cerr << "mouse move, move instance " << at_time.StringValue() << " flags " << nFlags << endl;
 				Instance	*inst = mouse_instance->instance;
 				if (inst) {
 					Pix2Time(point.x-mouse_move_inst_offset.x, at_time);
@@ -1183,6 +1216,7 @@ MFCArrangeView::OnScroll(
 {
 	int nPos = (int) unPos;
 //	fprintf(stderr, "on scroll %d/%d %d %d\n", nScrollCode&0xff, (nScrollCode&0xff00)>>8, nPos, bDoScroll);
+	InvalidateRect(NULL, TRUE);
 	switch ((nScrollCode&0xff00)>>8) {
 		case SB_BOTTOM: { //   Scroll to bottom. 
 			if (channeler && bDoScroll) {
@@ -1338,6 +1372,7 @@ MFCArrangeView::AddInstanceRepresentation(Instance *i)
 	if (!nv) return;
 	AddI(nv);
 	nv->Redraw();
+	UpdateWindow();
 }
 
 
@@ -1403,6 +1438,8 @@ MFCArrangeView::updateClipIndexDisplay()
 	RemoveClipsNotIn(presentClips);
 //	clipsView->RemoveClipsNotIn(presentClips);
 }
+
+
 /////////////////////////////////////////////////////////////////////////////
 // MFCInstanceView
 /////////////////////////////////////////////////////////////////////////////
@@ -1423,7 +1460,7 @@ MFCInstanceView::~MFCInstanceView()
 
 #ifdef QUA_V_GDI_PLUS
 void
-MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
+MFCInstanceView::Draw(Graphics &dc, CRect &clipBox)
 {
 // !!!??? need to clip properly for short instances with long names
 	Pen			blackPen(AlphaColor(250, rgb_black), 1);
@@ -1432,30 +1469,28 @@ MFCInstanceView::Draw(Graphics *dc, CRect *clipBox)
 	SolidBrush	blackBrush(AlphaColor(100, rgb_black));
 
 	CRect		clipBounds = bounds;
-	if (clipBox->left > bounds.left) clipBounds.left = clipBox->left-1;
-	if (clipBox->right < bounds.right) clipBounds.right = clipBox->right+1;
+	if (clipBox.left > bounds.left) clipBounds.left = clipBox.left-1;
+	if (clipBox.right < bounds.right) clipBounds.right = clipBox.right+1;
 
-	cerr << "ondraw instance view " << endl;
-	dc->FillRectangle(&blueBrush,
-			bounds.left, bounds.top,
-			bounds.right-bounds.left, bounds.bottom-bounds.top);
-	dc->DrawRectangle(selected?&redPen:&blackPen,
-			bounds.left, bounds.top,
-			clipBounds.right-bounds.left, bounds.bottom-bounds.top);
+	cerr << "ondraw instance view " << clipBox.left << ", " << clipBox.right << endl;
+	dc.FillRectangle(&blueBrush,
+			bounds.left, bounds.top, bounds.right-bounds.left, bounds.bottom-bounds.top);
+	dc.DrawRectangle(selected?&redPen:&blackPen,
+			bounds.left, bounds.top, clipBounds.right-bounds.left, bounds.bottom-bounds.top);
 	Font	labelFont(L"Arial", 8.0, FontStyleRegular, UnitPoint, NULL);
 	wstring nm;
 	const char *cp = instance->sym->uniqueName();
 	while (*cp) { nm.push_back(*cp++); }
 	float lbx = bounds.left+2;
 #define LBLSEP 200
-	if (clipBox->left > lbx) {
-		int nld = clipBox->left - lbx;
+	if (clipBox.left > lbx) {
+		int nld = clipBox.left - lbx;
 		nld = nld/LBLSEP;
 //		if (nld > 2) lbx += (nld-2)*LBLSEP;
 	}
 	PointF	p(lbx, clipBounds.top);
 	do {
-		dc->DrawString(nm.c_str(), -1, &labelFont, p, &blackBrush);
+		dc.DrawString(nm.c_str(), -1, &labelFont, p, &blackBrush);
 		p.X += LBLSEP;
 	} while (p.X < clipBounds.right);
 }
@@ -1469,22 +1504,23 @@ MFCInstanceView::Draw(CDC *dc, CRect *clipBox)
 #endif
 
 void
-MFCInstanceView::Redraw(bool redraw)
+MFCInstanceView::Redraw()
 {
 	if (arranger) {
 		CRect	updr = bounds;
 		CPoint	scr = arranger->GetScrollPosition();
+//		CRect r2;
+//		arranger->GetClientRect(r2);
 		updr = bounds - scr;
 		updr.bottom ++;
 		updr.right ++;
-		if (redraw) {
-			arranger->RedrawWindow(&updr);
-		} else {
-			arranger->InvalidateRect(&updr);
-		}
+		arranger->InvalidateRect(&updr);
 	}
 }
 
+/*
+ * calculates the full bounds rectangle for this instance representation in it's arrangers coordinate space and metric
+ */
 void
 MFCInstanceView::CalculateBounds()
 {
@@ -1492,8 +1528,8 @@ MFCInstanceView::CalculateBounds()
 		MFCChannelView	*cv = (MFCChannelView *)arranger->channeler->ChannelRepresentationFor(instance->channel);
 		if (cv) {
 			Time	rt = instance->duration&(&Metric::mSec);
-			Time	arrTime = instance->startTime&arranger->displayMetric;
-			Time	arrDur = instance->duration&arranger->displayMetric;
+			Time	arrTime = instance->startTime & arranger->displayMetric;
+			Time	arrDur = instance->duration & arranger->displayMetric;
 			long	pixl = arranger->Time2Pix(arrTime);
 			long	pixd = arranger->Time2Pix(arrDur);
 			if (pixd < 2) {
@@ -1515,6 +1551,7 @@ MFCInstanceView::DrawMove()
 		CalculateBounds();
 		arranger->InvalidateRect(&oldr);
 		Redraw();
+		arranger->UpdateWindow();
 	}
 }
 
@@ -1526,6 +1563,7 @@ MFCInstanceView::Select(bool sel)
 	}
 	selected = sel;
 	Redraw();
+	arranger->UpdateWindow();
 }
 
 

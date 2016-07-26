@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+
 using namespace std;
 
 struct qua_time;
@@ -622,15 +624,18 @@ public:
 	}
 
 	inline void	AddI(QuaInstanceRepresentation *i) { 
-		instanceRepresentations.push_back(i);
+		auto ci = std::find(instanceRepresentations.begin(), instanceRepresentations.end(), i);
+		if (ci == instanceRepresentations.end()) {
+			instanceRepresentations.push_back(i);
+		}
+		
 	}
 
 	inline bool	RemI(QuaInstanceRepresentation *i) {
-		for (auto ci = instanceRepresentations.begin(); ci != instanceRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				instanceRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(instanceRepresentations.begin(), instanceRepresentations.end(), i);
+		if (ci != instanceRepresentations.end()) {
+			instanceRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
@@ -672,17 +677,22 @@ public:
 		return i >= 0 && ((size_t)i) < channelRepresentations.size()? channelRepresentations[i]:nullptr; 
 	}
 	inline void	AddCR(QuaChannelRepresentation *i) {
-		channelRepresentations.push_back(i);
+		auto ci = std::find(channelRepresentations.begin(), channelRepresentations.end(), i);
+		if (ci == channelRepresentations.end()) {
+			channelRepresentations.push_back(i);
+		}
+
 	}
+
 	inline bool	RemCR(QuaChannelRepresentation *i) {
-		for (auto ci = channelRepresentations.begin(); ci != channelRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				channelRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(channelRepresentations.begin(), channelRepresentations.end(), i);
+		if (ci != channelRepresentations.end()) {
+			channelRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
+
 	QuaChannelRepresentation	*ChannelRepresentationFor(Channel *c);
 	QuaChannelRepresentation	*ChannelRepresentationFor(StabEnt *s);
 
@@ -751,15 +761,19 @@ public:
 	inline QuaObjectRepresentation	*OR(long i) {
 		return i >= 0 && ((size_t)i) < objectRepresentations.size() ? objectRepresentations[i] : nullptr;
 	}
-	inline void	AddOR(QuaObjectRepresentation *i) { 
-		objectRepresentations.push_back(i); 
+	inline void	AddOR(QuaObjectRepresentation *i) {
+		auto ci = std::find(objectRepresentations.begin(), objectRepresentations.end(), i);
+		if (ci == objectRepresentations.end()) {
+			objectRepresentations.push_back(i);
+		}
+
 	}
+
 	inline bool	RemOR(QuaObjectRepresentation *i) {
-		for (auto ci = objectRepresentations.begin(); ci != objectRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				objectRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(objectRepresentations.begin(), objectRepresentations.end(), i);
+		if (ci != objectRepresentations.end()) {
+			objectRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
@@ -861,17 +875,21 @@ public:
 		return i >= 0 && ((size_t)i) < controllerRepresentations.size() ? controllerRepresentations[i] : nullptr;
 	}
 	inline void	AddCR(QuaControllerRepresentation *i) {
-		controllerRepresentations.push_back(i); 
+		auto ci = std::find(controllerRepresentations.begin(), controllerRepresentations.end(), i);
+		if (ci == controllerRepresentations.end()) {
+			controllerRepresentations.push_back(i);
+		}
 	}
+
 	inline bool	RemCR(QuaControllerRepresentation *i) {
-		for (auto ci = controllerRepresentations.begin(); ci != controllerRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				controllerRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(controllerRepresentations.begin(), controllerRepresentations.end(), i);
+		if (ci != controllerRepresentations.end()) {
+			controllerRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
+
 	inline void *RemCR(long i) {
 		QuaControllerRepresentation *qi = CR(i);
 		if (qi != nullptr) RemCR(qi);
@@ -926,14 +944,17 @@ public:
 		return i >= 0 && ((size_t)i)<childRepresentations.size() ? childRepresentations[i] : nullptr;
 	}
 	inline void	AddCOR(QuaObjectRepresentation *i) {
-		childRepresentations.push_back(i);
+		auto ci = std::find(childRepresentations.begin(), childRepresentations.end(), i);
+		if (ci == childRepresentations.end()) {
+			childRepresentations.push_back(i);
+		}
 	}
+
 	inline bool	RemCOR(QuaObjectRepresentation *i) {
-		for (auto ci = childRepresentations.begin(); ci != childRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				childRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(childRepresentations.begin(), childRepresentations.end(), i);
+		if (ci != childRepresentations.end()) {
+			childRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
@@ -966,13 +987,18 @@ public:
 	inline QuaFrameRepresentation	*FR(long i) { 
 		return i >= 0 && ((size_t)i) < frameRepresentations.size() ? frameRepresentations[i] : nullptr;
 	}
-	inline void	AddFR(QuaFrameRepresentation *i) { frameRepresentations.push_back(i); }
+	inline void	AddFR(QuaFrameRepresentation *i) {
+		auto ci = std::find(frameRepresentations.begin(), frameRepresentations.end(), i);
+		if (ci == frameRepresentations.end()) {
+			frameRepresentations.push_back(i);
+		}
+	}
+
 	inline bool	RemFR(QuaFrameRepresentation *i) {
-		for (auto ci = frameRepresentations.begin(); ci != frameRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				frameRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(frameRepresentations.begin(), frameRepresentations.end(), i);
+		if (ci != frameRepresentations.end()) {
+			frameRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
@@ -984,17 +1010,17 @@ public:
 	QuaFrameRepresentation		*RepresentationFor(QuasiStack *);
 
 #ifdef Q_FRAME_MAP
-	virtual void				PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *parent, QuasiStack *stack, frame_map_hdr *, bool)=0;
-	virtual void				RefreshFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *)=0;
+	virtual void PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *parent, QuasiStack *stack, frame_map_hdr *, bool)=0;
+	virtual void RefreshFrameRepresentation(StabEnt *, QuasiStack *, frame_map_hdr *)=0;
 #else
-	virtual void				PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *parent, QuasiStack *stack, bool)=0;
-	virtual void				RefreshFrameRepresentation(StabEnt *, QuasiStack *)=0;
+	virtual void PopFrameRepresentation(StabEnt *stackerSym, QuasiStack *parent, QuasiStack *stack, bool)=0;
+	virtual void RefreshFrameRepresentation(StabEnt *, QuasiStack *)=0;
 #endif
-	virtual void				HideFrameRepresentation(StabEnt *, QuasiStack *)=0;
-	virtual void				DeleteFrameRepresentation(StabEnt *, QuasiStack *)=0;
+	virtual void HideFrameRepresentation(StabEnt *, QuasiStack *)=0;
+	virtual void DeleteFrameRepresentation(StabEnt *, QuasiStack *)=0;
 
-	virtual void				updateClipIndexDisplay();
-	virtual void				UpdateChannelIndexDisplay(StabEnt *ds);
+	virtual void updateClipIndexDisplay();
+	virtual void UpdateChannelIndexDisplay(StabEnt *ds);
 };
 
 
@@ -1036,7 +1062,7 @@ class QuaMethodObjectRepresentation: public QuaObjectRepresentation
 public:
 	QuaMethodObjectRepresentation();
 	virtual ~QuaMethodObjectRepresentation();
-	virtual void				UpdateVariableIndexDisplay()=0;
+	virtual void UpdateVariableIndexDisplay()=0;
 };
 
 // an overview representation of a channel, popped into a channel rack
@@ -1061,23 +1087,33 @@ public:
 	inline QuaOutputRepresentation	*OutR(long i) {
 		return i >= 0 && ((size_t)i) < outputRepresentations.size() ? outputRepresentations[i] : nullptr;
 	}
-	inline void	AddInR(QuaInputRepresentation *i) { inputRepresentations.push_back(i); }
-	inline void	AddOutR(QuaOutputRepresentation *i) { outputRepresentations.push_back(i); }
+	inline void	AddInR(QuaInputRepresentation *i) {
+		auto ci = std::find(inputRepresentations.begin(), inputRepresentations.end(), i);
+		if (ci == inputRepresentations.end()) {
+			inputRepresentations.push_back(i);
+		}
+	}
+
 	inline bool	RemoveInR(QuaInputRepresentation *i) {
-		for (auto ci = inputRepresentations.begin(); ci != inputRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				inputRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(inputRepresentations.begin(), inputRepresentations.end(), i);
+		if (ci != inputRepresentations.end()) {
+			inputRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
+	inline void	AddOutR(QuaOutputRepresentation *i) {
+		auto ci = std::find(outputRepresentations.begin(), outputRepresentations.end(), i);
+		if (ci == outputRepresentations.end()) {
+			outputRepresentations.push_back(i);
+		}
+	}
+
 	inline bool	RemoveOutR(QuaOutputRepresentation *i) {
-		for (auto ci = outputRepresentations.begin(); ci != outputRepresentations.end(); ++ci) {
-			if (*ci == i) {
-				outputRepresentations.erase(ci);
-				return true;
-			}
+		auto ci = std::find(outputRepresentations.begin(), outputRepresentations.end(), i);
+		if (ci != outputRepresentations.end()) {
+			outputRepresentations.erase(ci);
+			return true;
 		}
 		return false;
 	}
@@ -1178,8 +1214,8 @@ public:
 	QuaInstanceRepresentation();
 	~QuaInstanceRepresentation();
 
-	void						SetInstance(Instance *i);
-	Instance					*instance;
+	void SetInstance(Instance *i);
+	Instance *instance;
 };
 
 // representation of a value type symbol, eg string, numeric, list
@@ -1192,9 +1228,9 @@ public:
 	QuaSymbolController();
 	~QuaSymbolController();
 
-	void						SetDisplayValue();		// sets the display value
-	void						DisplayValue();			// return current value of display
-	void						DisplayValueChanged(); // called to change the actual value
+	void SetDisplayValue();		// sets the display value
+	void DisplayValue();			// return current value of display
+	void DisplayValueChanged(); // called to change the actual value
 };
 
 // representation of a value type symbol, eg numeric which has an enveloped value
@@ -1211,11 +1247,11 @@ public:
 	QuaSymbolEnvelopper();
 	~QuaSymbolEnvelopper();
 
-	void						AddPoint();		// sets the display value
-	void						DeletePoint();			// return current value of display
-	void						MovePoint(); // called to change the actual value
-	void						ModifyPoint();
-	void						ModifyProperty();
+	void AddPoint();		// sets the display value
+	void DeletePoint();			// return current value of display
+	void MovePoint(); // called to change the actual value
+	void ModifyPoint();
+	void ModifyProperty();
 };
 
 

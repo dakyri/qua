@@ -44,7 +44,7 @@ public:
 	virtual				~MFCEditorItemView();
 
 #ifdef QUA_V_GDI_PLUS
-	virtual void		Draw(Graphics *, CRect *);
+	virtual void		Draw(Graphics &g, CRect &rect);
 #else
 	virtual void		Draw(CDC *, CRect *);
 #endif
@@ -52,7 +52,7 @@ public:
 	virtual bool		Represents(void *)=NULL;
 	virtual short		HitTest(CPoint &, UINT, void * & clkit)=NULL;
 
-	void				Redraw(bool redraw=true);
+	void				Redraw();
 	void				DrawMove();
 	void				Select(bool);
 
@@ -62,7 +62,7 @@ public:
 	bool				selected;
 	enum {
 		NONE = 0,
-		DISCRETE = 1,
+		DISCRETE = 1, // afics, this is only stream items
 		LIST = 2,
 		ENV = 3,
 		CLIP = 4,
@@ -201,7 +201,10 @@ public:
 	afx_msg void				OnKeyDown(UINT nChar, UINT nRepCnt,	UINT nFlags	);
 	afx_msg void				OnKeyUp(UINT nChar,	UINT nRepCnt, UINT nFlags );
 
-//	afx_msg void				OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnPaint();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+
+	//	afx_msg void				OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void				OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -263,12 +266,12 @@ public:
 	Metric						*displayMetric;
 // drawing
 #ifdef QUA_V_GDI_PLUS
-	void						DrawGridGraphics(Graphics *g, CRect *);
-	void						DrawCursor(Graphics *g, CRect *);
+	void						DrawGridGraphics(Graphics &g, CRect &);
+	void						DrawCursor(Graphics &g, CRect &);
 #else
-	void						DrawCursor(CDC *pdc, CRect *);
+	void						DrawCursor(CDC *pdc, CRect &);
 #endif
-	void						DrawGrid(CDC *pdc, CRect *);
+	void						DrawGrid(CDC *pdc, CRect &);
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(MFCSequenceEditor)

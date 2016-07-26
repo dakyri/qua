@@ -18,12 +18,13 @@ public:
 	virtual				~MFCStreamEditorYScale();
 
 	static CFont		displayFont;
-	afx_msg BOOL		OnEraseBkgnd(CDC* pDC);
-	afx_msg void		OnPaint();
-	afx_msg int			OnCreate(LPCREATESTRUCT lpCreateStruct );
-	afx_msg void		OnSize(UINT nType, int cx, int cy);
-	afx_msg void		OnSizing( UINT, LPRECT );
-	afx_msg void		OnMove(int x, int y);
+
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnPaint();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct );
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnSizing( UINT, LPRECT );
+	afx_msg void OnMove(int x, int y);
 
 	bool				CreateYScale(CRect &r, CWnd *p, UINT id, MFCStreamDataEditor *);
 
@@ -113,20 +114,22 @@ public:
 class MFCStreamDataEditor :	public MFCDataEditor
 {
 public:
-							MFCStreamDataEditor(void);
+	MFCStreamDataEditor(void);
 	DECLARE_DYNCREATE(MFCStreamDataEditor)
-	virtual					~MFCStreamDataEditor(void);
+	virtual ~MFCStreamDataEditor(void);
 
-	afx_msg void			OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void			OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void			OnLButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg void			OnMButtonDown(UINT nFlags, CPoint point);
-	afx_msg void			OnMButtonUp(UINT nFlags, CPoint point);
-	afx_msg void			OnMButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg void			OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg BOOL			OnMouseWheel(UINT nFlags, short zDelta,	CPoint pt );
-	afx_msg void			OnKeyDown(UINT nChar, UINT nRepCnt,	UINT nFlags	);
-	afx_msg void			OnKeyUp(UINT nChar,	UINT nRepCnt, UINT nFlags );
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnPaint();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt );
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags	);
+	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags );
 
 	afx_msg void			OnAddController();
 
@@ -155,15 +158,15 @@ public:
 
 	bool					AddAllItemViews(bool redraw);
 
-	Stream					*stream;
-	StreamTake				*take;
+	Stream *stream;
+	StreamTake *take;
 
-	StreamItem				*mouse_sub_item;
-	float					last_controller_value;
+	StreamItem *mouse_sub_item;
+	float last_controller_value;
 
-	long					NoteHeight();
-	long					Note2Pix(long c);
-	long					Pix2Note(long);
+	long NoteHeight();
+	long Note2Pix(long c);
+	long Pix2Note(long);
 
 	DECLARE_MESSAGE_MAP()
 };

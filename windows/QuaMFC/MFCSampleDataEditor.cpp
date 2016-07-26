@@ -411,7 +411,7 @@ MFCSampleDataEditor::OnDraw(CDC* pdc)
 	CDocument* pDoc = GetDocument();
 #ifdef QUA_V_GDI_PLUS
 	Graphics	graphics(pdc->m_hDC);
-	DrawGridGraphics(&graphics, &clipBox);
+	DrawGridGraphics(graphics, clipBox);
 
 	if (take != NULL && take->file != NULL) {
 #if QUA_V_SAMPLE_DRAW=='p'
@@ -535,16 +535,16 @@ MFCSampleDataEditor::OnDraw(CDC* pdc)
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type != MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
 	for (short i=0; i<NItemR(); i++) {
 		MFCEditorItemView *ir = ItemR(i);
 		if (ir->type == MFCEditorItemView::DISCRETE && ir->BoundingBox().Intersects(clipBox)) {
-			ir->Draw(&graphics, &clipBox);
+			ir->Draw(graphics, clipBox);
 		}
 	}
-	DrawCursor(&graphics, &clipBox);
+	DrawCursor(graphics, clipBox);
 #else
 	DrawGrid(pdc, &clipBox);
 	DrawCursor(pdc);

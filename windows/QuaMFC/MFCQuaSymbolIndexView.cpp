@@ -862,7 +862,7 @@ MFCQuaSymbolIndexView::OnEndLabelEdit(NMHDR *pNotifyStruct,LRESULT *result)
 
 	string name;
 
-//	fprintf(stderr, "label edit end %s\n", tvp->item.pszText?tvp->item.pszText:"");
+//	cerr << "label edit end " << ( tvp->item.pszText?tvp->item.pszText:"") << endl;
 	DWORD_PTR		selectedData = GetTreeCtrl().GetItemData(selectedItem);
 	if (selectedData > QSI_SYMBOL_LPARAM && (name=SymTab::MakeValidSymbolName(tvp->item.pszText)).size()) {
 		StabEnt		*sym = (StabEnt *)selectedData;
