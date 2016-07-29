@@ -29,6 +29,8 @@
 
 #include "QuaDisplay.h"
 
+#include <iostream>
+
 flag	debug_chan = 0;
 
 //static float	qmo_temp[8192];
@@ -132,11 +134,12 @@ Channel::Channel(std::string nm, short ch_id,
 bool
 Channel::Init()
 {
-	fprintf(stderr, "Channel::initialise %s\n", sym->name.c_str());
+	cerr << "Channel::initialise " << sym->name << endl;
+
 	hasAudio = txStack->hasAudio|rxStack->hasAudio;
 #ifdef QUA_V_AUDIO
 	if (hasAudio&AUDIO_HAS_PLAYER) {
-		fprintf(stderr, "Channel::initialise starting audio for player channel\n");
+		cerr << "Channel::initialise starting audio for player channel" << endl;
 
 		getAudioManager().startChannel(this);
 	}
@@ -173,7 +176,7 @@ Channel::~Channel()
 //		Window()->Unlock();
 //	}
 	
-	fprintf(stderr, "deleting channel %s\n", sym->name.c_str());
+	cerr << "deleting channel " << sym->name << endl;
 	if (rx.block) {
 		rx.block->DeleteAll();
 		rx.block = nullptr;
@@ -239,7 +242,7 @@ Channel::EnableAudioThru(bool in)
 {
 	if (audioThru != in) {
 		audioThru = in;
-		fprintf(stderr, "audio thru = %d\n", audioThru);
+		cerr << "audio thru = " << audioThru << endl;
 	}
 }
 
@@ -248,7 +251,7 @@ Channel::EnableMidiThru(bool in)
 {
 	if (midiThru != in) {
 		midiThru = in;
-		fprintf(stderr, "midi thru = %d\n", midiThru);
+		cerr << "midi thru = " << audioThru << endl;
 	}
 }
 
@@ -376,7 +379,7 @@ Channel::CheckInBuffers()
 		for (Input *i: activeStreamInputs) {
 			// get stream items
 			i->GetStreamItems(&recvStream);
-			fprintf(stderr, "Channel %s, receiving %d\n", sym->name.c_str(), recvStream.nItems);
+			cerr <<"Channel " << sym->name <<", receiving " << recvStream.nItems << endl;
 		}
 		
 		if (recvStream.nItems > 0) {
@@ -824,7 +827,7 @@ Channel::Receive(size_t nFrames)
 				float   *tbuf[] = {ibuf, xbuf };
 				sample_buf_add(inSig, tbuf, nAudioIns, nFrames);
 			} else {
-				fprintf(stderr, "Qua channel panic: don't know how to reformat input\n");
+				cerr << "Qua channel panic: don't know how to reformat input" << endl;
 			}
 		} else {	// skip dud port data
 		}
@@ -862,7 +865,7 @@ size_t
 Channel::Generate(size_t nFrames)
 {
 	if (debug_chan >= 2) {
-		fprintf(stderr, "Channel %d: generate(%d)\n", chanId, nFrames);
+		cerr << "Channel " << chanId << ": generate(" << nFrames << ")" << endl;
 	}
 // used to be a simple q ... now a sample_buf.
 // sample data received is in inSig
@@ -909,7 +912,7 @@ Channel::Generate(size_t nFrames)
 					*xsp++ = *orp++;
 				}
 			} else {
-				fprintf(stderr, "Channel::Generate() error: missing audio buffer in stereo channel generation\n");
+				cerr << "Channel::Generate() error: missing audio buffer in stereo channel generation" << endl;
 			}
 //	if (chanId == 0) {
 //		for (short i=0; i<nFrames; i++) {
@@ -932,34 +935,34 @@ Channel::Generate(size_t nFrames)
 	return nFrames;
 }
 
+
 Input *
-Channel::AddInput(const string &nm, const string &deviceName, QuaPort *p, short c, bool en)
+Channel::AddInput(const string &nm, const PortSpec &portSpec, bool en)
 {
-	fprintf(stderr, "Channel %s adding input %s\n", sym->name.c_str(), nm.c_str());
-	Input	*s=nullptr;
+	cerr << "Channel " << sym->name << " adding input " << nm << endl;
+	Input	*s = nullptr;
 	activePortsLock.lock();
 	std::string inputName = glob.makeUniqueName(sym, nm, 0);
-	inputs.Add(s=new Input(inputName, this, p, c, en));
+	inputs.Add(s = new Input(inputName, this, portSpec, en));
 	DefineSymbol("gain", TypedValue::S_FLOAT, 0,
-					&s->gain, s->sym,
-					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
+		&s->gain, s->sym, TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 	DefineSymbol("pan", TypedValue::S_FLOAT, 0,
-					&s->pan, s->sym,
-					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
+		&s->pan, s->sym, TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 
+	QuaPort *p = s->currentPort();
 	if (p && s->enabled) {
 		switch (p->deviceType) {
-			case QuaPort::Device::AUDIO: {
-				activeAudioInputs.Add(s);
-				break;
-			}
-			
-			case QuaPort::Device::JOYSTICK:
-			case QuaPort::Device::MIDI:
-			default: {
-				activeStreamInputs.Add(s);
-				break;
-			}
+		case QuaPort::Device::AUDIO: {
+			activeAudioInputs.Add(s);
+			break;
+		}
+
+		case QuaPort::Device::JOYSTICK:
+		case QuaPort::Device::MIDI:
+		default: {
+			activeStreamInputs.Add(s);
+			break;
+		}
 		}
 	}
 	activePortsLock.unlock();
@@ -969,34 +972,35 @@ Channel::AddInput(const string &nm, const string &deviceName, QuaPort *p, short 
 }
 
 Output *
-Channel::AddOutput(const string &nm, const string &deviceName, QuaPort *p, short c, bool en)
+Channel::AddOutput(const string &nm, const PortSpec &portSpec, bool en)
 {
-	fprintf(stderr, "Channel %s adding output %s\n", sym->name.c_str(), nm.c_str());
+	cerr << "Channel " << sym->name << " adding output " << nm << endl;
 
 	activePortsLock.lock();
-	Output		*d=nullptr;
+	Output *d = nullptr;
 	std::string outputName = glob.makeUniqueName(sym, nm, 0);
 
-	outputs.Add(d=new Output(outputName, this, p, c, en));
+	outputs.Add(d = new Output(outputName, this, portSpec, en));
 	DefineSymbol("gain", TypedValue::S_FLOAT, 0,
-					&d->gain, d->sym,
-					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
+		&d->gain, d->sym,
+		TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 	DefineSymbol("pan", TypedValue::S_FLOAT, 0,
-					&d->pan, d->sym,
-					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
+		&d->pan, d->sym,
+		TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
+	QuaPort *p = d->currentPort();
 	if (p && d->enabled) {
 		switch (p->deviceType) {
-			case QuaPort::Device::AUDIO: {
-				activeAudioOutputs.Add(d);
-				break;
-			}
-			
-			case QuaPort::Device::JOYSTICK:
-			case QuaPort::Device::MIDI:
-			default: {
-				activeStreamOutputs.Add(d);
-				break;
-			}
+		case QuaPort::Device::AUDIO: {
+			activeAudioOutputs.Add(d);
+			break;
+		}
+
+		case QuaPort::Device::JOYSTICK:
+		case QuaPort::Device::MIDI:
+		default: {
+			activeStreamOutputs.Add(d);
+			break;
+		}
 		}
 	}
 	activePortsLock.unlock();
@@ -1039,7 +1043,7 @@ Channel::Enable(Input *s, bool en)
 		switch(s->device->deviceType) {
 		case QuaPort::Device::MIDI: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable midi in (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
+				cerr << "Channel "<< sym->name <<" , enable midi in ("<< s->Name(NMFMT_NAME, NMFMT_NUM) <<")" << endl;
 				if ((err=getMidiManager().connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
 				} else {
@@ -1072,7 +1076,7 @@ Channel::Enable(Input *s, bool en)
 #ifdef QUA_V_AUDIO
 		case QuaPort::Device::AUDIO: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
+				cerr << "Channel " << sym->name << " , enable audio in (" << s->Name(NMFMT_NAME, NMFMT_NUM) << ")" << endl;
 				if ((err=getAudioManager().connect(s)) == B_OK) {
 					activeAudioInputs.Add(s);
 				} else {
@@ -1103,7 +1107,7 @@ Channel::Enable(Output *s, bool en)
 		switch(s->device->deviceType) {
 		case QuaPort::Device::MIDI: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable midi out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NAME));
+				cerr << "Channel " << sym->name << " , enable midi out (" << s->Name(NMFMT_NAME, NMFMT_NUM) << ")" << endl;
 				if ((err=getMidiManager().connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
 				} else {
@@ -1136,7 +1140,7 @@ Channel::Enable(Output *s, bool en)
 #ifdef QUA_V_AUDIO
 		case QuaPort::Device::AUDIO: {
 			if (en) {
-				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
+				cerr << "Channel " << sym->name << " , enable audio out (" << s->Name(NMFMT_NAME, NMFMT_NUM) << ")" << endl;
 				if ((err=getAudioManager().connect(s)) == B_OK) {
 					activeAudioOutputs.Add(s);
 				} else {
@@ -1280,8 +1284,7 @@ Output::NoodleEnable(bool en)
 	status_t	err=B_OK;
 
 	if (device) {
-		fprintf(stderr, "Noodle enable(%d) devt = %d\n",
-					en, device->deviceType);
+		cerr << "Noodle enable(" << en << ") devt = " << device->deviceType << endl;
 					
 		switch(device->deviceType) {
 		

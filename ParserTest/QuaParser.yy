@@ -66,6 +66,8 @@
 	std::string *stringval;
 	std::vector<int> *vectival;
 	TypedValue *typedval;
+	PortSpec *portval;
+	
 	int intval;
 	base_type_t typeval;
 	StabEnt *stabval;
@@ -90,9 +92,9 @@
 %type <stabval> struct_defn
 %type <stabval> input_defn
 %type <stabval> output_defn
-%type <intval> destination_spec
-%type <intval> port_spec
-%type <intval> port_id_list
+%type <portval> destination_spec
+%type <vectival> chan_id_spec
+%type <vectival> chan_id_list
 
 %type <stabval> qua_child_defn_list
 %type <stabval> qua_child_defn
@@ -178,6 +180,7 @@
 %destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <stringval>
 %destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <typedval>
 %destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <vectival>
+%destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <portval>
 
 %%
 
@@ -339,19 +342,16 @@ input_defn : INPUT destination_attribute_list IDENT destination_spec {
 //		input \midi in1 "In USB Keystation":*
 //		input \audio in1 "*"
 //		input \audio in1 pluginInstanceId:2,3
+		Channel *cha=context->ChannelValue();
+		Input *s = cha->AddInput(nm, *$4, true);
 /*
-			Channel		*cha=context->ChannelValue();
-			Input *s = cha->AddInput(nm, trxport[0], sch[0], true);
-			for (short i=1; i<nport; i++) {
-				s->setPortInfo(trxport[i], sch[i], i);
-			}
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
 				s->initBlock = ParseBlockInfo(s->sym, s->sym);
 				glob.PopContext(s->sym);
 			}
 */
-		$$ = nullptr;
+		$$ = s->sym;
 	}
 	;
 	
@@ -359,35 +359,33 @@ output_defn : OUTPUT destination_attribute_list IDENT destination_spec {
 //		output \audio out1 "ASIO Echo WDM":0,1
 //		output \midi out1 pluginInstanceId:2,3
 //		output \osc out1 "124.1.1.1:1008"
+
+		Channel *cha=context->ChannelValue();
+		Output *s = cha->AddOutput(nm, *$4, true);
 /*
-			Channel		*cha=context->ChannelValue();
-			Output *s = cha->AddOutput(nm, trxport[0], sch[0], true);
-			for (short i=1; i<nport; i++) {
-				s->setPortInfo(trxport[i], sch[i], i);
-			}
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
 				s->initBlock = ParseBlockInfo(s->sym, s->sym);
 				glob.PopContext(s->sym);
 			}
 */
-		$$ = nullptr;
+		$$ = s->sym;
 	}
 	;
 	
 destination_spec
-	: IDENT port_spec
-	| LITERAL_STRING port_spec
+	: IDENT chan_id_spec 			{ $$ = new PortSpec($1, true); $$->setChanIds($2); }
+	| LITERAL_STRING chan_id_spec	{ $$ = new PortSpec($1, false); $$->setChanIds($2); }
 	;
 
-port_spec : { $$ = 0; }
-	| COLON STAR { $$ = 0; }
-	| COLON port_id_list  { $$ = 0; }
+chan_id_spec : { $$ = nullptr; }
+	| COLON STAR { $$ = new vector<int>({-1}); }
+	| COLON chan_id_list  { $$ = $2; }
 	;
 	
-port_id_list
-	: LITERAL_INT { $$ = 0; }
-	| port_id_list COMMA LITERAL_INT { $$ = 0; }
+chan_id_list
+	: LITERAL_INT { $$ = new vector<int>(1, $1); }
+	| chan_id_list COMMA LITERAL_INT { $$ = $1; $$->push_back($3); }
 	;
 	
 simple_defn : TYPE dimension_list IDENT {

@@ -100,7 +100,7 @@ AttributeList::has(char *pr)
 
 }
 
-Attribute::value &
+Attribute::value
 AttributeList::getValue(Attribute::idcode pid)
 {
 	for (Attribute *p = items; p!=nullptr; p=p->next) {
@@ -130,7 +130,7 @@ AttributeList::getValue(char *pr)
 	return getValue(AttributeId(pr));
 }
 
-AttributeList &
+AttributeList
 AttributeList::clone() {
 	return AttributeList(items->clone());
 }

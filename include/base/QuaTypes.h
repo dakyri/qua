@@ -5,6 +5,7 @@
 
 typedef short qua_status;
 typedef short qua_chan_id;
+typedef short qua_port_type;
 typedef	uint32 q_size_t;
 typedef	int8 base_type_t;
 typedef int16 port_chan_id;

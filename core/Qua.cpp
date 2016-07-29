@@ -338,8 +338,7 @@ Qua::PostCreationInit()
     SetTempo(120, true);
 
 #ifdef QUA_V_MULTIMEDIA_TIMER
-	mmTimerId = timeSetEvent(
-		theApp.wTimerRes,0,&MMEventProc,(DWORD_PTR)this,TIME_PERIODIC);
+	mmTimerId = timeSetEvent( theApp.wTimerRes,0,&MMEventProc,(DWORD_PTR)this,TIME_PERIODIC);
 	if (mmTimerId == nullptr) {
 		bridge.reportError("Qua::PostCreationInit(): failed to set multimedia timer event, res %dms", theApp.wTimerRes);
 	}
@@ -377,19 +376,19 @@ Qua::AddChannel(std::string nm, short ch_id,
  	Channel *c = new Channel(nm, ch_id, au_thru, midi_thru, nAudioIns, nAudioOuts, this);
  	if (add_dflt_str_in) {
 		if (environment.quaMidi.dfltInput) {
-			Input *s = c->AddInput("midin", "*", environment.quaMidi.dfltInput, midi_ch, true);
+			Input *s = c->AddInput("midin", PortSpec(QuaPort::Device::MIDI, "*", { midi_ch }), true);
 		}
 	}
 	if (add_dflt_str_out) {
 		if (environment.quaMidi.dfltOutput) {
-			Output *d = c->AddOutput("midout", "*", environment.quaMidi.dfltOutput, midi_ch, true);
+			Output *d = c->AddOutput("midout", PortSpec(QuaPort::Device::MIDI, "*", { midi_ch }), true);
 		}
 	}
 #ifdef QUA_V_AUDIO
  	if (add_dflt_au_in) {
 
 		if (getAudioManager().dfltInput) {
-			Input *s = c->AddInput("audin", "*", environment.quaAudio.dfltInput, 0, true);
+			Input *s = c->AddInput("audin", PortSpec(QuaPort::Device::AUDIO, "*", { 0 }), true);
 			// try and make a stereo pair
 			if (nAudioIns == 2) {
 				if (getAudioManager().dfltInput->NInputChannels(0) == 1) {
@@ -405,7 +404,7 @@ Qua::AddChannel(std::string nm, short ch_id,
 	}
 	if (add_dflt_au_out) {
 		if (getAudioManager().dfltOutput) {
-			Output *d = c->AddOutput("audout", "*", getAudioManager().dfltOutput, 0, true);
+			Output *d = c->AddOutput("audout", PortSpec(QuaPort::Device::AUDIO, "*", { 0 }), true);
 			// try and make a stereo pair
 			if (nAudioOuts == 2) {
 				if (getAudioManager().dfltOutput->NOutputChannels(0) == 1) {
@@ -1857,7 +1856,7 @@ Qua::ReadChunk(istream &in, void **bufp, ulong *buf_lenp)
 char *
 TypedValue::StringValue()
 {
-	static char buf[1024];
+	static string hax;
 	switch (type) {
 	case S_BOOL:
 		if (refType != REF_VALUE)
@@ -1868,32 +1867,32 @@ TypedValue::StringValue()
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%d", val.byte);
-		return buf;
+			hax=to_string(val.byte);
+		return const_cast<char*>(hax.c_str());
 	case S_SHORT:
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%d", val.Short);
-		return buf;
+			hax = to_string(val.Short);
+		return const_cast<char*>(hax.c_str());
 	case S_INT:
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%d", val.Int);
-		return buf;
+			hax = to_string(val.Int);
+		return const_cast<char*>(hax.c_str());
 	case S_LONG:
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%lld", val.Long);
-		return buf;
+			hax = to_string(val.Long);
+		return const_cast<char*>(hax.c_str());
 	case S_FLOAT:
 		if (refType != REF_VALUE)
 			return "0";
 		else
-			sprintf(buf, "%g", val.Float);
-		return buf;
+			hax = to_string(val.Float);
+		return const_cast<char*>(hax.c_str());
 	case S_STRING:
 		return val.string?val.string:"";
 	case S_QUA:
@@ -1927,7 +1926,6 @@ TypedValue::StringValue()
 	case S_BLOCK: {
 		long	len = 0;
 		Block	*block = refType>0?*val.blockP:val.block;
-		static string hax;
 		stringstream ssos(hax);
 		if (!block) {
 			return "";
@@ -1948,8 +1946,8 @@ TypedValue::StringValue()
 		}
 	default:
 		internalError("TypedValue::StringValue of unexpected type %d", type);
-		sprintf(buf, "%d", type);
-		return buf;
+		hax = "type"+to_string(type);
+		return const_cast<char*>(hax.c_str());
 	}
 }
 
@@ -2132,24 +2130,39 @@ findQuaPort(int deviceType, const string &nm, int direction, int nports)
 {
 	QuaPort *p = nullptr;
 	switch (deviceType) {
-	case Attribute::DEVICE_AUDIO:
+	case QuaPort::Device::AUDIO:
 		p = getAudioManager().findPortByName(nm, direction, nports);
 		break;
-	case Attribute::DEVICE_MIDI:
+	case QuaPort::Device::MIDI:
 		p = environment.quaMidi.findPortByName(nm, direction, nports);
 		break;
-	case Attribute::DEVICE_JOYSTICK:
+	case QuaPort::Device::JOYSTICK:
 #ifdef QUA_V_JOYSTICK
 		p = environment.quaJoystick.findPortByName(nm, direction, nports);
 #endif
 		break;
-	case Attribute::DEVICE_PARALLEL:
+	case QuaPort::Device::PARALLEL:
 		p = environment.quaParallel.findPortByName(nm, direction, nports);
 		break;
-	case Attribute::DEVICE_OSC:
+	case QuaPort::Device::OSC:
 		break;
-	case Attribute::DEVICE_SENSOR:
+	case QuaPort::Device::SENSOR:
 		break;
+	default: {
+		if ((p = environment.quaMidi.findPortByName(nm, direction, nports)) != nullptr) {
+			break;
+		}
+		if ((p = getAudioManager().findPortByName(nm, direction, nports)) != nullptr) {
+			break;
+		}
+		if ((p = environment.quaJoystick.findPortByName(nm, direction, nports)) != nullptr) {
+			break;
+		}
+		if ((p = environment.quaParallel.findPortByName(nm, direction, nports)) != nullptr) {
+			break;
+		}
+
+	}
 	}
 	return p;
 }

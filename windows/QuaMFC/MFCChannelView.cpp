@@ -254,10 +254,10 @@ MFCChannelView::ChannelMenu(CPoint popPt)
 		selMenu = p->submenu;
 		switch (selMenu) {
 			case 0:
-				channel->AddOutput("out", "*", selPort, selChannel, true);
+				channel->AddOutput("out", PortSpec(selPort->deviceType, selPort->name(NMFMT_NAME), { selChannel }), true);
 				break;
 			case 1:
-				channel->AddInput("out", "*", selPort, selChannel, true);
+				channel->AddInput("out", PortSpec(selPort->deviceType, selPort->name(NMFMT_NAME), { selChannel }), true);
 				break;
 			case 2:
 				channel->RemoveOutput(channel->outputs.Item(selChannel));
@@ -563,7 +563,7 @@ PortPopup::DoPopup(CWnd *wnd, CPoint &scrPt, QuaPort *&port, port_chan_id &chan,
 		ClearMenuIndex();
 		return false;
 	}
-	menu_idx_item	*p = menuIdx[ret];
+	menu_idx_item	*p = (ret < menuIdx.size()? menuIdx[ret]: nullptr);
 
 	if (p) {
 		port = p->port;

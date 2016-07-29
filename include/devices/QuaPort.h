@@ -20,6 +20,7 @@ enum {
 // and this would also include CHANNEL
 // both vsts and internal channels can be valid destinations for midi or audio
 // so these are really subsystem kinds, port::subType
+// perhaps these internal routings aren't even relevant here?
 
 enum {
 	QUA_JOY_GENERIC = 0,
@@ -131,6 +132,15 @@ public:
 inline const string
 portDirectionName(const int direction) {
 	return string(direction == QUA_PORT_IN ? "in" : direction == QUA_PORT_OUT ? "out" : direction == QUA_PORT_IO ? "i/o" : "?");
+}
+
+inline const string
+portDeviceTypeName(const int type) {
+	return string(type == QuaPort::Device::AUDIO ? "audio":
+		type == QuaPort::Device::JOYSTICK ? "joy" :
+		type == QuaPort::Device::SENSOR ? "sensor" :
+		type == QuaPort::Device::OSC ? "OSC" :
+		type == QuaPort::Device::MIDI ? "midi" : "?");
 }
 
 #endif

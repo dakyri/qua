@@ -5,6 +5,11 @@ namespace tinyxml2 {
 	class XMLElement;
 }
 
+/*
+ * modes that a Place/Destination can operate in
+ *... I think these are now historical only. I think these are obvious from the structure of the QuaChannel and a few other parameters
+ * or perhaps this is still a good idea? @deprecated or TODO XXXX FIXME
+ */
 enum {
 	FLOW_NORMAL = 0,	// channel for channel
 	FLOW_MONO = 1,		// force mono
@@ -30,7 +35,12 @@ class StabEnt;
 
 #include "QuaTypes.h"
 #include "QuaTime.h"
-
+#include <initializer_list>
+using namespace std;
+/*
+ * TODO  XXXX FIXME @deprecated
+ * currently these constants are only used on the MFC interface controlling the name format for destinations
+ */
 enum {
 	NMFMT_NONE = 0,
 	NMFMT_SYM = 1,
@@ -38,22 +48,61 @@ enum {
 	NMFMT_NUM = 3
 };
 
+/*
+ * confusion on terminology, but one I'll live with.
+ * channel within this class refers to the hard channels ie particular midi channel or vst pin or audio channel ... but not the main Qua Channel objects
+ * and of course there are a few direct pointers to Qua Channel objects
+ */
+
+/*
+ * PortSpec
+ * unified object to specify a port within qua ... either a hardware port or an internal routing
+ * with internal routing, the port might not be mappable until a whole script is processed
+ */
+class PortSpec {
+public:
+	PortSpec(qua_port_type t, const string& nm, bool isIdent, vector<int> *ids=nullptr) :
+			name(nm), type(t), nameIsIdent(isIdent) {
+		setChanIds(ids);
+	}
+	PortSpec(qua_port_type t, const string& nm, bool isIdent, initializer_list<int> chanid) :
+			name(nm), type(t), nameIsIdent(isIdent), chanIds(chanid) { }
+	PortSpec(qua_port_type t, const string& nm, initializer_list<int> chanid) :
+		name(nm), type(t), nameIsIdent(false), chanIds(chanid) { }
+	PortSpec(qua_port_type t, const string& nm, const vector<int> &chanid) :
+		name(nm), type(t), nameIsIdent(false), chanIds(chanid) { }
+
+	void setChanIds(vector<int> *ids) {
+		if (ids != nullptr) {
+			chanIds.assign(ids->begin(), ids->end());
+		}
+	}
+	string toString();
+
+	string name;
+	qua_port_type type;
+	bool nameIsIdent;
+	vector<int> chanIds;
+};
+
 class Place
 {
 public:
-						Place(StabEnt *s, Channel *c, QuaPort *, port_chan_id chan, bool);
-						~Place();
+	Place(StabEnt *s, Channel *c, const PortSpec &, int direction, bool enable);
+	virtual ~Place();
 
 	virtual bool		ValidDevice(QuaPort *);
 	virtual status_t	SetEnabled(uchar);
 	virtual char		*Name(uchar nfmt, uchar cfmt);
 
 	bool setPortInfo(QuaPort *, port_chan_id chan, short ind);
+	QuaPort *currentPort() { return device;  }
 	
-	void				Reset();
+	void Reset();
 				
-	Channel				*channel;
-	QuaPort				*device;
+	Channel *channel;
+	QuaPort *device;
+	PortSpec portSpec;
 
 //	short				needed_channels;	// # of channels to try for
 
@@ -75,7 +124,7 @@ public:
 class Input: public Place
 {
 public:
-						Input(std::string nm, Channel *c, QuaPort *, port_chan_id chan, bool);
+	Input(const std::string &nm, Channel *c, const PortSpec &portSpec, const bool);
 
 	virtual bool		ValidDevice(QuaPort *);
 	virtual status_t	SetEnabled(uchar);
@@ -107,8 +156,7 @@ public:
 class Output: public Place
 {
 public:
-						Output(std::string nm, Channel *c, QuaPort *, port_chan_id chan, bool);
-
+	Output(const std::string &nm,  Channel *c, const PortSpec &portSpec, const bool);
 
 	virtual bool		ValidDevice(QuaPort *);
 	virtual status_t	SetEnabled(uchar);

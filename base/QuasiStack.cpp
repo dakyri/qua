@@ -481,16 +481,14 @@ QuasiStack::SaveSnapshot(ostream &out, const char *label)
 			while (p!= nullptr) {
 				switch (p->type) {
 					case TypedValue::S_VST_PROGRAM: {
-						char buf[256];
-						sprintf(buf, "type=\"vstprogram\"");
-						err=p->SaveSimpleTypeSnapshot(out, stacker, this, buf);
+						string buf("type=\"vstprogram\"");
+						err=p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
 						break;
 					}
 #ifdef QUA_V_VST_HOST
 					case TypedValue::S_VST_PARAM: {
-						char buf[256];
-						sprintf(buf, "type=\"vstparam\" position=\"%d\"", p->VstParamValue());
-						err=p->SaveSimpleTypeSnapshot(out, stacker, this, buf);
+						string buf = "type=\"vstparam\" position=\""+to_string(p->VstParamValue())+"\"";
+						err=p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
 						break;
 					}
 #endif

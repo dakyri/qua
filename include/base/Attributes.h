@@ -112,13 +112,13 @@ public:
 	bool has(Attribute::idcode);
 	bool has(char *pr);
 
-	Attribute::value &getValue(Attribute::idcode id);
+	Attribute::value getValue(Attribute::idcode id);
 	AttributeList & operator=(const AttributeList &);
 // TODO XXX this is deleted in a vector
 //	AttributeList & operator=(const AttributeList &&);
 
 	Attribute::value getValue(char *pr);
-	AttributeList & clone();
+	AttributeList clone();
 
 	inline void
 	add(char *pr, Attribute::value val)

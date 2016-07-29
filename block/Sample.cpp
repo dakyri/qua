@@ -178,9 +178,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 
 	do {
 		takeno++;
-		char buf[100];
-		sprintf(buf, "%s_%d.%s", sym->name.c_str(), takeno, extension);
-		filenm = buf;
+		filenm = sym->name+"_"+to_string(takeno)+"."+extension;
 		path == uberQua->sampleDirectoryPath + "/" + filenm;
 	} while (!_access(path.c_str(), 04));
 	takenm = glob.makeUniqueName(sym, "record", 1);

@@ -130,9 +130,9 @@ public:
 	bool				outEnabled;
 
 	uchar				hasAudio;
-	
-	Input				*AddInput(const string &, const string &deviceName, QuaPort *, short, bool);
-	Output				*AddOutput(const string &, const string &deviceName, QuaPort *, short, bool);
+
+	Input				*AddInput(const string &, const PortSpec &portSpec, bool);
+	Output				*AddOutput(const string &, const PortSpec &portSpec, bool);
 	void				SetInput(Input *, QuaPort *, short);
 	void				SetOutput(Output *, QuaPort *, short);
 	void				RemoveInput(Input *);

@@ -20,17 +20,30 @@
 #endif
 #include "QuaDisplay.h"
 
+#include <iostream>
 
-Place::Place(StabEnt *sy,
-			 Channel *c,
-			 QuaPort *dev,
-			 port_chan_id devch,
-			 bool en)
+string
+PortSpec::toString() {
+	string ret = portDeviceTypeName(type)+"/"+ name;
+	if (chanIds.size()) ret += ":" + to_string(chanIds[0]);
+	return ret;
+}
+
+
+
+Place::Place(StabEnt *sy, Channel *c, const PortSpec &ps, int direction, bool  en)
+	: sym(sy), channel(c), portSpec(ps)
 {
-	channel = c;
-	device = dev;
-	deviceChannel = devch;
-	sym = sy;
+	int m = qut::maxel(portSpec.chanIds);
+	QuaPort *port = findQuaPort(portSpec.type, portSpec.name, direction, m > 0 ? m + 1 : -1);
+	cerr << "Place::Place " + sy->name + " dirn " + portDirectionName(direction) + "portspec " + portSpec.toString()
+			+ " found port " + (port != nullptr ? port->name(NMFMT_NAME) : "null") << endl;
+	device = port;
+	deviceChannel = portSpec.chanIds.size() > 0? portSpec.chanIds[0]: -1;
+	for (short i = 1; i<portSpec.chanIds.size(); i++) {
+		setPortInfo(port, portSpec.chanIds[i], i);
+	}
+
 	if (device) {
 		switch (device->deviceType) {
 		case QuaPort::Device::JOYSTICK:
@@ -43,57 +56,50 @@ Place::Place(StabEnt *sy,
 			break;
 		}
 	}
-	
+
 	DefineSymbol("enabled", TypedValue::S_BOOL, 0,
-					&enabled, sym,
-					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_NOT);
+		&enabled, sym,
+		TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_NOT);
 	mode = FLOW_NORMAL;
 	select = 0;
 	enabled = en;
-//	needed_channels = 2;
+	//	needed_channels = 2;
 	isinit = true;		// initialised and empty
 	initBlock = nullptr;
-	
 
-//	SetViewColor(mdGray);
-//	ResizeTo(3+StringWidth(Name())+3+12, 11);
+
+	//	SetViewColor(mdGray);
+	//	ResizeTo(3+StringWidth(Name())+3+12, 11);
 	xDevice = nullptr;
 	xChannel = 0;
 }
 
-
-Input::Input(std::string nm,
-			 Channel *c,
-			 QuaPort *dev,
-			 port_chan_id devch,
-			 bool en):
-	Place(
-		DefineSymbol(nm, TypedValue::S_INPUT, 0,
-					this, c->sym,
-					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
-		c, dev, devch, en)
+/*
+ * specifies it's destination in a more general way
+ */
+Input::Input(const std::string & nm, Channel *c, const PortSpec &ps, bool en)
+	: Place( DefineSymbol(nm, TypedValue::S_INPUT, 0,
+			this, c->sym, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
+		c, ps, QUA_PORT_IN, en)
 {
 	gain = 1;
 	pan = 0;
 	src.audio.port = src.audio.xport = nullptr;
-}	
+}
 
-Output::Output(std::string nm,
-			 Channel *c,
-			 QuaPort *dev,
-			 port_chan_id devch,
-			 bool en):
-	Place(
-		DefineSymbol(nm, TypedValue::S_OUTPUT, 0,
-					this, c->sym,
-					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
-		c, dev, devch, en)
+
+/* more general version
+ */
+Output::Output(const std::string & nm,
+		Channel *c, const PortSpec &ps, const bool en) :
+	Place( DefineSymbol(nm, TypedValue::S_OUTPUT, 0,
+			this, c->sym, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
+		c, ps, QUA_PORT_OUT, en)
 {
 	gain = 1;
 	pan = 0;
 	dst.audio.port = dst.audio.xport = nullptr;
 }
-
 void
 Input::SaveSnapshot(ostream &out, Channel *chan)
 {

@@ -2270,7 +2270,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	int32 nProgram = 0;
 	bool audioThru = false;
 	bool midiThru = false;
-	int deviceKind = Attribute::DEVICE_MIDI;
+	int deviceKind = QuaPort::Device::MIDI;
 	while (currentTokenType == TOK_TYPE) {
 		subType = findTypeAttribute(currentToken);
 		if (debug_parse) {
@@ -2330,25 +2330,36 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 		case Attribute::DEVICE_AUDIO: {
 			GetToken();
-			deviceKind = Attribute::DEVICE_AUDIO;
+			deviceKind = QuaPort::Device::AUDIO;
 			break;
 		}
 
 		case Attribute::DEVICE_MIDI: {
 			GetToken();
-			deviceKind = Attribute::DEVICE_MIDI;
+			deviceKind = QuaPort::Device::MIDI;
 			break;
 		}
 
 		case Attribute::DEVICE_JOYSTICK: {
 			GetToken();
-			deviceKind = Attribute::DEVICE_JOYSTICK;
+			deviceKind = QuaPort::Device::JOYSTICK;
 			break;
 		}
 
 		case Attribute::DEVICE_PARALLEL: {
 			GetToken();
-			deviceKind = Attribute::DEVICE_PARALLEL;
+			deviceKind = QuaPort::Device::PARALLEL;
+			break;
+		}
+		case Attribute::DEVICE_SENSOR: {
+			GetToken();
+			deviceKind = QuaPort::Device::SENSOR;
+			break;
+		}
+
+		case Attribute::DEVICE_OSC: {
+			GetToken();
+			deviceKind = QuaPort::Device::OSC;
 			break;
 		}
 
@@ -2663,10 +2674,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		if (context && context->type == TypedValue::S_CHANNEL) {
  			Channel		*cha=context->ChannelValue();
 
-			Input *s = cha->AddInput(nm, portDeviceName, port, chans.size()? chans[0]: 0, true);
-			for (short i=1; i<chans.size(); i++) {
-				s->setPortInfo(port, chans[i], i);
-			}
+			Input *s = cha->AddInput(nm, PortSpec(deviceKind, portDeviceName, chans), true);
 			// todo this is a a strage attempt to do initialization of parameters like port gain: XXXX do this differently, it sucks
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);
@@ -2720,10 +2728,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 		bool found = parsePort(deviceKind, portDeviceName, port, sym, QUA_PORT_OUT, chans);
 		if (context && context->type == TypedValue::S_CHANNEL) {
 			Channel		*cha=context->ChannelValue();
-			Output *s = cha->AddOutput(nm, portDeviceName, port, chans.size()? chans[0]: 0, true);
-			for (short i=1; i<chans.size(); i++) {
-				s->setPortInfo(port, chans[i], i);
-			}
+			Output *s = cha->AddOutput(nm, PortSpec(deviceKind, portDeviceName, chans), true);
 			// xxxx as aboce
 			if (strcmp(currentToken, "{") == 0) {
 				glob.PushContext(s->sym);

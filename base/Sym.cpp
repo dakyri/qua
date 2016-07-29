@@ -921,10 +921,8 @@ dump:
 		nm +=  stk[--nstk]->name + ".";
 	}
 #ifdef DEFINE_COUNT
-	if (defineCount == 0) {
-		sprintf(buf+pos, "%s", name);
-	} else {
-		sprintf(buf+pos, "%s#%d", name, defineCount);
+	if (defineCount > 0) {
+		name += "#" + to_string(defineCount);
 	}
 #else
 	nm += name;
@@ -967,7 +965,7 @@ StabEnt::printableName()
 	if (defineCount == 0) {
 		*p = '\0';
 	} else {
-		sprintf(p, "\\%d", defineCount);
+		nm+= "\\" +to_string( defineCount);
 	}
 #else
 #endif
@@ -1417,7 +1415,7 @@ StabEnt::SaveValue(FILE *fp, Stacker *i, QuasiStack *s)
 const char *
 StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 {
-	static char	buf[10*1024];
+	static string hax;
 
 	LValue		lval;
 	SetLValue(lval, items, stacker, nullptr, stack);
@@ -1425,20 +1423,20 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 	case S_BOOL:
 		return ((char *) (*((bool*)lval.addr)?"true":"false"));
 	case S_BYTE:
-		sprintf(buf, "%d", *((char*)lval.addr));
-		return buf;
+		hax = to_string(*((char*)lval.addr));
+		return  const_cast<char *>(hax.c_str());
 	case S_SHORT:
-		sprintf(buf, "%d", *((int16*)lval.addr));
-		return buf;
+		hax = to_string(*((int16*)lval.addr));
+		return  const_cast<char *>(hax.c_str());
 	case S_INT:
-		sprintf(buf, "%d", *((int32*)lval.addr));
-		return buf;
+		hax = to_string(*((int32*)lval.addr));
+		return  const_cast<char *>(hax.c_str());
 	case S_LONG:
-		sprintf(buf, "%lld", *((int64*)lval.addr));
-		return buf;
+		hax = to_string(*((int64*)lval.addr));
+		return  const_cast<char *>(hax.c_str());
 	case S_FLOAT:
-		sprintf(buf, "%g", *((float*)lval.addr));
-		return buf;
+		hax = to_string(*((float*)lval.addr));
+		return  const_cast<char *>(hax.c_str());
 	case S_STRING:
 		return val.string;
 	case S_QUA:
@@ -1459,7 +1457,7 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 	case S_BLOCK: {
 		long	len = 0;
 		Block	*block = *((Block **)lval.addr);
-		static string hax;
+
 		stringstream ssos(hax);
 		if (!block) {
 			return "";
@@ -1473,18 +1471,15 @@ StabEnt::StringValue(StreamItem *items, Stacker *stacker, QuasiStack *stack)
 	}
 	case S_TIME:
 		if (((Time *)lval.addr)->metric == &Metric::std) {
-			sprintf(buf, "%s",
-					((Time*)lval.addr)->StringValue());
+			hax = ((Time*)lval.addr)->StringValue();
 		} else {
-			sprintf(buf, "%s'%s",
-					((Time*)lval.addr)->StringValue(),
-					((Time*)lval.addr)->metric->name.c_str());
+			hax = ((Time*)lval.addr)->StringValue()+string("'")+((Time*)lval.addr)->metric->name;
 		}
-		return buf;
+		return const_cast<char *>(hax.c_str());
 	default:
 		internalError("string value of unexpected type %d", type);
-		sprintf(buf, "", type);
-		return buf;
+		hax = "type"+to_string(type);
+		return const_cast<char *>(hax.c_str());
 	}
 	return "!";
 }
