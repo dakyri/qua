@@ -755,12 +755,13 @@ QuaDisplay::CreateInstance(StabEnt * const schSym, const short chan, const Time 
 			return instance->sym;
 		}
 	}
+
 	return nullptr;
 }
 
 // called by an interface to make dynamic changes to a potentially running sequencer
 StabEnt *
-QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
+QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> & pathList)
 {
 	// create sample
 	std::string	sample_nm;
@@ -782,17 +783,8 @@ QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> 
 			std::string b = Qua::nameFromLeaf(p);
 			sample->addSampleTake(b, p, false);
 		}
-		// update index displays
-		Instance	*instance = nullptr;
-		if (tp != nullptr && dp != nullptr) {
-			Time t = *tp, d = *dp;
-			instance = sample->addInstance(nm, chan, t, d, false);
-		}
 		for (short i = 0; i < NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(sample->sym);
-			if (instance) {
-				Indexer(i)->addToSymbolIndex(instance->sym);
-			}
 		}
 		// update arranger displays;
 		/*
@@ -803,11 +795,6 @@ QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> 
 		t.GetBBQValue(bar, beat, q);
 		fprintf(stderr, "selection duration %d:%d.%d\n", bar, beat, q);
 		*/
-		if (instance) {
-			for (short i=0; i<NArranger(); i++) {
-				Arranger(i)->AddInstanceRepresentation(instance);
-			}
-		}
 		ShowObjectRepresentation(sample->sym);
 		return sample->sym;
 	}
@@ -815,7 +802,7 @@ QuaDisplay::CreateSample(const std::string & nm, const std::vector<std::string> 
 }
 
 StabEnt *
-QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
+QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & pathList)
 {
 	// create voice
 	short	i;
@@ -837,16 +824,8 @@ QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & 
 			voice->addStreamTake(nm, pathList[i], true);
 		}
 		// update index displays
-		Instance	*instance=nullptr;
-		if (chan >= 0 && tp != nullptr && dp != nullptr) {
-			Time t = *tp, d = *dp;
-			instance = voice->addInstance(voice->sym->name, chan, t, d, false);
-		}
 		for (short i=0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(voice->sym);
-			if (instance) {
-				Indexer(i)->addToSymbolIndex(instance->sym);
-			}
 		}
 		// update arranger displays;
 		/*
@@ -856,11 +835,6 @@ QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & 
 		int	q;
 		t.GetBBQValue(bar, beat, q);
 		fprintf(stderr, "selection duration %d:%d.%d\n", bar, beat, q);*/
-		if (instance) {
-			for (short i=0; i<NArranger(); i++) {
-				Arranger(i)->AddInstanceRepresentation(instance);
-			}
-		}
 		ShowObjectRepresentation(voice->sym);
 		return voice->sym;
 	}
@@ -869,7 +843,7 @@ QuaDisplay::CreateVoice(const std::string &nm, const std::vector<std::string> & 
 
 
 StabEnt *
-QuaDisplay::CreatePool(const std::string &nm, const std::vector<std::string> & pathList, short chan, Time *tp, Time *dp)
+QuaDisplay::CreatePool(const std::string &nm, const std::vector<std::string> & pathList)
 {
 	// create pool
 	short	i;
@@ -891,17 +865,8 @@ QuaDisplay::CreatePool(const std::string &nm, const std::vector<std::string> & p
 			std::string nm = Qua::nameFromLeaf(pathList[i]);
 			pool->addStreamTake(nm, pathList[i], true);
 		}
-		// update index displays
-		Instance	*instance = nullptr;
-		if (chan >= 0 && tp != nullptr && dp != nullptr) {
-			Time t = *tp, d = *dp;
-			instance = pool->addInstance(pool->sym->name, chan, t, d, false);
-		}
 		for (short i = 0; i<NIndexer(); i++) {
 			Indexer(i)->addToSymbolIndex(pool->sym);
-			if (instance) {
-				Indexer(i)->addToSymbolIndex(instance->sym);
-			}
 		}
 		// update arranger displays;
 		/*
@@ -911,11 +876,6 @@ QuaDisplay::CreatePool(const std::string &nm, const std::vector<std::string> & p
 		int	q;
 		t.GetBBQValue(bar, beat, q);
 		fprintf(stderr, "selection duration %d:%d.%d\n", bar, beat, q);*/
-		if (instance) {
-			for (short i = 0; i<NArranger(); i++) {
-				Arranger(i)->AddInstanceRepresentation(instance);
-			}
-		}
 		ShowObjectRepresentation(pool->sym);
 		return pool->sym;
 	}

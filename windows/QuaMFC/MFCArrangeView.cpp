@@ -781,7 +781,8 @@ MFCArrangeView::OnDrop(
 				return FALSE;
 			}
 			if (drop_sample_file) {
-				quaLink->CreateSample("", *dragon.data.filePathList, at_channel, &at_time, NULL);
+				StabEnt *s = quaLink->CreateSample("", *dragon.data.filePathList);
+				quaLink->CreateInstance(s, at_channel, at_time, Time());
 			} else if (drop_midi_file) {
 				;
 			} else if (drop_qua_file) {
