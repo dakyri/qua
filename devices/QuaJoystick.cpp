@@ -67,7 +67,7 @@ QuaJoystickPort::QuaJoystickPort(const string &devnm, QuaJoystickManager *qj, sh
 		, int32 jid
 #endif
 						):
-	QuaPort(devnm, QUA_DEV_JOYSTICK, subt, QUA_PORT_IO)
+	QuaPort(devnm, QuaPort::Device::JOYSTICK, subt, QUA_PORT_IO)
 {
 	quaJoystick = qj;
 

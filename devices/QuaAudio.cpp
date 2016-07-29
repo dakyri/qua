@@ -67,7 +67,7 @@ QuaAudioOut::~QuaAudioOut()
 }
 
 QuaAudioPort::QuaAudioPort(char *nm, QuaAudioManager *qa, short subt)
-	: QuaPort(nm, QUA_DEV_AUDIO, subt, QUA_PORT_IO)
+	: QuaPort(nm, QuaPort::Device::AUDIO, subt, QUA_PORT_IO)
 {
 	quaAudio = qa;
 }

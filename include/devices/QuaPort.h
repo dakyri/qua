@@ -11,18 +11,6 @@ class Stream;
 class ArrangerObject;
 
 enum {
-	QUA_DEV_NOT = 0,
-	QUA_DEV_JOYSTICK = 1, // standard joystick data
-	QUA_DEV_MIDI = 2, // regular midi port
-	QUA_DEV_AUDIO = 3, // regular external audio device
-	QUA_DEV_PARALLEL = 4, // historical name, but now to represent hardware ports in general, usb in particular for wierd devices
-	QUA_DEV_VST = 5, // a vst or similar plugin, especially one with multiple pinouts or pinins
-	QUA_DEV_CHANNEL = 6, // standard qua channel output, internal routing
-	QUA_DEV_OSC = 7, // OSC message stream, port is a port on an internat connection
-	QUA_DEV_SENSOR = 8 // stream of sensor data eg orientation on a tablet
-};
-
-enum {
 	QUA_AUDIO_GENERIC = 0,
 	QUA_AUDIO_ASIO = 1,
 	QUA_AUDIO_MME = 2,
@@ -119,9 +107,23 @@ public:
 	bool isControllable();
 	bool isMultiSchedulable();
 	
-	short deviceType;
-	short deviceSubType;
-	short mode;
+	short deviceType; // the main differentiating type .. eg AUDIO, MIDI, JOYSTICK
+	short deviceSubType; // the hardware subsystem type e.g. ASIO or DX or MMC 
+	short mode; // open kind eg input
+
+	enum Device {
+		NOT = 0,
+		JOYSTICK = 1, // standard joystick data
+		MIDI = 2, // regular midi port
+		AUDIO = 3, // regular external audio device
+		PARALLEL = 4, // historical name, but now to represent hardware ports in general, usb in particular for wierd devices
+		VST = 5, // a vst or similar plugin, especially one with multiple pinouts or pinins
+		CHANNEL = 6, // standard qua channel output, internal routing
+		OSC = 7, // OSC message stream, port is a port on an internat connection
+		SENSOR = 8 // stream of sensor data eg orientation on a tablet
+	};
+
+
 };
 
 inline const string

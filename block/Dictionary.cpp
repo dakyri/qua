@@ -96,10 +96,10 @@ std::unordered_map<std::string, int>  note_nf = {
 };
 
 std::unordered_map<std::string, int>  deviceTypeIndex = {
-	{ "midi",	QUA_DEV_MIDI },
-	{ "audio",	QUA_DEV_AUDIO },
-	{ "joystick",	QUA_DEV_JOYSTICK },
-	{ "parallel",	QUA_DEV_PARALLEL }
+	{ "midi",	QuaPort::Device::MIDI },
+	{ "audio",	QuaPort::Device::AUDIO },
+	{ "joystick",	QuaPort::Device::JOYSTICK },
+	{ "parallel",	QuaPort::Device::PARALLEL }
 };
 
 std::unordered_map<std::string, int> streamTypeIndex = {

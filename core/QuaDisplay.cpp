@@ -1652,7 +1652,7 @@ QuaOutputRepresentation::DeviceType()
 			return output->device->deviceType;
 		}
 	}
-	return 	QUA_DEV_NOT;
+	return 	QuaPort::Device::NOT;
 }
 
 
@@ -1733,7 +1733,7 @@ QuaInputRepresentation::DeviceType()
 			return input->device->deviceType;
 		}
 	}
-	return 	QUA_DEV_NOT;
+	return 	QuaPort::Device::NOT;
 }
 
 // called by the interface to make changes to parameter values, make any other

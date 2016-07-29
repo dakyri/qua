@@ -34,7 +34,7 @@ QuaPort::name(uchar)
 bool
 QuaPort::isMultiSchedulable()
 {
-	if (deviceType != QUA_DEV_AUDIO)
+	if (deviceType != QuaPort::Device::AUDIO)
 		return false;
 	QuaAudioPort	*p = (QuaAudioPort *)this;
 	return false;

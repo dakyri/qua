@@ -130,7 +130,7 @@ std::unordered_map<std::string, int> midiTechNameIndex = {
 
 
 QuaMidiPort::QuaMidiPort(std::string portnm, std::string nm, QuaMidiManager *qp, short md, int32 p):
-	QuaPort(nm, QUA_DEV_MIDI, QUA_DEV_GENERIC, md)
+	QuaPort(nm, QuaPort::Device::MIDI, QUA_DEV_GENERIC, md)
 {
 	quaMidi = qp;
 	id = p;

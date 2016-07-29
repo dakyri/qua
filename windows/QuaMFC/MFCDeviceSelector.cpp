@@ -124,17 +124,17 @@ MFCDeviceSelector::OnPaint()
 	CRect	r = bounds;
 
 	switch (DeviceType()) {
-		case QUA_DEV_JOYSTICK:
+		case QuaPort::Device::JOYSTICK:
 			bmp = &joyImg;
 			break;
-		case QUA_DEV_MIDI:
+		case QuaPort::Device::MIDI:
 			bmp = &midiImg;
 			break;
-		case QUA_DEV_AUDIO:
+		case QuaPort::Device::AUDIO:
 			bmp = &audioImg;
 			break;
-		case QUA_DEV_PARALLEL:
-		case QUA_DEV_NOT:
+		case QuaPort::Device::PARALLEL:
+		case QuaPort::Device::NOT:
 		default:
 			bmp = &otherImg;
 			break;
@@ -289,5 +289,5 @@ MFCDeviceSelector::DeviceType()
 			return ((MFCOutputView *)destinationView)->DeviceType();
 		}
 	}
-	return QUA_DEV_NOT;
+	return QuaPort::Device::NOT;
 }

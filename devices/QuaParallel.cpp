@@ -15,7 +15,7 @@
 #include "QuaDisplay.h"
 
 QuaParallelPort::QuaParallelPort(char *devnm, QuaParallelManager *qj):
-	QuaPort(devnm, QUA_DEV_PARALLEL, QUA_DEV_GENERIC, QUA_PORT_IO)
+	QuaPort(devnm, QuaPort::Device::PARALLEL, QUA_DEV_GENERIC, QUA_PORT_IO)
 {
 	quaParallel = qj;
 	AddInsert("Joy!", 0, INPUT_INSERT, 1, 0);	

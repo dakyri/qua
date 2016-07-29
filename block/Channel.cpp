@@ -518,7 +518,7 @@ Channel::StartRecording()
 //						dur((long)50, channel->uberQua->metric);
 //		recordStarted = uberQua->theTime;
 //		
-//		if (device->deviceType == QUA_DEV_AUDIO) {
+//		if (device->deviceType == QuaPort::Device::AUDIO) {
 //			if (reRecord) {
 //				recordInstance->StartRecording();
 //				recordInstance->SetStartTime(recordStarted);
@@ -557,7 +557,7 @@ Channel::StartRecording()
 //
 //			bool	freshTake = P->SetRecordTake();
 //			
-//			if (device->deviceType == QUA_DEV_MIDI) {
+//			if (device->deviceType == QuaPort::Device::MIDI) {
 ////				FlushInput();
 //			}
 //			
@@ -949,13 +949,13 @@ Channel::AddInput(const string &nm, const string &deviceName, QuaPort *p, short 
 
 	if (p && s->enabled) {
 		switch (p->deviceType) {
-			case QUA_DEV_AUDIO: {
+			case QuaPort::Device::AUDIO: {
 				activeAudioInputs.Add(s);
 				break;
 			}
 			
-			case QUA_DEV_JOYSTICK:
-			case QUA_DEV_MIDI:
+			case QuaPort::Device::JOYSTICK:
+			case QuaPort::Device::MIDI:
 			default: {
 				activeStreamInputs.Add(s);
 				break;
@@ -986,13 +986,13 @@ Channel::AddOutput(const string &nm, const string &deviceName, QuaPort *p, short
 					TypedValue::REF_POINTER, false, false, StabEnt::DISPLAY_CTL);
 	if (p && d->enabled) {
 		switch (p->deviceType) {
-			case QUA_DEV_AUDIO: {
+			case QuaPort::Device::AUDIO: {
 				activeAudioOutputs.Add(d);
 				break;
 			}
 			
-			case QUA_DEV_JOYSTICK:
-			case QUA_DEV_MIDI:
+			case QuaPort::Device::JOYSTICK:
+			case QuaPort::Device::MIDI:
 			default: {
 				activeStreamOutputs.Add(d);
 				break;
@@ -1037,7 +1037,7 @@ Channel::Enable(Input *s, bool en)
 	if (s && s->device) {
 		s->enabled = en;
 		switch(s->device->deviceType) {
-		case QUA_DEV_MIDI: {
+		case QuaPort::Device::MIDI: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable midi in (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getMidiManager().connect(s)) == B_OK) {
@@ -1054,7 +1054,7 @@ Channel::Enable(Input *s, bool en)
 		}
 
 #ifdef QUA_V_JOYSTICK
-		case QUA_DEV_JOYSTICK: {
+		case QuaPort::Device::JOYSTICK: {
 			if (en) {
 				if ((err=getJoyManager().connect(s)) == B_OK) {
 					activeStreamInputs.Add(s);
@@ -1070,7 +1070,7 @@ Channel::Enable(Input *s, bool en)
 		}
 #endif
 #ifdef QUA_V_AUDIO
-		case QUA_DEV_AUDIO: {
+		case QuaPort::Device::AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable aud (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getAudioManager().connect(s)) == B_OK) {
@@ -1101,7 +1101,7 @@ Channel::Enable(Output *s, bool en)
 	if (s && s->device) {
 		s->enabled = en;
 		switch(s->device->deviceType) {
-		case QUA_DEV_MIDI: {
+		case QuaPort::Device::MIDI: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable midi out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NAME));
 				if ((err=getMidiManager().connect(s)) == B_OK) {
@@ -1118,7 +1118,7 @@ Channel::Enable(Output *s, bool en)
 		}
 
 #ifdef QUA_V_JOYSTICK
-		case QUA_DEV_JOYSTICK: {
+		case QuaPort::Device::JOYSTICK: {
 			if (en) {
 				if ((err=getJoyManager().connect(s)) == B_OK) {
 					activeStreamOutputs.Add(s);
@@ -1134,7 +1134,7 @@ Channel::Enable(Output *s, bool en)
 		}
 #endif
 #ifdef QUA_V_AUDIO
-		case QUA_DEV_AUDIO: {
+		case QuaPort::Device::AUDIO: {
 			if (en) {
 				fprintf(stderr, "Channel %s, enable audio out (%s)\n", sym->name.c_str(), s->Name(NMFMT_NAME,NMFMT_NUM));
 				if ((err=getAudioManager().connect(s)) == B_OK) {
@@ -1179,7 +1179,7 @@ Input::NoodleEnable(bool en)
 	if (device) {
 		switch(device->deviceType) {
 		
-		case QUA_DEV_MIDI: {
+		case QuaPort::Device::MIDI: {
 			if (en) {
 				src.midi = channel->uberQua->quaMidi->OpenInput((QuaMidiPort *)device);
 				if (src.midi == nullptr) {
@@ -1212,7 +1212,7 @@ Input::NoodleEnable(bool en)
 		}
 			
 #ifdef QUA_V_JOYSTICK
-		case QUA_DEV_JOYSTICK: {
+		case QuaPort::Device::JOYSTICK: {
 			if (en) {
 				if (((QuaJoystickPort*)device)->CheckPortOpen()) {
 					reportError("Can't open joystick %s", device->sym->name.c_str());
@@ -1231,7 +1231,7 @@ Input::NoodleEnable(bool en)
 		}
 #endif
 			
-		case QUA_DEV_AUDIO: {
+		case QuaPort::Device::AUDIO: {
 							
 			bool	anyEnabled = false;
 			if (!en) {
@@ -1285,7 +1285,7 @@ Output::NoodleEnable(bool en)
 					
 		switch(device->deviceType) {
 		
-		case QUA_DEV_MIDI: {
+		case QuaPort::Device::MIDI: {
 			if (en) {
 				dst.midi = channel->uberQua->quaMidi->OpenOutput((QuaMidiPort *)device);
 				if (dst.midi == nullptr) {
@@ -1317,12 +1317,12 @@ Output::NoodleEnable(bool en)
 			break;
 		}
 			
-		case QUA_DEV_JOYSTICK: {
+		case QuaPort::Device::JOYSTICK: {
 			err = B_ERROR;
 			break;
 		}
 		
-		case QUA_DEV_AUDIO: {
+		case QuaPort::Device::AUDIO: {
 			if (en) {
 				channel->uberQua->sampler->OpenOutput((QuaAudioPort *)device, deviceChannel);
 				channel->activeAudioOutputs.Add(this);

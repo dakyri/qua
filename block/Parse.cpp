@@ -797,8 +797,12 @@ QSParser::parseAttribute(AttributeList * al, StabEnt *context, StabEnt *schedSym
 }
 
 /*
- '(' attr ',' attr ',' ... ')' or just a single attr
-*/
+ * '(' attr ',' attr ',' ... ')' or just a single attr
+ * attributes here are properties of a stream item, and this attribute list is set by the 'set' operator
+ * these are for principally for tagging notes with metadata, and some builtin functions rely on this
+ * also planning on using similalar attribute structure for sub-type attributes.
+ * maybe. i think this is clear and avoids doubling up on similar types. maybe TODO XXXX FIXME
+ */
 AttributeList *
 QSParser::parseAttributeList(StabEnt *context, StabEnt *schedSym, bool resolve) {
 	AttributeList *al = new AttributeList();
@@ -2884,12 +2888,12 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			ParseError(ERROR_ERR, "port must be in outer context.");
 		P = findQuaPort(-1, currentToken, QUA_PORT_IO);
 		if (P == nullptr) {
-			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
+			P = new QuaPort(currentToken, QuaPort::Device::NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
 //			, quapp->quaSmallIcon, quapp->quaBigIcon);
 			fprintf(stderr, "Can't find port %s\n", currentToken);
 		}
 //		else if (P->uberQua && P->uberQua != uberQua) {
-//			P = new QuaPort(currentToken, QUA_DEV_NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
+//			P = new QuaPort(currentToken, QuaPort::Device::NOT, QUA_DEV_GENERIC, QUA_PORT_IO);
 //			, quapp->quaSmallIcon, quapp->quaBigIcon);
 //			fprintf(stderr, "Port already under control of a different sequencer\n");
 //		}

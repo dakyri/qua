@@ -192,14 +192,14 @@ MFCQuaContextIndexView::addToSymbolIndex(StabEnt *s)
 				if (it == NULL) {
 					QuaPort	*p = s->PortValue();
 					switch (p->deviceType) {
-						case QUA_DEV_JOYSTICK:
+						case QuaPort::Device::JOYSTICK:
 							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 9);
 							break;
-						case QUA_DEV_AUDIO:
+						case QuaPort::Device::AUDIO:
 							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 8);
 							break;
 						default:
-						case QUA_DEV_MIDI:
+						case QuaPort::Device::MIDI:
 							it = AddIndexItem(s->uniqueName(), (LPARAM)s, ports, 7);
 							break;
 					}

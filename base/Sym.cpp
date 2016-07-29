@@ -574,8 +574,8 @@ SymTab::DeleteSymbol(StabEnt *sym, bool doCleanup)
 // ???????????????????????????????????????????
 // confused here... these deletes should be ok, but aren't 
 // !!!!!!!!!!!! must check
-//		case QUA_DEV_MIDI: delete (QuaMidiPort *)sym->PortValue(); break;
-//		case QUA_DEV_AUDIO: delete (QuaAudioPort *)sym->PortValue(); break;
+//		case QuaPort::Device::MIDI: delete (QuaMidiPort *)sym->PortValue(); break;
+//		case QuaPort::Device::AUDIO: delete (QuaAudioPort *)sym->PortValue(); break;
 		}
 		break;
 	}

@@ -121,9 +121,23 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "/" { return token::SLASH; }
 
 
-"\\"{IDENT} {
-	return token::TYPE_MODIFIER;
+"\\"{IDENT} { // also return token::ATTRIBUTE from here
+	yylval->intval = 0;
+	return token::MODIFIER;
 }
+
+"\\ins" { return token::M_INS; }
+"\\outs" { return token::M_OUTS; }
+"\\midithru" { return token::M_STREAM_THRU; }
+"\\audiothru" { return token::M_AUDIO_THRU; }
+"\\audio" { return token::M_AUDIO; }
+"\\midi" { return token::M_MIDI; }
+"\\joy" { return token::M_JOYSTICK; }
+"\\parallel" { return token::M_PARALLEL; }
+"\\osc" { return token::M_OSC; }
+"\\channel" { return token::M_CHANNEL; }
+"\\sensor" { return token::M_SENSOR; }
+"\\vst" { return token::M_VST; } // maybe we'll need to split this it may be in several contexts TODO 
 
 [ \t] {
 	// skip white space

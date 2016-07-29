@@ -33,13 +33,13 @@ Place::Place(StabEnt *sy,
 	sym = sy;
 	if (device) {
 		switch (device->deviceType) {
-		case QUA_DEV_JOYSTICK:
+		case QuaPort::Device::JOYSTICK:
 			break;
-		case QUA_DEV_MIDI:
+		case QuaPort::Device::MIDI:
 			break;
-		case QUA_DEV_AUDIO:
+		case QuaPort::Device::AUDIO:
 			break;
-		case QUA_DEV_NOT:
+		case QuaPort::Device::NOT:
 			break;
 		}
 	}
@@ -381,12 +381,12 @@ Place::Name(uchar dfmt, uchar cfmt)
 
 	if (dfmt == NMFMT_NONE && cfmt == NMFMT_NONE) {
 		return
-			(device->deviceType == QUA_DEV_AUDIO)? "audio":
-			(device->deviceType == QUA_DEV_MIDI)? "midi":
-			(device->deviceType == QUA_DEV_JOYSTICK)? "joy":"device";
+			(device->deviceType == QuaPort::Device::AUDIO)? "audio":
+			(device->deviceType == QuaPort::Device::MIDI)? "midi":
+			(device->deviceType == QuaPort::Device::JOYSTICK)? "joy":"device";
 	}
 
-	if (device->deviceType == QUA_DEV_MIDI) {
+	if (device->deviceType == QuaPort::Device::MIDI) {
 		if (cfmt == NMFMT_NONE) {
 			return (char *)device->name(dfmt);
 		} else {
@@ -397,7 +397,7 @@ Place::Name(uchar dfmt, uchar cfmt)
 			else
 				sprintf(buf, "%s:%d", device->name(dfmt), deviceChannel);
 		}
-	} else if (device->deviceType == QUA_DEV_AUDIO) {
+	} else if (device->deviceType == QuaPort::Device::AUDIO) {
 		if (xDevice) {
 			char buf2[512];
 			char buf3[512];
@@ -407,7 +407,7 @@ Place::Name(uchar dfmt, uchar cfmt)
 		} else {
 			sprintf(buf, "%s:%d", device->name(dfmt), deviceChannel);
 		}
-	} else if (device->deviceType == QUA_DEV_JOYSTICK) {
+	} else if (device->deviceType == QuaPort::Device::JOYSTICK) {
 		return (char *)device->name(dfmt);
 	}
 
@@ -445,9 +445,9 @@ Place::ValidDevice(QuaPort *dev)
 		return false;
 	if (device == nullptr)
 		return true;
-	if (device->deviceType == QUA_DEV_AUDIO)
+	if (device->deviceType == QuaPort::Device::AUDIO)
 		return false;
-	if (dev->deviceType == QUA_DEV_AUDIO)
+	if (dev->deviceType == QuaPort::Device::AUDIO)
 		return false;
 	return true;
 }
@@ -457,7 +457,7 @@ Output::ValidDevice(QuaPort *dev)
 {
 	if (!Place::ValidDevice(dev))
 		return false;
-	if (dev->deviceType == QUA_DEV_JOYSTICK) {
+	if (dev->deviceType == QuaPort::Device::JOYSTICK) {
 		return false;
 	}
 	return true;
@@ -478,13 +478,13 @@ Output::OutputStream(Time &t, Stream *stream)
 	if (device == nullptr)
 		return false;
 	switch (device->deviceType) {
-	case QUA_DEV_MIDI: {
+	case QuaPort::Device::MIDI: {
 		dst.midi->OutputStream(t, stream, deviceChannel);
 		break;
 	}
 	
 #ifdef QUA_V_JOYSTICK
-	case QUA_DEV_JOYSTICK:		// not quite sure how this looks. 07/05
+	case QuaPort::Device::JOYSTICK:		// not quite sure how this looks. 07/05
 		dst.joy->OutputStream(t, stream, deviceChannel);
 		break;
 #endif
@@ -499,10 +499,10 @@ bool
 Input::HasStreamItems()
 {
 	return	device == nullptr? false:
-			device->deviceType == QUA_DEV_MIDI?
+			device->deviceType == QuaPort::Device::MIDI?
 				src.midi->HasStreamItems():
 #ifdef QUA_V_JOYSTICK
-			device->deviceType == QUA_DEV_JOYSTICK?
+			device->deviceType == QuaPort::Device::JOYSTICK?
 				((QuaJoystickPort *)device)->HasStreamItems():
 #endif
 			false;
@@ -514,12 +514,12 @@ Output::ClearStream(Stream *outStream)
 	if (device == nullptr)
 		return false;
 	switch (device->deviceType) {
-	case QUA_DEV_MIDI: {
+	case QuaPort::Device::MIDI: {
 		dst.midi->ClearStream(outStream, deviceChannel);
 		break;
 	}
 	
-	case QUA_DEV_JOYSTICK:		// v clever joy
+	case QuaPort::Device::JOYSTICK:		// v clever joy
 		break;
 	
 	default: {
@@ -535,12 +535,12 @@ Input::GetStreamItems(Stream *recvStream)
 	if (device == nullptr)
 		return false;
 	switch (device->deviceType) {
-	case QUA_DEV_MIDI: {
+	case QuaPort::Device::MIDI: {
 		src.midi->GetStreamItems(deviceChannel, recvStream);
 		break;
 	}
 #ifdef QUA_V_JOYSTICK
-	case QUA_DEV_JOYSTICK: {
+	case QuaPort::Device::JOYSTICK: {
 		src.joy->GetStreamItems(recvStream);
 		break;
 	}
@@ -555,7 +555,7 @@ Input::Save(ostream &out, short indent, short i)
 	out << tab(indent) << "input";
 	if (device) {
 		switch (device->deviceType) {
-			case QUA_DEV_AUDIO: {
+			case QuaPort::Device::AUDIO: {
 				out << " \\audio " << device->sym->name << " " << deviceChannel;
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
@@ -566,16 +566,16 @@ Input::Save(ostream &out, short indent, short i)
 				}
 				break;
 			}
-			case QUA_DEV_JOYSTICK: {
+			case QuaPort::Device::JOYSTICK: {
 				out << " \\joystick " << device->sym->name;
 				break;
 			}
 
-			case QUA_DEV_MIDI: {
+			case QuaPort::Device::MIDI: {
 				out << " \\midi " << device->sym->name << " " << deviceChannel;
 				break;
 			}
-			case QUA_DEV_PARALLEL: {
+			case QuaPort::Device::PARALLEL: {
 				out << " \\parallel " << device->sym->name;
 				break;
 			}
@@ -599,7 +599,7 @@ Output::Save(ostream &out, short indent, short i)
 	out << indent << "output";
 	if (device) {
 		switch (device->deviceType) {
-			case QUA_DEV_AUDIO: {
+			case QuaPort::Device::AUDIO: {
 				out << " \\audio " << device->sym->name << " "<< deviceChannel;
 				if (xDevice != nullptr) {
 					if (xDevice != device) {
@@ -610,15 +610,15 @@ Output::Save(ostream &out, short indent, short i)
 				}
 				break;
 			}
-			case QUA_DEV_JOYSTICK: {
+			case QuaPort::Device::JOYSTICK: {
 				out << " \\joystick " << device->sym->name;
 				break;
 			}
-			case QUA_DEV_MIDI: {
+			case QuaPort::Device::MIDI: {
 				out << " \\midi " << device->sym->name << " " << deviceChannel;
 				break;
 			}
-			case QUA_DEV_PARALLEL: {
+			case QuaPort::Device::PARALLEL: {
 				out << " \\parallel "<< device->sym->name;
 				break;
 			}

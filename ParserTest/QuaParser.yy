@@ -105,6 +105,11 @@
 %type <intval> formal_param_defn
 %type <intval> formal_param_list
 
+%type <intval> channel_attribute_list
+%type <intval> channel_attribute
+%type <intval> destination_attribute_list
+%type <intval> destination_attribute
+
 %type <vectival> dimension_list
 
 %token END 0 "end of file"
@@ -128,7 +133,22 @@
 %token STRUCT
 %token INPUT
 %token OUTPUT
-%token <intval> TYPE_MODIFIER
+
+// '\ident' tokens ... some of these are specifically recognized, some are generic
+%token <stringval> ATTRIBUTE // an unknown value ... it's not in our internal table but maybe it's a user defined thing
+%token <intval> MODIFIER // a ident is in the dictionary and it has the given value
+%token M_INS // '\ins' channel attrib ... number of audio lines in
+%token M_OUTS // '\outs' ... lines out
+%token M_STREAM_THRU // channel attribute 
+%token M_AUDIO_THRU // channel attribute
+%token M_AUDIO // destination device type
+%token M_MIDI // destination device type
+%token M_JOYSTICK // destination device type
+%token M_PARALLEL // destination device type
+%token M_OSC // destination device type
+%token M_CHANNEL // destination device type
+%token M_SENSOR // destination device type
+%token M_VST // destination device type
 
 %token ASSGN
 
@@ -216,7 +236,7 @@ qua_defn : QUA IDENT {
 	}
 	;
 
-channel_defn : CHANNEL IDENT {
+channel_defn : CHANNEL channel_attribute_list IDENT {
 //	channel \outs 2 \midithru channel1 { ... }
 /*
 		if (nIns < 0) {
@@ -312,11 +332,11 @@ lambda_defn : LAMBDA IDENT {
 	;
 	
 input_defn : INPUT IDENT {
-//		input in1 \joy "joystick1"
-//		input in1 \midi "In-A USB MidiSport 2x2":*
-//		input in1 \midi "In USB Keystation":*
-//		input in1 \audio "*"
-//		input in1 \audio pluginInstanceId:2,3
+//		input \joy in1 "joystick1"
+//		input \midi in1 "In-A USB MidiSport 2x2":*
+//		input \midi in1 "In USB Keystation":*
+//		input \audio in1 "*"
+//		input \audio in1 pluginInstanceId:2,3
 /*
 			Channel		*cha=context->ChannelValue();
 			Input *s = cha->AddInput(nm, trxport[0], sch[0], true);
@@ -334,9 +354,9 @@ input_defn : INPUT IDENT {
 	;
 	
 output_defn : OUTPUT IDENT {
-//		output out1 \audio "ASIO Echo WDM":0,1
-//		output out1 \midi pluginInstanceId:2,3
-//		output out1 \osc "124.1.1.1:1008"
+//		output \audio out1 "ASIO Echo WDM":0,1
+//		output \midi out1 pluginInstanceId:2,3
+//		output \osc out1 "124.1.1.1:1008"
 /*
 			Channel		*cha=context->ChannelValue();
 			Output *s = cha->AddOutput(nm, trxport[0], sch[0], true);
@@ -376,6 +396,24 @@ simple_defn : TYPE dimension_list IDENT {
 	    }
 	    break;
 	}
+	;
+	
+channel_attribute
+	: M_INS LITERAL_INT { $$ = 0; }
+	| M_OUTS LITERAL_INT { $$ = 0; }
+	| M_MIDITHRU { $$ = 0; }
+	| M_AUDIOTHRU { $$ = 0; }
+	;
+	
+destination_attribute
+	: M_AUDIO { $$ = QuaPort::Device::AUDIO; }
+	| M_MIDI { $$ = QuaPort::Device::MIDI; }
+	| M_JOYSTICK { $$ = QuaPort::Device::JOYSTICK; }
+	| M_PARALLEL { $$ = QuaPort::Device::PARALLEL; }
+	| M_OSC { $$ = QuaPort::Device::OSC; }
+	| M_CHANNEL { $$ = QuaPort::Device::CHANNEL; }
+	| M_SENSOR { $$ = QuaPort::Device::SENSOR; }
+	| M_VST { $$ = QuaPort::Device::VST; }
 	;
 
 qua_child_defn
@@ -436,6 +474,15 @@ dimension_list : { $$ = nullptr; }
 		$$ = vi;
 	}
 	;
+	
+channel_attribute_list : { $$ = 0; }
+	| channel_attribute_list channel_attribute; { $$ = 0; }
+	;
+	
+destination_attribute_list : { $$ = 0; }
+	| destination_attribute_list destination_attribute; { $$ = 0; }
+	;
+	
 	
 qua_child_defn_list : { $$ = nullptr; } 
 	| qua_child_defn_list qua_child_defn { $$ = $2; }
