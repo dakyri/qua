@@ -137,7 +137,6 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "\\osc" { return token::M_OSC; }
 "\\channel" { return token::M_CHANNEL; }
 "\\sensor" { return token::M_SENSOR; }
-"\\vst" { return token::M_VST; } // maybe we'll need to split this it may be in several contexts TODO 
 
 [ \t] {
 	// skip white space

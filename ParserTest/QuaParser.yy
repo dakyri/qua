@@ -90,6 +90,9 @@
 %type <stabval> struct_defn
 %type <stabval> input_defn
 %type <stabval> output_defn
+%type <intval> destination_spec
+%type <intval> port_spec
+%type <intval> port_id_list
 
 %type <stabval> qua_child_defn_list
 %type <stabval> qua_child_defn
@@ -148,7 +151,6 @@
 %token M_OSC // destination device type
 %token M_CHANNEL // destination device type
 %token M_SENSOR // destination device type
-%token M_VST // destination device type
 
 %token ASSGN
 
@@ -331,7 +333,7 @@ lambda_defn : LAMBDA IDENT {
 	}
 	;
 	
-input_defn : INPUT IDENT {
+input_defn : INPUT destination_attribute_list IDENT destination_spec {
 //		input \joy in1 "joystick1"
 //		input \midi in1 "In-A USB MidiSport 2x2":*
 //		input \midi in1 "In USB Keystation":*
@@ -353,7 +355,7 @@ input_defn : INPUT IDENT {
 	}
 	;
 	
-output_defn : OUTPUT IDENT {
+output_defn : OUTPUT destination_attribute_list IDENT destination_spec {
 //		output \audio out1 "ASIO Echo WDM":0,1
 //		output \midi out1 pluginInstanceId:2,3
 //		output \osc out1 "124.1.1.1:1008"
@@ -371,6 +373,21 @@ output_defn : OUTPUT IDENT {
 */
 		$$ = nullptr;
 	}
+	;
+	
+destination_spec
+	: IDENT port_spec
+	| LITERAL_STRING port_spec
+	;
+
+port_spec : { $$ = 0; }
+	| COLON STAR { $$ = 0; }
+	| COLON port_id_list  { $$ = 0; }
+	;
+	
+port_id_list
+	: LITERAL_INT { $$ = 0; }
+	| port_id_list COMMA LITERAL_INT { $$ = 0; }
 	;
 	
 simple_defn : TYPE dimension_list IDENT {

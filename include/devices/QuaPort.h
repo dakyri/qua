@@ -16,6 +16,10 @@ enum {
 	QUA_AUDIO_MME = 2,
 	QUA_AUDIO_DX = 3
 };
+//		VST = 5, // a vst or similar plugin, especially one with multiple pinouts or pinins
+// and this would also include CHANNEL
+// both vsts and internal channels can be valid destinations for midi or audio
+// so these are really subsystem kinds, port::subType
 
 enum {
 	QUA_JOY_GENERIC = 0,
@@ -117,10 +121,8 @@ public:
 		MIDI = 2, // regular midi port
 		AUDIO = 3, // regular external audio device
 		PARALLEL = 4, // historical name, but now to represent hardware ports in general, usb in particular for wierd devices
-		VST = 5, // a vst or similar plugin, especially one with multiple pinouts or pinins
-		CHANNEL = 6, // standard qua channel output, internal routing
-		OSC = 7, // OSC message stream, port is a port on an internat connection
-		SENSOR = 8 // stream of sensor data eg orientation on a tablet
+		OSC = 5, // OSC message stream, port is a port on an internat connection
+		SENSOR = 6 // stream of sensor data eg orientation on a tablet
 	};
 
 
