@@ -36,7 +36,7 @@ typedef QSParse::QuaParser::token token;
 #include "VstPlugin.h"
 #include "MidiDefs.h"
 #include "Dictionary.h"
-	
+
 %}
  
 %option debug 
@@ -69,6 +69,8 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 }
 
 {INTEGER}":"{INTEGER}"."{INTEGER} {
+/* TODO XXX FIXME ??? best implementation for this may be as a triplet
+ */
 	TypedValue *v = new TypedValue();
 	yylval->typedval = v;
 	return token::LITERAL_TIME;
@@ -82,6 +84,7 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 
 "qua" { return token::QUA; }
 "voice" { return token::VOICE; }
+"pool" { return token::POOL; }
 "sample" { return token::SAMPLE; }
 "channel" { return token::CHANNEL; }
 "function" { return token::LAMBDA; }
@@ -89,12 +92,21 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "struct" { return token::STRUCT; }
 "input" { return token::INPUT; }
 "output" { return token::OUTPUT; }
+"take" { return token::TAKE; }
+"clip" { return token::CLIP; }
+"vst" { return token::VST; }
+"vstparam" { return token::VST; }
 
 {IDENT} {
 	int type_id = findType(yytext);
 	if (type_id != TypedValue::S_UNKNOWN) {
 		yylval->typeval = type_id;
 		return token::TYPE;
+	}
+	type_id = findDfltEventType(yytext);
+	if (type_id != TypedValue::S_UNKNOWN) {
+		yylval->typeval = type_id;
+		return token::EVENT;
 	}
 	yylval->stringval = new std::string(yytext);
 	return token::IDENT;
@@ -120,23 +132,39 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "*" { return token::STAR; }
 "/" { return token::SLASH; }
 
-
-"\\"{IDENT} { // also return token::ATTRIBUTE from here
-	yylval->intval = 0;
-	return token::MODIFIER;
-}
-
 "\\ins" { return token::M_INS; }
 "\\outs" { return token::M_OUTS; }
-"\\midithru" { return token::M_STREAM_THRU; }
+"\\midithru" { return token::M_MIDI_THRU; }
 "\\audiothru" { return token::M_AUDIO_THRU; }
 "\\audio" { return token::M_AUDIO; }
 "\\midi" { return token::M_MIDI; }
 "\\joy" { return token::M_JOYSTICK; }
 "\\parallel" { return token::M_PARALLEL; }
 "\\osc" { return token::M_OSC; }
-"\\channel" { return token::M_CHANNEL; }
 "\\sensor" { return token::M_SENSOR; }
+"\\locus" { return token::M_LOCUS; }
+"\\modal" { return token::M_MODAL; }
+"\\oncer" { return token::M_ONCER; }
+"\\fixed" { return token::M_FIXED; }
+"\\held" { return token::M_HELD; }
+"\\init" { return token::M_INIT; }
+"\\reset" { return token::M_RESET; }
+"\\range" { return token::M_RANGE; }
+"\\path" { return token::M_PATH; }
+"\\nparam" { return token::M_NPARAMS; }
+"\\nprogram" { return token::M_NPROGRAMS; }
+"\\doload" { return token::M_DOLOAD; }
+"\\noload" { return token::M_NOLOAD; }
+"\\synth" { return token::M_SYNTH; }
+"\\map" { return token::M_MAPPARAMS; }
+"\\id" { return token::M_SIGNATURE; }
+
+"\\"{IDENT} {
+ // also return token::ATTRIBUTE from here (ie if is in symbol table. ATTRIBUTE=user defined, string valued
+ //"\\channel" { return token::M_CHANNEL; }
+	yylval->intval = 0;
+	return token::MODIFIER;
+}
 
 [ \t] {
 	// skip white space

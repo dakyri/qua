@@ -1024,6 +1024,12 @@ GetTypeAlign(base_type_t typ)
 	return align;
 }
 
+/*
+ * TODO XXX FIXME
+ *  this goes way back. unsure of the original, but it dates from a stable version
+ * i think this is a bug fix but the vm is shakey ... needs extensive test
+ * this will handle nested structs ok though
+ */
 void
 EndStructureAllocation(StabEnt *sym)
 {
@@ -1033,7 +1039,8 @@ EndStructureAllocation(StabEnt *sym)
 			sym->context->size[0] += size;
 			Stackable	*e = sym->context->StackableValue();
 			if (e) {
-				e->stackSize = (stack_size_t) sym->context->size[0];
+				e->stackSize += (stack_size_t) sym->context->size[0];
+				// here .. was originaly just = ... ????
 			}
 		}
 	}

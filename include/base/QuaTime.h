@@ -7,6 +7,10 @@
 
 typedef int32	tick_t;
 
+/*
+ * space is no longer a premium. TODO XXX FIXME perhaps this is better as a triplet.
+ * sometimes it definitely is. that would be more robust for shifting meters.
+ */
 struct qua_time {
 public:
 	tick_t		ticks;

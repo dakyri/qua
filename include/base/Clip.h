@@ -108,7 +108,7 @@ class StreamTake: public Take
 {
 public:
 	StreamTake(const std::string &, StabEnt *, const Time &);
-	virtual~StreamTake();
+	virtual ~StreamTake();
 						
 	virtual status_t	SaveSnapshot(ostream &out) override;
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
@@ -118,6 +118,7 @@ public:
 	Time duration;
 	flag saveFormat;
 	Block *initBlock;
+	string path; // midi file or similar
 };
 
 enum {

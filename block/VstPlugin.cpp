@@ -11,7 +11,6 @@
 #include <iostream>
 using namespace std;
 #include <boost/filesystem.hpp>
-using namespace boost;
 
 #ifdef QUA_V_VST_HOST
 #include "aeffectx.h"
@@ -38,7 +37,7 @@ using namespace boost;
 
 flag debug_vst = 0;
 
-VstPlugin::VstPlugin(const char *plugin, char *nm, bool doLoad, bool doMap, bool isasyn, int32 ni, int32 no, int32 npar, int32 nprog):
+VstPlugin::VstPlugin(const string &plugin, const string &nm, bool doLoad, bool doMap, bool isasyn, int32 ni, int32 no, int32 npar, int32 nprog):
 	Stackable(DefineSymbol(nm, TypedValue::S_VST_PLUGIN, 0, this, nullptr, TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
 	mapParams = doMap;
@@ -244,7 +243,7 @@ VstPlugin::Unload()
 #endif
 
 status_t
-VstPlugin::SetPluginPath(const char *plug)
+VstPlugin::SetPluginPath(const string &plug)
 {
 	pluginExecutablePath = plug;
 	status = VST_PLUG_UNLOADED;
@@ -1751,6 +1750,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 	return retval;
 };
 
+using namespace boost;
 void
 VstPlugin::ScanFile(const string &vstpath, ostream &scriptFile, ostream &logFile, bool recursive)
 {

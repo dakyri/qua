@@ -17,6 +17,7 @@
 #include <mutex>
 #include <regex>
 #include <string>
+#include <boost/filesystem.hpp>
 
 #include <tinyxml2.h>
 
@@ -569,7 +570,7 @@ Qua::CreatePool(string &nm)
 		nm = string("pool") + std::to_string(new_pool_id++);
 	}
 
-    Pool *S = new Pool(nm, this, sym, true);
+    Pool *S = new Pool(nm, this, true);
     AddSchedulable(S);
 
 	return S;
@@ -731,27 +732,38 @@ Qua::Stop()
  *			B_ERROR if the mime type is not set
  */
 std::string
-Qua::identifyFile(std::string path)
+Qua::identifyFile(const std::string & path)
 {
-	int n = path.find_last_of('.');
-	if (n == -1) {
-		return "";
-	}
-	std::string p = path.substr(n + 1);
-	if (p == "wav" || p == "wave") {
+	boost::filesystem::path idPath(path);
+	string ext = idPath.extension().string();
+
+	if (ext == "wav" || ext == "wave") {
 		return "audio/x-wav";
-	} else if (p == "aif" || p == "aiff") {
+	} else if (ext == "aif" || ext == "aiff") {
 		return "audio/x-aiff";
-	} else if (p == "mid" || p == "midi") {
+	} else if (ext == "mid" || ext == "midi") {
 		return "audio/x-midi";
-	} else if (p == "qs") {
+	} else if (ext == "qs") {
 		return "audio/x-quascript";
-	} else if (p == "qua") {
+	} else if (ext == "qua") {
 		return "audio/x-quascript";
 	} else {
 		return "application/octet-stream";
 	}
 	return "";
+}
+
+bool
+Qua::isSampleFile(const string &path)
+{
+	string type = identifyFile(path);
+	return type == "audio/x-wav" || type == "audio/x-aiff";
+}
+
+bool
+Qua::isMidiFile(const string & path) {
+	string type = identifyFile(path);
+	return type == "audio/x-midi";
 }
 
 // largely defunk ... used to instantiate from templates in prior incarnations

@@ -143,7 +143,9 @@ public:
 
 	StabEnt *loadFile(std::string path);
 	StabEnt *loadObject(StabEnt *obj);
-	static std::string identifyFile(std::string);
+	static std::string identifyFile(const string &path);
+	static bool isSampleFile(const string &path);
+	static bool isMidiFile(const string &path);
 	static std::string nameFromLeaf(std::string);
 
 	static Qua * loadScriptFile(const char *path, QuaReflection &display);

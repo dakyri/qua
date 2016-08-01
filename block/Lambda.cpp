@@ -44,7 +44,7 @@ Lambda::Save(ostream &out, short indent)
 }
 
 
-Lambda::Lambda(std::string nm, StabEnt *context, bool f1, bool f2, bool f3, bool f4, bool f6, bool f7):
+Lambda::Lambda(const std::string &nm, StabEnt * const context, bool f1, bool f2, bool f3, bool f4, bool f6, bool f7):
 	Executable(DefineSymbol(nm, TypedValue::S_LAMBDA, 0,
 						this, context,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))

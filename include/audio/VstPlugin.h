@@ -33,7 +33,7 @@ class Stream;
 class VstPlugin: public Stackable
 {
 public:
-						VstPlugin(const char *, char *name, bool, bool, bool, int32, int32, int32, int32);
+						VstPlugin(const string &path, const string &name, bool, bool, bool, int32, int32, int32, int32);
 						~VstPlugin();
 
 	bool				mapParams;
@@ -42,7 +42,7 @@ public:
 	long				CheckPluginStatus();
 	void				Init();
 	
-	status_t			SetPluginPath(const char *);
+	status_t			SetPluginPath(const string &path);
 
 	status_t			Load(ErrorHandler &display);
 	status_t			Unload();

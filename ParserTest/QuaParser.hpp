@@ -163,6 +163,8 @@ namespace QSParse {
 	std::string *stringval;
 	std::vector<int> *vectival;
 	TypedValue *typedval;
+	PortSpec *portval;
+	
 	int intval;
 	base_type_t typeval;
 	StabEnt *stabval;
@@ -171,7 +173,7 @@ namespace QSParse {
 	Block *block;
 	Qua *qua;
 
-#line 175 "QuaParser.hpp" // lalr1.cc:377
+#line 177 "QuaParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -192,37 +194,71 @@ namespace QSParse {
         WORD = 258,
         SYMBOL = 259,
         TYPE = 260,
-        IDENT = 261,
-        LITERAL_INT = 262,
-        LITERAL_FLOAT = 263,
-        LITERAL_TIME = 264,
-        LITERAL_STRING = 265,
-        QUA = 266,
-        VOICE = 267,
-        SAMPLE = 268,
-        LAMBDA = 269,
-        CHANNEL = 270,
-        STRUCT = 271,
-        INPUT = 272,
-        OUTPUT = 273,
-        TYPE_MODIFIER = 274,
-        ASSGN = 275,
-        LSQB = 276,
-        RSQB = 277,
-        LBRA = 278,
-        RBRA = 279,
-        LB = 280,
-        RB = 281,
-        COMMA = 282,
-        COLON = 283,
-        COLON2 = 284,
-        SEMI = 285,
-        DOT = 286,
-        PLUS = 287,
-        MINUS = 288,
-        STAR = 289,
-        SLASH = 290,
-        NEWLINE = 291
+        EVENT = 261,
+        IDENT = 262,
+        LITERAL_INT = 263,
+        LITERAL_FLOAT = 264,
+        LITERAL_TIME = 265,
+        LITERAL_STRING = 266,
+        QUA = 267,
+        VOICE = 268,
+        POOL = 269,
+        SAMPLE = 270,
+        LAMBDA = 271,
+        CHANNEL = 272,
+        STRUCT = 273,
+        INPUT = 274,
+        OUTPUT = 275,
+        CLIP = 276,
+        TAKE = 277,
+        VST = 278,
+        VSTPARAM = 279,
+        ATTRIBUTE = 280,
+        MODIFIER = 281,
+        M_INS = 282,
+        M_OUTS = 283,
+        M_MIDI_THRU = 284,
+        M_AUDIO_THRU = 285,
+        M_AUDIO = 286,
+        M_MIDI = 287,
+        M_JOYSTICK = 288,
+        M_PARALLEL = 289,
+        M_OSC = 290,
+        M_CHANNEL = 291,
+        M_SENSOR = 292,
+        M_LOCUS = 293,
+        M_MODAL = 294,
+        M_ONCER = 295,
+        M_FIXED = 296,
+        M_HELD = 297,
+        M_INIT = 298,
+        M_RESET = 299,
+        M_RANGE = 300,
+        M_PATH = 301,
+        M_NPARAMS = 302,
+        M_NPROGRAMS = 303,
+        M_DOLOAD = 304,
+        M_NOLOAD = 305,
+        M_SYNTH = 306,
+        M_MAPPARAMS = 307,
+        M_SIGNATURE = 308,
+        ASSGN = 309,
+        LSQB = 310,
+        RSQB = 311,
+        LBRA = 312,
+        RBRA = 313,
+        LB = 314,
+        RB = 315,
+        COMMA = 316,
+        COLON = 317,
+        COLON2 = 318,
+        SEMI = 319,
+        DOT = 320,
+        PLUS = 321,
+        MINUS = 322,
+        STAR = 323,
+        SLASH = 324,
+        NEWLINE = 325
       };
     };
 
@@ -386,7 +422,7 @@ namespace QSParse {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const signed char yypact_[];
+  static const short int yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -397,14 +433,14 @@ namespace QSParse {
   static const signed char yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const signed char yydefgoto_[];
+  static const short int yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const short int yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -521,12 +557,12 @@ namespace QSParse {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 69,     ///< Last index in yytable_.
-      yynnts_ = 30,  ///< Number of nonterminal symbols.
-      yyfinal_ = 5, ///< Termination state number.
+      yylast_ = 177,     ///< Last index in yytable_.
+      yynnts_ = 66,  ///< Number of nonterminal symbols.
+      yyfinal_ = 6, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 37  ///< Number of tokens.
+      yyntokens_ = 71  ///< Number of tokens.
     };
 
 
@@ -538,7 +574,7 @@ namespace QSParse {
 
 #line 5 "QuaParser.yy" // lalr1.cc:377
 } // QSParse
-#line 542 "QuaParser.hpp" // lalr1.cc:377
+#line 578 "QuaParser.hpp" // lalr1.cc:377
 
 
 

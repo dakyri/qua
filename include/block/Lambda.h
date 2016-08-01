@@ -19,12 +19,12 @@ class Lambda: public Executable
 public:					
 	status_t Save(ostream &out, short indent);
 
-	Lambda(std::string nm, StabEnt *S, bool f1=false,
+	Lambda(const std::string & nm, StabEnt * const S, bool f1=false,
 		bool f2 = false,
 		bool f3 = false,
 		bool f4 = false,
-		bool f6 = false,
-		bool f7 = false);
+		bool f5 = false,
+		bool f6 = false);
 	Lambda(Lambda *S, StabEnt *Sy);
 	virtual ~Lambda();
 	bool Init();

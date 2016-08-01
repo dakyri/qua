@@ -18,10 +18,14 @@ QSParse::ParserDriver::~ParserDriver() {
 void 
 QSParse::ParserDriver::parse(std::istream& inStream)
 {
+	vstplugins.clear();
+	schedulables.clear();
+	lambdas.clear();
+
 	scanner.yyrestart(&inStream);
 	const int accept( 0 );
 	if( parser.parse() != accept ) {
-		std::cerr << "Unrecognized command!!\n";
+		std::cerr << "Oops! parser failed and the error recovery is awful\n";
 	}
 }
 

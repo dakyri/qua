@@ -28,7 +28,7 @@ struct IXMLDOMElement;
 class Pool: public Schedulable
 {
 public:
-						Pool(string nm, Qua *uq, StabEnt *c, bool);
+						Pool(string nm, Qua *uq, bool);
 						~Pool();
 						
 						virtual bool		Init() override;

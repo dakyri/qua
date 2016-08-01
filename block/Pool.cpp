@@ -12,10 +12,10 @@
 #include "Channel.h"
 #include "QuaDisplay.h"
 
-Pool::Pool(string nm, Qua *uq, StabEnt *context, bool addTake):
+Pool::Pool(string nm, Qua *uq, bool addTake):
 	Schedulable(
 		DefineSymbol(nm, TypedValue::S_POOL, 0,
-					this, context,
+					this, uq->sym,
 					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT),
 		uq,
 		uq->metric)

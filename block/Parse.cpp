@@ -2620,7 +2620,8 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 			if (currentTokenType == TOK_VAL && currentTokenVal.type == TypedValue::S_STRING) {
 				dataPath = currentToken;
 				GetToken();
-			} else if (strcmp(currentToken, "[")==0 || strcmp(currentToken, "{") == 0) { // TODO XXX FIXME messy syntax is getting messy lots of odd cases could happen
+			} else if (strcmp(currentToken, "[")==0 || strcmp(currentToken, "{") == 0) { 
+				// TODO XXX FIXME messy syntax is getting messy lots of odd cases could happen
 				initBlock = ParseBlockInfo(context, schedSym);
 			}
 
@@ -2883,6 +2884,10 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 	    break;
 	}
 
+/*
+TODO FIXME XXXX probably unnecessary ... an alias for a port. i think these are better left of defined
+by context automatically and matched by the inputs/outputs in channels
+*/
 	case TypedValue::S_PORT: {
 		if (ndimensions != 0) {
 			ParseError(ERROR_ERR, "port should be undimensioned");
@@ -2950,7 +2955,7 @@ QSParser::ParseDefine(StabEnt *context, StabEnt *schedSym)
 
 		Pool	*S;
 
-	    S = new Pool(currentToken, uberQua, context, true);
+	    S = new Pool(currentToken, uberQua, true);
 	    S->next = schedulees;
 	    schedulees = S;
 
