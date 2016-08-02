@@ -25,29 +25,27 @@ enum {
 
 
 #include <vector>
+#include <string>
+using namespace std;
+
 #include "StdDefs.h"
 
 class QuaInsert
 {
 public:
-	QuaInsert( Insertable *object, QuaNexion *quanexion, char *name, int32 id, short type, int32, int32);
+	QuaInsert( Insertable *object, QuaNexion *quanexion, const string &name, int32 id, short type, int32, int32);
 	QuaInsert();
 	~QuaInsert();
-	void			Set(
-						Insertable *object,
-						QuaNexion *quanexion,
-						char *name,
-						int32 id,
-						short type);
-	void			SetName(char *);
+	void Set( Insertable *object, QuaNexion *quanexion, const string &name, int32 id, short type);
+	void SetName(char *);
 
-	Insertable		*object;
-	QuaNexion		*quanexion;
-	char			*name;
-	int32			id;
-	short			type;
-	int32			width;
-	int32			format;
+	Insertable *object;
+	QuaNexion *quanexion;
+	string name;
+	int32 id;
+	short type;
+	int32 width;
+	int32 format;
 };
 
 class QuaNexion

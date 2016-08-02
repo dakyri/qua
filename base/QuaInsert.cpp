@@ -15,7 +15,7 @@
 QuaInsert::QuaInsert(
 				Insertable *o,
 				QuaNexion *q,
-				char *n,
+				const string &n,
 				int32 i,
 				short t,
 				int32 w,
@@ -23,12 +23,7 @@ QuaInsert::QuaInsert(
 {
 	object = o;
 	quanexion = q;
-	if (n) {
-		name = new char[strlen(n)+1];
-		strcpy(name, n);
-	} else {
-		name = nullptr;
-	}
+	name = n;
 	id = i;
 	type = t;
 	width = w;
@@ -48,22 +43,11 @@ QuaInsert::	QuaInsert()
 }
 
 void
-QuaInsert::	Set(
-				Insertable *o,
-				QuaNexion *q,
-				char *n,
-				int32 i,
-				short t)
+QuaInsert::	Set( Insertable *o, QuaNexion *q, const string &n, int32 i, short t)
 {
 	object = o;
 	quanexion = q;
-	if (name) {
-		delete name;
-	}
-	if (n) {
-		name = new char[strlen(n)+1];
-		strcpy(name, n);
-	}
+	name = n;
 	id = i;
 	type = t;
 	/*
@@ -79,16 +63,7 @@ QuaInsert::	Set(
 void
 QuaInsert::	SetName(char *n)
 {
-	if (name) {
-		delete name;
-	}
-	if (n) {
-		name = new char[strlen(n)+1];
-		strcpy(name, n);
-	} else {
-		name = "";
-	}
-
+	name = n ? n : "";
 	/*
 	if (object->executable->representation) {
 		if (object->executable->representation->Window())
@@ -102,8 +77,6 @@ QuaInsert::	SetName(char *n)
 
 QuaInsert::~QuaInsert()
 {
-	if (name)
-		delete name;
 }
 
 /*
@@ -168,7 +141,7 @@ Insertable::FindInsert(char *nm, int32 id, short typ)
 	for (auto ins: inserts) {
 		if (id >= 0 && ins->id == id && (typ == ANY_INSERT || typ == ins->type))
 			return ins;
-		if (nm && ins->name && strcmp(nm, ins->name) == 0 && (typ == ANY_INSERT || typ == ins->type))
+		if (nm && ins->name.size() && ins->name == string(nm) && (typ == ANY_INSERT || typ == ins->type))
 			return ins;
 	}
 	return nullptr;

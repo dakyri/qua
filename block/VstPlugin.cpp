@@ -1901,9 +1901,10 @@ VstPluginList::item4Path(char *path)
 VstPlugin *
 VstPluginList::item4Name(char *nm)
 {
+	if (!nm) return nullptr;
 	for (short i=0; ((unsigned)i)<size(); i++) {
 		VstPlugin	*p = itemAt(i);
-		if (p->sym != nullptr && strcmp(p->sym->name.c_str(), nm) == 0) {
+		if (p->sym != nullptr && p->sym->name == string(nm)) {
 			return p;
 		}
 	}

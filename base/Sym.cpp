@@ -385,9 +385,7 @@ SymTab::findFreeInd(const string &nm, StabEnt *context, short &defineCount)
 	}
 	while (bucketCount < stabLen) {
 #ifdef DEFINE_COUNT
-		if (  stab[i] != nullptr &&
-			  strcmp(nm, stab[i]->name) == 0 &&
-			  context == stab[i]->context) {
+		if (  stab[i] != nullptr &&  nm == stab[i]->name && context == stab[i]->context) {
 			if (foundDefCount) {
 				if (!stab[i]->isDeleted && stab[i]->defineCount == defineCount) {
 					reportError("Qua: symtab defcount clash, needs a fix");
@@ -937,8 +935,7 @@ StabEnt::uniqueName()
 	if (defineCount == 0) {
 		return name;
 	} else {
-		sprintf(buf, "%s#%d", name, defineCount);
-		return buf;
+		return name + "#"+to_string(defineCount);
 	}
 #else
 	return name.c_str();

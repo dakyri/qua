@@ -83,7 +83,7 @@ public:
 	Block				*enclosingList;
 	TimeKeeper			*timeKeeper;
 
-	char				*label;
+	string label;
 	Stacker				*stacker;
 	StabEnt				*stackerSym;
 	StabEnt				*context;

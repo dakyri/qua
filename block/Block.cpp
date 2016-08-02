@@ -227,13 +227,14 @@ Block::Setup(bool setVars)
 	}
 		
 	case C_VALUE: {
-		crap.constant.stringValue = nullptr;
 		break;
 	}
 		
+	case C_NAME:
+		break;
+
 	case C_SYM:
 	case C_ARRAY_REF:
-	case C_NAME:
 	case C_STRUCTURE_REF:
 	case C_UNKNOWN:
 	case C_CAST:
@@ -338,15 +339,13 @@ Block::Block(Block *model, StabEnt *newContext, bool unwind)
 	case C_SYM:
 		if (unwind) {
 			type = C_NAME;
-			crap.name = new char[model->crap.sym->name.size()+1];
-			strcpy(crap.name, model->crap.sym->name.c_str());
+			name = model->crap.sym->name;
 			QDBMSG_BLK("new Block() clone unwind symbol %s\n", crap.name,0);
 		}
 		break;
 		
 	case C_NAME	:
-		crap.name = new char[strlen(model->crap.name)+1];
-		strcpy(crap.name, model->crap.name);
+		name = model->name;
 		break;
 		
 		
@@ -413,15 +412,12 @@ Block::~Block()
 {
 //	if (label)
 //		delete label;
-	if (comment)
-		delete comment;
-
 	switch (type) {
 
 	case C_BUILTIN: {
 		break;
 	}
-	
+
 	case C_LIST: {
 		if (crap.list.tmpbuf1)
 			sample_buf_free(crap.list.tmpbuf1, 2);
@@ -473,12 +469,9 @@ Block::~Block()
 		break;
 	}
 	case C_VALUE: {
-		if (crap.constant.stringValue) {
-			delete [] crap.constant.stringValue;
-		}
-//		if (crap.constant.Value.type == TypedValue::S_TIME) {
-//			delete crap.constant.Value.TimeValue();
-//		}
+		//		if (crap.constant.Value.type == TypedValue::S_TIME) {
+		//			delete crap.constant.Value.TimeValue();
+		//		}
 		break;
 	}
 	case C_SET_ATTRIB: {
@@ -486,6 +479,9 @@ Block::~Block()
 			delete crap.setAttrib.attributes;
 		}
 		break;
+	}
+
+	case C_NAME: {
 	}
 	default: {
 	}
@@ -550,14 +546,13 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	
 	case C_NAME: {
 	    StabEnt	*S;
-	    S = glob.findSymbol(crap.name);
+	    S = glob.findSymbol(name);
 	    if (S == nullptr) {
-			internalError("Qua linkage error: \"%s\" not found", crap.name);
+			internalError("Qua linkage error: \"%s\" not found", name.c_str());
 			status = B_ERROR;
 			return B;
 	    }
-	    QDBMSG_BLK("found symbol %s in %s\n", S->name, S->context?S->context->name:"<glbl>");
-	    delete [] crap.name;
+	    QDBMSG_BLK("found symbol %s in %s\n", S->name, S->context?S->context->name.c_str():"<glbl>");
 		if (S->type == TypedValue::S_LAMBDA) {
 			type = C_CALL;
 			crap.call.parameters = nullptr;
@@ -573,10 +568,10 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 	case C_UNLINKED_CALL: {
 	    QDBMSG_BLK("Setting up unlinked call element: %s\n", crap.call.crap.name,0);
     
-    	StabEnt *S = glob.findSymbol(crap.call.crap.name);
+    	StabEnt *S = glob.findSymbol(name);
 
 	    if (S == nullptr) {
-			internalError("Init: call symbol \"%s\" not found\n", crap.call.crap.name);
+			internalError("Init: call symbol \"%s\" not found\n", name);
 			status = B_ERROR;
 			return B;
 	    }
@@ -586,32 +581,28 @@ Block::DoInitPre(void *V, void *B, int z, long & status)
 		case TypedValue::S_SAMPLE:
 		case TypedValue::S_POOL:
    		case TypedValue::S_PORT:
-			delete [] crap.call.crap.name;
 	    	crap.call.crap.sym = S;
 			glob.PushContext(crap.call.crap.sym);
 			type = C_SCHEDULE;
 			break;
 		case TypedValue::S_VST_PLUGIN:
-			delete [] crap.call.crap.name;
 	    	crap.call.crap.sym = S;
 			glob.PushContext(crap.call.crap.sym);
 			type = C_VST;
 			break;
 		case TypedValue::S_EVENT:
-			delete [] crap.call.crap.name;
 	    	crap.call.crap.sym = S;
 			glob.PushContext(crap.call.crap.sym);
 			type = C_CALL;
 			break;
 	    case TypedValue::S_LAMBDA:
-			delete [] crap.call.crap.name;
 	    	crap.call.crap.lambda = S->LambdaValue();
 			glob.PushContext(crap.call.crap.lambda->sym);
 	    	type = C_CALL;
 	    	break;
 
 	    default:
-  			internalError("Init: call symbol \"%s\" not a method\n", crap.call.crap.name);
+  			internalError("Init: call symbol \"%s\" not a method\n", name.c_str());
   			crap.call.crap.sym = S;
 			return B;
 		}
@@ -1887,8 +1878,8 @@ Block::Dump(FILE *fp, short indent)
 
 
 	case C_UNLINKED_CALL:
-	    if (crap.call.crap.name) {
-			fprintf(fp, crap.call.crap.name);
+	    if (name.size()) {
+			fprintf(fp, name.c_str());
 		    if (crap.call.parameters) {
 		    	fprintf(fp, "(");
 	    		crap.call.parameters->Dump(fp, 0);
@@ -2059,7 +2050,7 @@ Block::Dump(FILE *fp, short indent)
 		break;
 
 	case C_NAME:
-		fprintf(fp, crap.name);
+		fprintf(fp, name.c_str());
 		fprintf(fp, " ");
 	    break;
 	    
@@ -2107,19 +2098,11 @@ Block::Set(ulong t, ulong st)
 }
 
 void
-Block::Set(TypedValue &v, char*nm)
+Block::SetConstValue(TypedValue &v, char*nm)
 {
-	char *nnm;
-	
-	if (nm && *nm) {
-		nnm= new char [strlen(nm)+1];
-		strcpy(nnm, nm);
-	} else {
-		nnm = nullptr;
-	}
 	type = C_VALUE;
 	crap.constant.value = v;
-	crap.constant.stringValue = nnm;
+	if (nm) name = nm;
 }
 
 void

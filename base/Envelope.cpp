@@ -275,7 +275,7 @@ Envelope::MoveSegment(int i, Time &t, float v, bool draw)
 void
 Envelope::SetName(const char *nm)
 {
-	if (strcmp(sym->name.c_str(), nm) != 0) {
+	if (sym->name != string(nm)) {
 		if (sym)
 			glob.rename(sym, ((char *)nm));
 	}

@@ -22,6 +22,7 @@
 #include "QuaDisplay.h"
 
 #include <unordered_map>
+#include <iostream>
 
 int	debug_midi=0;
 
@@ -1219,7 +1220,7 @@ QuaMidiManager::disconnect(Input *s)
 	}
 	if (!anyEnabled &&
 		!closeInput(s->src.midi)) {
-		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name.c_str());
+		cerr << "Can't close input midi port" << s->device->sym->name << endl;
 		return B_ERROR;
 	}
 	s->src.midi = nullptr;
@@ -1245,7 +1246,7 @@ QuaMidiManager::disconnect(Output *s)
 	}
 	if (!anyEnabled &&
 		!closeOutput(s->dst.midi)) {
-		fprintf(stderr, "Can't close input midi port %s", s->device->sym->name.c_str());
+		cerr << "Can't close input midi port" << s->device->sym->name << endl;
 		return B_ERROR;
 	}
 	s->dst.midi = nullptr;

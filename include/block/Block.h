@@ -20,6 +20,7 @@ struct WhirlInfo;
 class StabEnt;
 
 #include <unordered_map>
+#include <string>
 extern std::unordered_map<std::string, int>	streamTypeIndex;
 extern std::unordered_map<std::string, int>	objectSubTypeIndex;
 extern std::unordered_map<std::string, int>	builtinCommandIndex;
@@ -147,7 +148,6 @@ struct CallInfo
     int			frameIndex;
     union {
 		Lambda				*lambda;
-		char				*name;
 		StabEnt				*sym;
 		VstPlugin			*vstplugin;
 		SamplePlayInfo		*splayer;
@@ -209,7 +209,6 @@ struct StructureRef
 struct ConstInfo
 {
 	TypedValue	value;
-	char		*stringValue;
 };
 
 // sin
@@ -302,7 +301,6 @@ union BlockInfo {
 	ArrayRef		arrayRef;
 	
 	Block			*block;
-	char			*name;
 };
 
 status_t		SaveMainBlock(class Block *, ostream &out,
@@ -341,17 +339,20 @@ public:
 	void					Dump(FILE *, short);
 
 	void					Set(ulong t, ulong st=C_UNKNOWN);
-	void					Set(TypedValue&v, char*n=nullptr);
+	void					SetConstValue(TypedValue&v, char*n=nullptr);
 
-    ulong					type;
-    ulong					subType;
-    BlockInfo				crap;
-    Block					*next;
+    ulong type;
+    ulong subType;
+    BlockInfo crap;
+    Block *next;
+	string name;
+	// name, of UNLINKED, constant VALUE, other block types that have a string name field.
+	// string can't go in union, putting it here reduces a lot of dangerous code for a negligible cost
 
-	StabEnt					*labelSym;
-	char					*comment;
+	StabEnt *labelSym;
+	string comment;
 
-	BlockDisplayInfo		displayInfo;
+	BlockDisplayInfo displayInfo;
 
 	inline bool isOperator() { return type == C_UNOP || type == C_BINOP || type == C_IFOP; }
 

@@ -403,15 +403,15 @@ Time::operator &=(const Metric &m)
 char *
 Time::StringValue()
 {
-	static	char	buf[50];
-	int			bar, barBeat, beatTick;
+	static string buf;
+	int bar, barBeat, beatTick;
 	if (ticks == INFINITE_TICKS) {
-		strcpy(buf, "forever");
+		buf = "forever";
 	} else {
 		GetBBQValue(bar, barBeat, beatTick);
-		sprintf(buf, "%d:%d.%d", bar, barBeat, beatTick);
+		buf = to_string(bar) + ":" + to_string(barBeat) + "." + to_string(beatTick);
 	}
-	return buf;
+	return const_cast<char *>(buf.c_str());
 }
 
 void

@@ -21,12 +21,6 @@ Pool::Pool(string nm, Qua *uq, bool addTake):
 		uq->metric)
 	, selectedTakeStream(scratchStream)
 {
-//	if (nm != nullptr) {
-//		name = new char[strlen(nm)+1];
-//		strcpy(name, nm);
-//	} else {
-//		name = "";
-//	}
 	SelectTake(addStreamTake(string("original"), Time::zero, false));
     uberQua = uq;
 	status = STATUS_RUNNING;

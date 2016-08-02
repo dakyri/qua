@@ -52,11 +52,6 @@ Voice::Voice(std::string nm, Qua *parent):
     Time		zero;
     Note		t;
     StreamNote	x(zero, t);
-    
-//    name = new char[strlen(nm)+1];
-//    strcpy(name, nm);
-//	
-	
     DefineSymbol("self", TypedValue::S_VOICE, 0,
     			this, sym,
 				TypedValue::REF_VALUE, true, false, StabEnt::DISPLAY_NOT);

@@ -1296,8 +1296,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		varp = p = new Block( Block::C_VALUE);
 		p->crap.constant.value = currentTokenVal;
 		if (*currentToken) {
-			p->crap.constant.stringValue = new char [strlen(currentToken)+1];
-			strcpy(p->crap.constant.stringValue, currentToken);
+			p->name = currentToken;
 		}
         if (debug_parse)
         	fprintf(stderr, "\tconst %s\n", currentToken);
@@ -1387,8 +1386,7 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		        } else {
 					p = new Block( Block::C_NAME);
 					varp = p;
-					p->crap.name = new char[strlen(currentToken) + 1];
-					strcpy(p->crap.name, currentToken);
+					p->name = currentToken;
 			   		GetToken();
 			   	}
 		   	}
@@ -1433,13 +1431,14 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 		   		}
 		   		
 		   		case Block::C_NAME: {
-		   			char *nm = varp->crap.name;
+		   			char *nm = const_cast<char*>(varp->name.c_str());
 					long	v;
+					// note name won't change here, just type of block and the value in the union
 					if ((v = findMidiNote(nm)) != INT_MIN) {
 						TypedValue	val;
 						val.Set(TypedValue::S_INT, TypedValue::REF_VALUE);
 						val.SetValue((int32)v);
-						varp->Set(val, nm);
+						varp->SetConstValue(val); 
 						varp->next = p;
 						p = varp;
 #ifdef QUA_V_OLD_BUILTIN
@@ -1451,7 +1450,6 @@ QSParser::ParseAtom(StabEnt *context, StabEnt *schedSym, bool resolveNames)
 						varp->crap.call.parameters = p;
 					} else {
 			   			varp->type = Block::C_UNLINKED_CALL;
-			   			varp->crap.call.crap.name = nm;
 			   			varp->crap.call.parameters = p;
 					}
 		   			break;
@@ -1958,9 +1956,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		if (p->type == Block::C_SYM) {
 			StabEnt		*sym = p->crap.sym;
 			p->crap.call.crap.sym = sym;
-		} else if (p->type == Block::C_NAME) {
-			char		*nm = p->crap.name;
-			p->crap.call.crap.name = nm;
+		} else if (p->type == Block::C_NAME) { // name doesn't change here
 			ParseError(ERROR_ERR, "suspend linkage error at '%s'", currentToken);
 		}
 		p->type = Block::C_SUSPEND;
@@ -1976,9 +1972,7 @@ QSParser::ParseBlockInfo(StabEnt *context, StabEnt *schedSym)
 		if (p->type == Block::C_SYM) {
 			StabEnt		*sym = p->crap.sym;
 			p->crap.call.crap.sym = sym;
-		} else if (p->type == Block::C_NAME) {
-			char		*nm = p->crap.name;
-			p->crap.call.crap.name = nm;
+		} else if (p->type == Block::C_NAME) { // name doesn't change
 			ParseError(ERROR_ERR, "wake linkage error, at '%s'", currentToken);
 		}
 		p->type = Block::C_WAKE;

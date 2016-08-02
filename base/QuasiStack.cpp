@@ -66,13 +66,7 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 	timeKeeper = uq;
 	mulch = nullptr;
 	stk.vars = nullptr;
-	if (lbl) {
-		label = new char[strlen(lbl)+1];
-		strcpy(label, lbl);
-	} else {
-		label = nullptr;
-	}
-
+	label = lbl? lbl: "";
 	stackable = ctxt->StackableValue();
 	if (stackable == nullptr) {
 		uq = nullptr;
@@ -263,9 +257,6 @@ QuasiStack::~QuasiStack()
 		delete ControllerBridge(i);
 	}*/
 	
-	if (label)
-		delete label;
-		
 	if (stackable) {
 		stackable->removeStack(this);
 	}
@@ -678,7 +669,7 @@ QuasiStack::SetValue(Block *b)
 			return false;
 		}
 	} else if (b->type == Block::C_UNLINKED_CALL) {
-		if (strcmp(b->crap.call.crap.name, stackable->sym->name.c_str()) != 0)
+		if (b->name == stackable->sym->name)
 			return false;
 	} else {
 		return false;

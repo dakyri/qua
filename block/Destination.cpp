@@ -352,34 +352,10 @@ Input::SetEnabled(uchar en)
 }
 	
 
-void merge(char *d, char *s, char *t);
-void merge(char *d, char *s, char *t)
-{
-	if (s != nullptr) {
-		char *ss = s;
-		while (*ss) {
-			*d++ = *ss++;
-		}
-		if (t != nullptr) {
-			*d++ = ',';
-		}
-	}
-	if (t != nullptr) {
-		while (*s && *t && *t == *s) {
-			t++;
-			s++;
-		}
-		while (*t) {
-			*d++ = *t++;
-		}
-	}
-	*d = 0;
-}
-
 char *
 Place::Name(uchar dfmt, uchar cfmt)
 {
-	static char buf[512];
+	static string buf;
 	
 	if (device == nullptr) {
 		return "null device";
@@ -393,31 +369,28 @@ Place::Name(uchar dfmt, uchar cfmt)
 	}
 
 	if (device->deviceType == QuaPort::Device::MIDI) {
+		buf = device->name(dfmt);
 		if (cfmt == NMFMT_NONE) {
 			return (char *)device->name(dfmt);
 		} else {
 			if (deviceChannel == -1)
-				sprintf(buf, "%s:*", device->name(dfmt));
+				buf += ":*";
 			else if (deviceChannel == 0)
-				sprintf(buf, "%s:!", device->name(dfmt));
+				buf += ":!";
 			else
-				sprintf(buf, "%s:%d", device->name(dfmt), deviceChannel);
+				buf += ":"+to_string(deviceChannel);
 		}
 	} else if (device->deviceType == QuaPort::Device::AUDIO) {
 		if (xDevice) {
-			char buf2[512];
-			char buf3[512];
-			sprintf(buf2, "%s:%d", device->name(dfmt), deviceChannel);
-			sprintf(buf3, "%s:%d", xDevice->name(dfmt), xChannel);
-			merge(buf, buf2, buf3);
+			buf += ":" + to_string(deviceChannel);
+			buf += "," + string(xDevice->name(dfmt)) + ":" + to_string(xChannel);
 		} else {
-			sprintf(buf, "%s:%d", device->name(dfmt), deviceChannel);
+			buf += ":"+to_string(deviceChannel);
 		}
 	} else if (device->deviceType == QuaPort::Device::JOYSTICK) {
-		return (char *)device->name(dfmt);
 	}
 
-	return buf;
+	return const_cast<char*>(buf.c_str());
 }
 
 

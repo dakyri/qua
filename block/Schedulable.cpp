@@ -62,11 +62,9 @@ Schedulable::~Schedulable()
 void
 Schedulable::SetName(char *nm)
 {
-	if (strcmp(sym->name.c_str(), nm) != 0) {
-		if (sym) {
-			glob.rename(sym, nm);
-		}
-//		uberQua->bridge.Rename(sym, nm);			
+	if (sym && sym->name != string(nm)) {
+		glob.rename(sym, nm);
+		//		uberQua->bridge.Rename(sym, nm);			
 	}
 }
 

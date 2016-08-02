@@ -165,8 +165,8 @@ Esrap(Block *block, ostream &out, bool do_indent, short indent, short crlf)
 		}
 	
 		case Block::C_UNLINKED_CALL:
-		    if (block->crap.call.crap.name) {
-				put(block->crap.call.crap.name, out);
+		    if (block->name.size()) {
+				put(block->name, out);
 			    if (block->crap.call.parameters) {
 			    	put("(", out);
 			    	if (!Esrap(block->crap.call.parameters, out, false, indent, crlf)) return false;
@@ -389,8 +389,8 @@ Esrap(Block *block, ostream &out, bool do_indent, short indent, short crlf)
 				put("\"", out);
 				put(block->crap.constant.value.StringValue(), out);
 				put("\"", out);
-			} else if (block->crap.constant.stringValue) {
-				put(block->crap.constant.stringValue, out);
+			} else if (block->name.size()) {
+				put(block->name, out);
 			} else {
 				put(block->crap.constant.value.StringValue(), out);
 			}
@@ -401,7 +401,7 @@ Esrap(Block *block, ostream &out, bool do_indent, short indent, short crlf)
 			break;
 	
 		case Block::C_NAME:
-			put(block->crap.name, out);
+			put(block->name, out);
 		    break;
 		    
 		case Block::C_STRUCTURE_REF:
