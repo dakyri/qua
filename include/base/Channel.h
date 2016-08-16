@@ -103,8 +103,9 @@ public:
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element);
 
-	size_t				Generate(size_t nf);
-	size_t				Receive(size_t nf);
+	void initAudioBuffers();
+	size_t generate(size_t nf);
+	size_t receive(size_t nf);
 	
 	Event				rx;
 	Event				tx;

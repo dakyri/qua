@@ -18,7 +18,7 @@
 #endif
 #include "Parse.h"
 #include "VstPlugin.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 #include "Sample.h"
 #include "Markov.h"
 
@@ -27,6 +27,7 @@
 #include "QuaDisplay.h"
 
 #if defined(QUA_V_AUDIO)
+#include "QuaEnvironment.h"
 #include "QuaAudio.h"
 #endif
 
@@ -166,8 +167,8 @@ Block::Setup(bool setVars)
 // should check that this is an audio unit block or do this later. ??
 #ifdef QUA_V_AUDIO
 		if (subType == LIST_FORK) {
-			crap.list.tmpbuf1 = sample_buf_alloc(2, audioManager->bufferSize);
-			crap.list.tmpbuf2 = sample_buf_alloc(2, audioManager->bufferSize);
+			crap.list.tmpbuf1 = sample_buf_alloc(2, getAudioManager().bufferSize);
+			crap.list.tmpbuf2 = sample_buf_alloc(2, getAudioManager().bufferSize);
 		} else {
 			crap.list.tmpbuf1 = nullptr;
 			crap.list.tmpbuf2 = nullptr;
@@ -1118,11 +1119,13 @@ Block::DoReset(void *V, void *B, int x)
 #if defined(QUA_V_VST_HOST)
 	case C_VST: {
 		QDBMSG_BLK("Reset vst element\n",0,0);
-		QuasiStack	*higherFrame = stack->frameAt(crap.call.frameIndex);
-		AEffect	*afx = higherFrame->stk.afx;
-// ?????????????????? reset to what and how ???????????
-// default param vals will be held in the plugin
-//		crap.call.crap.afx->Reset(afx);
+		QuasiAFXStack *higherFrame = dynamic_cast<QuasiAFXStack*>(stack->frameAt(crap.call.frameIndex));
+		if (higherFrame != nullptr) {
+			AEffect *afx = higherFrame->afx;
+			// ?????????????????? reset to what and how ???????????
+			// default param vals will be held in the plugin
+			//		crap.call.crap.afx->Reset(afx);
+		}
 		break;
 	}
 #endif
@@ -1313,63 +1316,72 @@ Block::DoStack(void *V, void *B, int y, long&status)
    		QuasiStack	*parent = (QuasiStack *)V;
 		QuasiStack *qs = nullptr;
 	   	if (parent) {
-			qs = new QuasiStack(S, parent->stacker, parent->stackerSym,
-	   							this, (Block *)B,
-	   							parent, parent->timeKeeper, nullptr);
-	   		parent->addFrame(qs);
+			if (type == C_VST) {
+				qs = new QuasiAFXStack(S, parent->stacker, parent->stackerSym,
+					this, (Block *)B, parent, parent->timeKeeper, nullptr);
+				parent->addFrame(qs);
 
-	   		crap.call.frameIndex = parent->countFrames()-1;
-			QDBMSG_BLK("StackOMatic(), C_CALL: parent %x %s\n",
-    					parent, parent->context?parent->context->name:"<no name>");
-			switch (type) {
-				
+				crap.call.frameIndex = parent->countFrames() - 1;
+				qs->isLeaf = true;
+				QDBMSG_BLK("StackOMatic(), C_CALL: parent %x %s\n", parent, parent->context ? parent->context->name : "<no name>");
+			} else {
+				qs = new QuasiStack(S, parent->stacker, parent->stackerSym,
+					this, (Block *)B, parent, parent->timeKeeper, nullptr);
+				parent->addFrame(qs);
+
+				crap.call.frameIndex = parent->countFrames() - 1;
+				QDBMSG_BLK("StackOMatic(), C_CALL: parent %x %s\n", parent, parent->context ? parent->context->name : "<no name>");
+				switch (type) {
+
 				case C_STREAM_PLAYER:
 				case C_GENERIC_PLAYER:
 				case C_BUILTIN:
-    				qs->isLeaf = true;
+					qs->isLeaf = true;
 					break;
 
 				case C_VST: {
-    				qs->isLeaf = true;
-     				break;
+					qs->isLeaf = true;
+					break;
 				}
-				
+
 				case C_TUNEDSAMPLE_PLAYER:
 				case C_SAMPLE_PLAYER: {
-    				qs->isLeaf = true;
-    				break;
+					qs->isLeaf = true;
+					break;
 				}
-				
+
 				case C_MIDI_PLAYER: {
-    				qs->isLeaf = true;
-    				break;
+					qs->isLeaf = true;
+					break;
 				}
-				
+
 				case C_MARKOV_PLAYER: {
-    				qs->isLeaf = true;
-    				break;
+					qs->isLeaf = true;
+					break;
 				}
-				
+
 				case C_WAKE:
 				case C_SUSPEND: {
 					qs->isLeaf = true;
-	//	    		Schedulable		*sched = S->SchedulableValue();
-	//		    	if (sched && y>0) {
-	//		    		sched->mainBlock->StackOMatic(qs,y-1);
-	//		    		if (qs->higherFrame.CountItems() == 0)	// no context to build, try again
-	//		    			qs->isLeaf = true;
-	//		    	}
-		    		break;
+					//	    		Schedulable		*sched = S->SchedulableValue();
+					//		    	if (sched && y>0) {
+					//		    		sched->mainBlock->StackOMatic(qs,y-1);
+					//		    		if (qs->higherFrame.CountItems() == 0)	// no context to build, try again
+					//		    			qs->isLeaf = true;
+					//		    	}
+					break;
 				}
-			    
+
 				default: {
-		    		if (y>0) {
-		    			((Lambda *)qs->stackable)->mainBlock->StackOMatic(qs,y-1);
-		    			if (qs->countFrames() == 0)	// no context to build, try again
-		    				qs->isLeaf = true;
-		    		}
+					if (y>0) {
+						((Lambda *)qs->stackable)->mainBlock->StackOMatic(qs, y - 1);
+						if (qs->countFrames() == 0)	// no context to build, try again
+							qs->isLeaf = true;
+					}
 				}
-			
+
+				}
+
 			}
     	} else {
     		QDBMSG_BLK("StackOMatic(), C_CALL: no parent stack!\n",0,0);

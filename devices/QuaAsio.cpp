@@ -542,7 +542,7 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 		bool	recording = (c->recordState == RECORD_ING);
 
 		if (c->audioThru || recording) {
-			c->Receive(bufSize);
+			c->receive(bufSize);
 		}
 	}
 	for (short i=0; i<nActiveInput; i++) {

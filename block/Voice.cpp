@@ -36,7 +36,7 @@
 #include "Clip.h"
 #include "QuaAudio.h"
 #include "QuaFX.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 #include "QuaDisplay.h"
 
 #include <iostream>
@@ -100,9 +100,9 @@ Voice::RemoveClip(Clip *c, bool disp)
 			clips.erase(ci);
 		}
 		if (disp) {
-			fprintf(stderr, "updating it allll\n");
+			cerr <<  "updating it allll" << endl;
 			uberQua->bridge.updateClipIndexDisplay(sym);
-			fprintf(stderr, "updated it allll\n");
+			cerr <<  "updated it allll" << endl;
 		}
 		glob.DeleteSymbol(c->sym, true);
 	}
@@ -167,7 +167,7 @@ Voice::DeleteTake(StreamTake *take, bool disp)
 	}
 	if (del) {
 		delete take;
-		fprintf(stderr, "del ...\n");
+		cerr <<  "del ..." << endl;
 		if (disp) {
 			uberQua->bridge.UpdateTakeIndexDisplay(sym);
 		}
@@ -182,7 +182,7 @@ Voice::Init()
 {
 	StabEnt		*stream;
 
-	fprintf(stderr, "Initing voice %s\n", sym->name.c_str());
+	cerr <<  "Initing voice " << sym->name << endl;
 
 #ifdef VOICE_MAINSTREAM
 	mainStream.ClearStream();
@@ -271,17 +271,9 @@ Voice::Sleep(Instance *i)
 #endif
 		if (sleep.block) {
 			Stream	mainStream;
-			Time Now = uberQua->theTime;
+			Time now = uberQua->theTime;
 		    flag ua = UpdateActiveBlock(
-		    	uberQua,
-				mainStream,
-		    	sleep.block,
-				Now,
-				i,
-				i->sym,
-		    	i->sleepStack, 
-				1,
-				true);
+		    		uberQua, mainStream, sleep.block, now, i, i->sym, i->sleepStack,  1, true);
 			if (i->channel)
 				i->channel->OutputStream(mainStream);
 		    mainStream.ClearStream();
@@ -589,7 +581,7 @@ VoiceInstance::~VoiceInstance()
 status_t
 VoiceInstance::Run()
 {
-//	fprintf(stderr, "run voice\n");
+//	cerr <<  "run voice\n");
 	wakeDuration = uberQua->theTime - startTime;
 	UpdateEnvelopes(wakeDuration);
 	if (schedulable.mainBlock) {
@@ -637,7 +629,7 @@ VoiceInstance::Generate(float **outSig, long nFramesReqd, short nAudioChannels)
 	schedulable->stackableLock.Unlock();
 #endif
 
-//	fprintf(stderr, "@os[0] %g oframe %d %d-%d\n", outSig[0], outFrame, startFrame.ticks, endFrame.ticks);
+//	cerr <<  "@os[0] %g oframe %d %d-%d\n", outSig[0], outFrame, startFrame.ticks, endFrame.ticks);
 	
 // now in stereo
 

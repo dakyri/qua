@@ -194,6 +194,5 @@ enum {
 	AUDIO_HAS_PLAYER = 2
 };
 
-extern QuaAudioManager	*audioManager;
 #endif
 #endif

@@ -1,8 +1,10 @@
-#ifndef _SAMPLE_BUFFER
-#define _SAMPLE_BUFFER
+#ifndef _C_SAMPLE_BUF
+#define _C_SAMPLE_BUF
 
 #include <math.h>
 
+// set of pure C functions for manipulating sample buffers.
+// kind of antique... a 90s relic, one of the original untouched files
 // simplify sample buffer for vst style buffer (seperate into a float*) for each chan
 // ????????????? maybe inline asms if we have to get nasty about it
 
@@ -1056,9 +1058,9 @@ inline void
 sample_buf_free(float **p, short nChan)
 {
 	for (short i=0; i<nChan; i++) {
-		delete p[i];
+		delete [] p[i];
 	}
-	delete p;
+	delete [] p;
 }
 
 #endif

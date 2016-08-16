@@ -22,6 +22,7 @@ namespace tinyxml2 {
 }
 
 #include "QuaTypes.h"
+#include "AudioBuffer.h"
 
 class QuasiStack;
 
@@ -43,9 +44,9 @@ struct frame_map_hdr
 
 class QuasiStack {
 public:
-						QuasiStack(StabEnt *, Stacker *i, StabEnt *sc, Block *B, Block *L,
-								QuasiStack *, TimeKeeper *, char *);
-						~QuasiStack();
+	QuasiStack(StabEnt *, Stacker *i, StabEnt *sc, Block *B, Block *L, QuasiStack *, TimeKeeper *, char *);
+	virtual ~QuasiStack();
+
 	bool				Thunk();
 	bool				UnThunk();
 	bool				Delete();
@@ -61,7 +62,7 @@ public:
 	
 	void				Dump();
 	status_t			Save(ostream &out, short);
-	status_t			SaveSnapshot(ostream &out, const char *label);
+	virtual status_t SaveSnapshot(ostream &out, const char *label);
 	status_t			LoadSnapshotElement(tinyxml2::XMLElement *);
 	status_t			LoadSnapshotChildren(tinyxml2::XMLElement *element, std::vector<std::string> textFrags);
 
@@ -77,22 +78,21 @@ public:
 	bool				isLeaf;
 	uchar				hasAudio;
 
-	Stackable			*stackable;
+	Stackable			*stackable; // corresponding function, code block, vst plugin
 	qua_status			locusStatus;
-	Block				*callingBlock;
-	Block				*enclosingList;
+	Block				*callingBlock; // if this is a call
+	Block				*enclosingList; // siblings .. mainly used if we have a modal state
 	TimeKeeper			*timeKeeper;
 
 	string label;
-	Stacker				*stacker;
-	StabEnt				*stackerSym;
-	StabEnt				*context;
-	QuasiStack			*lowerFrame;
-	char				*mulch;
-	union stackvar_t {
-		uchar				*vars;
-		struct AEffect		*afx;
-	}					stk;
+	Stacker *stacker; // this is either our Instance, or Channel
+	StabEnt *stackerSym; // and it's symbol
+	StabEnt *context; // and the context that's defined in
+	QuasiStack *lowerFrame; // parent of this frame
+
+// TODO XXXX FIXME possbly these belong in a subclass of QuasiStack, similar to QuasiAFXStack eg QuasiVarStack
+	char *mulch; // scratch storrage
+	uchar *vars; // the base address with our scratch storage .. we have some extra padding for byte alignment, possible
 
 	inline QuasiStack * frameAt(int i) {
 		return i >= 0 && ((size_t)i) < higherFrame.size()? higherFrame[i]:nullptr; 
@@ -114,6 +114,24 @@ public:
 	std::vector<QuasiStack*> higherFrame;
 };
 
+class QuasiAFXStack : public QuasiStack {
+public:
+	QuasiAFXStack(StabEnt *, Stacker *i, StabEnt *sc, Block *B, Block *L,
+		QuasiStack *, TimeKeeper *, char *);
+	virtual ~QuasiAFXStack();
+
+	virtual status_t SaveSnapshot(ostream &out, const char *label);
+
+	void initBuffers() {
+		inputs.zero();
+	}
+
+	struct AEffect *afx; // the vst plugin .. at the moment, vst's have all their allocations relative to the plugin instance
+	// TODO XXXX FIXME that may well change
+	AudioBuffer inputs;
+	AudioBuffer outputs;
+
+};
 
 
 long	AllocStack(StabEnt *, base_type_t, int nelem=1);

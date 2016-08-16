@@ -11,18 +11,20 @@
 #include "Channel.h"
 #include "Block.h"
 #include "Schedulable.h"
-//#include "messid.h"
+
 #include "Envelope.h"
 #include "Sample.h"
 #include "FloatQueue.h"
 
-#include <algorithm>
 #include "QuaDisplay.h"
+
+
+#include <algorithm>
+#include <iostream>
+
 #ifdef QUA_V_AUDIO_ASIO
 QuaAsio		QuaAudioManager::asio;
 #endif
-
-QuaAudioManager		*audioManager = nullptr;
 
 QuaAudioStreamIO::QuaAudioStreamIO(Qua *q, QuaAudioPort *p,
 								   long chid, long gid, char *nm,
@@ -245,7 +247,6 @@ QuaAudioManager::QuaAudioManager()
 {
 	sampleRate = 44100.0;
 	bufferSize = 512;
-	audioManager = this;
 
 	dfltInput = nullptr;
 	dfltOutput = nullptr;
@@ -296,15 +297,15 @@ QuaAudioManager::~QuaAudioManager()
 {
 
 	status = STATUS_DEAD;
-	fprintf(stderr, "~QuaAudioManager: resuming buffer eater\n");
+	cerr << "~QuaAudioManager: resuming buffer eater" << endl;
 	resumeBuffaerator();
-	fprintf(stderr, "~QuaAudioManager: resuming writer\n");
+	cerr << "~QuaAudioManager: resuming writer" << endl;
 	resumeWriter();
-	fprintf(stderr, "~QuaAudioManager: waiting on buffer eater\n");
+	cerr << "~QuaAudioManager: waiting on buffer eater" << endl;
 	buffyThread.join();
-	fprintf(stderr, "~QuaAudioManager: waiting on writer\n");
+	cerr << "~QuaAudioManager: waiting on writer" << endl;
 	writerThread.join();
-	fprintf(stderr, "~QuaAudioManager: all done ... phew!\n");
+	cerr << "~QuaAudioManager: all done ... phew!" << endl;
 }
 
 QuaPort *
@@ -449,10 +450,12 @@ bool
 QuaAudioManager::Generate(size_t nFrames)
 {
 // for the moment, we will just generate regardless of whether stopped or not
+	for (short i = 0; ((unsigned)i)<channels.size(); i++) {
+		channels[i]->initAudioBuffers();
+	}
 	for (short i=0; ((unsigned)i)<channels.size(); i++) {
 	// ! must check for SR change ... one day
-		Channel	*chan = channels[i];
-		int nf = chan->Generate(nFrames);
+		int nf = channels[i]->generate(nFrames);
 	}
 
 	// editors originally generated their own stuff on a free channel .. that's necessary in the big picture
@@ -685,7 +688,7 @@ QuaAudioManager::removeSample(Sample *s)
 void
 QuaAudioManager::startInstance(Instance *i)
 {
-	fprintf(stderr, "start audio instance %s\n", i->sym->name.c_str());
+	cerr << "start audio instance " << i->sym->name << endl;
 	if (i->channel == nullptr)
 		return;
 	Channel	*c = i->channel;
@@ -793,7 +796,7 @@ QuaAudioManager::stopRecording(SampleInstance *ri)
 	if (ri->sample.sampleClip(0)->media == nullptr) {
 		ri->sample.SelectTake(newest, true);
 	}
-	fprintf(stderr, "Sampler: stopped recording\n");
+	cerr << "Sampler: stopped recording" << endl;
 	recordInstanceLock.unlock();
 }
 
@@ -838,7 +841,7 @@ SourceChannelIndex(KeyIndex *, QuaAudioPort *, short nc)
 //		media_node	liveOne;
 //		err=r->GetNodeFor(liveNodes[i].node.node, &liveOne);
 //		if (err != B_NO_ERROR)
-//			fprintf(stderr, "get node for error, %s\n", ErrorStr(err));
+//			cerr << "get node for error, %s\n", ErrorStr(err));
 //		for (short j=0; j<nOuts; j++) {
 //			fprintf(stdout, "\tnode %d => (%d %d)\n",
 //				liveOne.node,
@@ -860,7 +863,7 @@ SourceChannelIndex(KeyIndex *, QuaAudioPort *, short nc)
 //							||(err=r->GetFreeOutputsFor(
 //									liveOne, outputs+nConOuts,
 //									15-nConIns, &nFreeOuts)<B_NO_ERROR)) {
-//							fprintf(stderr, "%s: get input/output connection error, %s\n", liveInfo.name, ErrorStr(err));
+//							cerr << "%s: get input/output connection error, %s\n", liveInfo.name, ErrorStr(err));
 //						} else {
 //							for (short i=0; i<nConIns+nFreeIns; i++) {
 //								if (inputs[i].format.IsAudio()) {
@@ -877,18 +880,18 @@ SourceChannelIndex(KeyIndex *, QuaAudioPort *, short nc)
 //	//					nAttribs=r->GetNodeAttributesFor(
 //	//								liveOne, attribs, 40);
 //	//					if (nAttribs < B_NO_ERROR) {
-//	//						fprintf(stderr, "%s: get attribute error, %s\n", liveInfo.name, ErrorStr(nAttribs));
+//	//						cerr << "%s: get attribute error, %s\n", liveInfo.name, ErrorStr(nAttribs));
 //	//					} else if (nAttribs == 0) {
-//	//						fprintf(stderr, "%s: no attributes to speak of\n", liveInfo.name);
+//	//						cerr << "%s: no attributes to speak of\n", liveInfo.name);
 //	//					} else {
 //	//						for (short i=0; i<nAttribs; i++) {
-//	//							fprintf(stderr, "%s: at %d %x %Lx\n",
+//	//							cerr << "%s: at %d %x %Lx\n",
 //	//								liveInfo.name, attribs[i].what, attribs[i].flags, attribs[i].data);
 //	//						}
 //	//					}
 //						if (isAudio) {
 //						} else {
-//							fprintf(stderr, "%s: probably not an audio node\n", liveInfo.name);
+//							cerr << "%s: probably not an audio node\n", liveInfo.name);
 //							r->ReleaseNode(liveOne); // not released by port
 //						}
 #endif

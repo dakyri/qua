@@ -338,6 +338,9 @@ SymTab::~SymTab()
 {
 	if (debug_symtab)
 		fprintf(stderr, "deleting symbol table\n");
+	if (stab) {
+		delete [] stab;
+	}
 }
 
 SymTab::SymTab(int n)
@@ -347,7 +350,7 @@ SymTab::SymTab(int n)
 	for (short j=0; j<14; j++)
 		contextStack[j] = nullptr;
 		
-	stab = (StabEnt **)malloc(n * (sizeof (StabEnt *)));
+	stab = new StabEnt*[n];
 	for (long i=0; i<stabLen; i++) {
 		stab[i] = nullptr;
 	}
@@ -1687,9 +1690,10 @@ StabEnt::SetAtomicSnapshot(tinyxml2::XMLElement *element, Stacker *stacker, Stab
 // as qua symbols, and issues with params changing according to
 // program being set
 #ifdef QUA_V_VST_HOST
-				if (stack->stk.afx) {
+				QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+				if (as != nullptr && as->afx) {
 					double val = atof(valAttr.c_str());
-					stack->stk.afx->setParameter(stack->stk.afx, position, val);
+					as->afx->setParameter(as->afx, position, val);
 				}
 #endif
 			} else {

@@ -19,7 +19,7 @@
 #endif
 #include "Parse.h"
 #include "Channel.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 #include "State.h"
 #include "QuaDisplay.h"
 
@@ -37,10 +37,10 @@ Sample::Sample(std::string nm, std::string path, Qua *uq, short maxbuf, short ma
 	maxBuffers = maxbuf;
 	maxRequests = maxreq;
 	fileBufferLength = QUA_DFLT_SAMPLE_READ_BUF_BYTES;
-	buffer = new SampleBuffer*[maxbuf];
+	buffer = new SampleFileBuffer*[maxbuf];
 	request = new long[maxreq];
 	requestedTake = new SampleTake*[maxreq];
-	fileBuffer = (char *)malloc(fileBufferLength); // !!!
+	fileBuffer = new char[fileBufferLength];
 	
 //	AddClip("clip");
 
@@ -172,9 +172,7 @@ Sample::AddRecordTake(long fileType, short nChan, short sampleSize, float sample
 	status_t err;
 
 	recordFrame = 0;
-	pendingRecordBuffers = nullptr;
 	currentRecordBuffer = nullptr;
-	freeRecordBuffers = nullptr;
 
 	do {
 		takeno++;
@@ -676,7 +674,7 @@ err_ex:
 // files are references to objects in takes ... so they can be
 // validly compared as pointers
 ////////////////////////////////////////////////////////////
-SampleBuffer *
+SampleFileBuffer *
 Sample::BufferForFrame(SampleFile *f, long fr)
 {
 	for (short i=0; i<nBuffers; i++) {
@@ -687,7 +685,7 @@ Sample::BufferForFrame(SampleFile *f, long fr)
 	return nullptr;
 }
 
-SampleBuffer *
+SampleFileBuffer *
 Sample::BufferForChunk(SampleFile *f, long fr)
 {
 	for (short i=0; i<nBuffers; i++) {
@@ -708,33 +706,20 @@ Sample::Stash(float **inBuf, short nChannel, long nFrames)
 	recordbufferLock.lock();
 	while (stashedFrame < nFrames) {
 // find somewhere to put stuff!
-		if (  currentRecordBuffer &&
-			  currentRecordBuffer->nFrames == samplesPerBuffer/nChannel) {
-			
-			SampleBuffer	**tailp=&pendingRecordBuffers,
-							*q = pendingRecordBuffers;
-			while (q) {
-				tailp = &q->next;
-				q = q->next;
-			}
-			
-			*tailp = currentRecordBuffer;
-			
+		if (  currentRecordBuffer && currentRecordBuffer->nFrames == samplesPerBuffer/nChannel) {
+			pendingRecordBuffers.push_back(currentRecordBuffer);
 			currentRecordBuffer = nullptr;
 		}
 		
 		if (currentRecordBuffer == nullptr) {
-			SampleBuffer		*nbuf;
-			
-			if (freeRecordBuffers) {
-				nbuf = freeRecordBuffers;
-				freeRecordBuffers = nbuf->next;
+			SampleFileBuffer		*nbuf;			
+			if (!freeRecordBuffers.empty()) {
+				nbuf = freeRecordBuffers.front();
+				freeRecordBuffers.pop_front();
 			} else {
-				nbuf = new SampleBuffer();
+				nbuf = new SampleFileBuffer();
 			}
 			nbuf->Set(nullptr, Sample::ChunkForFrame(nChannel, recordFrame), recordFrame, 0);
-			nbuf->next = nullptr;
-
 			currentRecordBuffer = nbuf;
 		}
 		
@@ -777,13 +762,12 @@ Sample::FlushRecordBuffers(bool finalflush)
 	bool		flushing = finalflush;
 	do {
 		recordbufferLock.lock();
-		SampleBuffer		*wb = pendingRecordBuffers;
-		if (wb != nullptr) {
-			pendingRecordBuffers = wb->next;
+		SampleFileBuffer *wb = nullptr;
+		if (!pendingRecordBuffers.empty()) {
+			wb = pendingRecordBuffers.front();
+			pendingRecordBuffers.pop_front();
 //			fprintf(stderr, "pending %x %x size %d from %d\n", wb, wb->next, wb->nFrames, wb->fromFrame);
-		}	
-		
-		if (wb == nullptr) {
+		} else {
 	// nothing pending!
 	// check to flush remaining buffers
 			if (finalflush) {
@@ -794,7 +778,7 @@ Sample::FlushRecordBuffers(bool finalflush)
 	
 		recordbufferLock.unlock();
 		if (wb != nullptr) {		// write it!
-			long	toWrite = wb->nFrames*recordTake->file->nChannels*recordTake->file->sampleSize;
+			long toWrite = wb->nFrames*recordTake->file->nChannels*recordTake->file->sampleSize;
 			recordTake->file->NormalizeOutput(((float *)wb->data), wb->nFrames);
 			recordTake->file->SeekToFrame(wb->fromFrame);
 			if ((err=recordTake->file->Write(wb->data, toWrite)) != toWrite) {
@@ -802,8 +786,7 @@ Sample::FlushRecordBuffers(bool finalflush)
 				break;
 			}
 			recordbufferLock.lock();
-			wb->next = freeRecordBuffers;
-			freeRecordBuffers = wb;
+			freeRecordBuffers.push_back(wb);
 			recordbufferLock.unlock();
 		}
 	} while (flushing);
@@ -812,8 +795,10 @@ Sample::FlushRecordBuffers(bool finalflush)
 //		nFrames = recordTake->file->Frame();
 		fprintf(stderr, "nf %d\n", recordTake->file->Frame());
 		recordbufferLock.lock();
-		delete freeRecordBuffers;
-		freeRecordBuffers = nullptr;
+		for (auto it : freeRecordBuffers) {
+			delete it;
+		}
+		freeRecordBuffers.clear();
 		recordbufferLock.unlock();
 		if (recordTake->file->Finalize() != B_NO_ERROR) {
 			uberQua->bridge.reportError(recordTake->file->lastError);
@@ -893,7 +878,7 @@ Sample::SynchronizeBuffers()
 		for (j=0; j<maxRequests; j++) {
 //			fprintf(stderr, "got stuff for %s %d\n", sym->name, j, request[j]);
 			if (request[j] != SAMPLE_DATA_REQUEST_NOTHING) {
-				SampleBuffer	*bufForRequest = 
+				SampleFileBuffer	*bufForRequest = 
 						BufferForChunk(requestedTake[j]->file, request[j]);
 				if (bufForRequest != nullptr) {
 					bufForRequest->nRequest++;
@@ -907,7 +892,7 @@ Sample::SynchronizeBuffers()
 // request[j] can get asynchronously modified by the audio loop
 		for (j=0; j<maxRequests; j++) {
 			if (request[j] != SAMPLE_DATA_REQUEST_NOTHING) {
-				SampleBuffer	*bufForRequest = BufferForChunk(
+				SampleFileBuffer	*bufForRequest = BufferForChunk(
 					requestedTake[j]->file, request[j]);
 				if (bufForRequest == nullptr) {
 //					fprintf(stderr, "filling request %d from %s -> buf address %x\n", request[j], requestedTake[j]?requestedTake[j]->path.Path():"null", bufForRequest);
@@ -916,7 +901,7 @@ Sample::SynchronizeBuffers()
 					short		newBuf = -1;
 					if (nBuffers < maxBuffers) {	// new buffer
 						newBuf = nBuffers++;
-						buffer[newBuf] = new SampleBuffer();
+						buffer[newBuf] = new SampleFileBuffer();
 					} else {	// junk something we don't want
 						for (short k=0; k<nBuffers; k++) {
 							if (	buffer[k]->nFrames == 0 ||
@@ -1036,7 +1021,7 @@ Sample::Play(float **outSig, short nAudioChannels, long nFramesReqd,
 					take->PrevChunk(chunk, startFrame, endFrame));
 	RequestChunk(take, nextChunk);
 
-	SampleBuffer	*currentBuffer=nullptr;
+	SampleFileBuffer	*currentBuffer=nullptr;
 	while (outFrame < nFramesReqd) {
 		long nFramesAvail;
 		if (dir == 0) {
@@ -1191,7 +1176,7 @@ Sample::PlayPitched(float **outSig, short nAudioChannels, long nFramesReqd,
 		if (nextChunk == chunk) break;
 		RequestChunk(take, nextChunk);
 	} while (StartFrameOfChunk(file, abs(chunk-nextChunk))<2*index*nFramesReqd);
-	SampleBuffer	*currentBuffer=nullptr;
+	SampleFileBuffer	*currentBuffer=nullptr;
 	while (outFrame < nFramesReqd) {
 		long nFramesAvail;
 		if (dir == 0) {
@@ -1598,7 +1583,7 @@ SampleInstance::Generate(float **outSig, long nFramesReqd, short nAudioChannels)
 }
 #endif	
 
-SampleBuffer::SampleBuffer()
+SampleFileBuffer::SampleFileBuffer()
 {
 #ifdef QUA_V_RAM_LOCKED_BUFFERS
 
@@ -1622,11 +1607,10 @@ SampleBuffer::SampleBuffer()
 	fromFrame = -1;	
 	chunk = -1;
 	file = nullptr;
-	next = nullptr;
 	nRequest = 0;
 }
 
-SampleBuffer::~SampleBuffer()
+SampleFileBuffer::~SampleFileBuffer()
 {
 #ifdef QUA_V_RAM_LOCKED_BUFFERS
 #if defined(WIN32)
@@ -1638,12 +1622,10 @@ SampleBuffer::~SampleBuffer()
 #else
 	delete data;
 #endif
-	if (next)
-		delete next;
 }
 
 void
-SampleBuffer::Set(SampleFile *f, long ch, long fr, long nf)
+SampleFileBuffer::Set(SampleFile *f, long ch, long fr, long nf)
 {
 	file = f;
 	chunk = ch;

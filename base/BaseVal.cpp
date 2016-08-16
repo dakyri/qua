@@ -27,7 +27,7 @@ TypedValue::IntValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_BOOL:		return *((bool *)addr);
 			case S_BYTE:		return *((uchar *)addr);
@@ -108,7 +108,7 @@ TypedValue::TimeValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_TIME:		return *((Time*)addr);
 			default:			return Time::zero;
@@ -144,7 +144,7 @@ TypedValue::FloatPValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_FLOAT:		return ((float *)addr);
 			}
@@ -175,7 +175,7 @@ TypedValue::FloatValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_BOOL:		return *((bool *)addr);
 			case S_BYTE:		return *((uchar *)addr);
@@ -233,7 +233,7 @@ TypedValue::DoubleValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_DOUBLE:		return *((double *)addr);
 			case S_BOOL:		return *((bool *)addr);
@@ -271,7 +271,7 @@ TypedValue::LongValue(QuasiStack *stack)
 		while (stack && stack->context != val.stackAddress.context)
 			stack = stack->lowerFrame;
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars + val.stackAddress.offset;
 			switch (type) {
 			case S_BOOL:		return *((bool *)addr);
 			case S_BYTE:		return *((uchar *)addr);
@@ -329,7 +329,7 @@ TypedValue::PointerValue(QuasiStack *stack)
 			stack = stack->lowerFrame;
 		}
 		if (stack && stack->mulch) {
-			uchar *addr = stack->stk.vars+val.stackAddress.offset;
+			uchar *addr = stack->vars+val.stackAddress.offset;
 			switch (type) {
 			case S_BOOL:
 			case S_BYTE:
@@ -370,6 +370,12 @@ TypedValue::PointerValue(QuasiStack *stack)
 	return 0;
 }
 
+uchar *
+TypedValue::StackAddressValue(QuasiStack *stack)
+{
+	return (refType == REF_STACK) && stack ? stack->vars + val.stackAddress.offset : 0;
+}
+
 
 void
 TypedValue::SetValue(int64 v, class QuasiStack *stack)
@@ -377,7 +383,7 @@ TypedValue::SetValue(int64 v, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		uchar *addr = stack->stk.vars + val.stackAddress.offset;
+		uchar *addr = stack->vars + val.stackAddress.offset;
 //		fprintf(stderr, "set long: addr %x\n", addr);
 		switch (type) {
 		case S_BOOL:		*((uchar*)addr) = (v!=0);	break;
@@ -427,7 +433,7 @@ TypedValue::SetValue(int32 v, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		uchar *addr = stack->stk.vars + val.stackAddress.offset;
+		uchar *addr = stack->vars + val.stackAddress.offset;
 //		fprintf(stderr, "set int: addr %x\n", addr);
 		switch (type) {
 		case S_BOOL:		*((uchar*)addr) = (uchar)v;	break;
@@ -479,7 +485,7 @@ TypedValue::SetValue(float v, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		uchar *addr = stack->stk.vars + val.stackAddress.offset;
+		uchar *addr = stack->vars + val.stackAddress.offset;
 //		fprintf(stderr, "set float: addr %x\n", addr);
 		switch (type) {
 		case S_BOOL:		*((uchar*)addr) = (v!=0);	break;
@@ -528,7 +534,7 @@ TypedValue::SetDoubleValue(double v, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		uchar *addr = stack->stk.vars + val.stackAddress.offset;
+		uchar *addr = stack->vars + val.stackAddress.offset;
 //		fprintf(stderr, "set float: addr %x\n", addr);
 		switch (type) {
 		case S_DOUBLE:		*((double*)addr) = v; break;
@@ -566,7 +572,7 @@ TypedValue::SetValue(Time &d, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		uchar *addr = stack->stk.vars + val.stackAddress.offset;
+		uchar *addr = stack->vars + val.stackAddress.offset;
 		switch (type) {
 		case S_TIME:		*((Time*)addr) = d; return;
 		default:			return;
@@ -584,7 +590,7 @@ TypedValue::SetPointerValue(void *d, class QuasiStack *stack)
 	if (refType == REF_STACK) {
 		if (stack == nullptr || stack->mulch == nullptr)
 			return;
-		void **addr = (void**)(stack->stk.vars + val.stackAddress.offset);
+		void **addr = (void**)(stack->vars + val.stackAddress.offset);
 		*addr = d;
 		fprintf(stderr, "set %x in %x\n", (unsigned) *addr, (unsigned) addr);
 	} else if (refType == REF_VALUE) {	// should be cool for all pointer types

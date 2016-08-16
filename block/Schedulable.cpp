@@ -26,7 +26,7 @@ Schedulable::Schedulable(StabEnt *s, Qua *q, class Metric *m):
 	record("Record", s),
 	init("Init", s)
 {
-	cout << "building schedulable " << endl;
+	cerr  << "building schedulable " << endl;
 
 	uberQua = q;
 	metric = m;
@@ -136,7 +136,7 @@ Schedulable::addInstance(const string &nm, const Time & t, const Time & d, Chann
 		uberQua->addToSchedule(i);
 //		uberQua->display.CreateInstanceBridge(i);
 	} else {
-		cout << "Schedulable: unexpected null while committing to schedule" << endl;
+		cerr  << "Schedulable: unexpected null while committing to schedule" << endl;
 	}
 	return i;
 }
@@ -207,7 +207,7 @@ Schedulable::Schedule(Block *b)
    	ResultValue		v0 = EvaluateExpression(b);
    	ResultValue		v1 = EvaluateExpression(b->Sibling(1));
    	ResultValue		v2 = EvaluateExpression(b->Sibling(2));
-	cout << "scheduling "<< sym->name <<  " on "<< v0.StringValue() << " at " << v1.StringValue() << " for " << v2.StringValue() << endl;
+	cerr  << "scheduling "<< sym->name <<  " on "<< v0.StringValue() << " at " << v1.StringValue() << " for " << v2.StringValue() << endl;
 	Channel *c=nullptr;
 	if (v0.type == TypedValue::S_CHANNEL) {
 		c = (Channel *)v0.PointerValue(nullptr);
@@ -224,7 +224,7 @@ Schedulable::Schedule(Block *b)
 						*v2.TimeValue():
 						Time(v2.IntValue(nullptr), uberQua->metric),
 					c);
-	cout << "instance created and added!!!\n";
+	cerr  << "instance created and added!!!\n";
 	return err;
 }
 

@@ -17,13 +17,13 @@ Notifiable::Notifiable(StabEnt *S):
 	stop("Stop", S),
 	record("Record", S)
 {
-	cout << "Notifiable::Notifiable()\n";
+	cerr << "Notifiable::Notifiable()\n";
 }
 
 
 Notifiable::~Notifiable()
 {
-	cout << "Notifiable::~Notifiable()\n";
+	cerr << "Notifiable::~Notifiable()\n";
 }
 
 
@@ -31,19 +31,11 @@ void
 Notifiable::Notification(Block *B, Stacker *i, StabEnt *stackCtxt, QuasiStack *s)
 {
 	if (B) {
-		Time Now = i->uberQua->theTime;
+		Time now = i->uberQua->theTime;
 		Stream	mainStream;
 
-		flag ua_complete = UpdateActiveBlock(
-	    					i->uberQua,
-	    					mainStream,
-	    					B,
-	    					Now,
-							i,
-							stackCtxt,
-	    					s,
-							1,
-	    					true);
+		flag ua_complete = UpdateActiveBlock( i->uberQua, mainStream, B, now,
+							i, stackCtxt, s, 1, true);
 	
 		mainStream.ClearStream();
 	}		
@@ -112,24 +104,21 @@ Notified::Init(Notifiable *n, StabEnt *ss, QuasiStack *lowerFrame)
 			return false;
 	}
 
-	fprintf(stderr, "seq start stack...\n");
+	cerr << "seq start stack..." << endl;
 	if (startStack == nullptr && n->start.block) {
-		startStack = new QuasiStack(n->start.sym,
-									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Start");
+		startStack = new QuasiStack(n->start.sym, this, ss, nullptr, nullptr, lowerFrame, uberQua, "Start");
 		if (!n->start.block->StackOMatic(startStack, 3))
 			return false;
 	}
-//	fprintf(stderr, "seq stop stack...\n");
+
 	if (stopStack == nullptr && n->stop.block) {
-		stopStack = new QuasiStack(n->stop.sym,
-									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Stop");
+		stopStack = new QuasiStack(n->stop.sym, this, ss, nullptr, nullptr, lowerFrame, uberQua, "Stop");
 		if (!n->stop.block->StackOMatic(stopStack, 3))
 			return false;
 	}
-//	fprintf(stderr, "seq rec stack...\n");
+
 	if (recordStack == nullptr && n->record.block) {
-		recordStack = new QuasiStack(n->record.sym,
-									this, ss, nullptr, nullptr, lowerFrame, uberQua, "Record");
+		recordStack = new QuasiStack(n->record.sym, this, ss, nullptr, nullptr, lowerFrame, uberQua, "Record");
 		if (!n->record.block->StackOMatic(recordStack, 3))
 			return false;
 	}

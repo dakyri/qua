@@ -95,8 +95,14 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 		case S_TIME:	lval.addr = (char *) val.timeP; return;
 		case S_FLOAT:	lval.addr = (char *) val.floatP; return;
 #ifdef QUA_V_VST_HOST
-		case S_VST_PARAM:	lval.addr = (char *) stack->stk.afx; return;
-		case S_VST_PROGRAM:	lval.addr = (char *) stack->stk.afx; return;
+		case S_VST_PARAM:	
+		case S_VST_PROGRAM: {
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+			if (as != nullptr) {
+				lval.addr = (char*)as->afx;
+			}
+			return;
+		}
 #endif
 		default:
 			lval.addr = (char *) val.pointer; return;
@@ -202,7 +208,7 @@ StabEnt::BaseAddress(LValue &lval, StreamItem *items, Stacker *stacker, QuasiSta
 						}
 						if (stack == nullptr || stack->mulch == nullptr)
 							return;
-						lval.addr = addr + (uint32) stack->stk.vars;
+						lval.addr = addr + (uint32) stack->vars;
 						lval.stack = stack;
 						return;
 			
@@ -424,14 +430,17 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 						QuasiStack	*callFrame = (QuasiStack *)lval.addr;
 						switch (lb->objContext->type) { 
 							case TypedValue::S_VST_PLUGIN: {
-								lval.addr = (char *)callFrame->stk.afx;;
+								QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(callFrame);
+								if (as != nullptr) {
+									lval.addr = (char *)as->afx;;
+								}
 								lval.sym = b->crap.structureRef.member;
 								return;
 							}
 							case TypedValue::S_LAMBDA:
 							case TypedValue::S_BUILTIN: {
 								lval.stack = callFrame;
-								lval.addr = (char *)callFrame->stk.vars;
+								lval.addr = (char *)callFrame->vars;
 								break;
 							}
 						}
@@ -494,7 +503,7 @@ LValueAte(LValue &lval, Block *b, StreamItem *items, Stacker *stacker, StabEnt *
 						lval.addr = nullptr;
 						return;
 					}
-					lval.addr = (char*)(stack? stack->stk.vars : nullptr);
+					lval.addr = (char*)(stack? stack->vars : nullptr);
 					break;
 				}
 			}
@@ -953,18 +962,21 @@ LValue::SetToString(const char *strval)
 		case TypedValue::S_VST_PROGRAM: {
 #ifdef QUA_V_VST_HOST
 			VstPlugin *vst = nullptr;
-			if (stack && stack->context && (vst=stack->context->VstValue())) {
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+			if (as != nullptr && as->context && (vst=as->context->VstValue())) {
 				int		prog = atoi(strval);
-				vst->SetProgram(stack->stk.afx, prog);
+				vst->SetProgram(as->afx, prog);
 			}
 #endif
 			break;
 		}
 #ifdef QUA_V_VST_HOST
 		case TypedValue::S_VST_PARAM: {
-			if (stack != nullptr && stack->context != nullptr && (stack->stk.afx != nullptr)) {
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+
+			if (as != nullptr && as->context != nullptr && (as->afx != nullptr)) {
 				double val = atof(strval);
-				stack->stk.afx->setParameter(stack->stk.afx, sym->VstParamValue(), val);
+				as->afx->setParameter(as->afx, sym->VstParamValue(), val);
 			}
 			break;
 		}
@@ -1027,8 +1039,10 @@ LValue::CurrentValue()
 #if defined(QUA_V_VST_HOST)
 
 	case TypedValue::S_VST_PARAM: {
-		if (stack && sym) {
-			AEffect *afx = stack->stk.afx;
+		QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+
+		if (as != nullptr && sym) {
+			AEffect *afx = as->afx;
 			ret_val.type = TypedValue::S_FLOAT;
 			ret_val.val.Float = afx->getParameter(afx, sym->val.vstParam);
 		} else {
@@ -1037,8 +1051,9 @@ LValue::CurrentValue()
 		break;
 	}
 	case TypedValue::S_VST_PROGRAM: {
-		if (stack && sym) {
-			AEffect *afx = stack->stk.afx;
+		QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(stack);
+		if (as != nullptr && sym) {
+			AEffect *afx = as->afx;
 			ret_val.type = TypedValue::S_INT;
 			ret_val.val.Int = 0;
 		} else {

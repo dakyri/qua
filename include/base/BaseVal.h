@@ -1,5 +1,5 @@
-#ifndef _BASEVAL
-#define _BASEVAL
+#ifndef _BASEVAL_H
+#define _BASEVAL_H
 
 #include "qua_version.h"
 
@@ -190,12 +190,14 @@ union base_val_t {
 	OSCMessage			*mesgP;
 };
 
-
+/*
+ * TypedValue
+ * used inside unions, so may not have a constructor
+ */
 class TypedValue
 {
 public:
-//	inline			TypedValue()
-//						{ Set(S_UNKNOWN);}
+//	inline TypedValue() : type(S_UNKNOWN) {} 
 //	inline			TypedValue(Time *v)
 //						{ Set(S_TIME,0,0,0); Set(v); }
 //	inline			TypedValue(Time v)
@@ -796,13 +798,6 @@ TypedValue::FileValue()
 	return type == S_FILE?val.file: nullptr;
 }
 
-inline uchar *
-TypedValue::StackAddressValue(QuasiStack *stack)
-{
-	return (refType == REF_STACK) && stack?
-				stack->stk.vars + val.stackAddress.offset: 0;
-}
-
 inline int32
 TypedValue::OffsetValue()
 {
@@ -867,4 +862,45 @@ TypedValue::ListValue()
 	return val.list;
 }
 
+/*
+* value type returned by expressions ... a TypedValue with additional flags indicating validity
+* TODO XXX FIXME xxx this is now almost redundant
+* except. currently TypedValue is used in a union, so loses the default constructors.
+* ResultValue isn't unionized :), so it does have default constructors
+*/
+class ResultValue : public TypedValue
+{
+public:
+	enum {
+		BLOCKED = 1,
+		COMPLETE = 2,
+	};
+
+	inline ResultValue() {
+		type = S_UNKNOWN;
+		val.Int = 0;
+		refType = REF_VALUE;
+		indirection = 0;
+		flags = COMPLETE;
+	}
+
+	inline ResultValue(int32 t, bool block = false) {
+		flags = block ? BLOCKED : COMPLETE;
+		type = t;
+		val.Int = 0;
+		refType = REF_VALUE;
+		indirection = 0;
+	}
+
+	inline  ResultValue(TypedValue &v) {
+		flags = v.flags | COMPLETE;
+		type = v.type;
+		val = v.val;
+		refType = v.refType;
+		indirection = 0;
+	}
+
+	inline bool Complete() { return (flags & COMPLETE) != 0; }
+	inline bool Blocked() { return (flags & BLOCKED) != 0; }
+};
 #endif

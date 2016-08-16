@@ -1292,10 +1292,13 @@ MFCQuaVstProgramController::SetSelectorValues()
 		if (vst->status != VST_PLUG_LOADED) {
 			return false;
 		}
-		AEffect	*afx = qs->stk.afx;
-		for (short i=0; i<afx->numPrograms; i++) {
-			char	*nm = vst->GetProgramName(afx, i);
-			AddValue((void *)i, nm);
+		QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(qs);
+		if (as != nullptr) {
+			AEffect	*afx = as->afx;
+			for (short i = 0; i < afx->numPrograms; i++) {
+				char	*nm = vst->GetProgramName(afx, i);
+				AddValue((void *)i, nm);
+			}
 		}
 	}
 #endif
@@ -1336,10 +1339,13 @@ MFCQuaVstProgramController::SetSymValue()
 			if (vst->status != VST_PLUG_LOADED) {
 				return;
 			}
-			AEffect	*afx = parent->frame->stk.afx;
-			int32 prog = vst->GetProgram(afx);
-			TypedValue	r = TypedValue::VstProgram(prog);
-			UpdateDisplay(r);
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(parent->frame);
+			if (as != nullptr) {
+				AEffect	*afx = as->afx;
+				int32 prog = vst->GetProgram(afx);
+				TypedValue	r = TypedValue::VstProgram(prog);
+				UpdateDisplay(r);
+			}
 		}
 #endif
 	}
@@ -1486,8 +1492,9 @@ MFCStackFrameView::OnQuaExtEd(WPARAM wparam, LPARAM lparam)
 {
 #ifdef QUA_V_VST_HOST
 	VstPlugin	*vst = (VstPlugin *)wparam;
-	if (vst != NULL && frame != NULL) {
-		AEffect	*afx = frame->stk.afx;
+	QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(frame);
+	if (vst != nullptr && as != nullptr) {
+		AEffect	*afx = as->afx;
 		CRect r;
 #ifdef QUA_V_VST_HOST_GUI
 		if (vst->EditorGetRect(afx, r)) {
@@ -1577,9 +1584,9 @@ MFCStackFrameView::SetWidth(long cx)
 
 MFCStackFrameView::MFCStackFrameView()
 {
-	eButton = NULL;
-	popupEdit = NULL;
-	popupInfo = NULL;
+	eButton = nullptr;
+	popupEdit = nullptr;
+	popupInfo = nullptr;
 }
 
 MFCStackFrameView::~MFCStackFrameView()
@@ -1595,7 +1602,7 @@ inline StabEnt *
 map_controller(frame_map_hdr *map, long i)
 {
 	return (i>=0&&i<map->n_controller)?	
-		((StabEnt **)(((char *)map)+sizeof(frame_map_hdr)))[i]:NULL;
+		((StabEnt **)(((char *)map)+sizeof(frame_map_hdr)))[i]:nullptr;
 }
 
 inline QuasiStack *
@@ -1607,7 +1614,7 @@ map_frame(frame_map_hdr *map, long i)
 				+sizeof(frame_map_hdr)
 				+(map->n_controller*sizeof(StabEnt *))
 				)
-			)[i]:NULL;
+			)[i]:nullptr;
 }
 
 bool
@@ -1631,7 +1638,7 @@ MFCStackFrameView::CreateFrameView(
 	} else {
 		label = "stack";
 	}
-	long	ret=Create(NULL, "FrameView", WS_CHILD|WS_VISIBLE, r, wpv, NULL);
+	long	ret=Create(nullptr, "FrameView", WS_CHILD|WS_VISIBLE, r, wpv, NULL);
 	if (ret && frame != NULL && frame->callingBlock != NULL) {
 		if (root) {
 			root->AddFR(this);

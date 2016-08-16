@@ -34,16 +34,23 @@ template <typename C>
 class StreamItemCache {
 public:
 	StreamItemCache<typename C>() {
-		free = nullptr;
+		freeList = nullptr;
 	}
 	~StreamItemCache<typename C>() {
+		C* p = freeList;
+		void* q;
+		while (p != nullptr) {
+			q = p;
+			p = static_cast<C*>(p->next);
+			free(q);
+		}
 	}
 	void *alloc(size_t s) {
 		void *p;
 		mutex.lock();
-		if (free != nullptr && s <= sizeof(C)) {
-			p = (void *)free;
-			free = static_cast<C *>(free->next);
+		if (freeList != nullptr && s <= sizeof(C)) {
+			p = (void *)freeList;
+			freeList = static_cast<C *>(freeList->next);
 		} else {
 			p = malloc(s/*sizeof(C)*/);
 //			cerr << "malloc " << s << " of " << sizeof(C) << ", " << sizeof(StreamItem) << ", " << sizeof(Note) << ", " << sizeof(Time) << ", " << sizeof(StreamItem*) << endl;
@@ -54,12 +61,12 @@ public:
 	void dealloc(void *p) {
 		mutex.lock();
 		C *q = static_cast<C *>(p);
-		q->next = free;
-		free = q;
+		q->next = freeList;
+		freeList = q;
 		mutex.unlock();
 	}
 	std::mutex mutex;
-	C *free;
+	C *freeList;
 };
 
 /**

@@ -25,6 +25,7 @@
 #endif
 #ifdef QUA_V_AUDIO
 #include "QuaAudio.h"
+#include "QuaEnvironment.h"
 #endif
 
 #include <iostream>
@@ -65,7 +66,7 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 	stacker = i;
 	timeKeeper = uq;
 	mulch = nullptr;
-	stk.vars = nullptr;
+	vars = nullptr;
 	label = lbl? lbl: "";
 	stackable = ctxt->StackableValue();
 	if (stackable == nullptr) {
@@ -76,13 +77,11 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 		stackable->addStack(this);
 	}
 
-	Lambda	*So = (context->type == TypedValue::S_LAMBDA && stackable)?
-					((Lambda*)stackable):nullptr;
+	Lambda	*So = (context->type == TypedValue::S_LAMBDA && stackable)? ((Lambda*)stackable):nullptr;
 	isLocus =	So?	So->isLocus:false;
 	callingBlock = block;
 	enclosingList = list;
-	locusStatus = ((So && (So->isModal || So->isOncer || So->isHeld))?
-						STATUS_SLEEPING:STATUS_RUNNING);
+	locusStatus = ((So && (So->isModal || So->isOncer || So->isHeld))? STATUS_SLEEPING:STATUS_RUNNING);
 	lowerFrame = l;
 	isActive = false;
 	isLeaf = false;
@@ -123,33 +122,6 @@ QuasiStack::QuasiStack(	class StabEnt *ctxt,
 				SetAudio(AUDIO_HAS_PLAYER);
 #endif
 				break;
-#ifdef QUA_V_VST_HOST
-			case Block::C_VST: {
-				VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
-				if (vst) {
-					if (vst->status != VST_PLUG_LOADED) {
-						vst->Load(stacker->uberQua->bridge);
-					}
-					if (vst->status == VST_PLUG_LOADED) {
-						stk.afx = vst->AEffectInstance();
-						if (stk.afx == nullptr) {
-							stacker->uberQua->bridge.reportError("Can't instantiate %s", vst->sym->name.c_str());
-						} else {
-							vst->Open(stk.afx);
-							vst->MainsOn(stk.afx);
-							vst->ConnectOutput(stk.afx, 0);
-							vst->ConnectOutput(stk.afx, 1);
-//							vst->TestDrive(afx);
-							QDBMSG_STK("QuasiStack::creating vst %s -> %x\n", vst->sym->name, stk.afx);
-						}
-					} else {
-						stacker->uberQua->bridge.reportError("can't load vst plugin");
-					}
-				}
-				SetAudio(vst->isSynth?AUDIO_HAS_PLAYER:AUDIO_HAS_FX);
-				break;
-			}
-#endif
 		}
 	}
 	
@@ -221,13 +193,13 @@ QuasiStack::CheckMulchSize()
 		}
 		QDBMSG_STK("\tCheckmulchsize: stack allocs %d stack for %x%\n", stackable->stackSize, stackable);
 		if (mulch) {
-			delete mulch;
+			delete [] mulch;
 		}
 		mulch =  new char[stackable->stackSize+8];
 		memset(mulch, 0, stackable->stackSize+8);
-	 	stk.vars = (uchar *)mulch;
+	 	vars = (uchar *)mulch;
 		short	pad = (short) (((uint32)mulch) % 8);
-		if (pad) stk.vars += (8-pad);
+		if (pad) vars += (8-pad);
 		QDBMSG_STK("\tmulch = %x, stack = %x\n", mulch, stk.vars);
 	}
 	return true;
@@ -236,21 +208,11 @@ QuasiStack::CheckMulchSize()
 
 QuasiStack::~QuasiStack()
 {
+	/*
 	if (callingBlock) {
 		switch (callingBlock->type) {
-#ifdef QUA_V_VST_HOST
-			case Block::C_VST: {
-				VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
-				if (vst) {
-					vst->MainsOff(stk.afx);
-					vst->Close(stk.afx); // which deletes the instance!
-				}
-				SetAudio(vst->isSynth?AUDIO_HAS_PLAYER:AUDIO_HAS_FX);
-				break;
-			}
-#endif
 		}
-	}
+	}*/
 	/*
 	int i;
 	for (i=0; i<NControllerBridge(); i++) {
@@ -264,10 +226,11 @@ QuasiStack::~QuasiStack()
 		delete q;
 	}
 	if (mulch) {
-		free(mulch);
+		delete[] mulch;
 //		delete mulch;
 	}
 }
+
 
 
 bool
@@ -346,6 +309,9 @@ QuasiStack::UnThunk()
 	return false;
 }
 
+/*
+ * TODO XXX FIXME WTF this seems incredibly dangerous legacy code ... it's unused fortunately but should be fully deprecated
+ */
 bool
 QuasiStack::GetFrameMap(frame_map_hdr *&map)
 {
@@ -387,7 +353,7 @@ QuasiStack::Dump()
 {
 	if (stackable) {
 		for (short i=0; i<stackable->stackSize; i++)
-			fprintf(stderr, "%02x ", stk.vars[i]);
+			fprintf(stderr, "%02x ", vars[i]);
 		fprintf(stderr, "\n");
 	}
 }
@@ -429,6 +395,7 @@ QuasiStack::Save(ostream &out, short indent)
 	out << ")";
 	return err;
 }
+
 status_t
 QuasiStack::SaveSnapshot(ostream &out, const char *label)
 {
@@ -438,51 +405,19 @@ QuasiStack::SaveSnapshot(ostream &out, const char *label)
 	if (stackable) {
 		bool saveBinaryValues = true;
 		bool saveSymbolicValues = true;
-		if (callingBlock && callingBlock->type == Block::C_VST) {
-			VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
-			if (vst->programChunks) {
-#ifdef QUA_V_VST_HOST
-				void		*chunkPtr;
-				long		chunkLen;
-				chunkLen = vst->GetChunk(stk.afx, &chunkPtr);
-				if (chunkLen > 0) {
-					out << "<stack name=\""<< label <<"\" type=\"vst\" saveData=\"chunk\" length=\""<< chunkLen <<"\" encoding=\"base64\">\n";
-					std::string outb = Base64::Encode((uchar *)chunkPtr, chunkLen);
-					out << outb << endl;
-				} else {
-					out << "<stack name=\""<< label<<"\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
-				}
-#endif
-			} else { // programs are not chunks!
-				out << "<stack name=\""<<label<<"\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
-			}
-
-		} else {
-			if (stackable->stackSize > 0 && saveBinaryValues) {
-				out << "<stack name=\""<< label <<"\" length=\""<< stackable->stackSize <<"\" encoding=\"base64\">"<<endl;
-				std::string outb = Base64::Encode((uchar *)stk.vars, stackable->stackSize);
-				out << outb << endl;
-			} else {
-				out << "<stack name=\""<<label<<"\">"<<endl;
-			}
+		if (stackable->stackSize > 0 && saveBinaryValues) {
+			out << "<stack name=\"" << label << "\" length=\"" << stackable->stackSize << "\" encoding=\"base64\">" << endl;
+			std::string outb = Base64::Encode((uchar *)vars, stackable->stackSize);
+			out << outb << endl;
+		}
+		else {
+			out << "<stack name=\"" << label << "\">" << endl;
 		}
 
 		if (stackable->sym) {
 			StabEnt	*p = stackable->sym->children;
 			while (p!= nullptr) {
 				switch (p->type) {
-					case TypedValue::S_VST_PROGRAM: {
-						string buf("type=\"vstprogram\"");
-						err=p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
-						break;
-					}
-#ifdef QUA_V_VST_HOST
-					case TypedValue::S_VST_PARAM: {
-						string buf = "type=\"vstparam\" position=\""+to_string(p->VstParamValue())+"\"";
-						err=p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
-						break;
-					}
-#endif
 					case TypedValue::S_BOOL:
 					case TypedValue::S_SHORT:
 					case TypedValue::S_BYTE:
@@ -773,6 +708,131 @@ QuasiStack::PopHigherFrameRepresentations()
 	}
 	return false;
 }
+
+
+QuasiAFXStack::QuasiAFXStack(class StabEnt *ctxt,
+	Stacker *i, StabEnt *stkrSym, Block *block, Block *list,
+	QuasiStack *l, TimeKeeper *uq, char *lbl) :
+	QuasiStack(ctxt, i, stkrSym, block, list, l, uq, lbl)
+{
+#ifdef QUA_V_VST_HOST
+	afx = nullptr;
+	if (callingBlock != nullptr && callingBlock->type == Block::C_VST) {
+		VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
+		if (vst) {
+			if (vst->status != VST_PLUG_LOADED) {
+				vst->Load(stacker->uberQua->bridge);
+			}
+			if (vst->status == VST_PLUG_LOADED) {
+				afx = vst->AEffectInstance();
+				if (afx == nullptr) {
+					stacker->uberQua->bridge.reportError("Can't instantiate %s", vst->sym->name.c_str());
+				} else {
+					if (stacker) {
+						stacker->addAFXStack(this);
+					}
+					// now we need to get the stacker to handle zeroing of our buffers
+					inputs.set(vst->numInputs, getAudioManager().bufferSize);
+					outputs.set(vst->numOutputs, getAudioManager().bufferSize);
+					VstPlugin::Open(afx);
+					VstPlugin::MainsOn(afx);
+					VstPlugin::ConnectOutput(afx, 0);
+					VstPlugin::ConnectOutput(afx, 1);
+//							vst->TestDrive(afx);
+					QDBMSG_STK("QuasiStack::creating vst %s -> %x\n", vst->sym->name, stk.afx);
+				}
+			}
+			else {
+				stacker->uberQua->bridge.reportError("can't load vst plugin");
+			}
+		}
+		SetAudio(vst->isSynth ? AUDIO_HAS_PLAYER : AUDIO_HAS_FX);
+	}
+#endif
+}
+
+/*********************************************************************************
+ * QuasiAFXStack
+ * specialization of QuasiStack for vsts
+ *********************************************************************************/
+QuasiAFXStack::~QuasiAFXStack() {
+	if (afx != nullptr && callingBlock != nullptr && callingBlock->type == Block::C_VST) {
+#ifdef QUA_V_VST_HOST
+		VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
+		if (stacker) {
+			stacker->removeAFXStack(this);
+		}
+		if (vst) {
+			VstPlugin::MainsOff(afx);
+			VstPlugin::Close(afx); // which deletes the instance!
+			SetAudio(vst->isSynth ? AUDIO_HAS_PLAYER : AUDIO_HAS_FX);
+		}
+#endif
+	}
+}
+
+status_t
+QuasiAFXStack::SaveSnapshot(ostream &out, const char *label)
+{
+	status_t	err = B_NO_ERROR;
+
+	bool saveChildStacks = true;
+	if (stackable) {
+		bool saveBinaryValues = true;
+		bool saveSymbolicValues = true;
+		if (callingBlock && callingBlock->type == Block::C_VST) {
+			VstPlugin	*vst = callingBlock->crap.call.crap.vstplugin;
+			if (vst->programChunks) {
+#ifdef QUA_V_VST_HOST
+				void		*chunkPtr;
+				long		chunkLen;
+				chunkLen = vst->GetChunk(afx, &chunkPtr);
+				if (chunkLen > 0) {
+					out << "<stack name=\"" << label << "\" type=\"vst\" saveData=\"chunk\" length=\"" << chunkLen << "\" encoding=\"base64\">\n";
+					std::string outb = Base64::Encode((uchar *)chunkPtr, chunkLen);
+					out << outb << endl;
+				}
+				else {
+					out << "<stack name=\"" << label << "\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
+				}
+#endif
+			}
+			else { // programs are not chunks!
+				out << "<stack name=\"" << label << "\" type=\"vst\" length=\"0\" encoding=\"base64\">\n";
+			}
+
+		} else {
+			out << "<stack name=\"" << label << "\">" << endl;
+		}
+
+		if (stackable->sym) {
+			StabEnt	*p = stackable->sym->children;
+			while (p != nullptr) {
+				switch (p->type) {
+				case TypedValue::S_VST_PROGRAM: {
+					string buf("type=\"vstprogram\"");
+					err = p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
+					break;
+				}
+#ifdef QUA_V_VST_HOST
+				case TypedValue::S_VST_PARAM: {
+					string buf = "type=\"vstparam\" position=\"" + to_string(p->VstParamValue()) + "\"";
+					err = p->SaveSimpleTypeSnapshot(out, stacker, this, const_cast<char*>(buf.c_str()));
+					break;
+				}
+#endif
+											  p = p->sibling;
+				}
+			}
+		}
+	} else {
+		out << "<stack name=\"" << label << "\">" << endl;
+	}
+
+	out << "</stack>" << endl;
+	return err;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////

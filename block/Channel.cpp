@@ -21,7 +21,7 @@
 #include "QuaAudio.h"
 #include "QuasiStack.h"
 #include "QuaFX.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 
 #ifdef QUA_V_JOYSTICK
 #include "QuaJoystick.h"
@@ -806,7 +806,7 @@ LoadChannel(FILE *fp, Qua *u)
 // Called
 //  * through the audio input infrastructure
 size_t
-Channel::Receive(size_t nFrames)
+Channel::receive(size_t nFrames)
 {
 	long	nsamp = nAudioIns * nFrames;
 	sample_buf_zero(inSig, nAudioIns, nFrames);
@@ -857,12 +857,22 @@ Channel::Receive(size_t nFrames)
 	return nFrames;
 }
 
-// Called
-//  * through the audio output infrastructure
-//
-//  read lock activeAudioOutputs, activeAudioInputs, activeAudioInstances
+void
+Channel::initAudioBuffers() {
+	initAFXStackBuffers();
+	for (Instance *inst : audioInstances) {
+		inst->initAFXStackBuffers();
+	}
+
+}
+
+/**
+ * Called  through the audio output infrastructure
+ *
+ *  read lock activeAudioOutputs, activeAudioInputs, activeAudioInstances
+ */
 size_t
-Channel::Generate(size_t nFrames)
+Channel::generate(size_t nFrames)
 {
 	if (debug_chan >= 2) {
 		cerr << "Channel " << chanId << ": generate(" << nFrames << ")" << endl;

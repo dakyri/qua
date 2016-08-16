@@ -9,48 +9,13 @@ namespace tinyxml2 {
 	class XMLElement;
 }
 
-class ResultValue: public TypedValue
-{
-public:
-	enum {
-		BLOCKED = 1,
-		COMPLETE = 2,
-	};
-
-	inline					ResultValue()
-	{
-		type = S_UNKNOWN;
-		val.Int = 0;
-		refType = REF_VALUE;
-		indirection = 0;
-		flags = COMPLETE;
-	}
-	
-	inline 					ResultValue(int32 t, bool block=false)
-	{
-		flags = block?BLOCKED:COMPLETE;
-		type = t;
-		val.Int = 0;
-		refType = REF_VALUE;
-		indirection = 0;
-	}
-	
-	inline 					ResultValue(TypedValue &v)
-	{
-		flags = v.flags|COMPLETE;
-		type = v.type;
-		val = v.val;
-		refType = v.refType;
-		indirection = 0;
-	}
-
-	inline bool Complete() { return (flags & COMPLETE) != 0; }
-	inline bool Blocked() { return (flags & BLOCKED) != 0; }
-};
 
 class StabEnt;
 class QuasiStack;
 
+/*
+ * object holding all the necessary info to set or retrieve a value of a symbol in a particular context.
+ */
 class LValue
 {
 public:

@@ -21,7 +21,7 @@ using namespace std;
 #include "Stackable.h"
 #include "Parse.h"
 #include "VstPlugin.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 
 #include "Sym.h"
 #include "Qua.h"
@@ -29,6 +29,7 @@ using namespace std;
 #include "Note.h"
 #include "QuasiStack.h"
 #include "QuaAudio.h"
+#include "QuaEnvironment.h"
 
 // bogus avoidance of a messy issue of the
 // HostCallback knowing which of the hostside
@@ -1489,7 +1490,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			//NB - Host must despatch effSetSampleRate to the plug in response
 			//to this call
 			//Check despatcher notes for any return codes from effSetSampleRate
-			effect->dispatcher(effect,effSetSampleRate,0,0,nullptr,audioManager?audioManager->sampleRate:44100);
+			effect->dispatcher(effect,effSetSampleRate,0,0,nullptr, getAudioManager().sampleRate);
 			break;
 
 		case audioMasterGetBlockSize:
@@ -1500,7 +1501,7 @@ VstPlugin::HostCallback(AEffect *effect, long opcode, long index, long value, vo
 			//NB - Host must despatch effSetBlockSize to the plug in response
 			//to this call
 			//Check despatcher notes for any return codes from effSetBlockSize
-			effect->dispatcher(effect,effSetBlockSize,0,audioManager?audioManager->bufferSize:512,nullptr,0.0f);
+			effect->dispatcher(effect,effSetBlockSize,0, getAudioManager().bufferSize, nullptr,0.0f);
 			break;
 
 		case audioMasterGetInputLatency:

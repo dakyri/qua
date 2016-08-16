@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "SampleFile.h"
-#include "SampleBuffer.h"
+#include "AudioBuffer.h"
 #include "Block.h"
 #include "QuaFX.h"
 #include "Qua.h"
@@ -15,6 +15,8 @@
 #ifdef QUA_V_VST_HOST
 #include "VstPlugin.h"
 #endif
+
+#include <iostream>
 
 flag	debug_quafx=0;
 
@@ -27,16 +29,27 @@ flag	debug_quafx=0;
 // data from different channels outputting to it. Can't see a lot of benefit to this
 // in Qua, except minimizing screen space. Multiple outs from a drum machine
 // is something I would like to have to deal with....
-#define QUA_MAX_VST_OUT_PINS 8
-float	**vstTmpSig = sample_buf_alloc(QUA_MAX_VST_OUT_PINS,QUA_MAX_AUDIO_BUFSIZE);
-float	**vstTmpVex = new float*[QUA_MAX_VST_OUT_PINS];
+// -2003
+//
+// currently, plan is to keep buffers for vst pinouts and pinins as part of the stack of a vst instance, and redirect output and input to and
+// from these buffers .. see QuasiAFXStack
+//#define QUA_MAX_VST_OUT_PINS 8
+//float	**vstTmpSig = sample_buf_alloc(QUA_MAX_VST_OUT_PINS,QUA_MAX_AUDIO_BUFSIZE);
+//float	**vstTmpVex = new float*[QUA_MAX_VST_OUT_PINS];
 float	**sampleSig = sample_buf_alloc(2, QUA_MAX_AUDIO_BUFSIZE);
 
+/**
+ * main audio processing thing ... traverses our tree filling audio nodes
+
+ * @param outSig - inputs provided here, and outputs greatfully acceptes
+ * @param nFrames
+ * @param nChan
+ */
 size_t
 ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, short nChan)
 {
 	if (debug_quafx)
-		fprintf(stderr, "Apply Quafx %x %d stack %x\n", (unsigned)fxBlock, fxBlock?fxBlock->type:-1, (unsigned)stack);
+		cerr << "Apply Quafx " << (unsigned)fxBlock << " " << (fxBlock ? fxBlock->type : -1) << " stack " << (unsigned)stack << endl;;
 
 	if (!fxBlock)
 		return nFrames;
@@ -350,13 +363,11 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 	case Block::C_IF: {
 		if (fxBlock->crap.iff.condVar.IntValue(stack)) {
 		    if (fxBlock->crap.iff.ifBlock != nullptr) {
-				ApplyQuaFX(stack, fxBlock->crap.iff.ifBlock,
-					outSig, nFrames, nChan);
+				ApplyQuaFX(stack, fxBlock->crap.iff.ifBlock, outSig, nFrames, nChan);
 		    } 
 		} else {
 		    if (fxBlock->crap.iff.elseBlock != nullptr) {
-				ApplyQuaFX(stack, fxBlock->crap.iff.elseBlock,
-					outSig, nFrames, nChan);
+				ApplyQuaFX(stack, fxBlock->crap.iff.elseBlock, outSig, nFrames, nChan);
 		    } 
 		}
 		break;
@@ -365,8 +376,7 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 	case Block::C_GUARD: {
 		if (fxBlock->crap.guard.condVar.IntValue(stack)) {
 		    if (fxBlock->crap.guard.block != nullptr) {
-				ApplyQuaFX(stack, fxBlock->crap.guard.block,
-					outSig, nFrames, nChan);
+				ApplyQuaFX(stack, fxBlock->crap.guard.block, outSig, nFrames, nChan);
 		    } 
 		}
 		break;
@@ -376,164 +386,176 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
     case Block::C_VST: {
 #ifdef QUA_V_VST_HOST
 		stack->Thunk();
-		QuasiStack	*higherFrame = stack->frameAt(fxBlock->crap.call.frameIndex);
-		if (higherFrame->locusStatus == STATUS_RUNNING) {
+		QuasiAFXStack	*frame = dynamic_cast<QuasiAFXStack*>(stack->frameAt(fxBlock->crap.call.frameIndex));
+		if (frame != nullptr && frame->locusStatus == STATUS_RUNNING) {
 			VstPlugin	*vst = fxBlock->crap.call.crap.vstplugin;
-			if (vst->status == VST_PLUG_LOADED) {
-				AEffect	*afx = higherFrame->stk.afx;
+			AEffect	*afx = afx = frame->afx;
+			if (vst != nullptr && vst->status == VST_PLUG_LOADED && afx != nullptr) {
 				if (debug_quafx) {
-					fprintf(stderr, "Applying vst plugin %s cookie %x %d frames %d chan\n",
-							fxBlock->crap.call.crap.vstplugin->sym->name.c_str(),
-							afx, nFrames, nChan);
+					cerr << "Applying vst plugin " << fxBlock->crap.call.crap.vstplugin->sym->name 
+							<< " cookie " << afx << " " << nFrames << " frames " << nChan << " chan" << endl;
 				}
 // currently I think a synth that takes inputs should filter rather than
 // accumulate to its inputs.
 // ?????????????? i think a lot of the buffer copying can be optimised for the
 // ?????????????? 0,1,2 in and 2 out on a stereo channel case
-				if (afx) {
-					if (nChan == 1) {
-						if (vst->canReplacing) {
-							if (vst->numInputs == 0) { // most regular synths
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_add_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
-							} else {
-								if (vst->numInputs != 1) { // expand the mono in
-									for (short k=0; k<vst->numInputs; k++) {
-										vstTmpVex[k] = outSig[0];
-									}
-									afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								} else {
-									afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								}
-								sample_buf_copy_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
-							}
+
+//	higherFrame has own buffers for vst pins
+//	zero these at start of audio cycle, they will potentially be filled or not from various sources including here
+// add outSig to higherFrame->inputBuffer
+// run the vst to higherFrame->outputBuffer ... output buffers aren't zeroed units earlier in the chain should use it (though from previous cycle)
+// copy the 1st however many channels to outsig ... or add to it?
+
+				frame->inputs.addFrom(outSig, nChan, nFrames);
+				afx->processReplacing(afx, frame->inputs.getBuffers(), frame->outputs.getBuffers(), nFrames);
+				frame->outputs.copyTo(outSig, nChan, nFrames);
+
+
+#ifdef ORIG_VST
+				if (nChan == 1) {
+					if (vst->canReplacing) {
+						if (vst->numInputs == 0) { // most regular synths
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_add_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
 						} else {
-							sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
-							if (vst->numInputs == 0) { // most regular synths
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_add_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
-							} else {
-								if (vst->numInputs != 1) { // expand mono in to multi
-									for (short k=0; k<vst->numInputs; k++) {
-										vstTmpVex[k] = outSig[0];
-									}
-									afx->process(afx, vstTmpVex, vstTmpSig, nFrames);
-								} else {
-									afx->process(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numInputs != 1) { // expand the mono in
+								for (short k=0; k<vst->numInputs; k++) {
+									vstTmpVex[k] = outSig[0];
 								}
-								sample_buf_copy_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
-							}
-						}
-					} else if (nChan == 2) { // optimize the crap out of this one!!!! ??????
-						if (vst->canReplacing) {
-							if (vst->numInputs == 0) {
 								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) { // the most normal thing
-									sample_buf_add(outSig, vstTmpSig, 2, nFrames);
+							} else {
+								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							}
+							sample_buf_copy_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
+						}
+					} else {
+						sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
+						if (vst->numInputs == 0) { // most regular synths
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_add_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
+						} else {
+							if (vst->numInputs != 1) { // expand mono in to multi
+								for (short k=0; k<vst->numInputs; k++) {
+									vstTmpVex[k] = outSig[0];
+								}
+								afx->process(afx, vstTmpVex, vstTmpSig, nFrames);
+							} else {
+								afx->process(afx, outSig, vstTmpSig, nFrames);
+							}
+							sample_buf_copy_to_mono(outSig[0], vstTmpSig, vst->numOutputs, nFrames);
+						}
+					}
+				} else if (nChan == 2) { // optimize the crap out of this one!!!! ??????
+					if (vst->canReplacing) {
+						if (vst->numInputs == 0) {
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) { // the most normal thing
+								sample_buf_add(outSig, vstTmpSig, 2, nFrames);
 //									for (short ii=0; ii<nFrames; ii++) {
 //										fprintf(stderr, "%g ", outSig[0][ii]);
 //									} fprintf(stderr, "\n");
-								} else if (vst->numOutputs == 1) {
-									sample_buf_add_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_add_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else if (vst->numInputs == 1) {	// convert stereo in to mono
-								sample_buf_to_mono(outSig, nChan, nFrames);
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) { // a not uncommon thing
-									sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
-								} else if (vst->numOutputs == 1) {
-									sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else if (vst->numInputs == 2) {
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) {// the most normal thing
-									sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
-								} else if (vst->numOutputs == 1) {
-									sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else { // unheard of but not impossible
-								fprintf(stderr, "unexpected vst configuration: nchan = %d nin = %d nout = %d\n", nChan, vst->numInputs, vst->numOutputs);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_add_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_add_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
 							}
-						} else {
-							sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
-							if (vst->numInputs == 0) {
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) {
-									sample_buf_add(outSig, vstTmpSig, 2, nFrames);
-								} else if (vst->numOutputs == 1) {
-									sample_buf_add_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_add_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else if (vst->numInputs == 1) {	// convert stereo in to mono
-								sample_buf_to_mono(outSig, nChan, nFrames);
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) {
-									sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
-								} else if (vst->numOutputs == 1) {
-									sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else if (vst->numInputs == 2) {
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								if (vst->numOutputs == 2) {
-									sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
-								} else if (vst->numOutputs == 1) {
-									sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
-								} else {
-									sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
-								}
-							} else { // unheard of but not impossible
-								fprintf(stderr, "unexpected vst configuration: nchan = %d nin = %d nout = %d\n", nChan, vst->numInputs, vst->numOutputs);
+						} else if (vst->numInputs == 1) {	// convert stereo in to mono
+							sample_buf_to_mono(outSig, nChan, nFrames);
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) { // a not uncommon thing
+								sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
 							}
-						}
-					} else if (nChan == vst->numOutputs) {
-						// there's room for however many vst channels are out coming
-						if (vst->canReplacing) {
-							if (vst->numInputs == 0) {
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_add(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else if (vst->numInputs == 1) {	// convert stereo in to mono
-								sample_buf_to_mono(outSig, nChan, nFrames);
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else if (vst->numInputs == 2) {
-								afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else { // unheard of but not impossible
-								fprintf(stderr, "unexpected vst configuration: nchan = %d nin = %d nout = %d\n", nChan, vst->numInputs, vst->numOutputs);
+						} else if (vst->numInputs == 2) {
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) {// the most normal thing
+								sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
 							}
-						} else {
-							sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
-							if (vst->numInputs == 0) {
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_add(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else if (vst->numInputs == 1) {	// convert stereo in to mono
-								sample_buf_to_mono(outSig, nChan, nFrames);
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else if (vst->numInputs == 2) {
-								afx->process(afx, outSig, vstTmpSig, nFrames);
-								sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
-							} else { // unheard of but not impossible
-								fprintf(stderr, "unexpected vst configuration: nchan = %d nin = %d nout = %d\n", nChan, vst->numInputs, vst->numOutputs);
-							}
+						} else { // unheard of but not impossible
+							cerr << "unexpected vst configuration: nchan = " << nChan << " nin = " << vst->numInputs << " nout = " << vst->numOutputs << endl;
 						}
 					} else {
-						// bigger than two and bad... and will probably always be
-						// doubt this will ever happen
-						// 8 out plug to a quad send... qua would handle this differently
-						fprintf(stderr, "unexpected vst configuration: nchan = %d nin = %d nout = %d\n", nChan, vst->numInputs, vst->numOutputs);
+						sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
+						if (vst->numInputs == 0) {
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) {
+								sample_buf_add(outSig, vstTmpSig, 2, nFrames);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_add_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_add_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
+							}
+						} else if (vst->numInputs == 1) {	// convert stereo in to mono
+							sample_buf_to_mono(outSig, nChan, nFrames);
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) {
+								sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
+							}
+						} else if (vst->numInputs == 2) {
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							if (vst->numOutputs == 2) {
+								sample_buf_copy(outSig, vstTmpSig, 2, nFrames);
+							} else if (vst->numOutputs == 1) {
+								sample_buf_copy_mono(outSig, vstTmpSig[0], 2, nFrames);
+							} else {
+								sample_buf_copy_multi(outSig, 2, vstTmpSig, vst->numOutputs, nFrames);
+							}
+						} else { // unheard of but not impossible
+							cerr << "unexpected vst configuration: nchan = " << nChan << " nin = " << vst->numInputs << " nout = " << vst->numOutputs << endl;
+						}
 					}
+				} else if (nChan == vst->numOutputs) {
+					// there's room for however many vst channels are out coming
+					if (vst->canReplacing) {
+						if (vst->numInputs == 0) {
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_add(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else if (vst->numInputs == 1) {	// convert stereo in to mono
+							sample_buf_to_mono(outSig, nChan, nFrames);
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else if (vst->numInputs == 2) {
+							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else { // unheard of but not impossible
+							cerr << "unexpected vst configuration: nchan = " << nChan << " nin = " << vst->numInputs << " nout = " << vst->numOutputs << endl;
+						}
+					} else {
+						sample_buf_zero(vstTmpSig, vst->numOutputs, nFrames);
+						if (vst->numInputs == 0) {
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_add(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else if (vst->numInputs == 1) {	// convert stereo in to mono
+							sample_buf_to_mono(outSig, nChan, nFrames);
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else if (vst->numInputs == 2) {
+							afx->process(afx, outSig, vstTmpSig, nFrames);
+							sample_buf_copy(outSig, vstTmpSig, vst->numOutputs, nFrames);
+						} else { // unheard of but not impossible
+							cerr << "unexpected vst configuration: nchan = " << nChan << " nin = " << vst->numInputs << " nout = " << vst->numOutputs << endl;
+						}
+					}
+				} else {
+					// bigger than two and bad... and will probably always be
+					// doubt this will ever happen
+					// 8 out plug to a quad send... qua would handle this differently
+					cerr << "unexpected vst configuration: nchan = " << nChan << " nin = " << vst->numInputs << " nout = " << vst->numOutputs << endl;
 				}
+#endif
 			}
+
 		}
 		stack->UnThunk();
 // hell does the garbage collection

@@ -92,14 +92,14 @@ Instance::Init()
 		uberQua->bridge.tragicError("hmmm ... interesting ... instance of nullptr");
 	}
 	glob.PushContext(sym);
-	fprintf(stderr, "instance: initting children\n");
+	cerr << "instance: initting children\n";
 	for (StabEnt *p=sym->children; p!=nullptr; p=p->sibling) {
 		if (p->type == TypedValue::S_LAMBDA) {
 			if (!p->LambdaValue()->Init())
 				goto err_ex;
 		}
 	}
-	fprintf(stderr, "children initialized!\n");
+	cerr << "children initialized!\n";
 	mainStack = nullptr;
 	rxStack = nullptr;
 	wakeStack = nullptr;
@@ -114,7 +114,7 @@ Instance::Init()
 		
 	ResetStacks();
 	
-	fprintf(stderr, "stacks fully reset\n");
+	cerr << "stacks fully reset\n";
 
 	glob.PopContext(sym);
 	return true;
@@ -180,12 +180,11 @@ Instance::DestroyStacks()
 bool
 Instance::SetStacks()
 {
-//	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
 	if (schedulable.uberQua == nullptr)
 		return false;
 		
 	QuasiStack	*mainMainStack = mainStack;
-	fprintf(stderr, "main stack for %s\n", sym->uniqueName());
+	cerr <<  "main stack for " << sym->uniqueName() << endl;
 	if (mainStack == nullptr) {
 		mainStack = new QuasiStack(schedulable.sym, this, sym, nullptr, nullptr, schedulable.uberQua->theStack, schedulable.uberQua, nullptr);
 
@@ -196,7 +195,7 @@ Instance::SetStacks()
 		mainMainStack = mainStack;
 	}
 	
-	fprintf(stderr, "wake stack for %s\n", sym->uniqueName());
+	cerr <<  "wake stack for " << sym->uniqueName() << endl;
 	if (wakeStack == nullptr && schedulable.wake.block) {
 		wakeStack = new QuasiStack(
 							schedulable.wake.sym,
@@ -206,7 +205,7 @@ Instance::SetStacks()
 		wakeStack->lowerFrame = mainMainStack;
 	}
 	
-	fprintf(stderr, "sleep stack for %s\n", sym->uniqueName());
+	cerr <<  "sleep stack for " << sym->uniqueName() << endl;
 	if (sleepStack == nullptr && schedulable.sleep.block) {
 		sleepStack = new QuasiStack(
 							schedulable.sleep.sym,

@@ -5,7 +5,7 @@
 
 class Sample;
 class ResultValue;
-class SampleBuffer;
+class SampleFileBuffer;
 
 // sample player responsible for the ins and outs of sending
 // a sample from an object or a script ...
@@ -23,7 +23,7 @@ public:
 	
 	inline Sample	*QSample() { return sample; }
 					
-	SampleBuffer	*currentBuffer;
+	SampleFileBuffer	*currentBuffer;
 	long			currentFrame;
 	bool			enable;
 	Sample			*sample;

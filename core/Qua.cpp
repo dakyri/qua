@@ -268,11 +268,9 @@ Qua::PostCreationInit()
 		Stream	mainStream;
 
 //	theStack = new QuasiStack(sym, this, sym, nullptr, nullptr, nullptr, this, nullptr);
-		QuasiStack	*initStack = new QuasiStack(
-							initMethod->sym,
-							this, sym, nullptr, nullptr, nullptr, this, nullptr);
-		if (  initBlock->StackOMatic(initStack, 1) &&
-			  initBlock->Reset(initStack)) {
+		QuasiStack	*initStack = new QuasiStack( initMethod->sym, this, sym, nullptr, nullptr, nullptr, this, nullptr);
+		if (initBlock->StackOMatic(initStack, 1) && initBlock->Reset(initStack)) {
+
 			initStack->lowerFrame = theStack;
 			
 			fprintf(stderr, "Executing Init method of %s...\n", sym->name.c_str());

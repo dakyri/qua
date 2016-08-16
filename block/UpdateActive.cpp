@@ -79,8 +79,7 @@ UpdateActiveBlock(Qua *uberQua,
 		ResultValue			cv;
 //		flag				blocked;
 		ResultValue			val;
-		Time		*nextTP =
-				(Time*)B->crap.flux.timeVar.StackAddressValue(stack);
+		Time		*nextTP = (Time*)B->crap.flux.timeVar.StackAddressValue(stack);
 		
 #ifdef QUA_V_DEBUG_CONSOLE
 		if (debug_update >= 2)
@@ -607,29 +606,30 @@ UpdateActiveBlock(Qua *uberQua,
 #endif
 		ua_complete = true;
 		stack->Thunk();
-		QuasiStack	*higherFrame = stack->frameAt(B->crap.call.frameIndex);
+		QuasiAFXStack	*higherFrame = dynamic_cast<QuasiAFXStack*>(stack->frameAt(B->crap.call.frameIndex));
+		if (higherFrame != nullptr) {
+			AEffect	*afx = higherFrame->afx;
+			Stackable *stackable = B->crap.call.crap.vstplugin;
+			if (afx && higherFrame->locusStatus == STATUS_RUNNING) {
+				// fill in calculated parameters
+				short positionalParam = 0;
+				for (Block *bp = B->crap.call.parameters; bp != nullptr; bp = bp->next) {
 
-		AEffect	*afx = higherFrame->stk.afx;
-		Stackable *stackable = B->crap.call.crap.vstplugin;
-		if (afx && higherFrame->locusStatus == STATUS_RUNNING) {
-// fill in calculated parameters
-			short positionalParam = 0;
-			for (Block *bp=B->crap.call.parameters; bp!=nullptr; bp=bp->next) {
-				
-				ResultValue v = EvaluateExpression(bp,mainStream.head,
-							stacker, stackCtxt, stack);
-				if (bp->type != Block::C_ASSIGN && !v.Blocked()) {
-					afx->setParameter(afx, positionalParam, v.FloatValue(higherFrame));
+					ResultValue v = EvaluateExpression(bp, mainStream.head,
+						stacker, stackCtxt, stack);
+					if (bp->type != Block::C_ASSIGN && !v.Blocked()) {
+						afx->setParameter(afx, positionalParam, v.FloatValue(higherFrame));
+					}
+					positionalParam++;
 				}
-				positionalParam++;
+				B->crap.call.crap.vstplugin->OutputStream(afx, mainStream);
+				// fill in interface parameters
+				// hopefully vst params will have this done already!
+				//			for (QuaControllerBridge *cvp=higherFrame->controlVariables;
+				//					cvp!=nullptr; cvp=cvp->next) {
+				//				LValue	l = cvp->stabEnt->SetLValue(nullptr, stacker, higherFrame);
+				//			}
 			}
-			B->crap.call.crap.vstplugin->OutputStream(afx, mainStream);
-// fill in interface parameters
-// hopefully vst params will have this done already!
-//			for (QuaControllerBridge *cvp=higherFrame->controlVariables;
-//					cvp!=nullptr; cvp=cvp->next) {
-//				LValue	l = cvp->stabEnt->SetLValue(nullptr, stacker, higherFrame);
-//			}
 		}
 		stack->UnThunk();
 // hell does the garbage collection

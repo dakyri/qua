@@ -12,27 +12,30 @@
 #include "QuaTime.h"
 #include "Instance.h"
 
+#include <list>
+
 class SampleInstance;
 class SampleFile;
 class Sample;
 struct IXMLDOMElement;
 
-
-class SampleBuffer {
+/*
+ * buffer from a sample file ... represents a particular number of frames from a particular position in a particular file
+ */
+class SampleFileBuffer {
 public:
-						SampleBuffer();
-						~SampleBuffer();
-	inline bool			HasFrame(SampleFile *f, long fr) {
-		return (file == f && fr >= fromFrame && fr < fromFrame+nFrames);
-	}
-	void				Set(SampleFile *, long, long, long);
-	long				nRequest;
-	float				*data;
-	long				nFrames;
-	long				fromFrame;
-	long				chunk;
-	SampleFile			*file;
-	SampleBuffer		*next;
+	SampleFileBuffer();
+	~SampleFileBuffer();
+
+	inline bool HasFrame(SampleFile *f, long fr) { return (file == f && fr >= fromFrame && fr < fromFrame+nFrames); }
+	void Set(SampleFile *, long, long, long);
+
+	long nRequest; // number of active requests on this buffer, for deciding which pieces of the file are not currently interesting enough to cache
+	float *data;
+	long nFrames;
+	long fromFrame;
+	long chunk;
+	SampleFile *file;
 };
 
 #include "Clip.h"
@@ -102,7 +105,7 @@ public:
 	status_t SelectTake(SampleTake *, bool disp);
 	SampleTake *AddRecordTake(long fileType, short nChan, short sampleSize, float sampleRate);
 	
-	status_t			SetTakeList(Block *b);
+	status_t SetTakeList(Block *b);
 	
 	StabEnt *ampSym;
 	StabEnt *panSym;
@@ -113,27 +116,27 @@ public:
 	static long StartFrameOfChunk(SampleFile *, long);
 	static long ChunkForFrame(short, long);
 	static long StartFrameOfChunk(short, long);
-	SampleBuffer *BufferForFrame(SampleFile *, long f);
-	SampleBuffer *BufferForChunk(SampleFile *, long f);
+	SampleFileBuffer *BufferForFrame(SampleFile *, long f);
+	SampleFileBuffer *BufferForChunk(SampleFile *, long f);
 
 	mutex bufferLock;
 
-	char				*fileBuffer;
-	int					fileBufferLength;
+	char *fileBuffer;
+	int fileBufferLength;
 
-	short				nBuffers;
-	short				maxBuffers;
-	short				maxRequests;
-	SampleBuffer		**buffer;
-	long				*request;
-	SampleTake			**requestedTake;
+	short nBuffers;
+	short maxBuffers;
+	short maxRequests;
+	SampleFileBuffer **buffer;
+	long *request;
+	SampleTake **requestedTake;
 
-	SampleBuffer		*currentRecordBuffer;
-	SampleBuffer		*pendingRecordBuffers;
-	SampleBuffer		*freeRecordBuffers;
-	SampleTake			*recordTake;
-	long				recordFrame;
-	std::mutex			recordbufferLock;
+	SampleFileBuffer *currentRecordBuffer;
+	list<SampleFileBuffer *> pendingRecordBuffers;
+	list<SampleFileBuffer *> freeRecordBuffers;
+	SampleTake *recordTake;
+	long recordFrame;
+	std::mutex recordbufferLock;
 };
 
 inline long

@@ -1162,9 +1162,14 @@ QuaDisplay::ControllerChanged(
 			if (!vst || vst->status != VST_PLUG_LOADED) {
 				return;
 			}
-			AEffect	*afx = qs->stk.afx;
-			if (afx)
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(qs);
+			if (as == nullptr) {
+				return;
+			}
+			AEffect	*afx = as->afx;
+			if (afx) {
 				afx->setParameter(afx, sym->VstParamValue(), v.FloatValue(nullptr));
+			}
 			break;
 		}
 
@@ -1177,7 +1182,11 @@ QuaDisplay::ControllerChanged(
 			if (!vst || vst->status != VST_PLUG_LOADED) {
 				return;
 			}
-			AEffect	*afx = qs->stk.afx;
+			QuasiAFXStack *as = dynamic_cast<QuasiAFXStack*>(qs);
+			if (as == nullptr) {
+				return;
+			}
+			AEffect	*afx = as->afx;
 			VstPlugin::SetProgram(afx, v.VstProgramValue());
 			break;
 		}

@@ -12,6 +12,8 @@
 
 flag debug_method=0;
 
+#include <iostream>
+
 status_t
 Lambda::Save(ostream &out, short indent)
 {
@@ -50,7 +52,7 @@ Lambda::Lambda(const std::string &nm, StabEnt * const context, bool f1, bool f2,
 						TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
 	if (debug_method)
-		fprintf(stderr, "Lambda(%s, %d%d%d%d%d%d)\n", nm.c_str(), f1, f2, f3, f4, f6, f7);
+		cerr << "Lambda("<< nm <<", " << f1 << f2 << f3 << f4 << f6 << f7 << ")" << endl;
 
 	isLocus = f1;
 	isModal = f2;
@@ -68,7 +70,7 @@ Lambda::Lambda(Lambda *S, StabEnt *contxt):
 					TypedValue::REF_VALUE, false, false, StabEnt::DISPLAY_NOT))
 {
  	if (debug_method)
-		fprintf(stderr, "Dup Lambda()\n");
+		cerr << "Dup Lambda()" << endl;
 
 	isLocus = S->isLocus;
 	isModal = S->isModal;
@@ -105,7 +107,7 @@ Lambda::Init()
 	StabEnt		*C = sym->context;
 	StabEnt		*OriginalState = glob.TopContext();
 	StabEnt		*p = nullptr;
-	fprintf(stderr, "Init() of lambda %s in ctxt %s block %x\n", sym->name.c_str(), C?C->name.c_str() :"<glbl>, block ", (unsigned)B);
+	cerr << "Init() of lambda "<< sym->name <<" in ctxt " << (C ? C->name : string("<glbl>, block ")) << " block " << (unsigned)B << endl;
 
 //	shit(sym, uberQua->sym);
 	glob.PushContext(sym);
@@ -119,7 +121,7 @@ Lambda::Init()
 				goto err_ex;
 		}
 	}
-	fprintf(stderr, "exit Init() of lambda %s in ctxt %s block %x\n", sym->name.c_str(), C?C->name.c_str() :"<glbl>, block ", (unsigned)B);
+	cerr << "exit Init() of lambda " << sym->name << " in ctxt " << (C ? C->name : string("<glbl>, block ")) << " block " << (unsigned)B << endl;
 	glob.PopContext(sym);
 	return true;
 
