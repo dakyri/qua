@@ -158,7 +158,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 			int	state = 0;
 			
 			if (clip != nullptr) {
-//				fprintf(stderr, "playing sample pos %d clip %x loop %d dir %d pitch %g gain %g pan %g\n", pos, clip, loop, dir, pitch, gain, pan);
 				media = clip->media;
 				if (media && media->type == Take::SAMPLE) {
 					// ???????????????
@@ -174,7 +173,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 				}
 			} else {
 				media = (Take *)inf->mediaVar.PointerValue(higherFrame);
-//				fprintf(stderr, "playing sample pos %d media %x loop %d dir %d pitch %g gain %g pan %g\n", pos, media, loop, dir, pitch, gain, pan);
 				if (media && media->type == Take::SAMPLE) {
 					pos = ((SampleTake*)media)->sample->Play(
 								sampleSig, nChan, nFrames,
@@ -227,7 +225,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 				inf->idxVar.SetDoubleValue(idx, higherFrame);
 			}
 			if (clip != nullptr) {
-//				fprintf(stderr, "playing sample pos %d clip %x loop %d dir %d pitch %g gain %g pan %g\n", pos, clip, loop, dir, pitch, gain, pan);
 				media = clip->media;
 				if (media && media->type == Take::SAMPLE) {
 					// ???????????????
@@ -243,7 +240,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 				}
 			} else {
 				media = (Take *)inf->mediaVar.PointerValue(higherFrame);
-//				fprintf(stderr, "playing sample pos %d media %x loop %d dir %d pitch %g gain %g pan %g\n", pos, media, loop, dir, pitch, gain, pan);
 				if (media && media->type == Take::SAMPLE) {
 					pos = ((SampleTake*)media)->sample->PlayPitched(
 								sampleSig, nChan, nFrames,
@@ -296,7 +292,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 				inf->idxVar.SetDoubleValue(idx, higherFrame);
 			}
 			if (clip != nullptr) {
-//				fprintf(stderr, "playing sample pos %d clip %x loop %d dir %d pitch %g gain %g pan %g\n", pos, clip, loop, dir, pitch, gain, pan);
 				media = clip->media;
 				if (media && media->type == Take::SAMPLE) {
 					// ???????????????
@@ -312,7 +307,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 				}
 			} else {
 				media = (Take *)inf->mediaVar.PointerValue(higherFrame);
-//				fprintf(stderr, "playing sample pos %d media %x loop %d dir %d pitch %g gain %g pan %g\n", pos, media, loop, dir, pitch, gain, pan);
 				if (media && media->type == Take::SAMPLE) {
 					pos = ((SampleTake*)media)->sample->PlayPitched(
 								sampleSig, nChan, nFrames,
@@ -451,9 +445,6 @@ ApplyQuaFX(QuasiStack *stack, Block *fxBlock, float **outSig, long nFrames, shor
 							afx->processReplacing(afx, outSig, vstTmpSig, nFrames);
 							if (vst->numOutputs == 2) { // the most normal thing
 								sample_buf_add(outSig, vstTmpSig, 2, nFrames);
-//									for (short ii=0; ii<nFrames; ii++) {
-//										fprintf(stderr, "%g ", outSig[0][ii]);
-//									} fprintf(stderr, "\n");
 							} else if (vst->numOutputs == 1) {
 								sample_buf_add_mono(outSig, vstTmpSig[0], 2, nFrames);
 							} else {

@@ -336,7 +336,7 @@ public:
 	Block					*Sibling(short n);
 	StabEnt					*TypeSymbol();
 	
-	void					Dump(FILE *, short);
+	void					dump(ostream &os, short);
 
 	void					Set(ulong t, ulong st=C_UNKNOWN);
 	void					SetConstValue(TypedValue&v, char*n=nullptr);

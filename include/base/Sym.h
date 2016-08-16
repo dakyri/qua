@@ -107,7 +107,7 @@ public:
 	bool				UpdateControllerBridge(Time *t, TypedValue *v, QuasiStack *);
 	*/
 	Qua					*TopContext();
-	void				Dump(FILE *F, short i);
+	void				dump(ostream &os, short i);
 	
 	void				SetLValue(LValue &, StreamItem *items,  Stacker *instance, StabEnt *stackCtxt, QuasiStack *stack);
 	int					Size(short dim=0);
@@ -178,10 +178,12 @@ public:
 	bool rename(StabEnt *S, const string &nm);
 	string makeUniqueName(StabEnt *ctxt, const string basenm, long startind);
 	void			MoveSymbol(StabEnt *S, StabEnt *ctxt, StabEnt *np);
-	void			DumpGlobals(FILE *fp);
-	void			DumpContexts(FILE *fp);
+
 	inline StabEnt	*operator[](long i)
 		{ return stab[i]; }
+
+	void			dumpGlobals(ostream &os);
+	void			dumpContexts(ostream &os);
 
 private:
 	long findSymbolInd(StabEnt *S, short def_cnt = -1);

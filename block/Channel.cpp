@@ -924,11 +924,6 @@ Channel::generate(size_t nFrames)
 			} else {
 				cerr << "Channel::Generate() error: missing audio buffer in stereo channel generation" << endl;
 			}
-//	if (chanId == 0) {
-//		for (short i=0; i<nFrames; i++) {
-//			fprintf(stderr, "%d %x\n", op->nChannel, xp, xp?xp->nChannel:0);
-//		}fprintf(stderr, "\n");
-//	}
 		} else if (nAudioOuts == 1) {
 			if (op->nChannel == 1) {
 				float	*tp = outSig[0];

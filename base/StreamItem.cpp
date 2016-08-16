@@ -49,7 +49,6 @@ StreamItemCache::Alloc()
 		p = malloc(size);
     }
 	mutex.unlock();
-//	fprintf(stderr, "Alloc %d %x\n", Size, p);
 	return p;
 }
 
@@ -57,7 +56,6 @@ void
 StreamItemCache::Dealloc(void *p)
 {
 	mutex.lock();
-//	fprintf(stderr, "Dealloc %x\n", p);
 	StreamItem	*q = (StreamItem *)p;
     q->next = free;
     free = q;
@@ -167,14 +165,12 @@ StreamItem::setAttributes(AttributeList &attribs) {
 void *
 StreamNote::operator new(size_t sz)
 {
-//	fprintf(stderr, "new tone %d\n", sz);
 	return FreeNote.Alloc();
 }
 
 void
 StreamNote::operator delete(void *q)
 {
-//	fprintf(stderr, "delete tone %x\n", q);
 	FreeNote.Dealloc(q);
 }
 #endif

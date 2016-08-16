@@ -124,11 +124,9 @@ Template::initialize()
 ////	shit(sym, uberQua->sym);
 //	glob.PushContext(sym);
 //		
-////fprintf(stderr, "1 %s\n", name);
 //	if (B && !B->Init(this))
 //		goto err_ex;
 //		
-////fprintf(stderr, "3 %s\n", name);
 //	for (StabEnt *p=sym->children; p!=nullptr; p=p->sibling) {
 //		if (p->type == S_LAMBDA) {
 //			if (!p->LambdaValue()->Init())

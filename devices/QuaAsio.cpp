@@ -563,7 +563,6 @@ QuaAsio::bufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 			void		*buf = buffers[ind].buffers[doubleBufferIndex];
 			float		*s = op->outbuf+op->offset;
 			long		nFrames = bufSize / op->nChannel;
-//			fprintf(stderr, "out fmt %d %d chans %d frames on %d offset %d buf %x %x %g" << endl, op->sampleFormat, op->nChannel, nFrames, buffers[ind].channelNum, op->offset, s, op->outbuf, *s);
 			switch (op->sampleFormat) {
 ////////////////////// PPC/Motorola (MSB) Byte order /////////////////////				
 				case ASIOSTInt16MSB: {

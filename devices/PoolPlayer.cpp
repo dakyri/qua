@@ -14,6 +14,8 @@
 #include "Qua.h"
 #include "Channel.h"
 
+#include <iostream>
+
 // perhaps unnecessary, but ensures that all data gets played last
 // in the main loop, which may be a good thing if there are editors
 // adding to things...
@@ -28,7 +30,7 @@ PoolPlayer::PoolPlayer(Qua *q)
 
 PoolPlayer::~PoolPlayer()
 {
-	fprintf(stderr, "deleted pool player\n");
+	cerr << "deleted pool player" << endl;
 }
 
 void

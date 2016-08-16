@@ -15,6 +15,8 @@
 
 #include "Dictionary.h"
 
+#include <iostream>
+
 int32 lineLength = 0;
 
 inline void put(const string &s, ostream &out)
@@ -127,7 +129,7 @@ Esrap(Block *block, ostream &out, bool do_indent, short indent, short crlf)
 		case Block::C_SAMPLE_PLAYER: {
 			std::string s=findClipPlayer(block->type);
 			if (s.size() == 0) {
-				fprintf(stderr, "not recognised player");
+				cerr << "not recognised player" << endl;
 			} else {
 				put(s, out);
 				Block		*params=nullptr;

@@ -1670,7 +1670,6 @@ SaveHandlers(ostream &out, short indent, StabEnt *sym, bool force_brace)
 	Channel		*channel;
 	if ((sched=sym->SchedulableValue()) != nullptr) {
 		if (sched->wake.block) {
-//			sched->wake.block->Dump(stderr, 0);
 			out << endl;
 			WriteHandlerBlock(out, "wake", sched->wake.block, indent);
 		}
@@ -1723,8 +1722,6 @@ SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_bra
 
 	if (b == nullptr) {
 		if (sym->children || force_brace) {
-//			fprintf(fp, "\n");
-//			tab(fp, indent);
 			QDBMSG_BLK("save main: sym %d block %x", sym->type, b);
 			out << " {" << endl;
 			if (sym->children) {
@@ -1795,66 +1792,65 @@ SaveMainBlock(Block *b, ostream &out, short indent, StabEnt *sym, bool force_bra
 	}
 	return B_ERROR;
 }
+
 void
-Block::Dump(FILE *fp, short indent)
+Block::dump(ostream &os, short indent)
 {
 	switch (type) {
 
 	case C_WAIT:
-		fprintf(fp, "wait(");
+		os << "wait(";
 		if (crap.block) {
-			crap.block->Dump(fp, 0);
+			crap.block->dump(os, 0);
 		}
-		fprintf(fp, ")\n");
+		os << ")\n";
 		break;
 
 	case C_FLUX:
-		fprintf(fp, "<-");
+		os << "<-";
 	    if (crap.flux.lengthExp) {
-	    	fprintf(fp, "(");
-	    	crap.flux.lengthExp->Dump(fp, 0);
-	    	fprintf(fp, ")");
+	    	os << "(";
+	    	crap.flux.lengthExp->dump(os, 0);
+	    	os << ")";
 	    }
 		if (crap.flux.block)
-			crap.flux.block->Dump(fp, indent+1);
+			crap.flux.block->dump(os, indent+1);
 		if (crap.flux.rateExp) {
-			fprintf(fp, " : ");
-			crap.flux.rateExp->Dump(fp, 0);
+			os << " : ";
+			crap.flux.rateExp->dump(os, 0);
 		}
 		break;
 
 	case C_LIST:
-		fprintf(fp, subType == LIST_SEQ? "[":
+		os << (subType == LIST_SEQ? "[":
 				subType == LIST_FORK? "{&":
 				subType == LIST_PAR? "{|": "{");
 	    if (crap.list.block)
-	    	crap.list.block->Dump(fp, indent+1);
-		fprintf(fp, subType == LIST_SEQ?"]":"}");
+	    	crap.list.block->dump(os, indent+1);
+		os << (subType == LIST_SEQ?"]":"}");
 	    break;
 	
 	case C_DIVERT:
 		if (crap.divert.block)
-			crap.divert.block->Dump(fp, indent+1);
-		fprintf(fp, " @ ");
+			crap.divert.block->dump(os, indent+1);
+		os << " @ ";
 		if (crap.divert.clockExp)
-			crap.divert.clockExp->Dump(fp, indent+1);
+			crap.divert.clockExp->dump(os, indent+1);
 		break;
 		
 	case C_BUILTIN: {
 		int t = subType;
 		std::string s = qut::unfind(builtinCommandIndex, t);
-		fprintf(fp, s.c_str());
-		Block		*params=nullptr;
-		
-		params=crap.call.parameters;
+		os << s;
+		Block *params=crap.call.parameters;
 
 		if (params) {
-			fprintf(fp, "(");
-			params->Dump(fp, 0);
-			fprintf(fp, ")");
+			os << "(";
+			params->dump(os, 0);
+			os << ")";
  	    }
  		break;
-		fprintf(fp, "\n");
+		os << "\n";
 	}
 	
 	case C_STREAM_PLAYER:
@@ -1864,232 +1860,231 @@ Block::Dump(FILE *fp, short indent)
 	case C_TUNEDSAMPLE_PLAYER: 
 	case C_MARKOV_PLAYER: {
 		std::string s =findClipPlayer(subType);
-		fprintf(fp, s.c_str());
-		Block		*params=nullptr;
-		
-		params=crap.call.parameters;
+		os << s;
+		Block *params = crap.call.parameters;
 
 		if (params) {
-			fprintf(fp, "(");
-			params->Dump(fp, 0);
-			fprintf(fp, ")");
+			os << "(";
+			params->dump(os, 0);
+			os << ")";
  	    }
  		break;
-		fprintf(fp, "\n");
+		os << "\n";
 	}
 	
 	case C_OUTPUT: {
-		fprintf(fp, ">> %d\n", crap.channel->chanId);
+		os << ">> " << crap.channel->chanId << endl;
 		break;
 	}
 		 
 	case C_INPUT: {
-		fprintf(fp, "<< %d\n", crap.channel->chanId);
+		os << "<< " << crap.channel->chanId << endl;
 		break;
 	}
 
 
 	case C_UNLINKED_CALL:
 	    if (name.size()) {
-			fprintf(fp, name.c_str());
+			os << name;
 		    if (crap.call.parameters) {
-		    	fprintf(fp, "(");
-	    		crap.call.parameters->Dump(fp, 0);
-		    	fprintf(fp, ")\n");
+		    	os << "(";
+	    		crap.call.parameters->dump(os, 0);
+		    	os << ")\n";
 		    }
  	    }
 		break;
 
 	case C_CALL:
 	    if (crap.call.crap.lambda) {
-			fprintf(fp, crap.call.crap.lambda->sym->name.c_str());
+			os << crap.call.crap.lambda->sym->name;
 		    if (crap.call.parameters) {
-		    	fprintf(fp, "(");
-	    		crap.call.parameters->Dump(fp, 0);
-		    	fprintf(fp, ")\n");
+		    	os << "(";
+	    		crap.call.parameters->dump(os, 0);
+		    	os << ")\n";
 		    }
  	    }
  	    break;
 
 	case C_BREAK:
-		fprintf(fp, "break\n");
+		os << "break\n";
 		break;
 
 	case C_WAKE:
 	case C_SUSPEND:
 	    if (crap.call.crap.sym) {
-			fprintf(fp, crap.call.crap.sym->name.c_str());
+			os << crap.call.crap.sym->name;
 		    if (crap.call.parameters) {
-		    	fprintf(fp, "(");
+		    	os << "(";
 		    	if (crap.call.parameters)
-		    		crap.call.parameters->Dump(fp, indent+1);
-		    	fprintf(fp, ")\n");
+		    		crap.call.parameters->dump(os, indent+1);
+		    	os << ")\n";
 		    }
  	    }
 	    break;
 
 	case C_ASSIGN:
 	    if (crap.assign.atom)
-	    	crap.assign.atom->Dump(fp, indent+1);
-		fprintf(fp, " = ");
+	    	crap.assign.atom->dump(os, indent+1);
+		os << " = ";
 	    if (crap.assign.exp)
-	    	crap.assign.exp->Dump(fp, indent+1);
-    	fprintf(fp, "\n");
+	    	crap.assign.exp->dump(os, indent+1);
+    	os << "\n";
 	    break;
 
 	case C_GUARD:
 	    if (crap.guard.condition)
-	    	crap.guard.condition->Dump(fp, indent+1);
-		fprintf(fp, "::");
+	    	crap.guard.condition->dump(os, indent+1);
+		os << "::";
 	    if (crap.guard.block)
-	    	crap.guard.block->Dump(fp, indent+1);
+	    	crap.guard.block->dump(os, indent+1);
 	    break;
 
 	case C_REPEAT:
-		fprintf(fp, "repeat(");
+		os << "repeat(";
 	    if (crap.repeat.Exp)
-	    	crap.repeat.Exp->Dump(fp, indent+1);
-		fprintf(fp, ")");
+	    	crap.repeat.Exp->dump(os, indent+1);
+		os << ")";
 	    if (crap.repeat.block)
-	    	crap.repeat.block->Dump(fp, indent+1);
+	    	crap.repeat.block->dump(os, indent+1);
 	    break;
 
 	case C_IF:
-		fprintf(fp, "if (");
+		os << "if (";
 	    if (crap.iff.condition)
-	    	crap.iff.condition->Dump(fp, 0);
-	    fprintf(fp, ")");
+	    	crap.iff.condition->dump(os, 0);
+	    os << ")";
 	    if (crap.iff.ifBlock)
-	    	crap.iff.ifBlock->Dump(fp, indent+1);
+	    	crap.iff.ifBlock->dump(os, indent+1);
 	    if (crap.iff.elseBlock) {
-	    	fprintf(fp, "else");
-			crap.iff.elseBlock->Dump(fp, indent+1);
+	    	os << "else";
+			crap.iff.elseBlock->dump(os, indent+1);
 		}
 	    break;
 
 	case C_FOREACH:
-		fprintf(fp, "foreach (");
+		os << "foreach (";
 	    if (crap.foreach.condition)
-	    	crap.foreach.condition->Dump(fp, 0);
-	    fprintf(fp, ")");
+	    	crap.foreach.condition->dump(os, 0);
+	    os << ")";
 	    if (crap.foreach.ifBlock)
-	    	crap.foreach.ifBlock->Dump(fp, indent+1);
+	    	crap.foreach.ifBlock->dump(os, indent+1);
 	    if (crap.foreach.elseBlock) {
-	    	fprintf(fp, "else");
-			crap.foreach.elseBlock->Dump(fp, indent+1);
+	    	os << "else";
+			crap.foreach.elseBlock->dump(os, indent+1);
 		}
 	    break;
 
 	case C_WITH:
 		internalError("Unimplimented dump");
-//		    if (crap.with.withBlock &&!crap.with.withBlock->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
-//		    if (crap.with.withoutBlock &&!crap.with.withoutBlock->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
-//		    if (crap.with.condition && !crap.with.condition->->Dump(fp, indent+1);buf,pos,len, do_indent, indent)) return false;
+//		    if (crap.with.withBlock &&!crap.with.withBlock->->dump(os, indent+1);buf,pos,len, do_indent, indent)) return false;
+//		    if (crap.with.withoutBlock &&!crap.with.withoutBlock->->dump(os, indent+1);buf,pos,len, do_indent, indent)) return false;
+//		    if (crap.with.condition && !crap.with.condition->->dump(os, indent+1);buf,pos,len, do_indent, indent)) return false;
 	    break;
 
 	case C_UNOP:
 	    if (crap.op.l) {
 	    	switch(subType) {
-	    	case OP_UMINUS:	fprintf(fp, "-"); break;
-	    	case OP_NOT:	fprintf(fp, "!"); break;
-	    	case OP_BNOT:	fprintf(fp, "~"); break;
+	    	case OP_UMINUS:	os << "-"; break;
+	    	case OP_NOT:	os << "!"; break;
+	    	case OP_BNOT:	os << "~"; break;
 	    	default:
 				internalError("Unimplimented Esrap: unop");
 	    	}
-			if (crap.op.l->isOperator()) fprintf(fp, "(");
-			crap.op.l->Dump(fp, 0);
-			if (crap.op.l->isOperator()) fprintf(fp, ")");
+			if (crap.op.l->isOperator()) os << "(";
+			crap.op.l->dump(os, 0);
+			if (crap.op.l->isOperator()) os << ")";
 	    }
 	    break;
 	    
 	case C_BINOP:
 		if (crap.op.l && crap.op.r) {
 			if (crap.op.l->isOperator())
-	    		fprintf(fp, "(");
-	    	crap.op.l->Dump(fp, 0);
+	    		os << "(";
+	    	crap.op.l->dump(os, 0);
 			if (crap.op.l->isOperator())
-	    		fprintf(fp, ")");
+	    		os << ")";
 	    	switch(subType) {
-			case OP_LT:		fprintf(fp, "<"); break;
-			case OP_GT:		fprintf(fp, ">"); break;
-			case OP_EQ:		fprintf(fp, "=="); break;
-			case OP_NEQ:	fprintf(fp, "!="); break;
-			case OP_LE:		fprintf(fp, "<="); break;
-			case OP_GE:		fprintf(fp, ">="); break;
-			case OP_MUL:	fprintf(fp, "*"); break;
-			case OP_DIV:	fprintf(fp, "/"); break;
-			case OP_ADD:	fprintf(fp, "+"); break;
-			case OP_SUB:	fprintf(fp, "-"); break;
-			case OP_MOD:	fprintf(fp, "%%"); break;
-			case OP_AND:	fprintf(fp, "&&"); break;
-			case OP_OR:		fprintf(fp, "||"); break;
-			case OP_BAND:	fprintf(fp, "&"); break;
-			case OP_BOR:	fprintf(fp, "|"); break;
+			case OP_LT:		os << "<"; break;
+			case OP_GT:		os << ">"; break;
+			case OP_EQ:		os << "=="; break;
+			case OP_NEQ:	os << "!="; break;
+			case OP_LE:		os << "<="; break;
+			case OP_GE:		os << ">="; break;
+			case OP_MUL:	os << "*"; break;
+			case OP_DIV:	os << "/"; break;
+			case OP_ADD:	os << "+"; break;
+			case OP_SUB:	os << "-"; break;
+			case OP_MOD:	os << "%%"; break;
+			case OP_AND:	os << "&&"; break;
+			case OP_OR:		os << "||"; break;
+			case OP_BAND:	os << "&"; break;
+			case OP_BOR:	os << "|"; break;
 	    	default:
 				internalError("Unimplimented Esrap: unop");
 	    	}
 	
-			if (crap.op.r->isOperator()) fprintf(fp, "(");
-	    	crap.op.r->Dump(fp, 0);
+			if (crap.op.r->isOperator()) os << "(";
+	    	crap.op.r->dump(os, 0);
 	    	
-			if (crap.op.r->isOperator()) fprintf(fp, ")");
+			if (crap.op.r->isOperator()) os << ")";
 		}
 	    break;
 	    
 	case C_IFOP:
 		if (crap.iff.condition)
-			crap.iff.condition->Dump(fp, indent+1);
-		fprintf(fp, "?");
+			crap.iff.condition->dump(os, indent+1);
+		os << "?";
 	    if (crap.iff.ifBlock)
-			crap.iff.ifBlock->Dump(fp, indent+1);
-		fprintf(fp, ":");
+			crap.iff.ifBlock->dump(os, indent+1);
+		os << ":";
 	    if (crap.iff.elseBlock)
-			crap.iff.elseBlock->Dump(fp, indent+1);
+			crap.iff.elseBlock->dump(os, indent+1);
 	    break;
 	    
 	case C_VALUE:
 		if (crap.constant.value.type == TypedValue::S_STRING)
-			fprintf(fp, "\"");
-		fprintf(fp, crap.constant.value.StringValue());
+			os << "\"";
+		os << crap.constant.value.StringValue();
 		if (crap.constant.value.type == TypedValue::S_STRING)
-			fprintf(fp, "\"");
-		fprintf(fp, " ");
+			os << "\"";
+		os << " ";
 	    break;
 	    
 	case C_SYM:
-		fprintf(fp, crap.sym->name.c_str());
-		fprintf(fp, " ");
+		os << crap.sym->name;
+		os << " ";
 		break;
 
 	case C_NAME:
-		fprintf(fp, name.c_str());
-		fprintf(fp, " ");
+		os << name;
+		os << " ";
 	    break;
 	    
 	case C_STRUCTURE_REF:
 		if (crap.structureRef.base)
-			crap.structureRef.base->Dump(fp, 0);
-		fprintf(fp, ".");
-		if (crap.structureRef.member)
-			crap.structureRef.member->Dump(fp, 0);
+			crap.structureRef.base->dump(os, 0);
+		os << ".";
+		if (crap.structureRef.member) {
+			crap.structureRef.member->dump(os, 0);
+		}
 		break;
 		
 	case C_ARRAY_REF:
 		if (crap.arrayRef.base && crap.arrayRef.index) {
-			crap.arrayRef.base->Dump(fp, 0);
-			fprintf(fp, "[");
-			crap.arrayRef.index->Dump(fp, 0);
-			fprintf(fp, "]");
+			crap.arrayRef.base->dump(os, 0);
+			os << "[";
+			crap.arrayRef.index->dump(os, 0);
+			os << "]";
 		}
 		break;
 
 	case C_CAST: {
 		std::string s =findTypeName(subType);
-		fprintf(fp, "(#");
-		fprintf(fp, s.c_str());
-		fprintf(fp, " ");
-		crap.cast.block->Dump(fp, 0);
-		fprintf(fp, ")");
+		os << "(#";
+		os << s;
+		os << " ";
+		crap.cast.block->dump(os, 0);
+		os << ")";
 		break;
 	}
 	
@@ -2099,7 +2094,7 @@ Block::Dump(FILE *fp, short indent)
 	}
 	
 	if (next)
-		next->Dump(fp, indent);
+		next->dump(os, indent);
 }
 
 void

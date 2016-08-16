@@ -12,6 +12,7 @@
 #include "Dictionary.h"
 
 #include <utility>
+#include <iostream>
 using namespace std;
 
 // garbage collection needs to be sorted a bit. notes are the
@@ -66,7 +67,7 @@ AttributeList::add(Block *b)
 			if (fi != TypedValue::S_UNKNOWN) {
 				add(b->crap.constant.value.StringValue(), fi);
 			} else {
-				fprintf(stderr, "unknown property %s\n", b->crap.constant.value.StringValue());
+				cerr << "unknown property " << b->crap.constant.value.StringValue() << endl;
 			}
 		}
 		b = b->next;

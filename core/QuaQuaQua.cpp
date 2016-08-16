@@ -42,6 +42,8 @@
 
 flag		debug_gen = 0;
 
+#include <iostream>
+
 
 /*
  * PutNextNote:
@@ -102,11 +104,7 @@ CreateNewNote(int type, Block *P,
 //	noteTo.attributes.add(P->next->next->next);
 	ret_val.SetPointerValue(&noteTo);
 	if (debug_gen)
-		fprintf(stderr, "creating type %d: pitch %d dynamic %d duration %d\n", ret_val.type,
-					noteTo.pitch,
-					noteTo.dynamic,
-					noteTo.duration
-					);
+		cerr << "creating type "<< ret_val.type <<": pitch "<< noteTo.pitch <<" dynamic " << noteTo.dynamic << ": duration " << noteTo.duration << endl;
    
     return ret_val;
 }
@@ -149,9 +147,7 @@ CreateNewCtrl(Block *P,
     ctrlTo.amount = (amt_t)val.IntValue(NULL);
 
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d %d\n", ret_val.type,
-					ctrlTo.controller,
-					ctrlTo.amount);
+		cerr << "creating "<< ret_val.type <<": " << ctrlTo.controller << " " << ctrlTo.amount <<  endl;
 	ret_val.SetPointerValue(&ctrlTo);
    
     return ret_val;
@@ -184,8 +180,7 @@ CreateNewBend(Block *P,
    	bendTo.bend = (bend_t)val.IntValue(NULL);
 
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d\n", ret_val.type,
-					bendTo.bend);
+		cerr << "creating "<< ret_val.type <<": " << bendTo.bend << endl;
 	ret_val.SetPointerValue(&bendTo);
    
     return ret_val;
@@ -219,7 +214,7 @@ CreateNewProg(Block *P,
 	progTo.bank = NON_PROG;
 	progTo.subbank = NON_PROG;
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d\n", ret_val.type, progTo.program);
+		cerr << "creating " << ret_val.type << ": " << progTo.program << endl;
 	ret_val.SetPointerValue(&progTo);
    
     return ret_val;
@@ -258,8 +253,7 @@ CreateNewSysX(Block *P,
    	}
 
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d\n", ret_val.type,
-					sysXTo.length);
+		cerr << "creating "<< ret_val.type <<": " << sysXTo.length << endl;
 	ret_val.SetPointerValue(&sysXTo);
    
     return ret_val;
@@ -304,8 +298,7 @@ CreateNewSysC(int which, Block *P,
    	sysCTo.data2 = (int8)val.IntValue(NULL);
 
 	if (debug_gen)
-		fprintf(stderr, "creating %d: %d\n", ret_val.type,
-					sysCTo.cmd);
+		cerr << "creating "<< ret_val.type <<": " << sysCTo.cmd << endl;
 	ret_val.SetPointerValue(&sysCTo);
    
     return ret_val;

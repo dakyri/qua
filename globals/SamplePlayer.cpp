@@ -43,7 +43,6 @@ PlaySample::Generate(float *outSig, long nFramesReqd, short nChannel)
 			}
 			if (  currentFrame < 0 ||
 				  currentFrame >= f->nFrames) {	// a frame of nothing
-//				fprintf(stderr, "empty\n");
 				break;
 			} else {
 				if (!currentBuffer || !currentBuffer->HasFrame(f, currentFrame)) {

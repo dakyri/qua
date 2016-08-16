@@ -357,20 +357,20 @@ SymTab::SymTab(int n)
 }
 
 void
-SymTab::DumpGlobals(FILE *fp)
+SymTab::dumpGlobals(ostream &os)
 {
 	for (int i=0; i<MAX_SYMBOLS; i++) {
 		if (stab[i] != nullptr && stab[i]->context == nullptr) {
-			stab[i]->Dump(fp, 0);
+			stab[i]->dump(os, 0);
 		}
 	}
 }
 
 void
-SymTab::DumpContexts(FILE *fp)
+SymTab::dumpContexts(ostream &os)
 {
 	for (short i=0; i<contextCount; i++) {
-		fprintf(fp, "Context %d %s", i, contextStack[i]?contextStack[i]->name.c_str() :"null ctxt");
+		os << "Context << " << i << " " << (contextStack[i]?contextStack[i]->name : string("null ctxt")) << endl;
 	}
 }
 
@@ -1521,31 +1521,31 @@ StabEnt::SaveSimpleBits()
 
 
 void
-StabEnt::Dump(FILE *fp, short ind)
+StabEnt::dump(ostream &os, short ind)
 {
 	for (short i=0; i<ind; i++)
-		fprintf(fp, "\t");
+		os << "\t";
 	const char * k = findTypeName(type).c_str();
 	if (k) {
-		fprintf(fp, "%s (%s)", name.c_str(), k);
+		os << name << " (" << k << ") ";
 	} else {
-		fprintf(fp, "%s (type %d)", name.c_str(), type);
+		os << name << " (type " << type << ") ";
 	}
 #ifdef DEFINE_COUNT
 	if (defineCount > 1) {
-		fprintf(fp, " (defines = %d)",  defineCount);
+		os << " (defines = "<< defineCount <<") ";
 	}
 #endif
 	if (hasInit) {
-		fprintf(fp, " (init = %s)",  iniVal.StringValue());
+		os << " (init = "<< iniVal.StringValue() <<") ";
 	}
 	if (hasBounds) {
-		fprintf(fp, " (range [%s,",  minVal.StringValue());
-		fprintf(fp, "%s])",  maxVal.StringValue());
+		os << " (range [" <<  minVal.StringValue() << ", ";
+		os << maxVal.StringValue() << "])";
 	}
-	fprintf(fp, "\n");
+	os << endl;
 	for (StabEnt *p=children; p; p=p->sibling) {
-		p->Dump(fp, ind+1);
+		p->dump(os, ind+1);
 	}
 }
 

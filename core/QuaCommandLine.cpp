@@ -91,7 +91,7 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 			return true;
 		} else if (arg =="listglob") {
 			openListFile();
-			glob.DumpGlobals(listFile);
+			glob.dumpGlobals(cerr);
 			return true;
 		} else if (arg =="listjoy") {
 			openListFile();
@@ -124,7 +124,7 @@ QuaCommandLine::processCommandLineWord(long argno, string arg, bool cmd)
 			Qua * q = Qua::loadScriptFile((char *)arg.c_str(), defaultDisplay);
 			if (q != nullptr) {
 				fprintf(stderr, "got a qua\n");
-				q->sym->Dump(stderr, 0);
+				q->sym->dump(cerr, 0);
 				delete q;
 			}
 			return true;

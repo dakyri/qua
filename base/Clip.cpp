@@ -7,6 +7,8 @@
 #include "Clip.h"
 #include "Block.h"
 
+#include <iostream>
+
 SampleTake *
 TypedValue::SampleTakeValue()
 {
@@ -432,7 +434,6 @@ SampleTake::ClosePeakCache()
 	return true;
 }
 #endif
-//FILE *sstderr = fopen("debug", "w");
 
 bool
 SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float &loVal)
@@ -517,7 +518,7 @@ SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float 
 				return false;
 			}
 			peakBufferNFrames = nr/(file->nChannels*file->sampleSize);
-			fprintf(stderr, "nread %d nframes %d at frame %d\n", nr, peakBufferNFrames, frame);
+			cerr << "nread " << nr <<" nframes " << peakBufferNFrames << " at frame " << frame << endl;
 			nr = file->NormalizeInputCpy(peakBuffer, rawBuffer, nr);
 			if (nr < 0) {
 				// todo xxxx an error
@@ -531,10 +532,6 @@ SampleTake::PeakData(long startF, long endF, short channel, float &hiVal, float 
 		if (peakBuffer[cgo] < loVal) {
 			loVal = peakBuffer[cgo];
 		}
-//		if (loVal < -1 || frame <0) {
-//			fprintf(sstderr, "lov %g frame %d cgo %d\n", loVal, frame, cgo);
-//		}
-
 		frame ++;
 	}
 	return true;

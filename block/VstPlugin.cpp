@@ -1755,8 +1755,6 @@ using namespace boost;
 void
 VstPlugin::ScanFile(const string &vstpath, ostream &scriptFile, ostream &logFile, bool recursive)
 {
-//	path = "f:/progs/vstplugins/korg legacy collection/legacycell.dll";
-//	lfp = stderr;
 	bool doLog = logFile.good();
 	string ext = getExt(vstpath);
 	if (ext == "dll") {
